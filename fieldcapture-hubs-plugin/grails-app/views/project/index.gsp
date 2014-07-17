@@ -50,7 +50,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine,projects, attachDocuments, wmd"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd"/>
 </head>
 <body>
 <div class="container-fluid">
@@ -106,6 +106,12 @@
                         Recipient:
                         <a data-bind="visible:organisation(),text:transients.collectoryOrgName,attr:{href:fcConfig.organisationLinkBaseUrl + organisation()}"></a>
                         <span data-bind="visible:organisationName(),text:organisationName"></span>
+                    </h4>
+                </div>
+                <div class="clearfix" data-bind="visible:serviceProviderName()">
+                    <h4>
+                        Service provider:
+                        <span data-bind="text:serviceProviderName"></span>
                     </h4>
                 </div>
                 <div class="clearfix" data-bind="visible:associatedProgram()">
