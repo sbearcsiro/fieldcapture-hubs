@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
         //runtime ":cached-resources:1.0"
         runtime ":ala-web-theme:0.2.2"
         runtime ":csv:0.3.1"
-        runtime ":lesscss-resources:1.3.3"
+        //runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
         compile (":wmd:0.1") {
             exclude "resources"

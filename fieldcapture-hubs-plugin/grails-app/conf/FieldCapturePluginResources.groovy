@@ -4,7 +4,7 @@ modules = {
         resource url: "${grailsApplication.config.ala.baseURL?:'http://www.ala.org.au'}/wp-content/themes/ala2011/images/favicon.ico", attrs:[type:'ico'], disposition: 'head'
         resource url: [dir:'js', file:'html5.js', plugin: "ala-web-theme"], wrapper: { s -> "<!--[if lt IE 9]>$s<![endif]-->" }, disposition: 'head'
         resource url: 'js/vkbeautify.0.99.00.beta.js', plugin: 'fieldcapture-plugin'
-        resource url: 'js/application.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/fieldcapture-application.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.shorten.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/bootbox.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/jquery.columnizer.js', plugin: 'fieldcapture-plugin'
@@ -73,7 +73,7 @@ modules = {
     app_bootstrap {
         dependsOn 'application'
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
-        resource url: '/bootstrap/css/bootstrap.css', attrs:[media:'screen,print']
+        resource url: 'bootstrap/css/bootstrap.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         // lesscss-resources doesn't work with the resources plugin.
         //resource url: 'bootstrap/less/bootstrap.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
         resource url: 'bootstrap/img/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
@@ -83,7 +83,7 @@ modules = {
 
     app_bootstrap_responsive {
         dependsOn 'app_bootstrap'
-        resource url: '/bootstrap/css/bootstrap-responsive.min.css', attrs:[media:'screen,print']
+        resource url: '/bootstrap/css/bootstrap-responsive.min.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         // lesscss-resources doesn't work with the resources plugin.
         //resource url: 'bootstrap/less/responsive.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap_responsive'
         //resource url: 'css/empty.css', plugin: 'fieldcapture-plugin' // needed for less-resources plugin ?
