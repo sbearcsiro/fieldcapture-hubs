@@ -19,7 +19,7 @@
   Date: 08/07/13
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="au.org.ala.fieldcapture.SettingPageType; org.codehaus.groovy.grails.commons.ConfigurationHolder" %>
+<%@ page import="au.org.ala.fieldcapture.SettingPageType" %>
 <!DOCTYPE html>
 <!--[if IE 7]><html lang="en" class="ie ie7"><![endif]-->
 <!--[if IE 8]><html lang="en" class="ie ie8"><![endif]-->
@@ -46,11 +46,10 @@
             <div class="container-fluid">
                 <div class="nav logo">
                     <a href="${createLink(uri:"/")}">
-                        <r:img dir="css/nrm/images" file="AustGovt_inline_white_on_transparent.png" alt="Australian Government Emblem" />
+                        <img src="${hubConfig.bannerUrl}" alt="${hubConfig.title}" />
                     </a>
                 </div>
                 <div class="nav-collapse collapse pull-right">
-                    <span class="merit">MERIT</span>
                     <g:form controller="search" method="GET" class="search merit">
                         <p>
                             <label for="keywords"><span class="hide">Full text search</span><input type="text" name="query" id="keywords" value="${params.query}"></label>
@@ -62,15 +61,7 @@
                     </g:form>
                 </div>
             </div><!--/.container-fluid -->
-            <g:if test="${ grails.util.Environment.getCurrent().name =~ /dev|test/ }">
-                <!-- Markup to include ONLY when in test or dev -->
-                <div class="row-fluid">
-                    <div class="span12" id="testWatermark">
-                        This is a test system and any data added in this system will be removed and lost.
-                        To add your proper data go to <a href="http://fieldcapture.ala.org.au">http://fieldcapture.ala.org.au</a>
-                    </div>
-                </div>
-            </g:if>
+
         </div><!--/.navbar-inner -->
     </div><!--/.navbar -->
 

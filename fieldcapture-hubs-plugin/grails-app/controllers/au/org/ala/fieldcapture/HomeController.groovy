@@ -21,7 +21,7 @@ class HomeController {
         ]
     }
     def index() {
-        params.facets = "organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+        params.facets = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
         def resp = searchService.HomePageFacets(params)
         [   facetsList: params.facets.tokenize(","),
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
@@ -71,7 +71,7 @@ class HomeController {
         }
     }
 
-    private renderStaticPage(SettingPageType settingType, showNews) {
+    private renderStaticPage(SettingPageType settingType, showNews = false) {
         def content = settingService.getSettingText(settingType)
         render view: 'about', model: [settingType: settingType, content: content, showNews:showNews]
     }

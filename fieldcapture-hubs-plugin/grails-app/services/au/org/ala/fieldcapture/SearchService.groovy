@@ -1,5 +1,4 @@
 package au.org.ala.fieldcapture
-
 import groovy.json.JsonSlurper
 
 import javax.annotation.PostConstruct
@@ -93,7 +92,16 @@ class SearchService {
         params.fsort = "term"
         //params.offset = 0
         params.query = "docType:project"
-        params.facets = params.facets ? params.facets : "statesFacet,lgasFacet,nrmsFacet,organisationFacet,mvgFacet"
+        params.facets = params.facets ? params.facets : SettingService.getHubConfig().availableFacets
+        def defaultFacetQuery = SettingService.getHubConfig().defaultFacetQuery
+        if (defaultFacetQuery) {
+            def fq = new HashSet(defaultFacetQuery)
+            if (params.fq) {
+                fq.addAll(params.list('fq'))
+            }
+            params.fq = fq.asList()
+        }
+
         //def url = elasticBaseUrl + commonService.buildUrlParamsFromMap(params)
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticHome' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"

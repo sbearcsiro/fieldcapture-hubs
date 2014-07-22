@@ -66,6 +66,8 @@
         featureService: "http://fieldcapture.ala.org.au/proxy/feature",
         //WMS server for PID
         wmsServer: "http://spatial-dev.ala.org.au/geoserver",
+        // Default size (in km2) below which a marker will be added to a polygon to increase it's visibility
+        polygonMarkerAreaKm2 : 0.01,
         // init map and load features
         init: function (options, features) {
             var self = this;
@@ -82,6 +84,9 @@
             }
             if (features.highlightOnHover) {
                 this.highlightOnHover = features.highlightOnHover;
+            }
+            if (options.polygonMarkerAreaKm2 !== undefined) {
+                this.polygonMarkerAreaKm2 = this.polygonMarkerAreaKm2;
             }
             this.map = new google.maps.Map(document.getElementById(this.containerId), {
                 zoom: 3,
@@ -117,11 +122,11 @@
             this.load(features);
         },
         mapSite: function(site){
-           var self = this;
-           var loaded = self.loadFeature(site.extent.geometry);
-           if(loaded){
-             self.allLocationsLoaded();
-           }
+            var self = this;
+            var loaded = self.loadFeature(site.extent.geometry);
+            if(loaded){
+                self.allLocationsLoaded();
+            }
         },
         loadFeature: function(loc, iw){
             var self = this, f;
@@ -150,19 +155,19 @@
                     self.addFeature(f, loc, iw);
                     loaded = true;
                 } else if (loc.type.toLowerCase() === 'circle') {
-                   var ll = new google.maps.LatLng(loc.coordinates[1], loc.coordinates[0]);
-                   f = new google.maps.Circle({
-                      center: ll,
-                      radius: loc.radius,
-                      map: self.map,
-                      editable: false
-                   });
-                   //set the extend of the map
-                   //console.log("f.getBounds()",f.getBounds());
-                   self.featureBounds.extend(f.getBounds().getNorthEast());
-                   self.featureBounds.extend(f.getBounds().getSouthWest());
-                   self.addFeature(f, loc, iw);
-                   loaded = true;
+                    var ll = new google.maps.LatLng(loc.coordinates[1], loc.coordinates[0]);
+                    f = new google.maps.Circle({
+                        center: ll,
+                        radius: loc.radius,
+                        map: self.map,
+                        editable: false
+                    });
+                    //set the extend of the map
+                    //console.log("f.getBounds()",f.getBounds());
+                    self.featureBounds.extend(f.getBounds().getNorthEast());
+                    self.featureBounds.extend(f.getBounds().getSouthWest());
+                    self.addFeature(f, loc, iw);
+                    loaded = true;
                 } else if (loc.type.toLowerCase() === 'polygon') {
                     var points;
                     var paths = geojsonToPaths(loc.coordinates[0]);
@@ -189,16 +194,19 @@
                         url: this.featureService+ '?featureId=' + pid,
                         dataType:'json'
                     }).done(function(data) {
-                       if(data !== undefined && data.bbox !== undefined){
-                           var coords = data.bbox.replace(/POLYGON/g,"").replace(/[\\(|\\)]/g, "");
-                           var pointArray = coords.split(",");
-                           self.featureBounds.extend(new google.maps.LatLng(pointArray[1].split(" ")[1],pointArray[1].split(" ")[0]));
-                           self.featureBounds.extend(new google.maps.LatLng(pointArray[3].split(" ")[1],pointArray[3].split(" ")[0]));
-                       } else {
+                        if(data !== undefined && data !== null && data.bbox !== undefined){
+                            var coords = data.bbox.replace(/POLYGON/g,"").replace(/[\\(|\\)]/g, "");
+                            var pointArray = coords.split(",");
+                            self.featureBounds.extend(new google.maps.LatLng(pointArray[1].split(" ")[1],pointArray[1].split(" ")[0]));
+                            self.featureBounds.extend(new google.maps.LatLng(pointArray[3].split(" ")[1],pointArray[3].split(" ")[0]));
+                            if (!loc.areaKmSq) {
+                                loc.areaKmSq = data.area_km ? data.area_km : 0;
+                            }
+                        } else {
 //                           self.featureBounds.extend(new google.maps.LatLng(0,0));
 //                           self.featureBounds.extend(new google.maps.LatLng(-90, 180));
-                       }
-                       self.addFeature(f, loc);
+                        }
+                        self.addFeature(f, loc);
                     });
                     loaded = true;
                 } else {
@@ -225,8 +233,8 @@
                 //console.log('Loading feature with type:' + loc.type + "|" + loc.latitude);
                 if(loc != null){
 
-                   self.loadFeature(loc, iw);
-                   //self.locationLoaded();
+                    self.loadFeature(loc, iw);
+                    //self.locationLoaded();
                 }
             });
 
@@ -261,6 +269,19 @@
                 });
             }
 
+            // Add a marker at the centroid of the polygon for small polygons so they are visible despite the zoom level.
+            if (loc.type.toLowerCase() !== 'point' && loc.type.toLowerCase() !== 'dot' && loc.areaKmSq < self.polygonMarkerAreaKm2) {
+                if (loc.centre) {
+                    var latLng = new google.maps.LatLng(loc.centre[1], loc.centre[0]);
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: self.map,
+                        title:""
+                    });
+                    loc.marker = marker;
+                }
+
+            }
             this.indexFeature(f, loc);
             this.locationLoaded();
         },
@@ -273,6 +294,9 @@
             }
             if (this.featureIndex[id] === undefined) { this.featureIndex[id] = []; }
             this.featureIndex[id].push(f);
+            if (loc.marker) {
+                this.featureIndex[id].push(loc.marker);
+            }
         },
         // increments the count of loaded locations - zooms map when all are loaded
         locationLoaded: function () {
@@ -299,8 +323,8 @@
 //                    }
 //                    google.maps.event.removeListener(boundsListener);
 //                });
-          //  } else {
-            //    console.log("NOT Zooming to bounds");
+                //  } else {
+                //    console.log("NOT Zooming to bounds");
             }
         },
         //

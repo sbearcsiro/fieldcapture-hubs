@@ -579,6 +579,13 @@ class FCTagLib {
         }
     }
 
+    def homePageTitle = { attrs ->
+        def content = settingService.getSettingText(SettingPageType.TITLE) as String
+        if (content) {
+            out << content
+        }
+    }
+
     /**
      * Output HTML content for the requested SettingPageType
      *

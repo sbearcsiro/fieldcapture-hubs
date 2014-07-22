@@ -21,6 +21,7 @@ package au.org.ala.fieldcapture
  * @author "Nick dos Remedios <Nick.dosRemedios@csiro.au>"
  */
 enum SettingPageType {
+    TITLE ("title", "Title", "fielddata.title.text"),
     ABOUT ("about","About","fielddata.about.text"),
     DESCRIPTION ("description","Description","fielddata.description.text"),
     FOOTER ("footer","Footer","fielddata.footer.text"),

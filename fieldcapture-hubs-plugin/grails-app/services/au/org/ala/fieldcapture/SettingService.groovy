@@ -4,18 +4,37 @@ import groovy.text.GStringTemplateEngine
 
 class SettingService {
 
+    private static def ThreadLocal localHhubConfig = new ThreadLocal()
+
+    public static void setHubConfig(hubConfig) {
+        localHhubConfig.set(hubConfig)
+    }
+
+    public static void clearHubConfig() {
+        localHhubConfig.remove()
+    }
+
+    public static Map getHubConfig() {
+        return localHhubConfig.get()
+    }
+
     def webService, cacheService
     def grailsApplication
 
     def getSettingText(SettingPageType type) {
-        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${type.key}"
-        def res = cacheService.get(type.key,{ webService.getJson(url) })
+        def key = localHhubConfig.get().settingsPageKeyPrefix + type.key
+
+        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${key}"
+        def res = cacheService.get(key,{ webService.getJson(url) })
         return res?.settingText?:""
     }
 
     def setSettingText(SettingPageType type, String content) {
-        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxSetSettingText/${type.name}"
-        webService.doPost(url, [settingText: content, key: type.key])
+        def key = localHhubConfig.get().settingsPageKeyPrefix + type.key
+
+        cacheService.clear(key)
+        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxSetSettingText/${key}"
+        webService.doPost(url, [settingText: content, key: key])
     }
 
     /**

@@ -1,3 +1,5 @@
+import grails.util.Holders
+
 class FieldcapturePluginGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -37,7 +39,19 @@ Brief summary/description of the plugin.
 //    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
 
     def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
+        def mappingElement = xml.'filter'
+        def lastMapping = mappingElement[mappingElement.size()-1]
+        lastMapping + {
+            'filter' {
+                'filter-name' ('Hub configuration filter')
+                'filter-class' ('au.org.ala.fieldcapture.HubConfigurationFilter')
+            }
+            'filter-mapping' {
+                'filter-name' ('Hub configuration filter')
+                'url-pattern' ('/*')
+            }
+        }
+
     }
 
     def doWithSpring = {
