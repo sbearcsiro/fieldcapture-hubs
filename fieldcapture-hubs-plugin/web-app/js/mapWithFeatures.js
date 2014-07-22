@@ -487,16 +487,6 @@
 
             self.reset();
 
-        },
-        addLayer: function(layerName) {
-            var layerParams = [
-                "FORMAT=image/png8",
-                "LAYERS=ALA:" + layerName,
-                "STYLES=polygon"
-            ],
-            wms = new WMSTileLayer(layerName, map.wmsServer+'/gwc/service/wms?', layerParams, function(){}, 0.5);
-
-            map.map.overlayMapTypes.push(wms);
         }
     };
 
