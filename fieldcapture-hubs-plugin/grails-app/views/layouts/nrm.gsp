@@ -41,12 +41,12 @@
     </div>
 </g:if>
 <div id="body-wrapper">
-    <div class="navbar navbar-inverse navbar-static-top" id="header">
-        <div class="navbar-inner">
+    <div class="navbar navbar-inverse navbar-static-top" id="header" style="background:url(${hubConfig.bannerUrl}) repeat-x">
+        %{--<div class="navbar-inner">--}%
             <div class="container-fluid">
                 <div class="nav logo">
                     <a href="${createLink(uri:"/")}">
-                        <img src="${hubConfig.bannerUrl}" alt="${hubConfig.title}" />
+                        <img src="${hubConfig.logoUrl}" alt="${hubConfig.title}" />
                     </a>
                 </div>
                 <div class="nav-collapse collapse pull-right">
@@ -62,7 +62,7 @@
                 </div>
             </div><!--/.container-fluid -->
 
-        </div><!--/.navbar-inner -->
+        %{--</div><!--/.navbar-inner -->--}%
     </div><!--/.navbar -->
 
     <div id="dcNav" class="clearfix ">

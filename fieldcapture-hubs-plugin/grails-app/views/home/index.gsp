@@ -640,6 +640,13 @@
             "features": features
         }
 
+        mapData.features.push({
+            id:'cl22',
+            type:'pid',
+            pid:'cl22',
+            name:'test'
+        });
+
         init_map_with_features({
                 mapContainer: "map",
                 zoomToBounds:true,
@@ -651,6 +658,7 @@
             mapData
         );
 
+        alaMap.addLayer('ger_national_corridor_20121031');
         if (!bounds.isEmpty()) {
             alaMap.map.fitBounds(bounds);
         } else {
