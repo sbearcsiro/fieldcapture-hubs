@@ -220,6 +220,7 @@
                 self.modelForSaving = function () {
                     // get model as a plain javascript object
                     var jsData = ko.mapping.toJS(self, {'ignore':['transients']});
+
                     // get rid of any transient observables
                     return self.removeBeforeSave(jsData);
                 };
@@ -317,6 +318,17 @@
     var Master = function () {
         var self = this;
         this.subscribers = [];
+        this.site = null;
+        this.outputModels = [];
+
+        self.registerOutput = function(outputViewModel, modelInstanceName, getMethod, isDirtyMethod, resetMethod, siteMethod) {
+            self.register(modelInstanceName, getMethod, isDirtyMethod, resetMethod, siteMethod);
+            self.outputModels.push(outputViewModel);
+        },
+        self.registerActivity = function(activityViewModel, modelInstanceName, getMethod, isDirtyMethod, resetMethod, siteMethod) {
+            self.register(modelInstanceName, getMethod, isDirtyMethod, resetMethod, siteMethod);
+            activityViewModel.transients.outputs = self.outputModels;
+        },
         // client models register their name and methods to participate in saving
         self.register = function (modelInstanceName, getMethod, isDirtyMethod, resetMethod, siteMethod) {
             this.subscribers.push({
@@ -580,7 +592,11 @@
                 return jsData;
             };
             self.modelAsJSON = function () {
-                return JSON.stringify(self.modelForSaving());
+                return JSON.stringify(self.modelForSaving(), function(k, v) {
+                // If we leave the site or theme undefined, it will be ignored during JSON serialisation and hence
+                // will not overwrite the current value on the server.
+                    return v === undefined ? '' : v;
+                });
             };
 
             self.save = function (callback, key) {
