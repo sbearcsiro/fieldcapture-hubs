@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class ProjectService {
 
-    def webService, grailsApplication, siteService, activityService, authService, emailService, documentService
+    def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService
     LinkGenerator grailsLinkGenerator
 
     def projects
@@ -48,7 +48,13 @@ class ProjectService {
     }
 
     def update(id, body) {
-        webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
+
+        def result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
+        if (!id && result?.resp?.projectId) {
+            // Add the user as an admin of the project if it's a new project.
+            userService.addUserAsRoleToProject(userService.getUser().userId, result.resp.projectId, RoleService.PROJECT_ADMIN_ROLE)
+        }
+        result
     }
 
     /**

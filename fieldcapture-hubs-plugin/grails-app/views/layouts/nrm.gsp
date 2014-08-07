@@ -148,8 +148,8 @@
         $(".btnAdministration").click(function (e) {
             window.location = "${createLink(controller: 'admin')}";
         });
-        $('#btnDashboard').click(function(e) {
-            window.location = "${createLink(controller: 'report')}"
+        $('.btnNewProject').click(function(e) {
+            window.location = "${createLink(controller: 'project', action:'create')}"
         });
 
         $(".btnProfile").click(function (e) {

@@ -188,7 +188,7 @@
                               model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true]"/>
                 </g:if>
                 <g:else>
-                    <g:render template="/shared/activitiesPlan"
+                    <g:render template="/shared/activitiesList"
                               model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true]"/>
                 </g:else>
             </div>

@@ -10,7 +10,7 @@ class SearchController {
      * @return resp
      */
     def index(String query) {
-        params.facets = "associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,reportingThemesFacet,typeFacet,organisationFacet,statesFacet,nrmsFacet,lgasFacet,assessment,className"
+        params.facets = SettingService.getHubConfig().availableFacets+',className'
         [facetsList: params.facets.tokenize(","), results: searchService.fulltextSearch(params)]
     }
 

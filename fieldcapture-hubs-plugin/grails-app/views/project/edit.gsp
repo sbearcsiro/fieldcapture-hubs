@@ -187,11 +187,8 @@
                                 alert(data.detail + ' \n' + data.error);
                             } else {
                                 var projectId = "${project?.projectId}" || data.projectId;
-                                if (data.message === 'created') {
-                                    document.location.href = "${createLink(controller: 'home', action: 'index')}";
-                                } else {
-                                    document.location.href = "${createLink(action: 'index')}/" + projectId;
-                                }
+                                document.location.href = "${createLink(action: 'index')}/" + projectId;
+
                             }
                         },
                         error: function (data) {

@@ -63,7 +63,6 @@ class ProjectController {
         }
     }
 
-    @PreAuthorise(accessLevel = 'admin')
     def create() {
         render view: 'edit', model: [create:true,
                 institutions: metadataService.institutionList(),

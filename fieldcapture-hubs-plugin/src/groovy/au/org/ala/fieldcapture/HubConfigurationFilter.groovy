@@ -14,11 +14,11 @@ class HubConfigurationFilter implements Filter {
             // Lookup portal from database?  Or simply parse the URL?  Or access request?
             def hubConfig = [
                     bannerUrl : 'http://www.greateasternranges.org.au/templates/rt_chapelco/images/main/bg-header-mt.png',
-                    logoUrl : 'http://www.greateasternranges.org.au/images/ger-logo-205x150px.png',
+                    logoUrl : 'http://www.greateasternranges.org.au/wp-content/themes/ger/images/ger-logo-205x150px.png',
                     title: 'Great Eastern Ranges',
                     settingsPageKeyPrefix : 'ger.',
-                    availableFacets: "organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet",
-                    defaultFacetQuery: ['otherFacet:GER National Corridor']
+                    availableFacets: "organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,stateFacet,nrmFacet,lgaFacet,mvgFacet,ibraFacet,imcra4_pbFacet,otherFacet,gerSubRegionFacet",
+                    defaultFacetQuery: [/*'otherFacet:GER National Corridor'*/]
             ]
             SettingService.setHubConfig(hubConfig)
             request.setAttribute('hubConfig', hubConfig)

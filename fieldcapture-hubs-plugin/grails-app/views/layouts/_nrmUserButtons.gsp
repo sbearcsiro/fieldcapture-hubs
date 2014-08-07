@@ -9,6 +9,9 @@
         <div class="dropdown-menu pull-right">
             <fc:userProjectList />
         </div>
+        <button class="btn btn-small btn-fc btnNewProject" title="new project">
+            <i class="icon-plus icon-white"></i><span class="">&nbsp; New Project</span>
+        </button>
     </div>
     <g:if test="${fc.userIsSiteAdmin()}">
         <div class="btn-group">
