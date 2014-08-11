@@ -18,7 +18,7 @@ class HubConfigurationFilter implements Filter {
                     title: 'Great Eastern Ranges',
                     settingsPageKeyPrefix : 'ger.',
                     availableFacets: "organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,stateFacet,nrmFacet,lgaFacet,mvgFacet,ibraFacet,imcra4_pbFacet,otherFacet,gerSubRegionFacet",
-                    defaultFacetQuery: [/*'otherFacet:GER National Corridor'*/]
+                    defaultFacetQuery: ['otherFacet:GER National Corridor']
             ]
             SettingService.setHubConfig(hubConfig)
             request.setAttribute('hubConfig', hubConfig)

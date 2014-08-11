@@ -74,9 +74,6 @@ grails.project.dependency.resolution = {
         //compile ':asset-pipeline:1.8.3'
         compile ":resources:1.2.8"
 
-        compile (":wmd:0.1") {
-            exclude "resources"
-        }
         runtime ":lesscss-resources:1.3.3"
 
         //compile ":fieldcapture-plugin:0.1"

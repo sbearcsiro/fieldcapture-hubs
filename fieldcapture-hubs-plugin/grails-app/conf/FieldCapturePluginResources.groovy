@@ -27,6 +27,14 @@ modules = {
         resource url: 'css/capture.css', plugin: 'fieldcapture-plugin'
     }
 
+    wmd {
+        resource url:[ dir:'wmd', file:"wmd.css", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'wmd', file:"showdown.js", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'wmd', file:"wmd.js", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'wmd', file:'wmd-buttons.png', plugin:'fieldcapture-plugin']
+
+    }
+
     nrmPrintSkin {
         dependsOn 'nrmSkin'
         resource url: 'css/print.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
@@ -178,4 +186,6 @@ modules = {
         dependsOn 'knockout'
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
     }
+
+
 }

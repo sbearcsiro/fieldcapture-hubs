@@ -102,7 +102,6 @@ class SearchService {
             params.fq = fq.asList()
         }
 
-        //def url = elasticBaseUrl + commonService.buildUrlParamsFromMap(params)
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticHome' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"
         def jsonstring = webService.get(url)

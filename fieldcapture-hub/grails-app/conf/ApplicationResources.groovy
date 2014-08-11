@@ -18,12 +18,6 @@ modules = {
         resource url: 'bootstrap/less/responsive.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap_responsive'
         resource url: 'css/empty.css', plugin: 'fieldcapture-plugin' // needed for less-resources plugin ?
     }
-
-    wmd {
-        resource url:[ dir:'wmd', file:"wmd.css", plugin:'wmd']
-        resource url:[ dir:'wmd', file:"showdown.js", plugin:'wmd']
-        resource url:[ dir:'wmd', file:"wmd.js", plugin:'wmd']
-    }
 }
 //    application {
 //        dependsOn 'jquery'
