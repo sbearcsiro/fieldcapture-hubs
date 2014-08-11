@@ -71,8 +71,13 @@ grails.project.dependency.resolution = {
 
         // plugins needed at runtime but not for compilation
         runtime ":jquery:1.11.1"
-        runtime ":resources:1.2.8"
-        //runtime ":lesscss-resources:1.3.3"
+        //compile ':asset-pipeline:1.8.3'
+        compile ":resources:1.2.8"
+
+        compile (":wmd:0.1") {
+            exclude "resources"
+        }
+        runtime ":lesscss-resources:1.3.3"
 
         //compile ":fieldcapture-plugin:0.1"
 

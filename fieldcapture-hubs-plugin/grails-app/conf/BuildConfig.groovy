@@ -51,6 +51,10 @@ grails.project.dependency.resolution = {
         // needed by the cache plugin.
         compile "org.springframework:spring-aop:${springVersion}"
         compile "org.springframework:spring-expression:${springVersion}"
+        compile group: 'au.org.ala',
+                name: 'ala-cas-client',
+                version:'2.1-SNAPSHOT',
+                transitive:false
 
 
         // runtime 'mysql:mysql-connector-java:5.1.22'
@@ -64,15 +68,18 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        runtime ":jquery:1.8.3"
-        runtime ":resources:1.2.8"
+        runtime ":jquery:1.11.0.2"
+        //compile ':asset-pipeline:1.8.3'
         // required by the cached-resources plugin
         runtime ":cache-headers:1.1.6"
 
         //runtime ":cached-resources:1.0"
-        runtime ":ala-web-theme:0.2.2"
+        runtime ":rest:0.8" // Override the web-theme-plugin rest version.
+        compile (":ala-web-theme:0.2.2") {
+            exclude "rest"
+        }
         runtime ":csv:0.3.1"
-        //runtime ":lesscss-resources:1.3.3"
+        runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
         compile (":wmd:0.1") {
             exclude "resources"
@@ -86,7 +93,7 @@ grails.project.dependency.resolution = {
         compile ":mail:1.0.6"
 
         compile ":excel-export:0.2.0"
-        compile ":excel-import:1.0.0"
+        compile ":excel-import:1.0.1"
 
         test ":geb:0.9.3"
         test (":spock:0.7") {
