@@ -31,7 +31,6 @@ grails.project.dependency.resolution = {
         mavenRepo "http://maven.ala.org.au/repository/"
 
     }
-    def springVersion = '3.2.9.RELEASE'
     def tomcatVersion = '7.0.54'
     def seleniumVersion = "2.21.0"
     def metadataExtractorVersion = "2.6.2"
@@ -47,10 +46,6 @@ grails.project.dependency.resolution = {
         compile "com.vividsolutions:jts:${jtsVersion}"
         compile "joda-time:joda-time:2.3"
 
-
-        // needed by the cache plugin.
-        compile "org.springframework:spring-aop:${springVersion}"
-        compile "org.springframework:spring-expression:${springVersion}"
         compile group: 'au.org.ala',
                 name: 'ala-cas-client',
                 version:'2.1-SNAPSHOT',
@@ -75,9 +70,7 @@ grails.project.dependency.resolution = {
 
         //runtime ":cached-resources:1.0"
         runtime ":rest:0.8" // Override the web-theme-plugin rest version.
-        compile (":ala-web-theme:0.2.2") {
-            exclude "rest"
-        }
+        compile (":ala-web-theme:1.0.0")
         runtime ":csv:0.3.1"
         runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"

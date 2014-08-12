@@ -26,7 +26,7 @@ grails.project.fork = [
 grails.plugin.location.'fieldcapture-plugin'='../fieldcapture-hubs-plugin'
 
 
-grails.project.dependency.resolver = "ivy" //"maven" // or ivy
+grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
 
     // inherit Grails' default dependencies
