@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="au.org.ala.fieldcapture.SettingPageType; org.codehaus.groovy.grails.commons.ConfigurationHolder" %>
+<%@ page import="au.org.ala.fieldcapture.SettingPageType" %>
 <!DOCTYPE html>
 <head>
     <title><g:layoutTitle /></title>

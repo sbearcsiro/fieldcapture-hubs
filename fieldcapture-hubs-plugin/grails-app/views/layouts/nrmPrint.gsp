@@ -13,7 +13,6 @@
   - rights and limitations under the License.
   --}%
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="org.codehaus.groovy.grails.commons.ConfigurationHolder" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
