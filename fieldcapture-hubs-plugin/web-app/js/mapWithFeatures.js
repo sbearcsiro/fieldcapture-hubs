@@ -188,13 +188,13 @@
                     //load the overlay instead
                     var pid = loc.pid;
                     //console.log('Loading PID: ' + pid);
-                    f = new PIDLayer(pid, this.wmsServer);
+                    f = new PIDLayer(pid, this.wmsServer, loc.style);
                     map.map.overlayMapTypes.push(f);
                     $.ajax({
                         url: this.featureService+ '?featureId=' + pid,
                         dataType:'json'
                     }).done(function(data) {
-                        if(data !== undefined && data !== null && data.bbox !== undefined){
+                        if(data !== undefined && data !== null && data.bbox !== undefined && !loc.excludeBounds){
                             var coords = data.bbox.replace(/POLYGON/g,"").replace(/[\\(|\\)]/g, "");
                             var pointArray = coords.split(",");
                             self.featureBounds.extend(new google.maps.LatLng(pointArray[1].split(" ")[1],pointArray[1].split(" ")[0]));

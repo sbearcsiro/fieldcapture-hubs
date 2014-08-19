@@ -216,7 +216,8 @@ function getWMSTileUrl(coord, zoom, baseurl, customParams)
 }
 
 //Define custom WMS tiled layer
-function PIDLayer(pid, wmsServer){
+function PIDLayer(pid, wmsServer, style){
+
     return new google.maps.ImageMapType({
         getTileUrl: function(coord, zoom){
              var wmsParams = [
@@ -250,6 +251,9 @@ function PIDLayer(pid, wmsServer){
                 lLR_Longitude = Math.abs(lLR_Longitude);
             }
             var urlResult = wmsServer + "/wms/reflect?" + wmsParams.join("&") + "&bbox=" + lUL_Longitude + "," + lUL_Latitude + "," + lLR_Longitude + "," + lLR_Latitude;
+            if (style) {
+                urlResult+='&STYLES='+style;
+            }
 
             return urlResult;
         },

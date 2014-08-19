@@ -219,5 +219,30 @@ class MetadataService {
         })
     }
 
+    def getGeographicFacetConfig() {
+        cacheService.get("geographic-facets", {
+
+            def results = [:].withDefault{[:]}
+
+            def facetConfig = webService.getJson(grailsApplication.config.ecodata.baseUrl + "metadata/getGeographicFacetConfig")
+            facetConfig.grouped.each { k, v ->
+                v.each { name, fid ->
+                    def objects = webService.getJson(grailsApplication.config.spatial.baseUrl + '/ws/objects/'+fid)
+                    results[k] << [(objects[0].name):objects[0]]
+                }
+
+            }
+
+            facetConfig.gridded.each { name, fid ->
+                def objects = webService.getJson(grailsApplication.config.spatial.baseUrl + '/ws/objects/'+fid)
+                objects.each {
+                    results[name] << [(it.name):it]
+                }
+            }
+
+            results
+        })
+    }
+
 
 }

@@ -9,6 +9,7 @@ class HomeController {
     def activityService
     def searchService
     def settingService
+    def metadataService
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -22,8 +23,26 @@ class HomeController {
     }
     def index() {
         params.facets = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+        def selectedFacets = params.getList('fq').collectEntries{
+            def nameVal = it.split(':');
+            def name = nameVal[0].substring(0, nameVal[0].indexOf('Facet'))
+            return [(name):nameVal[1]]
+        }
+        def facetConfig = metadataService.getGeographicFacetConfig()
+
+        def geographicFacetConfig = []
+        selectedFacets.each {name, value ->
+            def config = facetConfig[name]
+            if (config) {
+                if (config[value]) {
+                    geographicFacetConfig << config[value]
+                }
+            }
+        }
+
         def resp = searchService.HomePageFacets(params)
         [   facetsList: params.facets.tokenize(","),
+            geographicFacets:geographicFacetConfig,
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
             results: resp ]
     }
