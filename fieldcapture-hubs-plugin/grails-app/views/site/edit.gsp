@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
   <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
   <title> ${create ? 'New' : ('Edit | ' + site?.name?.encodeAsHTML())} | Sites | Field Capture</title>
   <style type="text/css">
@@ -1178,7 +1177,13 @@
                             maxLat=-90,
                             maxLng=-180;
 
-                    $.each(path, function(i){
+                    // There appears to have been an API change here - this is required locally but it
+                    // still works without this change in test and prod.
+                    var pathArray = path;
+                    if (typeof(path.getArray) === 'function') {
+                        pathArray = path.getArray();
+                    }
+                    $.each(pathArray, function(i){
                       //console.log(path.getAt(i));
                       var coord = path.getAt(i);
                       if(coord.lat()>maxLat) maxLat = coord.lat();

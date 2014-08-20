@@ -87,7 +87,8 @@ class SearchService {
         webService.getJson(url)
     }
 
-    def HomePageFacets(params) {
+    def HomePageFacets(originalParams) {
+        def params = originalParams.clone()
         params.flimit = 999
         params.fsort = "term"
         //params.offset = 0

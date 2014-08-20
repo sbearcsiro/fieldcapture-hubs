@@ -23,11 +23,16 @@ class HomeController {
     }
     def index() {
         params.facets = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
-        def selectedFacets = params.getList('fq').collectEntries{
+
+        def allFacets = []
+        allFacets += SettingService.getHubConfig().defaultFacetQuery?:[]
+        allFacets += params.getList('fq')
+        def selectedFacets = allFacets.collectEntries{
             def nameVal = it.split(':');
             def name = nameVal[0].substring(0, nameVal[0].indexOf('Facet'))
             return [(name):nameVal[1]]
         }
+
         def facetConfig = metadataService.getGeographicFacetConfig()
 
         def geographicFacetConfig = []
