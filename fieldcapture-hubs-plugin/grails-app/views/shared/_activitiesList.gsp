@@ -74,7 +74,7 @@
                         collector: act.collector,
                         metaModel: act.model || {},
                         editActivity: function () {
-                            document.location.href = fcConfig.activityEditUrl + "/" + this.activityId +
+                            document.location.href = fcConfig.activityEnterDataUrl + "/" + this.activityId +
                                 "?returnTo=" + here;
                         },
                         printActivity: function() {

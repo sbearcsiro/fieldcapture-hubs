@@ -39,6 +39,13 @@
             </ul>
         </g:if>
 
+        <g:if test="${editInMerit}">
+            <div class="alert alert-error">
+                <strong>Note:</strong> This activity can only be edited in the <a href="${g.createLink(action:'edit',  id:activity.activityId, base:grailsApplication.config.merit.url)}" target="_merit">MERIT system</a>
+            </div>
+        </g:if>
+
+
         <div class="row-fluid title-block well well-small input-block-level">
             <div class="span12 title-attribute">
                 <h1><span data-bind="click:goToProject" class="clickable">${project?.name?.encodeAsHTML() ?: 'no project defined!!'}</span></h1>

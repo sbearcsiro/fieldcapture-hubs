@@ -172,7 +172,7 @@
             self.plannedStartDate = ko.observable(act.plannedStartDate).extend({simpleDate: false});
             self.plannedEndDate = ko.observable(act.plannedEndDate).extend({simpleDate: false});
             self.projectStage = 'Stage 1'; // hardwire until we have a scheme for picking the stage by date
-            self.progress = ko.observable('planned');
+            self.progress = ko.observable('started');
             self.censusMethod = ko.observable(act.censusMethod);
             self.methodAccuracy = ko.observable(act.methodAccuracy);
             self.collector = ko.observable(act.collector)/*.extend({ required: true })*/;
@@ -231,7 +231,7 @@
                                 // Redirect to the edit page for a new started activity, otherwise go back to
                                 // where you came from (the project or site activity list most likely).
                                 if (self.progress() != 'planned') {
-                                    document.location.href = "${createLink(action: 'edit')}"+'/'+data.activityId+'?returnTo='+returnTo;
+                                    document.location.href = "${createLink(action: 'enterData')}"+'/'+data.activityId+'?returnTo='+returnTo;
                                 }
                                 else {
                                     document.location.href = returnTo;

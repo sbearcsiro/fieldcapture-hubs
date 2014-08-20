@@ -425,7 +425,7 @@
 
     $(function(){
 
-        $('#validation-container').validationEngine('attach', {scroll: false});
+        $('#validation-container').validationEngine('attach', {scroll: true});
 
         $('.helphover').popover({animation: true, trigger:'hover'});
 

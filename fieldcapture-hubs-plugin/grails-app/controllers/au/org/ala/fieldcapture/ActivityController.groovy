@@ -54,9 +54,9 @@ class ActivityController {
                     model.speciesLists.add(list)
                 }
             }
-            model.printView = true
             model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
             model.themes = metadataService.getThemesForProject(model.project)
+
             model
         } else {
             forward(action: 'list', model: [error: 'no such id'])
@@ -71,9 +71,17 @@ class ActivityController {
         def activity = activityService.get(id)
         if (activity) {
             // permissions check
-            if (!projectService.canUserEditProject(userService.getCurrentUserId(), activity.projectId)) {
+            def userId = userService.getCurrentUserId()
+            if (!projectService.canUserEditProject(userId, activity.projectId)) {
+
+                if (projectService.canUserViewProject(userId, activity.projectId)) {
+                   chain(action:'index', id:id, model:[editInMerit:true])
+                    return
+                }
+
                 flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${activity.projectId}"
                 redirect(controller:'project', action:'index', id: activity.projectId)
+                return
             }
             // pass the activity
             def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
@@ -103,7 +111,14 @@ class ActivityController {
         def activity = activityService.get(id)
         if (activity) {
             // permissions check
-            if (!projectService.canUserEditProject(userService.getCurrentUserId(), activity.projectId)) {
+            def userId = userService.getCurrentUserId()
+            if (!projectService.canUserEditProject(userId, activity.projectId)) {
+
+                if (projectService.canUserViewProject(userId, activity.projectId)) {
+                    chain(action:'index', id:id,  model:[editInMerit: true])
+                    return
+                }
+
                 flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${activity.projectId}"
                 redirect(controller:'project', action:'index', id: activity.projectId)
             }

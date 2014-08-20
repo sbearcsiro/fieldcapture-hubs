@@ -26,11 +26,13 @@ class HomeController {
 
         def allFacets = []
         allFacets += SettingService.getHubConfig().defaultFacetQuery?:[]
-        allFacets += params.getList('fq')
+        allFacets += params.getList('fq').grep{it.contains('Facet') && it.contains(':')}
         def selectedFacets = allFacets.collectEntries{
             def nameVal = it.split(':');
+
             def name = nameVal[0].substring(0, nameVal[0].indexOf('Facet'))
             return [(name):nameVal[1]]
+
         }
 
         def facetConfig = metadataService.getGeographicFacetConfig()

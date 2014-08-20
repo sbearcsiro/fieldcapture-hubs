@@ -32,6 +32,10 @@ class MetadataService {
         })
     }
 
+    def programModel(program) {
+        return programsModel().programs.find {it.name == program}
+    }
+
     def updateProgramsModel(model) {
         def result = webService.doPost(grailsApplication.config.ecodata.baseUrl +
                 'metadata/updateProgramsModel', [model: model])
