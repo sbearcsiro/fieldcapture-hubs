@@ -3,9 +3,11 @@
          to the main viewModel. -->
 <!-- ko stopBinding: true -->
 <div class="row-fluid space-after" id="activityListContainer">
-    <div class="pull-right space-after">
-        <button data-bind="click:newActivity" type="button" class="btn">Add new activity</button>
-    </div>
+    <g:if test="${user.isEditor}">
+        <div class="pull-right space-after">
+            <button data-bind="click:newActivity" type="button" class="btn">Add new activity</button>
+        </div>
+    </g:if>
     <p data-bind="visible: activities().length > 0">Click column titles to sort. Click <i class="icon-edit no-pointer"></i> edit button to enter activity data.</p>
     <p data-bind="visible: activities().length == 0">
         This project currently has no activities listed.

@@ -63,6 +63,13 @@
         <li class="active" data-bind="text:name"></li>
     </ul>
 
+    <g:if test="${!user.isEditor}">
+        <div class="alert alert-info">
+            This project is funded by a federal government programme and can only be edited in the <a href="${g.createLink(id:project.projectId, base:grailsApplication.config.merit.url)}">MERIT system</a>
+        </div>
+
+    </g:if>
+
     <div class="row-fluid">
         <div class="row-fluid">
             <div class="clearfix">
@@ -95,7 +102,7 @@
         <li><a href="#plan" id="plan-tab" data-toggle="${tabIsActive}">Activities</a></li>
         <li><a href="#site" id="site-tab" data-toggle="${tabIsActive}">Sites</a></li>
         <li><a href="#dashboard" id="dashboard-tab" data-toggle="${tabIsActive}">Dashboard</a></li>
-        <g:if test="${user?.isAdmin || user?.isCaseManager}"><li><a href="#admin" id="admin-tab" data-toggle="tab">Admin</a></li></g:if>
+        <g:if test="${(user?.isAdmin || user?.isCaseManager) && user?.isEditor}"><li><a href="#admin" id="admin-tab" data-toggle="tab">Admin</a></li></g:if>
     </ul>
     <div class="tab-content" style="overflow:visible;">
         <div class="tab-pane active" id="overview">
@@ -292,7 +299,8 @@
                 <g:render template="dashboard"/>
             </div>
         </g:if>
-        <g:if test="${user?.isAdmin || user?.isCaseManager}">
+        %{-- A user can be an admin but not an editor if this is a MERIT project --}%
+        <g:if test="${(user?.isAdmin || user?.isCaseManager) && user?.isEditor}">
             <g:set var="activeClass" value="class='active'"/>
             <div class="tab-pane" id="admin">
             <!-- ADMIN -->
