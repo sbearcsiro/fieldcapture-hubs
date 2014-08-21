@@ -1,40 +1,46 @@
 package au.org.ala.fieldcapture
 
+import grails.converters.JSON
 import groovy.text.GStringTemplateEngine
 
 class SettingService {
 
-    private static def ThreadLocal localHhubConfig = new ThreadLocal()
+    private static def ThreadLocal localHubConfig = new ThreadLocal()
 
     public static void setHubConfig(hubConfig) {
-        localHhubConfig.set(hubConfig)
+        localHubConfig.set(hubConfig)
     }
 
     public static void clearHubConfig() {
-        localHhubConfig.remove()
+        localHubConfig.remove()
     }
 
     public static Map getHubConfig() {
-        return localHhubConfig.get()
+        return localHubConfig.get()
     }
 
     def webService, cacheService
     def grailsApplication
 
     def getSettingText(SettingPageType type) {
-        def key = localHhubConfig.get().settingsPageKeyPrefix + type.key
+        def key = localHubConfig.get().settingsPageKeyPrefix + type.key
 
-        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${key}"
-        def res = cacheService.get(key,{ webService.getJson(url) })
-        return res?.settingText?:""
+        get(key)
+
     }
 
     def setSettingText(SettingPageType type, String content) {
-        def key = localHhubConfig.get().settingsPageKeyPrefix + type.key
+        def key = localHubConfig.get().settingsPageKeyPrefix + type.key
 
         cacheService.clear(key)
         String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxSetSettingText/${key}"
         webService.doPost(url, [settingText: content, key: key])
+    }
+
+    private def get(key) {
+        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${key}"
+        def res = cacheService.get(key,{ webService.getJson(url) })
+        return res?.settingText?:""
     }
 
     /**
@@ -48,6 +54,11 @@ class SettingService {
         String templateText = getSettingText(type)
         GStringTemplateEngine templateEngine = new GStringTemplateEngine();
         return templateEngine.createTemplate(templateText).make(substitutionModel).toString()
+    }
+
+    def getProjectSettings(projectId) {
+        def settings = get(projectId+'.settings')
+        return settings ? JSON.parse(settings) : [:]
     }
 
 }

@@ -75,7 +75,7 @@ function addTimelineBasedOnStartDate (project) {
     if (project.plannedEndDate === undefined || project.plannedEndDate === '') {
         // make one up so we can proceed
         var endDate = new Date(Date.now());
-        endDate = endDate.setUTCFullYear(endDate.getUTCFullYear()+5);
+        endDate.setUTCFullYear(endDate.getUTCFullYear()+5);
         project.plannedEndDate = endDate.toISOStringNoMillis();
     }
 

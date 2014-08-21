@@ -189,15 +189,11 @@
         </div>
         <g:if test="${user?.hasViewAccess}">
             <div class="tab-pane" id="plan">
-                <!-- PLANS -->
-                <g:if test="${useAltPlan}">
-                    <g:render template="/shared/plan"
-                              model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true]"/>
-                </g:if>
-                <g:else>
-                    <g:render template="/shared/activitiesList"
-                              model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true]"/>
-                </g:else>
+
+
+                <g:render template="/shared/activitiesList"
+                          model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true]"/>
+
             </div>
 
             <div class="tab-pane" id="site">
@@ -427,20 +423,7 @@
     <r:script>
         var organisations = ${institutions};
 
-        // custom validator to ensure that only one of two fields is populated
-        function exclusive (field, rules, i, options) {
-            var otherFieldId = rules[i+2], // get the id of the other field
-                otherValue = $('#'+otherFieldId).val(),
-                thisValue = field.val(),
-                message = rules[i+3];
-            // checking thisValue is technically redundant as this validator is only called
-            // if there is a value in the field
-            if (otherValue !== '' && thisValue !== '') {
-                return message;
-            } else {
-                return true;
-            }
-        }
+
 
         $(window).load(function () {
             var map;

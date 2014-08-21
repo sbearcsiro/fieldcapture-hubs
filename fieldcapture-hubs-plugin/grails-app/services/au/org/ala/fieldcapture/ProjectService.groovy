@@ -5,7 +5,8 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class ProjectService {
 
-    def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService
+    def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService
+
     LinkGenerator grailsLinkGenerator
 
     def list(brief = false) {
@@ -257,5 +258,27 @@ class ProjectService {
         }
 
         result
+    }
+
+    /**
+     * Returns the programs model for use by a particular project.  At the moment, merit programmes are filtered out.
+     */
+    def programsModel() {
+        def fullModel = metadataService.programsModel()
+        [programs: fullModel.programs.grep{!it.isMeritProgramme}] as JSON
+    }
+
+    /**
+     * Returns a filtered list of activities for use by a project
+     */
+    def activityTypesList(projectId) {
+        def projectSettings = settingService.getProjectSettings(projectId)
+        def activityTypes = metadataService.activityTypesList()
+        if (projectSettings?.allowedActivities) {
+            activityTypes = activityTypes.grep { it.key in projectSettings.allowedActivities }
+        }
+
+        activityTypes
+
     }
 }

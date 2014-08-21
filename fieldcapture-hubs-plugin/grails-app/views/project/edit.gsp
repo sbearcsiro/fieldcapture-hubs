@@ -1,116 +1,153 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
+    <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title>${create ? 'New' : ('Edit | ' + project?.name?.encodeAsHTML())} | Projects | Field Capture</title>
     <r:require modules="knockout,jqueryValidationEngine,datepicker"/>
 </head>
+
 <body>
-    <div class="container-fluid validationEngineContainer" id="validation-container">
+<div class="container-fluid validationEngineContainer" id="validation-container">
 
-    <ul class="breadcrumb">
-        <li><g:link controller="home">Home</g:link> <span class="divider">/</span></li>
-        <g:if test="${create}">
-            <li class="active">Create new project</li>
-        </g:if>
-        <g:else>
-            <li><g:link controller="project" action="index" id="${project.projectId}">${project.name?.encodeAsHTML()}</g:link> <span class="divider">/</span></li>
-            <li class="active">Edit</li>
-        </g:else>
-    </ul>
-    <div class="row-fluid">
-        <div class="page-header">
-            <h1 data-bind="text: name"></h1><h1 data-bind="visible: !name()">Creating new project</h1>
+<ul class="breadcrumb">
+    <li><g:link controller="home">Home</g:link> <span class="divider">/</span></li>
+    <g:if test="${create}">
+        <li class="active">Create new project</li>
+    </g:if>
+    <g:else>
+        <li><g:link controller="project" action="index"
+                    id="${project.projectId}">${project.name?.encodeAsHTML()}</g:link> <span class="divider">/</span>
+        </li>
+        <li class="active">Edit</li>
+    </g:else>
+</ul>
+
+<div class="row-fluid">
+    <div class="control-group">
+        <label for="name" class="control-label">Project name</label>
+        <div class="controls">
+            <input type="text" class="input-xxlarge" id="name" data-bind="value: name"
+                   data-validation-engine="validate[required]"/>
         </div>
     </div>
-    <div class="row-fluid">
-        <div class="span12">
-            <div class="control-group span7">
-                <label for="name" class="control-label">Project name</label>
-                <div class="controls">
-                    <input type="text" class="input-xxlarge" id="name" data-bind="value: name"
-                        data-validation-engine="validate[required]"/>
-                </div>
-            </div>
-            <div class="control-group span5">
-                <label class="control-label">Organisation</label>
-                <select class="input-xlarge"
-                    data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisation, optionsCaption: 'Choose...'"></select>
-            </div>
+</div>
+
+<div class="row-fluid">
+    <div class="control-group span5">
+        <label class="control-label">Choose an organisation</label>
+        <select class="input-xlarge" id="organisation"
+                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisation, optionsCaption: 'Choose...'"></select>
+    </div>
+    <span class="control-group span1" style="margin-top: 28px;"><b>OR</b></span>
+
+    <div class="control-group span6">
+        <label class="control-label">Enter the name of an organisation or person</label>
+        <input class="input-xlarge" data-bind="value:organisationName" id="organisationName"
+               data-validation-engine="validate[funcCall[exclusive[organisation,You  can only specify one organisation. One field must be cleared.]]]"/>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="control-group">
+        <label for="description" class="control-label">Project description</label>
+
+        <div class="controls">
+            <textarea data-bind="value:description" class="input-xxlarge" id="description" rows="3"
+                      cols="50"></textarea>
         </div>
     </div>
-    <div class="row-fluid">
-        <div class="control-group">
-            <label for="description" class="control-label">Project description</label>
-            <div class="controls">
-                <textarea data-bind="value:description" class="input-xxlarge" id="description" rows="3" cols="50"></textarea>
-            </div>
-        </div>
-    </div>
-    <div class="row-fluid">
-        <div class="control-group span4">
-            <label class="control-label" for="manager">Project manager</label>
-            <div class="controls">
-                <g:textField class="" name="manager" data-bind="value:manager"/>
-            </div>
-        </div>
-        <div class="control-group span4">
-            <label class="control-label" for="externalId">External id</label>
-            <div class="controls">
-                <g:textField class="" name="externalId" data-bind="value:externalId"/>
-            </div>
-        </div>
-        <div class="control-group span4">
-            <label class="control-label" for="grantId">Grant id</label>
-            <div class="controls">
-                <g:textField class="" name="grantId" data-bind="value:grantId"/>
-            </div>
+</div>
+
+<div class="row-fluid">
+    <div class="control-group span4">
+        <label class="control-label" for="externalId">External id</label>
+
+        <div class="controls">
+            <g:textField class="" name="externalId" data-bind="value:externalId"/>
         </div>
     </div>
 
-    <div class="row-fluid">
-        <div class="span4">
-            <label class="control-label">Program name</label>
-            <select data-bind="value:associatedProgram,options:transients.programs,optionsCaption: 'Choose...'"
-                    data-validation-engine="validate[required]"></select>
+    <div class="control-group span4">
+        <label class="control-label" for="grantId">Grant id</label>
+
+        <div class="controls">
+            <g:textField class="" name="grantId" data-bind="value:grantId"/>
         </div>
-        <div class="span4">
-            <label class="control-label">Sub-program name</label>
-            <select data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...'"></select>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="control-group span4">
+        <label class="control-label" for="manager">Project manager</label>
+
+        <div class="controls">
+            <g:textField class="" name="manager" data-bind="value:manager"/>
         </div>
     </div>
 
-    <div class="row-fluid">
-        <div class="span4 control-group">
-            <label for="startDate">Planned start date
-            <fc:iconHelp title="Start date">Date the project is intended to commence.</fc:iconHelp>
-            </label>
-            <div class="input-append">
-                <input data-bind="datepicker:plannedStartDate.date" id="startDate" type="text" size="16"
-                       data-validation-engine="validate[required]"/>
-                <span class="add-on open-datepicker"><i class="icon-th"></i></span>
-            </div>
-        </div>
-        <div class="span4">
-            <label for="endDate">Planned end date
-            <fc:iconHelp title="End date">Date the project is intended to finish.</fc:iconHelp>
-            </label>
-            <div class="input-append">
-                <input data-bind="datepicker:plannedEndDate.date" id="endDate" type="text" size="16"/>
-                <span class="add-on open-datepicker"><i class="icon-th"></i></span>
-            </div>
+    <div class="control-group span4">
+        <label class="control-label" for="manager">Project funding</label>
+
+        <div class="controls">
+            <g:textField class="" name="funding" data-bind="value:funding"
+                         data-validation-engine="validate[custom[number]]"/>
         </div>
     </div>
 
-    <div class="form-actions">
-        <button type="button" data-bind="click: save" class="btn btn-primary">Save changes</button>
-        <button type="button" id="cancel" class="btn">Cancel</button>
+</div>
+
+<div class="row-fluid">
+    <div class="span4">
+        <label class="control-label">Program name</label>
+        <select data-bind="value:associatedProgram,options:transients.programs,optionsCaption: 'Choose...'"
+                data-validation-engine="validate[required]"></select>
     </div>
 
-    <g:if env="development">
-    <hr />
+    <div class="span4">
+        <label class="control-label">Sub-program name</label>
+        <select data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...'"></select>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span4">
+        <label for="startDate">Planned start date
+        <fc:iconHelp title="Start date">Date the project is intended to commence.</fc:iconHelp>
+        </label>
+
+        <div class="input-append">
+            <fc:datePicker targetField="plannedStartDate.date" name="startDate"
+                           data-validation-engine="validate[required]" size="input-large"/>
+        </div>
+    </div>
+
+    <div class="span4">
+        <label for="endDate">Planned end date
+        <fc:iconHelp title="End date">Date the project is intended to finish.</fc:iconHelp>
+        </label>
+
+        <div class="input-append">
+            <fc:datePicker targetField="plannedEndDate.date" name="endDate"
+                           data-validation-engine="validate[future[startDate]]"
+                           size="input-large"/>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-actions">
+    <button type="button" data-bind="click: save" class="btn btn-primary">Save changes</button>
+    <button type="button" id="cancel" class="btn">Cancel</button>
+</div>
+
+
+
+<g:if env="development">
+    <hr/>
+
     <div class="expandable-debug">
         <h3>Debug</h3>
+
         <div>
             <h4>KO model</h4>
             <pre data-bind="text:ko.toJSON($root,null,2)"></pre>
@@ -122,7 +159,7 @@
         </div>
     </div>
     </div>
-    </g:if>
+</g:if>
 </div>
 <r:script>
 
@@ -134,7 +171,7 @@
 
         $('#cancel').click(function () {
             document.location.href = "${create ? createLink(controller: 'home', action: 'index') :
-                createLink(action: 'index', id: project?.projectId)}";
+        createLink(action: 'index', id: project?.projectId)}";
         });
 
         var organisations = ${institutions};
@@ -152,6 +189,9 @@
             self.plannedEndDate = ko.observable(data.plannedEndDate).extend({simpleDate: false});
             self.currentStage = ko.observable(data.currentStage);
             self.organisation = ko.observable(data.organisation);
+            self.organisationName = ko.observable(data.organisationName);
+            self.funding = ko.observable(data.funding).extend({currency:{}});
+
             self.transients = {};
             self.transients.organisations = organisations;
             self.transients.programs = [];

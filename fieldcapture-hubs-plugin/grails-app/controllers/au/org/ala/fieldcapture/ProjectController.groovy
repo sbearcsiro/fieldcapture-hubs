@@ -40,12 +40,11 @@ class ProjectController {
              user: user,
              roles: roles,
              admins: admins,
-             activityTypes: metadataService.activityTypesList(),
+             activityTypes: projectService.activityTypesList(),
              metrics: projectService.summary(id),
              outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-             useAltPlan: params.useAltPlan,
              institutions: metadataService.institutionList(),
-             programs: metadataService.programsModel(),
+             programs: projectService.programsModel(),
              enableReporting: grailsApplication.config.enableReporting
             ]
         }
@@ -66,7 +65,7 @@ class ProjectController {
     def create() {
         render view: 'edit', model: [create:true,
                 institutions: metadataService.institutionList(),
-                programs: metadataService.programsModel()
+                programs: projectService.programsModel()
         ]
     }
 
@@ -78,7 +77,6 @@ class ProjectController {
      * @param id projectId
      * @return
      */
-    @PreAuthorise
     def ajaxUpdate(String id) {
         def postBody = request.JSON
         if (!id) { id = ''}
@@ -92,12 +90,23 @@ class ProjectController {
             }
         }
 
-        if (values.containsKey("planStatus") && values.planStatus =~ /approved/) {
-            // check to see if user has caseManager permissions
-            if (!projectService.isUserCaseManagerForProject(userService.getUser()?.userId, id)) {
-                render status:401, text: "User does not have caseManager permissions for project"
+        // The rule currently is that anyone is allowed to create a project so we only do these checks for
+        // existing projects.
+        if (id) {
+            def userId = userService.getUser()?.userId
+            if (!projectService.canUserEditProject(userId, id)) {
+                render status:401, text: "User ${userId} does not have edit permissions for project ${id}"
                 log.debug "user not caseManager"
                 return
+            }
+
+            if (values.containsKey("planStatus") && values.planStatus =~ /approved/) {
+                // check to see if user has caseManager permissions
+                if (!projectService.isUserCaseManagerForProject(userId, id)) {
+                    render status:401, text: "User does not have caseManager permissions for project"
+                    log.warn "User ${userId} who is not a caseManager attempting to change planStatus for project ${id}"
+                    return
+                }
             }
         }
 
