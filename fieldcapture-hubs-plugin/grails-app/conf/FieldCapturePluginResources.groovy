@@ -188,5 +188,11 @@ modules = {
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
     }
 
+    imageViewer {
+        dependsOn 'viewer', 'jquery'
+        resource 'fancybox/jquery.fancybox.js'
+        resource 'fancybox/jquery.fancybox.css?v=2.1.5'
+
+    }
 
 }
