@@ -8,8 +8,8 @@
     <r:script disposition="head">
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
-        enterDataUrl: "${createLink(action: 'enterData')}/",
-
+        createUrl: "${createLink(action: 'create')}/",
+        projectViewUrl: "${createLink(controller:'project', action:'index')}/"
         },
         here = document.location.href;
     </r:script>
@@ -76,6 +76,10 @@
 
             self.type = ko.observable();
 
+            self.goToProject = function () {
+                document.location.href = fcConfig.projectViewUrl + projectId;
+            };
+            self.transients = {};
             self.transients.activityDescription = ko.computed(function() {
                 var result = "";
                 if (self.type()) {
@@ -94,10 +98,10 @@
                 return result;
             });
 
-            self.save = function () {
+            self.next = function () {
                 if ($('#validation-container').validationEngine('validate')) {
 
-                    document.location = fcConfig.enterDataUrl+'?type='+self.type();
+                    document.location = fcConfig.createUrl+'?projectId='+projectId+'&type='+self.type();
 
                 }
             };

@@ -11,22 +11,45 @@ class ActivityController {
 
     static ignore = ['action','controller','id']
 
-    /*private Map fatten(model) {
-        // todo: all this needs to be made efficient when we know what we actually need
-        model.projects = model.activity.projectId ? [projectService.get(model.activity.projectId)] : null
-        model.site = model.activity.siteId ? siteService.get(model.activity.siteId) : null
-        if (!model.projects && model.site) {
-            model.projects = model.site.projects
+    private Map activityModel(activity, projectId) {
+        // pass the activity
+        def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
+
+        // the site
+        model.site = model.activity?.siteId ? siteService.get(model.activity.siteId, [view:'brief']) : null
+        model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
+
+        // the project
+        model.project = projectId ? projectService.get(model.activity.projectId) : null
+
+        // Add the species lists that are relevant to this activity.
+        model.speciesLists = new JSONArray()
+        if (model.project) {
+            model.project.speciesLists?.each { list ->
+                if (list.purpose == activity.type) {
+                    model.speciesLists.add(list)
+                }
+            }
+            model.themes = metadataService.getThemesForProject(model.project)
+
         }
-        model.sites = siteService.list().collect({[name:it.name,siteId:it.siteId]})
-        if (model.projects && !model.site) {
-            // change the list of sites to just the sites of this project
-            model.sites = siteService.sitesForProject(model.activity.projectId)
-        }
-        model.projects = projectService.list().collect({[name:it.name,projectId:it.projectId]})
-        //map.model = metadataService.getDataModelFromOutputName(output.name)
         model
-    }*/
+    }
+
+    private Map activityAndOutputModel(activity, projectId) {
+        def model = activityModel(activity, projectId)
+        addOutputModel(model)
+        model
+    }
+
+    def addOutputModel(model) {
+        // the activity meta-model
+        model.metaModel = metadataService.getActivityModel(model.activity.type)
+        // the array of output models
+        model.outputModels = model.metaModel?.outputs?.collectEntries {
+            [ it, metadataService.getDataModelFromOutputName(it)] }
+
+    }
 
     def index(String id) {
         def activity = activityService.get(id)
@@ -36,28 +59,8 @@ class ActivityController {
                 flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${activity.projectId}"
                 redirect(controller:'project', action:'index', id: activity.projectId)
             }
-            // pass the activity
-            def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
-            // the activity meta-model
-            model.metaModel = metadataService.getActivityModel(activity.type)
-            // the array of output models
-            model.outputModels = model.metaModel?.outputs?.collectEntries {
-                [ it, metadataService.getDataModelFromOutputName(it)] }
-            // the site
-            model.site = model.activity.siteId ? siteService.get(model.activity.siteId, [view:'brief']) : null
-            // the project
-            model.project = model.activity.projectId ? projectService.get(model.activity.projectId) : null
-            // Add the species lists that are relevant to this activity.
-            model.speciesLists = new JSONArray()
-            model.project?.speciesLists?.each { list ->
-                if (list.purpose == activity.type) {
-                    model.speciesLists.add(list)
-                }
-            }
-            model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
-            model.themes = metadataService.getThemesForProject(model.project)
 
-            model
+            activityAndOutputModel(activity, activity.projectId)
         } else {
             forward(action: 'list', model: [error: 'no such id'])
         }
@@ -83,20 +86,9 @@ class ActivityController {
                 redirect(controller:'project', action:'index', id: activity.projectId)
                 return
             }
-            // pass the activity
-            def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
-            // the site
-            model.site = model.activity.siteId ? siteService.get(model.activity.siteId, [view:'brief']) : null
-            // the project
-            model.project = model.activity.projectId ? projectService.get(model.activity.projectId) : null
-            model.project?.speciesLists?.each { list ->
-                if (list.purpose == activity.type) {
-                    model.speciesLists.add(list)
-                }
-            }
+            def model = activityModel(activity)
             model.activityTypes = metadataService.activityTypesList()
-            model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
-            model.themes = metadataService.getThemesForProject(model.project)
+
             // Required so we can supply a warning to the user if they attempt to change the site.
             // TODO photopoints need to be formally a part of the model instead of an output type to prevent
             // this kind of check.
@@ -132,26 +124,9 @@ class ActivityController {
             if (params.progress) {
                 activity.progress = params.progress
             }
-            def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
-            // the activity meta-model
-            model.metaModel = metadataService.getActivityModel(activity.type)
-            // the array of output models
-            model.outputModels = model.metaModel?.outputs?.collectEntries {
-                [ it, metadataService.getDataModelFromOutputName(it)] }
-            // the site
-            model.site = model.activity.siteId ? siteService.get(model.activity.siteId, [view:'brief']) : null
-            // the project
-            model.project = model.activity.projectId ? projectService.get(model.activity.projectId) : null
-            // Add the species lists that are relevant to this activity.
-            model.speciesLists = new JSONArray()
-            model.project?.speciesLists?.each { list ->
-                if (list.purpose == activity.type) {
-                    model.speciesLists.add(list)
-                }
-            }
-            model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
-            model.themes = metadataService.getThemesForProject(model.project)
-            model
+
+            activityAndOutputModel(activity, activity.projectId)
+
         } else {
             forward(action: 'list', model: [error: 'no such id'])
         }
@@ -166,25 +141,7 @@ class ActivityController {
                 redirect(controller:'project', action:'index', id: activity.projectId)
             }
             // pass the activity
-            def model = [activity: activity, returnTo: params.returnTo, projectStages:projectStages()]
-            // the activity meta-model
-            model.metaModel = metadataService.getActivityModel(activity.type)
-            // the array of output models
-            model.outputModels = model.metaModel?.outputs?.collectEntries {
-                [ it, metadataService.getDataModelFromOutputName(it)] }
-            // the site
-            model.site = model.activity.siteId ? siteService.get(model.activity.siteId, [view:'brief']) : null
-            // the project
-            model.project = model.activity.projectId ? projectService.get(model.activity.projectId) : null
-            // Add the species lists that are relevant to this activity.
-            model.speciesLists = new JSONArray()
-            model.project?.speciesLists?.each { list ->
-                if (list.purpose == activity.type) {
-                    model.speciesLists.add(list)
-                }
-            }
-            model.mapFeatures = model.site ? siteService.getMapFeatures(model.site) : "{}"
-            model.themes = metadataService.getThemesForProject(model.project)
+            def model = activityAndOutputModel(activity, activity.projectId)
             model.printView = true
             render view: 'enterData', model: model
         } else {
@@ -195,7 +152,34 @@ class ActivityController {
 
 
     /**
-     * Displays page to create an activity.
+     * Displays page(s) to create an activity.
+     */
+    @PreAuthorise(projectIdParam = 'projectId')
+    def create(String siteId, String projectId, String type) {
+
+        def activity = [activityId: "", siteId: siteId, projectId: projectId]
+        def model = activityModel(activity, projectId)
+        model.create = true
+
+        if (!type) {
+            def availableTypes = projectService.activityTypesList(projectId)
+            model.activityTypes = availableTypes
+            if (availableTypes.size() == 1) {
+                type = availableTypes[1].name
+            }
+        }
+        if (type) {
+            activity.type = type
+            model.returnTo = g.createLink(controller:'project', id:projectId)
+            addOutputModel(model)
+        }
+
+
+        render model:model, view:activity.type?'enterData':'create'
+    }
+
+    /**
+     * Displays page to create an activity in planning mode.
      *
      * Depending on where this is called from, either the site or the project or neither is known.
      * If neither is known, then the full list of projects and sites is injected for selection.
@@ -209,11 +193,11 @@ class ActivityController {
      * @return
      */
     @PreAuthorise(projectIdParam = 'projectId')
-    def create(String siteId, String projectId) {
+    def createPlan(String siteId, String projectId) {
         def activity = [activityId: "", siteId: siteId, projectId: projectId]
         def model = [activity: activity, returnTo: params.returnTo, create: true,
-                activityTypes: projectService.activityTypesList(projectId),
-                projectStages:projectStages()]
+                     activityTypes: projectService.activityTypesList(projectId),
+                     projectStages:projectStages()]
         model.project = projectId ? projectService.get(projectId) : null
         model.site = siteId ? siteService.get(siteId) : null
         if (projectId) {
@@ -241,7 +225,10 @@ class ActivityController {
      */
     def ajaxUpdate(String id) {
         def postBody = request.JSON
-        if (!id) { id = ''}
+        if (!id) {
+            id = postBody.remove('activityId')
+            if (!id) {id=''}
+        }
         //log.debug "Body: " + postBody
         //log.debug "Params:"
         //params.each { log.debug it }

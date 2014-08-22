@@ -66,21 +66,18 @@
                 <!-- Common activity fields -->
 
                 <div class="row-fluid space-after">
-                <div class="span6">
-                    <label for="theme">Major theme</label>
-                    <select id="theme" data-bind="value:mainTheme, options:transients.themes, optionsCaption:'Choose..'" class="input-xlarge">
-                    </select>
-                </div>
-                    <div class="span6">
-                        <label class="for-readonly">Description</label>
-                        <span class="readonly-text" data-bind="text:description"></span>
+
+                    <div class="span9 required">
+                        <label class="for-readonly" for="description">Description</label>
+                        <input id="description" type="text" class="input-xxlarge" data-bind="value:description" data-validation-engine="validate[required]"></span>
                     </div>
                 </div>
 
                 <div class="row-fluid space-after">
                     <div class="span6">
-                        <label class="for-readonly inline">Project stage</label>
-                        <span class="readonly-text" data-bind="text:projectStage"></span>
+                        <label for="theme" class="for-readonly">Major theme</label>
+                        <select id="theme" data-bind="value:mainTheme, options:transients.themes, optionsCaption:'Choose..'" class="input-xlarge">
+                        </select>
                     </div>
                     <div class="span6">
                         <label class="for-readonly inline">Activity progress</label>
@@ -93,11 +90,12 @@
                 </div>
 
                 <div class="row-fluid space-after">
-                    <div class="span6">
+
+                    <div class="span6" data-bind="visible:plannedStartDate()">
                         <label class="for-readonly inline">Planned start date</label>
                         <span class="readonly-text" data-bind="text:plannedStartDate.formattedDate"></span>
                     </div>
-                    <div class="span6">
+                    <div class="span6" data-bind="visible:plannedEndDate()">
                         <label class="for-readonly inline">Planned end date</label>
                         <span class="readonly-text" data-bind="text:plannedEndDate.formattedDate"></span>
                     </div>
@@ -450,57 +448,6 @@
         $('#reset').click(function () {
             master.reset();
         });
-
-        $('.edit-btn').click(function () {
-            var data = ${activity.outputs},
-                outputName = $(this).parent().previous().html(),
-                outputId;
-            // search for corresponding outputs in the activity data
-            $.each(data, function (i,output) { // iterate output data in the activity to
-                                               // find any matching the meta-model name
-                if (output.name === outputName) {
-                    outputId = output.outputId;
-                }
-            });
-            if (outputId) {
-                // build edit link
-                document.location.href = fcConfig.serverUrl + "/output/edit/" + outputId +
-                    "?returnTo=" + here;
-            } else {
-                // build create link
-                document.location.href = fcConfig.serverUrl + "/output/create?activityId=${activity.activityId}" +
-                    '&outputName=' + encodeURIComponent(outputName) +
-                    "&returnTo=" + here;
-            }
-
-        });
-
-        ko.bindingHandlers.editOutput = {
-            init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                var outputName = ko.utils.unwrapObservable(valueAccessor()),
-                    activity = bindingContext.$root,
-                    outputId;
-
-                // search for corresponding outputs in the activity data
-                $.each(activity.outputs, function (i,output) { // iterate output data in the activity to
-                                                                  // find any matching the meta-model name
-                    if (output.name === outputName) {
-                        outputId = output.outputId;
-                    }
-                });
-                if (outputId) {
-                    // build edit link
-                    $(element).html('Edit data');
-                    $(element).attr('href', fcConfig.serverUrl + "/output/edit/" + outputId +
-                        "?returnTo=" + here);
-                } else {
-                    // build create link
-                    $(element).attr('href', fcConfig.serverUrl + '/output/create?activityId=' + activity.activityId +
-                        '&outputName=' + encodeURIComponent(outputName) +
-                        "&returnTo=" + here);
-                }
-            }
-        };
 
         function ViewModel (act, site, project, metaModel) {
             var self = this;
