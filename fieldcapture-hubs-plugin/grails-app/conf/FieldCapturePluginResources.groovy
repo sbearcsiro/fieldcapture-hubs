@@ -175,6 +175,7 @@ modules = {
         defaultBundle false
         dependsOn 'knockout'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
     jquery_cookie {
