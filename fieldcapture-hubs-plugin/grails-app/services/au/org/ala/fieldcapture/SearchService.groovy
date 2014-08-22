@@ -15,7 +15,20 @@ class SearchService {
         elasticBaseUrl = grailsApplication.config.ecodata.baseUrl + 'search/elastic'
     }
 
+    private def addDefaultFacetQuery(params) {
+        def defaultFacetQuery = SettingService.getHubConfig().defaultFacetQuery
+        if (defaultFacetQuery) {
+            def fq = new HashSet(defaultFacetQuery)
+            if (params.fq) {
+                fq.addAll(params.list('fq'))
+            }
+            params.fq = fq.asList()
+
+        }
+    }
+
     def fulltextSearch(params) {
+        addDefaultFacetQuery(params)
         params.offset = params.offset?:0
         params.max = params.max?:10
         params.query = params.query?:"*:*"
@@ -26,6 +39,7 @@ class SearchService {
     }
 
     def allGeoPoints(params) {
+        addDefaultFacetQuery(params)
         params.max = 9999
         params.flimit = 999
         params.fsort = "term"
@@ -38,6 +52,7 @@ class SearchService {
     }
 
     def allProjects(params, String searchTerm = null) {
+        addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
         params.fsort = "term"
@@ -56,6 +71,7 @@ class SearchService {
     }
 
     def allProjectsWithSites(params, String searchTerm = null) {
+        addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
         params.fsort = "term"
@@ -75,6 +91,7 @@ class SearchService {
 
 
     def allSites(params) {
+        addDefaultFacetQuery(params)
         //params.max = 9999
         params.flimit = 999
         params.fsort = "term"
@@ -88,20 +105,15 @@ class SearchService {
     }
 
     def HomePageFacets(originalParams) {
+
         def params = originalParams.clone()
         params.flimit = 999
         params.fsort = "term"
         //params.offset = 0
         params.query = "docType:project"
         params.facets = params.facets ? params.facets : SettingService.getHubConfig().availableFacets
-        def defaultFacetQuery = SettingService.getHubConfig().defaultFacetQuery
-        if (defaultFacetQuery) {
-            def fq = new HashSet(defaultFacetQuery)
-            if (params.fq) {
-                fq.addAll(params.list('fq'))
-            }
-            params.fq = fq.asList()
-        }
+
+        addDefaultFacetQuery(params)
 
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticHome' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"
@@ -116,6 +128,7 @@ class SearchService {
     }
 
     def getProjectsForIds(params) {
+        addDefaultFacetQuery(params)
         //params.max = 9999
         params.remove("action");
         params.remove("controller");
@@ -141,6 +154,7 @@ class SearchService {
     def dashboardReport(params) {
 
         cacheService.get("dashboard-"+params, {
+            addDefaultFacetQuery(params)
             params.query = 'docType:project'
             def url = grailsApplication.config.ecodata.baseUrl + 'search/dashboardReport' + commonService.buildUrlParamsFromMap(params)
             webService.getJson(url, 1200000)
