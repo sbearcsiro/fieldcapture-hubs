@@ -230,7 +230,7 @@ function stringToDate(date) {
             });
 
             var changeHandler = function(event) {
-                var value = valueAccessor();
+                var value = valueAccessor();G
                 if (ko.isObservable(value)) {
                     value(event.date);
                 }
@@ -794,5 +794,20 @@ ko.extenders.currency = function(target, options) {
         return sym + s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
     });
     return target;
-}
+};
+
+// custom validator to ensure that only one of two fields is populated
+function exclusive (field, rules, i, options) {
+    var otherFieldId = rules[i+2], // get the id of the other field
+        otherValue = $('#'+otherFieldId).val(),
+        thisValue = field.val(),
+        message = rules[i+3];
+    // checking thisValue is technically redundant as this validator is only called
+    // if there is a value in the field
+    if (otherValue !== '' && thisValue !== '') {
+        return message;
+    } else {
+        return true;
+    }
+};
 
