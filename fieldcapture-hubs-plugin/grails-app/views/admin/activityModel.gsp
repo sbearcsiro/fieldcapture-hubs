@@ -48,7 +48,7 @@
     <div>Type: <span data-bind="text:type"></span></div>
     <div>Category: <span data-bind="text:category"></span></div>
     <div>Enabled: <span data-bind="text:enabled"></span></div>
-    <div>GMS name: <span data-bind="text:gmsName"></span></div>
+    <div>GMS ID: <span data-bind="text:gmsId"></span></div>
 
     <div>Outputs: <ul data-bind="foreach:outputs">
         <li data-bind="text:$data"></li>
@@ -62,7 +62,7 @@
     <div class="clearfix"><span class="span2">Type:</span> <select data-bind="options:['Activity','Assessment'],value:type" class="pull-right"></select></div>
     <div class="clearfix"><span class="span2">Category:</span> <input type="text" class="input-large pull-right" data-bind="value:category"></div>
     <div class="clearfix"><span class="span2">Enabled:</span><input type="checkbox" class="pull-right" data-bind="checked:enabled"></div>
-    <div class="clearfix"><span class="span2">GMS name:</span> <input type="text" class="input-large pull-right" data-bind="value:gmsName"></div>
+    <div class="clearfix"><span class="span2">GMS ID:</span> <input type="text" class="input-large pull-right" data-bind="value:gmsId"></div>
 
     <div>Outputs: <ul data-bind="sortable:{data:outputs}" class="output-drop-target sortableList small">
         <li>
@@ -94,12 +94,19 @@
             <div style="text-align:left;">
             Label: <input type="text" data-bind="value:label"/>
             </div>
+            <div style="text-align: left;">
+            Description: <input type="text" data-bind="value:description"/>
+            </div>
             <div style="text-align:left;">
             Category: <input type="text" data-bind="value:category"/>
             </div>
             <div style="text-align:left;">
             Units: <input type="text" data-bind="value:units"/>
             </div>
+            <div style="text-align:left;">
+            GMS ID: <input type="text" data-bind="value:gmsId"/>
+            </div>
+
             <div style="text-align:left;">
             Aggregation:
             <select data-bind="value:aggregationType, style: { color: aggregationTypeValid() ? 'black':'red' }">
@@ -113,6 +120,10 @@
             <div style="text-align:left;">
                 Grouping: <input type="text" data-bind="value:groupBy"/>
             </div>
+            <div style="text-align:left;">
+                Filtering: <input type="text" data-bind="value:filterBy"/>
+            </div>
+
             <div style="text-align:left;">
                 Display type: <select data-bind="value:displayType">
                 <option value=""></option>
@@ -159,6 +170,7 @@
             this.category = ko.observable(act.category);
             this.enabled = ko.observable(!act.status || act.status == 'active');
             this.status = ko.observable(act.status);
+            this.gmsId = ko.observable(act.gmsId);
             this.enabled.subscribe(function (enabled) {
                 if (enabled) {
                     self.status('active');
@@ -202,14 +214,16 @@
         var ScoreModel = function (template, score) {
             var self = this;
             self.name = ko.observable(score.name);
-            self.label = ko.observable(score.label)
+            self.label = ko.observable(score.label);
+            self.description = ko.observable(score.description);
             self.category = ko.observable(score.category);
             self.units = ko.observable(score.units)
             self.aggregationType = ko.observable(score.aggregationType)
             self.groupBy = ko.observable(score.groupBy);
+            self.filterBy = ko.observable(score.filterBy);
             self.displayType = ko.observable(score.displayType);
             self.listName = ko.observable(score.listName);
-
+            self.gmsId = ko.observable(score.gmsId);
             self.buildCompoundName = function(list, name) {
                 if (list) {
                     return list + '.' + name;
