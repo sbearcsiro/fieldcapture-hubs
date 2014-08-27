@@ -63,6 +63,13 @@
         <li class="active" data-bind="text:name"></li>
     </ul>
 
+    <g:if test="${!user.isEditor}">
+        <div class="alert alert-info">
+            This project is funded by a federal government programme and can only be edited in the <a href="${g.createLink(id:project.projectId, base:grailsApplication.config.merit.url)}">MERIT system</a>
+        </div>
+
+    </g:if>
+
     <div class="row-fluid">
         <div class="row-fluid">
             <div class="clearfix">
