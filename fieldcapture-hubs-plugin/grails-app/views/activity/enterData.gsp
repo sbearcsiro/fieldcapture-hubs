@@ -308,6 +308,9 @@
     <a href="${createLink(action:'enterData', id:activity.activityId)}?returnTo=${returnTo}">Click here to refresh your login and reload this page.</a>
 </div>
 
+
+<g:render template="/shared/imagerViewerModal"></g:render>
+
 <r:script>
 
     var returnTo = "${returnTo}";
