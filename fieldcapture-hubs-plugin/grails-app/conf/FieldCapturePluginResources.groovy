@@ -192,6 +192,12 @@ modules = {
         dependsOn 'viewer', 'jquery'
         resource 'fancybox/jquery.fancybox.js'
         resource 'fancybox/jquery.fancybox.css?v=2.1.5'
+        resource url:'fancybox/fancybox_overlay.png', plugin: 'fieldcapture-plugin'
+        resource url:'fancybox/fancybox_sprite.png', plugin: 'fieldcapture-plugin'
+        resource url:'fancybox/fancybox_sprite@2x.png', plugin: 'fieldcapture-plugin'
+        resource url:'fancybox/blank.gif', plugin: 'fieldcapture-plugin'
+        resource url:'fancybox/fancybox_loading@2x.gif', plugin: 'fieldcapture-plugin'
+
 
     }
 
