@@ -1,4 +1,4 @@
-<%@ page import="au.org.ala.fieldcapture.SettingPageType" contentType="text/html;charset=UTF-8" %>
+<%@ page import="grails.converters.JSON; au.org.ala.fieldcapture.SettingPageType" contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
@@ -640,6 +640,14 @@
             "highlightOnHover": false,
             "features": features
         }
+
+        var layers = ${(geographicFacets as JSON).toString()};
+        $.each(layers, function(i, layer) {
+            layer.type = 'pid';
+            layer.style = 'polygon';
+            layer.excludeBounds = true;
+            mapData.features.push(layer);
+        });
 
         init_map_with_features({
                 mapContainer: "map",
