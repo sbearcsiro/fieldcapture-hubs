@@ -253,6 +253,8 @@ class WebService {
     def postMultipart(url, Map params, MultipartFile file, fileParam = null) {
 
         def result = [:]
+        def user = userService.getUser()
+
         def fileParamName = fileParam?:file.name
         HTTPBuilder builder = new HTTPBuilder(url)
         builder.request(Method.POST) { request ->
@@ -263,6 +265,12 @@ class WebService {
                 content.addPart(key, new StringBody(value))
             }
             headers.'Authorization' = grailsApplication.config.api_key
+            if (user) {
+                headers[grailsApplication.config.app.http.header.userId] = user.userId
+            }
+            else {
+                log.warn("No user associated with request: ${url}")
+            }
             request.setEntity(content)
 
             response.success = {resp, message ->
