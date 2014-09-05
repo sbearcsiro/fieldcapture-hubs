@@ -63,9 +63,10 @@ class ProjectController {
     }
 
     def create() {
-        render view: 'edit', model: [create:true,
+        [
                 institutions: metadataService.institutionList(),
-                programs: projectService.programsModel()
+                programs: projectService.programsModel(),
+                activityTypes: metadataService.activityTypesList()
         ]
     }
 

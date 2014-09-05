@@ -65,7 +65,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         runtime ":jquery:1.11.0.2"
-        //compile ':asset-pipeline:1.8.3'
+        //compile ':asset-pipeline:1.9.9'
         // required by the cached-resources plugin
         runtime ":cache-headers:1.1.6"
 

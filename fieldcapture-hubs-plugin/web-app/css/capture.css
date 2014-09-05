@@ -818,3 +818,16 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
 .fancybox-prev {
     left: -60px;
 }
+
+.fuelux .wizard {
+    background-color: inherit;
+}
+
+#newProjectWizard .actions {
+    position: static;
+    float: none;
+
+}
+#newProjectWizard .step-content {
+    margin-bottom: 0px;
+}

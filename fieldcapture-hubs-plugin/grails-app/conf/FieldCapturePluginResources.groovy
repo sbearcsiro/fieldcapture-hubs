@@ -201,4 +201,11 @@ modules = {
 
     }
 
+    fuelux {
+        dependsOn 'bootstrap'
+        resource 'fuelux/js/fuelux.min.js'
+        resource 'fuelux/css/fuelux.min.css'
+
+    }
+
 }
