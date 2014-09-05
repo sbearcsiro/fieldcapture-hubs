@@ -230,7 +230,7 @@ function stringToDate(date) {
             });
 
             var changeHandler = function(event) {
-                var value = valueAccessor();G
+                var value = valueAccessor();
                 if (ko.isObservable(value)) {
                     value(event.date);
                 }

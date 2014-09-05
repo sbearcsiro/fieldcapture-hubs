@@ -253,7 +253,7 @@
                     var json = JSON.stringify(self.removeTransients(jsData));
                     var id = "${project?.projectId ? '/' + project.projectId : ''}";
                     $.ajax({
-                        url: "${createLink(action: 'ajaxUpdate')}" + id,
+                        url: "${createLink(action: 'ajaxCreate')}" + id,
                         type: 'POST',
                         data: json,
                         contentType: 'application/json',
@@ -292,8 +292,7 @@
             viewModel.save();
         }).on('actionclicked.fu.wizard', function(e) {
             var selected = $(this).wizard('selectedItem');
-            console.log(selected);
-            if (!$('.step-pane[data-step='+selected.step+']').validationEngine('validate')) {
+           if (!$('.step-pane[data-step='+selected.step+']').validationEngine('validate')) {
                 e.preventDefault();
             }
         });
