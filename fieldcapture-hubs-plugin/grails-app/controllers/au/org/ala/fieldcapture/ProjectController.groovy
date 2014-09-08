@@ -70,6 +70,29 @@ class ProjectController {
         ]
     }
 
+    def ajaxCreate() {
+
+        if (!userService.getUser()) {
+            render status: 401, text: 'You do not have permission to create a project'
+        }
+
+        def postBody = request.JSON
+        def values = [:]
+        // filter params to remove keys in the ignore list
+        postBody.each { k, v ->
+            if (!(k in ignore)) {
+                values[k] = v
+            }
+        }
+
+        def result = projectService.create(values)
+        if (result.error) {
+            render result as JSON
+        } else {
+            render result.resp as JSON
+        }
+    }
+
     /**
      * Updates existing or creates new output.
      *

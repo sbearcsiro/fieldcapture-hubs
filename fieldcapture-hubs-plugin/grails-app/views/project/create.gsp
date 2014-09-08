@@ -164,7 +164,7 @@
             <div data-bind="foreach:transients.activityTypes" id="activityTypes">
                 <strong><span data-bind="text:name"></span></strong>
                 <ul class="unstyled" data-bind="foreach:list">
-                    <li><input type="checkbox" name="activity" data-bind="value:$root.selectedActivities"> <span data-bind="text:name"></span></li>
+                    <li><input type="checkbox" name="activity" data-bind="checked:$root.selectedActivities,value:name,attr:{id:'activity'+$index()}" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
                 </ul>
             </div>
         </div>
@@ -224,7 +224,7 @@
             self.organisation = ko.observable(data.organisation);
             self.organisationName = ko.observable(data.organisationName);
             self.funding = ko.observable(data.funding).extend({currency:{}});
-            self.selectedActivities = ko.observable();
+            self.selectedActivities = ko.observableArray();
 
             self.transients = {};
             self.transients.organisations = organisations;
@@ -280,7 +280,6 @@
         ko.applyBindings(viewModel);
 
         $('#selectAll').change(function() {
-        console.log('dd');
             if ($('#selectAll').is(':checked')) {
                 $('#activityTypes input[type=checkbox]').attr('checked', 'checked');
             }

@@ -32,15 +32,19 @@ class SettingService {
     def setSettingText(SettingPageType type, String content) {
         def key = localHubConfig.get().settingsPageKeyPrefix + type.key
 
-        cacheService.clear(key)
-        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxSetSettingText/${key}"
-        webService.doPost(url, [settingText: content, key: key])
+        set(key, content)
     }
 
     private def get(key) {
         String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${key}"
         def res = cacheService.get(key,{ webService.getJson(url) })
         return res?.settingText?:""
+    }
+
+    private def set(key, settings) {
+        cacheService.clear(key)
+        String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxSetSettingText/${key}"
+        webService.doPost(url, [settingText: settings, key: key])
     }
 
     /**
@@ -56,9 +60,18 @@ class SettingService {
         return templateEngine.createTemplate(templateText).make(substitutionModel).toString()
     }
 
+    private def projectSettingsKey(projectId) {
+        return projectId+'.settings'
+    }
+
     def getProjectSettings(projectId) {
-        def settings = get(projectId+'.settings')
+        def settings = get(projectSettingsKey(projectId))
         return settings ? JSON.parse(settings) : [:]
+    }
+
+    def updateProjectSettings(projectId, settings) {
+        def key = projectSettingsKey(projectId)
+        set(key, (settings as JSON).toString())
     }
 
 }

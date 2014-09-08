@@ -164,8 +164,9 @@ class ActivityController {
         if (!type) {
             def availableTypes = projectService.activityTypesList(projectId)
             model.activityTypes = availableTypes
-            if (availableTypes.size() == 1) {
-                type = availableTypes[1].name
+            def activityCount = availableTypes.collect {it.list}.flatten().size()
+            if (activityCount == 1) {
+                type = availableTypes[0].list[0].name
             }
         }
         if (type) {
