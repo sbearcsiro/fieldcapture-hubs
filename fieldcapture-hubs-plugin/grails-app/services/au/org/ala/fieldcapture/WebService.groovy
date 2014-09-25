@@ -250,19 +250,35 @@ class WebService {
      * @param file the Multipart file object to forward.
      * @return [status:<request status>, content:<The response content from the server, assumed to be JSON>
      */
-    def postMultipart(url, Map params, MultipartFile file, fileParam = null) {
+    def postMultipart(url, Map params, MultipartFile file, fileParam = 'files') {
+
+        postMultipart(url, params, file.inputStream, file.contentType, file.originalFilename, fileParam)
+    }
+
+    /**
+     * Forwards a HTTP multipart/form-data request to ecodata.
+     * @param url the URL to forward to.
+     * @param params the (string typed) HTTP parameters to be attached.
+     * @param contentIn the content to post.
+     * @param contentType the mime type of the content being posted (e.g. image/png)
+     * @param originalFilename the original file name of the data to be posted
+     * @param fileParamName the name of the HTTP parameter that will be used for the post.
+     * @return [status:<request status>, content:<The response content from the server, assumed to be JSON>
+     */
+    def postMultipart(url, Map params, InputStream contentIn, contentType, originalFilename, fileParamName = 'files') {
 
         def result = [:]
         def user = userService.getUser()
 
-        def fileParamName = fileParam?:file.name
         HTTPBuilder builder = new HTTPBuilder(url)
         builder.request(Method.POST) { request ->
             requestContentType : 'multipart/form-data'
             MultipartEntity content = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE)
-            content.addPart(fileParamName, new InputStreamBody(file.inputStream, file.contentType, file.originalFilename))
+            content.addPart(fileParamName, new InputStreamBody(contentIn, contentType, originalFilename?:fileParamName))
             params.each { key, value ->
-                content.addPart(key, new StringBody(value))
+                if (value) {
+                    content.addPart(key, new StringBody(value.toString()))
+                }
             }
             headers.'Authorization' = grailsApplication.config.api_key
             if (user) {
