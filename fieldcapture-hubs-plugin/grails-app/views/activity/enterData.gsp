@@ -292,9 +292,9 @@
 
     <div class="output-block" data-bind="with:transients.photoPointModel">
         <h3>Photo Points</h3>
-        <g:if test="${!printView}">
-            <g:render template="/site/photoPoints"></g:render>
-        </g:if>
+
+         <g:render template="/site/photoPoints"></g:render>
+
     </div>
     <g:if test="${!printView}">
         <div class="form-actions">
@@ -516,10 +516,12 @@
                     document.location.href = fcConfig.siteViewUrl + self.siteId();
                 }
             };
+
             self.transients.photoPointModel = ko.observable(new PhotoPointViewModel(site, activity));
             self.updatePhotoPointModel = function(site) {
                 self.transients.photoPointModel(new PhotoPointViewModel(site, activity));
             };
+
             self.modelForSaving = function () {
                 // get model as a plain javascript object
                 var jsData = ko.mapping.toJS(self, {'ignore':['transients']});

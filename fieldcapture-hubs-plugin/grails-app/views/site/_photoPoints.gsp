@@ -1,4 +1,4 @@
-
+<g:if test="${!printView}">
 <div data-bind="visible:!site">
     No site has been selected.  To add photos to this activity, select a site.
 </div>
@@ -24,13 +24,13 @@
                         <table class="table">
                             <tbody data-bind="foreach:photos">
                                 <tr data-bind="visible:status() !== 'deleted'">
-                                    <td>
+                                    <td style="width:40%;">
                                         <a data-bind="attr:{href:url, title:name}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
                                     </td>
-                                    <td data-bind="template:{name:'${readOnly?'photoViewTemplate':'photoEditTemplate'}'}">
+                                    <td style="width:45%;" data-bind="template:{name:'${readOnly?'photoViewTemplate':'photoEditTemplate'}'}">
 
                                     </td>
-                                    <td style="text-align: right;">
+                                    <td style="text-align: right; width:15%">
                                         <g:if test="${!readOnly}">
                                             <a class="btn" data-bind="click:$parent.removePhoto"><i class="icon-remove"></i> Remove</a>
                                         </g:if>
@@ -97,8 +97,15 @@
 </script>
 
 <script type="text/html" id="editablePhotoPoint">
-    <p><strong>Enter the details of the new photo point below.</strong></p>
-    <p>If you attach a photo, the latitude and longitude will be populated from the information in the photo, if available.</p>
+    <div class="floatright">
+        <a class="btn" data-bind="click:$parent.removePhotoPoint"><i class="icon-remove"></i> Remove</a>
+    </div>
+
+    <div class="clearfix">
+        <p><strong>Enter the details of the new photo point below.</strong></p>
+        <p>If you attach a photo, the latitude and longitude will be populated from the information in the photo, if available.</p>
+    </div>
+
     <div class="form-horizontal">
         <div class="control-group">
             <label class="control-label">Name: </label>
@@ -122,7 +129,11 @@
             <label class="control-label">Bearing: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.geometry.bearing" data-validation-engine="validate[required]"></div>
         </div>
+
+
+
     </div>
+
 
 </script>
 <script id="photoEditTemplate" type="text/html">
@@ -176,6 +187,7 @@
     <label class="control-label">File Size: <span data-bind="text:formattedSize"></span></label>
 </div>
 </script>
+</g:if>
 
 <r:script>
 
@@ -197,6 +209,9 @@
             });
         }
 
+        self.removePhotoPoint = function(photoPoint) {
+            self.photoPoints.remove(photoPoint);
+        }
 
         self.addPhotoPoint = function() {
             self.photoPoints.push(photoPointPhotos(site, null, activity.activityId, []));
@@ -306,6 +321,10 @@
 
                 };
                 isDirty = true;
+                if (isNewPhotopoint && data.lat && data.lng && !photoPoint.geometry.decimalLatitude() && !photoPoint.geometry.decimalLongitude()) {
+                    photoPoint.geometry.decimalLatitude(data.lat);
+                    photoPoint.geometry.decimalLongitude(data.lng);
+                }
 
                 photos.push(photoPointPhoto(data));
             }
