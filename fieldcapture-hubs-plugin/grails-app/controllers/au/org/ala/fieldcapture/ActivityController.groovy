@@ -7,7 +7,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class ActivityController {
 
-    def activityService, siteService, projectService, metadataService, userService, excelImportService, webService, grailsApplication, speciesService
+    def activityService, siteService, projectService, metadataService, userService, excelImportService, webService, grailsApplication, speciesService, documentService
 
     static ignore = ['action','controller','id']
 
@@ -269,7 +269,12 @@ class ActivityController {
         }
 
         if (!result) {
+            def photoPoints = values.remove('photoPoints')
             result = activityService.update(id, values)
+            if (photoPoints) {
+                updatePhotoPoints(id ?: result.activityId, photoPoints)
+            }
+
         }
         //log.debug "result is " + result
 
@@ -278,6 +283,42 @@ class ActivityController {
         } else {
             //log.debug "json result is " + (result as JSON)
             render result.resp as JSON
+        }
+    }
+
+    private def updatePhotoPoints(activityId, photoPoints) {
+
+        def allPhotos = photoPoints.photos?:[]
+
+        // If new photo points were defined, add them to the site.
+        if (photoPoints.photoPoints) {
+            photoPoints.photoPoints.each { photoPoint ->
+                def photos = photoPoint.remove('photos')
+                def result = siteService.addPhotoPoint(photoPoints.siteId, photoPoint)
+
+                if (!result.error) {
+                    photos.each { photo ->
+                        photo.poiId = result?.resp?.poiId
+                        allPhotos << photo
+                    }
+                }
+            }
+        }
+
+        allPhotos.each { photo ->
+
+            photo.remove('url')
+            photo.activityId = activityId
+            if (!photo.documentId) {
+                def file = new File(grailsApplication.config.upload.images.path, photo.filename)
+                // Create a new document for the photo point image, supplying the file that was uploaded to the ImageController.
+                documentService.createDocument(photo, photo.contentType, new FileInputStream(file))
+            }
+            else {
+                // Just update the document.
+                documentService.updateDocument(photo)
+            }
+
         }
     }
 

@@ -27,6 +27,7 @@ function DocumentViewModel (doc, owner) {
     this.role = ko.observable(doc.role);
     this.public = ko.observable(doc.public);
     this.url = doc.url;
+    this.thumbnailUrl = doc.thumbnailUrl;
     this.documentId = doc.documentId;
     this.hasPreview = ko.observable(false);
     this.error = ko.observable();
@@ -144,7 +145,11 @@ function DocumentViewModel (doc, owner) {
 
     this.toJSONString = function() {
         // These are not properties of the document object, just used by the view model.
-        return JSON.stringify(ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'filesize', 'fileLabel', 'file', 'complete']}));
+        return JSON.stringify(self.modelForSaving());
+    }
+
+    this.modelForSaving = function() {
+        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText']});
     }
 }
 

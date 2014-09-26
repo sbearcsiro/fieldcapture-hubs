@@ -132,14 +132,9 @@ modules = {
     }
 
     jQueryFileUpload {
-        dependsOn 'jquery_ui'
-        resource url: 'js/fileupload-9.0.0/tmpl.js', plugin: 'fieldcapture-plugin'
-        resource url: 'bootstrap/css/bootstrap-responsive.min.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen']
-        resource url: 'bootstrap/css/bootstrap-image-gallery.min.css', plugin: 'fieldcapture-plugin'
-        resource url: 'bootstrap/css/bootstrap-ie6.min.css', plugin: 'fieldcapture-plugin',
-                wrapper: { s -> "<!--[if lt IE 7]>$s<![endif]-->" }
-
+        dependsOn 'jquery_ui,bootstrap'
         resource url: 'css/jquery.fileupload-ui.css', plugin: 'fieldcapture-plugin', disposition: 'head'
+
         resource url: 'js/fileupload-9.0.0/load-image.min.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/fileupload-9.0.0/jquery.fileupload.js', plugin: 'fieldcapture-plugin'
         resource url: 'js/fileupload-9.0.0/jquery.fileupload-process.js', plugin: 'fieldcapture-plugin'
@@ -156,7 +151,10 @@ modules = {
 
     jQueryFileUploadUI {
         dependsOn 'jQueryFileUpload'
+
         resource url: 'js/fileupload-9.0.0/jquery.fileupload-ui.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/fileupload-9.0.0/tmpl.js', plugin: 'fieldcapture-plugin'
+
     }
 
     attachDocuments {

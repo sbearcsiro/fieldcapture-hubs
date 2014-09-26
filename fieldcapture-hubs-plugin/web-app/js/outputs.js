@@ -112,6 +112,89 @@ var image = function(props) {
     return imageObj;
 };
 
+ko.bindingHandlers.photoPoint = {
+    init: function(element, valueAccessor) {
+
+    }
+}
+
+
+ko.bindingHandlers.photoPointUpload = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+
+        var defaultConfig = {
+            maxWidth: 300,
+            minWidth:150,
+            minHeight:150,
+            maxHeight: 300,
+            previewSelector: '.preview'
+        };
+        var size = ko.observable();
+        var progress = ko.observable();
+        var error = ko.observable();
+        var complete = ko.observable(true);
+
+        var uploadProperties = {
+
+            size: size,
+            progress: progress,
+            error:error,
+            complete:complete
+
+        };
+        var innerContext = bindingContext.createChildContext(bindingContext);
+        ko.utils.extend(innerContext, uploadProperties);
+
+        var config = valueAccessor();
+        config = $.extend({}, config, defaultConfig);
+
+        var target = config.target; // Expected to be a ko.observableArray
+        $(element).fileupload({
+            url:config.url,
+            autoUpload:true,
+            forceIframeTransport: true
+        }).on('fileuploadadd', function(e, data) {
+            complete(false);
+            progress(1);
+        }).on('fileuploadprocessalways', function(e, data) {
+            if (data.files[0].preview) {
+                if (config.previewSelector !== undefined) {
+                    var previewElem = $(element).parent().find(config.previewSelector);
+                    previewElem.append(data.files[0].preview);
+                }
+            }
+        }).on('fileuploadprogressall', function(e, data) {
+            progress(Math.floor(data.loaded / data.total * 100));
+            size(data.total);
+        }).on('fileuploaddone', function(e, data) {
+
+//            var resultText = $('pre', data.result).text();
+//            var result = $.parseJSON(resultText);
+
+
+            var result = data.result;
+            if (!result) {
+                result = {};
+                error('No response from server');
+            }
+
+            if (result.files[0]) {
+                target.push(result.files[0]);
+                complete(true);
+            }
+            else {
+                error(result.error);
+            }
+
+        }).on('fileuploadfail', function(e, data) {
+            error(data.errorThrown);
+        });
+
+        ko.applyBindingsToDescendants(innerContext, element);
+
+        return { controlsDescendantBindings: true };
+    }
+};
 
 ko.bindingHandlers.imageUpload = {
     init: function(element, valueAccessor) {

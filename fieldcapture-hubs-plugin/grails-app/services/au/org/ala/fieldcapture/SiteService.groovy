@@ -77,6 +77,20 @@ class SiteService {
         result
     }
 
+    def addPhotoPoint(siteId, photoPoint) {
+        photoPoint.type = 'photopoint'
+        addPOI(siteId, photoPoint)
+    }
+
+    def addPOI(siteId, poi) {
+
+        if (!siteId) {
+            throw new IllegalArgumentException("The siteId parameter cannot be null")
+        }
+        def url = "${grailsApplication.config.ecodata.baseUrl}site/${siteId}/poi"
+        webService.doPost(url, poi)
+    }
+
     def get(id, Map urlParams = [:]) {
         webService.getJson(grailsApplication.config.ecodata.baseUrl + 'site/' + id +
                 commonService.buildUrlParamsFromMap(urlParams))

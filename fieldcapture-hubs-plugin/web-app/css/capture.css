@@ -829,3 +829,26 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
 #newProjectWizard .step-content {
     margin-bottom: 0px;
 }
+
+#photoPointTable .form-horizontal .control-label {
+    width:100px;
+}
+#photoPointTable .form-horizontal .controls {
+    margin-left:120px;
+}
+#photoPointTable .form-horizontal .control-group {
+    margin-bottom: 5px;
+}
+#photoPointTable table td {
+    border-top : 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 2px solid #dddddd;
+}
+#photoPointTable table tr {
+    border-bottom: 1px;
+}
+
+#photoPointTable .control-group.readonly {
+    margin-bottom:0;
+}

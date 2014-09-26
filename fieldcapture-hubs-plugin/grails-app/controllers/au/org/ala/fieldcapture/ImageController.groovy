@@ -100,7 +100,7 @@ class ImageController {
      * Uploads the image to the ALA image service.
      * @return
      */
-    def upload() {
+    def uploadNew() {
         if (request.respondsTo('getFile')) {
             def url = grailsApplication.config.ala.image.service.url + 'ws/uploadImage'
 
@@ -127,7 +127,7 @@ class ImageController {
         }
     }
 
-    def uploadOld() {
+    def upload() {
         log.debug "-------------------------------upload action"
         params.each { log.debug it }
         def result = []
@@ -150,7 +150,7 @@ class ImageController {
 
                 // thumbnail it
                 BufferedImage img = ImageIO.read(f)
-                BufferedImage tn = Scalr.resize(img, 100, Scalr.OP_ANTIALIAS)
+                BufferedImage tn = Scalr.resize(img, 300, Scalr.OP_ANTIALIAS)
                 File tnFile = new File(colDir, thumbFilename)
                 try {
                     def success = ImageIO.write(tn, ext, tnFile)
@@ -164,6 +164,7 @@ class ImageController {
                         name: filename,
                         size: file.size,
                         isoDate: exifMd.date,
+                        contentType: file.contentType,
                         date: isoDateStrToDate(exifMd.date) ?: 'Not available',
                         time: isoDateStrToTime((exifMd.date)),
                         decimalLatitude: doubleToString(exifMd.decLat),
