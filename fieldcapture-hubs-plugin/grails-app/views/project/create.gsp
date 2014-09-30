@@ -32,13 +32,13 @@
 
                     <span><label for="nrm" class="control-label"><input type="radio" name="projectType" value="nrm" id="nrm" checked="checked" data-validation-engine="validate[minCheckbox[1]]"> <strong>Works and site based projects</strong></label></span>
                     Choose this option for projects which have a schedule of actions (activities). Each record in the database requires a new activity to be added to the schedule before data can be recorded against it.
-                    Examples include: Projects to ehance, restore, protect or manage environmental assets, etc.
+                    <p>Examples include: Projects to enhance, restore, protect or manage environmental assets, etc.</p>
                     <span><label for="simple" class="control-label"><input type="radio" name="projectType" value="simple" id="simple" disabled="disabled" data-validation-engine="validate[minCheckbox[1]]"> <strong>Citizen Science or biological surveys </strong> (not yet implemented)</label></span>
                     Choose this option for survey-based projects where activity forms can be selected and used repeatedly (ie. not in association with a schedule of actions).
-                    Examples include: Single or multi-species citizen science projects, Waterwatch surveys, ecological surveys, etc.
+                    <p>Examples include: Single or multi-species citizen science projects, Waterwatch surveys, ecological surveys, etc.</p>
                 </div>
                 <p>
-                    Note: Both project types use the same suite of available data recording forms, but the way that they are used is different in each.
+                    <strong>Note:</strong> Both project types use the same suite of available data recording forms, but the way that they are used is different in each.
                 </p>
             </div>
         </div>
@@ -174,7 +174,7 @@
             </div>
         </div>
     </div>
-    <div class="actions" style="clear:both;">
+    <div class="form-actions" style="clear:both;">
         <button class="btn btn-default btn-prev"><span class="glyphicon glyphicon-arrow-left"></span>Prev</button>
         <button class="btn btn-default btn-next" data-last="Save">Next<span class="glyphicon glyphicon-arrow-right"></span></button>
     </div>
