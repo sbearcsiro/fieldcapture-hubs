@@ -859,3 +859,8 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
 #photoPointTable .control-group.readonly {
     margin-bottom:0;
 }
+
+.program-activities li {
+    text-align : left;
+    margin-left: 10px;
+}

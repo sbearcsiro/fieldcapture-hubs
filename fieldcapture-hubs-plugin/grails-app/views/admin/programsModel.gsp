@@ -34,6 +34,15 @@
                     <div><label for="isMeritProgramme">Reports via MERIT <input id="isMeritProgramme" type="checkbox" data-bind="checked:isMeritProgramme"></label></div>
                     <div><label for="reportingPeriod">Reporting period (months) <input id="reportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
                     <div><label for="isMeritProgramme">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
+                    <div><label data-toggle="collapse" data-bind="attr:{'data-target':'#activities-'+$index()}">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
+                    <div class="program-activities collapse" data-bind="attr:{id:'activities-'+$index()}">
+                        <div data-bind="foreach:{data: $root.transients.activityTypes}">
+                            <strong><span data-bind="text:name"></span></strong>
+                            <ul class="unstyled" data-bind="foreach:list">
+                                <li><input type="checkbox" name="activity" data-bind="value:name,attr:{id:'activity'+$index()},checked:$parents[1].activities" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -96,7 +105,8 @@
             this.isMeritProgramme = ko.observable(prg.isMeritProgramme);
             this.reportingPeriod = ko.observable(prg.reportingPeriod);
             this.reportingPeriodAlignedToCalendar = ko.observable(prg.reportingPeriodAlignedToCalendar);
-
+            this.activities = ko.observableArray(prg.activities?prg.activities:[]);
+            this.activities.subscribe(function(e){ console.log(e);});
             this.select = function () {
                 model.transients.selectedProgram(this);
                 model.transients.selectedSubprogram(undefined);
@@ -150,12 +160,13 @@
             }
         };
 
-        var ViewModel = function (model) {
+        var ViewModel = function (model, activityTypes) {
             var self = this;
             this.transients = {};
             this.transients.selectedProgram = ko.observable();
             this.transients.selectedSubprogram = ko.observable();
             this.transients.selectedTheme = ko.observable();
+            this.transients.activityTypes = activityTypes;
 
             this.programs = ko.observableArray($.map(model.programs, function (obj, i) {
                 return new ProgramModel(obj, self);
@@ -218,8 +229,8 @@
                 });
             };
         };
-
-        var viewModel = new ViewModel(${programsModel});
+        var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
+        var viewModel = new ViewModel(${programsModel}, activityTypes);
         ko.applyBindings(viewModel);
     });
 </r:script>
