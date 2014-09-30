@@ -591,6 +591,13 @@ ul.facetValues {
     margin-left: 7px;
 }
 
+#facetsContent i.icon-chevron-down {
+    margin-top:5px;
+}
+#facetsContent i.icon-chevron-right {
+    margin-top:3px;
+}
+
 .currentFilters {
     background-color: #faf8f1;
     padding: 1px 5px;

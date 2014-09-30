@@ -94,46 +94,49 @@
                 <g:set var="baseUrl"><fc:formatParams params="${params}" requiredParams="${reqParams}"/></g:set>
                 <g:set var="fqLink" value="${baseUrl?:"?"}"/>
             <!-- fqLink = ${fqLink} -->
-                <g:each var="fn" in="${facetsList}">
+                <g:each var="fn" status="facetNum" in="${facetsList}">
                     <g:set var="f" value="${results.facets.get(fn)}"/>
                     <g:set var="max" value="${5}"/>
+                    <g:set var="safeId" value="${'facet-'+facetNum}"/>
                     <g:if test="${fn != 'class' && f?.terms?.size() > 0}">
                         <g:set var="fName"><g:message code="label.${fn}" default="${fn?.capitalize()}"/></g:set>
-                        <h4>${fName}</h4>
-                        <ul class="facetValues">
-                            <g:each var="t" in="${f.terms}" status="i">
-                                <g:if test="${i < max}">
-                                    <li><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
-                                            code="label.${t.term}" default="${t.term}"/></a> (${t.count})
-                                    </li>
-                                </g:if>
-                            </g:each>
-                        </ul>
-                        <g:if test="${f?.terms?.size() > max}">
-                            <a href="#${fn}Modal" role="button" class="moreFacets tooltips" data-toggle="modal" title="View full list of values"><i class="icon-hand-right"></i> choose more...</a>
-                            <div id="${fn}Modal" class="modal hide fade">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                    <h3>Filter by ${fName}</h3>
-                                </div>
-                                <div class="modal-body">
-                                    <ul class="facetValues">
-                                        <g:each var="t" in="${f.terms}">
-                                            <li data-sortalpha="${t.term.toLowerCase().trim()}" data-sortcount="${t.count}"><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
-                                                    code="label.${t.term}" default="${t.term?:'[empty]'}"/></a> (<span class="fcount">${t.count}</span>)
-                                            </li>
-                                        </g:each>
-                                    </ul>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="pull-left">
-                                        <button class="btn btn-small sortAlpha"><i class="icon-filter"></i> Sort by name</button>
-                                        <button class="btn btn-small sortCount"><i class="icon-filter"></i> Sort by count</button>
+                        <h4 data-toggle="collapse" data-target="#${safeId}"><i id="chevron-${safeId}" class="icon-chevron-down"></i> ${fName}</h4>
+                        <div id="${safeId}" class="in">
+                            <ul class="facetValues">
+                                <g:each var="t" in="${f.terms}" status="i">
+                                    <g:if test="${i < max}">
+                                        <li><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
+                                                code="label.${t.term}" default="${t.term}"/></a> (${t.count})
+                                        </li>
+                                    </g:if>
+                                </g:each>
+                            </ul>
+                            <g:if test="${f?.terms?.size() > max}">
+                                <a href="#${fn}Modal" role="button" class="moreFacets tooltips" data-toggle="modal" title="View full list of values"><i class="icon-hand-right"></i> choose more...</a>
+                                <div id="${fn}Modal" class="modal hide fade">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                        <h3>Filter by ${fName}</h3>
                                     </div>
-                                    <a href="#" class="btn" data-dismiss="modal">Close</a>
+                                    <div class="modal-body">
+                                        <ul class="facetValues">
+                                            <g:each var="t" in="${f.terms}">
+                                                <li data-sortalpha="${t.term.toLowerCase().trim()}" data-sortcount="${t.count}"><a href="${fqLink}&fq=${fn.encodeAsURL()}:${t.term.encodeAsURL()}"><g:message
+                                                        code="label.${t.term}" default="${t.term?:'[empty]'}"/></a> (<span class="fcount">${t.count}</span>)
+                                                </li>
+                                            </g:each>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="pull-left">
+                                            <button class="btn btn-small sortAlpha"><i class="icon-filter"></i> Sort by name</button>
+                                            <button class="btn btn-small sortCount"><i class="icon-filter"></i> Sort by count</button>
+                                        </div>
+                                        <a href="#" class="btn" data-dismiss="modal">Close</a>
+                                    </div>
                                 </div>
-                            </div>
-                        </g:if>
+                            </g:if>
+                        </div>
                     </g:if>
                 </g:each>
             </div>
@@ -475,6 +478,16 @@
             }
             $(".facetBtn[data-facet='" + facet + "']").removeClass("btn-info");
             $(this).addClass("btn-info");
+        });
+
+        // Change chevron when a facet is collapsed.
+        $('#facetsContent').on('hide', function(e) {
+            var chevron = $('#chevron-'+e.target.id);
+            chevron.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+        });
+        $('#facetsContent').on('show', function(e) {
+            var chevron = $('#chevron-'+e.target.id);
+            chevron.removeClass('icon-chevron-right').addClass('icon-chevron-down');
         });
 
         // next/prev buttons in project list table
