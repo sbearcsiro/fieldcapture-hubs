@@ -17,7 +17,7 @@ class HubConfigurationFilter implements Filter {
                     logoUrl : 'http://www.greateasternranges.org.au/wp-content/themes/ger/images/ger-logo-205x150px.png',
                     title: 'Great Eastern Ranges',
                     settingsPageKeyPrefix : 'ger.',
-                    availableFacets: "organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,stateFacet,nrmFacet,lgaFacet,mvgFacet,ibraFacet,imcra4_pbFacet,otherFacet,gerSubRegionFacet",
+                    availableFacets: "organisationFacet,mainThemeFacet,gerSubRegionFacet,ibraFacet",
                     defaultFacetQuery: ['otherFacet:GER National Corridor']
             ]
             SettingService.setHubConfig(hubConfig)
