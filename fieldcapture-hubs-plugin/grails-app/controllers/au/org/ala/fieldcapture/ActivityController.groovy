@@ -86,15 +86,9 @@ class ActivityController {
                 redirect(controller:'project', action:'index', id: activity.projectId)
                 return
             }
-            def model = activityModel(activity)
+            def model = activityModel(activity, activity.projectId)
             model.activityTypes = metadataService.activityTypesList()
-
-            // Required so we can supply a warning to the user if they attempt to change the site.
-            // TODO photopoints need to be formally a part of the model instead of an output type to prevent
-            // this kind of check.
-            def photopointOutput = activity.outputs.find {it.name == 'Photo Points'}
-            def photos = photopointOutput?.data?.photoPoints?.find { it.photo }
-            model.hasPhotopointData = photos != null
+            model.hasPhotopointData = activity.documents?.find {it.poiId}
             model
         } else {
             forward(action: 'list', model: [error: 'no such id'])
