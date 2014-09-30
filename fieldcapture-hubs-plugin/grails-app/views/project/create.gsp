@@ -27,14 +27,19 @@
         <div class="step-pane active validationEngineContainer" data-step="1">
 
             <div class="row-fluid">
-                <h3>What activities will this project be sponsoring?</h3>
+                <h3>Select the applicable type of project?</h3>
                 <div class="control-group">
 
-                    <span><label for="nrm" class="control-label"><input type="radio" name="projectType" value="nrm" id="nrm" checked="checked" data-validation-engine="validate[minCheckbox[1]]"> <strong>Works and site based activities</strong></label></span>
-                    Examples include:  Peter to supply...
+                    <span><label for="nrm" class="control-label"><input type="radio" name="projectType" value="nrm" id="nrm" checked="checked" data-validation-engine="validate[minCheckbox[1]]"> <strong>Works and site based projects</strong></label></span>
+                    Choose this option for projects which have a schedule of actions (activities). Each record in the database requires a new activity to be added to the schedule before data can be recorded against it.
+                    Examples include: Projects to ehance, restore, protect or manage environmental assets, etc.
                     <span><label for="simple" class="control-label"><input type="radio" name="projectType" value="simple" id="simple" disabled="disabled" data-validation-engine="validate[minCheckbox[1]]"> <strong>Citizen Science or biological surveys </strong> (not yet implemented)</label></span>
-                    Examples include: Peter to supply...
+                    Choose this option for survey-based projects where activity forms can be selected and used repeatedly (ie. not in association with a schedule of actions).
+                    Examples include: Single or multi-species citizen science projects, Waterwatch surveys, ecological surveys, etc.
                 </div>
+                <p>
+                    Note: Both project types use the same suite of available data recording forms, but the way that they are used is different in each.
+                </p>
             </div>
         </div>
 
