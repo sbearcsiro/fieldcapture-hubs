@@ -163,14 +163,18 @@
         </div>
         <div class="step-pane validationEngineContainer" data-step="3">
             <h3>Project Activities</h3>
-            Select the types of activities this project requires.
+            This section allows you to restrict the types of activities that can be created as a part of this project.
+            <label for="program-activities"><input id="program-activities" type="radio" name="activitySource" value="program" data-bind="checked:transients.activitySource"> Use the activity types associated with the programme (funding source)</label>
+            <label for="project-activities"><input id="project-activities" type="radio" name="activitySource" value="project" data-bind="checked:transients.activitySource"> Make a custom selection of activity types for this project</label>
+            <div data-bind="visible:transients.activitySource() == 'project'">
 
-            <div><input type="checkbox" id="selectAll"> Select all</div>
-            <div data-bind="foreach:transients.activityTypes" id="activityTypes">
-                <strong><span data-bind="text:name"></span></strong>
-                <ul class="unstyled" data-bind="foreach:list">
-                    <li><input type="checkbox" name="activity" data-bind="checked:$root.selectedActivities,value:name,attr:{id:'activity'+$index()}" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
-                </ul>
+                <div><input type="checkbox" id="selectAll"> Select all</div>
+                <div data-bind="foreach:transients.activityTypes" id="activityTypes">
+                    <strong><span data-bind="text:name"></span></strong>
+                    <ul class="unstyled" data-bind="foreach:list">
+                        <li><input type="checkbox" name="activity" data-bind="checked:$root.selectedActivities,value:name,attr:{id:'activity'+$index()}" data-validation-engine="validate[minCheckbox[1]]"> <span data-bind="text:name"></span></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -233,6 +237,7 @@
 
             self.transients = {};
             self.transients.organisations = organisations;
+            self.transients.activitySource = ko.observable('program');
             self.transients.activityTypes = activityTypes;
             self.transients.programs = [];
             self.transients.subprograms = {};
@@ -254,6 +259,10 @@
             };
             self.save = function () {
                 if ($('#validation-container').validationEngine('validate')) {
+                    if (self.transients.activitySource() === 'program') {
+                        self.selectedActivities([]);
+                    }
+
                     var jsData = ko.toJS(self);
                     var json = JSON.stringify(self.removeTransients(jsData));
                     var id = "${project?.projectId ? '/' + project.projectId : ''}";
