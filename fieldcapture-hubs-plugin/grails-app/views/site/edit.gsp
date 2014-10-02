@@ -1,4 +1,4 @@
-<%@ page import="org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
+<%@ page import="net.sf.json.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -183,7 +183,7 @@
                             <div class="span12" data-bind="foreach: poi">
                                 <div>
                                     <div data-bind="template: { name: 'poi'}" ></div>
-                                    <button type="button" class="btn btn-danger" style="margin-bottom:20px;" data-bind="click: $parent.removePOI">Remove</button>
+                                    <button type="button" class="btn btn-danger" style="margin-bottom:20px;" data-bind="click: $parent.removePOI, visible:!hasDocuments">Remove</button>
                                 </div>
                                 <hr/>
                             </div>
@@ -269,6 +269,9 @@
 <script type="text/html" id="poi">
 <div class="drawLocationDiv row-fluid">
     <div class="span12">
+        <div class="row-fluid alert" style="box-sizing:border-box;" data-bind="visible:hasDocuments">
+            This point of interest has documents attached and cannot be removed.
+        </div>
         <div class="row-fluid controls-row">
             <fc:textField data-bind="value:name" outerClass="span6" label="Name" data-validation-engine="validate[required]"/>
         </div>
@@ -435,6 +438,7 @@
         area : "${site?.area}",
         description : "${site?.description?.encodeAsJavaScript()}",
         notes : "${site?.notes?.encodeAsJavaScript()}",
+        documents : JSON.parse('${documents.encodeAsJavaScript()}'),
         <g:if test="${project}">
         projects : ['${project.projectId}'],
         </g:if>
@@ -760,11 +764,12 @@
             }
         };
 
-        var POI = function (l) {
+        var POI = function (l, hasDocuments) {
             var self = this;
+            self.poiId = ko.observable(exists(l, 'poiId'));
             self.name = ko.observable(exists(l,'name'));
             self.type = ko.observable(exists(l,'type'));
-
+            self.hasDocuments = hasDocuments;
             var storedGeom;
             if(l !== undefined){
                 storedGeom = l.geometry;
@@ -797,6 +802,7 @@
             }
             self.toJSON = function(){
                 var js = ko.toJS(self);
+                delete js.hasDocuments;
                 if(js.geometry.decimalLatitude !== undefined
                     && js.geometry.decimalLatitude !== ''
                     && js.geometry.decimalLongitude !== undefined
@@ -832,10 +838,13 @@
                 //get the center of the map
                 var lngLat = getMapCentre();
                 var randomBit = (self.poi().length + 1) /1000;
-                self.poi.push(new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}));
+                self.poi.push(new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}, false));
                 self.renderPOIs();
             }
             self.removePOI = function(){
+                if (this.hasDocuments) {
+                    return;
+                }
                 self.poi.remove(this);
                 self.renderPOIs();
             }
@@ -896,10 +905,20 @@
                 }
                 return self.extent().source();
             };
+            self.hasDocuments = function(poi) {
+                var hasDoc = false;
+                $.each(siteData.documents, function(i, doc) {
+                    if (doc.poiId === poi.poiId) {
+                        hasDoc = true;
+                        return false;
+                    }
+                });
+                return hasDoc;
+            }
             self.loadPOI = function () {
                 if(SERVER_CONF.siteData != null && SERVER_CONF.siteData.poi != NaN && SERVER_CONF.siteData.poi !== undefined){
                     $.each(SERVER_CONF.siteData.poi, function (i, poi) {
-                        self.poi.push(new POI(poi));
+                        self.poi.push(new POI(poi, self.hasDocuments(poi)));
                     });
                 }
             };
