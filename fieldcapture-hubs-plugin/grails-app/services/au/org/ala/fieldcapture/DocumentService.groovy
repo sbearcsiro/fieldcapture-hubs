@@ -27,4 +27,9 @@ class DocumentService {
         def params = [document:doc as JSON]
         return webService.postMultipart(url, params, inputStream, contentType, doc.filename)
     }
+
+    def getDocumentsForSite(id) {
+        def url = "${grailsApplication.config.ecodata.baseUrl}site/${id}/documents"
+        return webService.doPost(url, [:])
+    }
 }
