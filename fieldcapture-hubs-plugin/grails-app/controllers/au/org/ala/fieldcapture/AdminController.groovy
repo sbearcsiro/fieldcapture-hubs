@@ -414,4 +414,21 @@ class AdminController {
         render result as JSON
     }
 
+    def assignPOIIds() {
+        def errors = []
+        def count = 0
+        def sites = siteService.list()
+        for (site in sites) {
+            try {
+                siteService.update(site.siteId, [poi:site.poi])
+                count++
+            }
+            catch (Exception e) {
+                errors << e.message
+            }
+        }
+        def result = [count:count, errors:errors]
+        render result as JSON
+    }
+
 }
