@@ -306,7 +306,10 @@ class ActivityController {
             if (!photo.documentId) {
                 def file = new File(grailsApplication.config.upload.images.path, photo.filename)
                 // Create a new document for the photo point image, supplying the file that was uploaded to the ImageController.
-                documentService.createDocument(photo, photo.contentType, new FileInputStream(file))
+                def result = documentService.createDocument(photo, photo.contentType, new FileInputStream(file))
+                if (!result.error) {
+                    file.delete()
+                }
             }
             else {
                 // Just update the document.
