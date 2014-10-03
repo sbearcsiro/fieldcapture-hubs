@@ -195,8 +195,12 @@
                         dataType:'json'
                     }).done(function(data) {
                         if(data !== undefined && data !== null && data.bbox !== undefined && !loc.excludeBounds){
-                            var coords = data.bbox.replace(/POLYGON/g,"").replace(/[\\(|\\)]/g, "");
+                            var coords = data.bbox.replace(/POLYGON|LINESTRING/g,"").replace(/[\\(|\\)]/g, "");
                             var pointArray = coords.split(",");
+                            if (pointArray.length == 2) {
+                                // The bounding box of a point is a linestring with two points
+                                pointArray = [pointArray[0], pointArray[1], pointArray[0], pointArray[1]];
+                            }
                             self.featureBounds.extend(new google.maps.LatLng(pointArray[1].split(" ")[1],pointArray[1].split(" ")[0]));
                             self.featureBounds.extend(new google.maps.LatLng(pointArray[3].split(" ")[1],pointArray[3].split(" ")[0]));
                             if (!loc.areaKmSq) {
