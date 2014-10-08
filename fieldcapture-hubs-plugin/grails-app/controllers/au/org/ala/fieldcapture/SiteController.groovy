@@ -4,7 +4,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class SiteController {
 
-    def siteService, projectService, activityService, metadataService, userService, searchService, importService, webService
+    def siteService, projectService, activityService, metadataService, userService, searchService, importService, webService, documentService
 
     static defaultAction = "index"
 
