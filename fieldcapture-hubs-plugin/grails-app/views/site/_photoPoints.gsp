@@ -199,7 +199,7 @@
         self.site = site;
         self.photoPoints = ko.observableArray();
 
-        if (site !== undefined && site.poi !== undefined) {
+        if (site && site.poi) {
 
             $.each(site.poi, function(index, obj) {
                 var photos = ko.utils.arrayFilter(activity.documents, function(doc) {
