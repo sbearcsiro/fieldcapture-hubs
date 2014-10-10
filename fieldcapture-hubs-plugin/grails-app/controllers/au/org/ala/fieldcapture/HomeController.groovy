@@ -26,13 +26,29 @@ class HomeController {
 
         def allFacets = []
         allFacets += SettingService.getHubConfig().defaultFacetQuery?:[]
-        allFacets += params.getList('fq').grep{it.contains('Facet') && it.contains(':')}
-        def selectedFacets = allFacets.collectEntries{
+        def userFacets = params.getList('fq').grep{it.contains('Facet') && it.contains(':')}
+
+        // Workaround for each partnership region in the GER being a separate layer and each layer name is
+        // prefixed with GER to make it discoverable in the spatial portal.
+        // TODO implement an optional display name lookup for facet values.
+        def modifiedFacets = userFacets.collect{
             def nameVal = it.split(':');
+            def val = nameVal[1]
+            if (nameVal[0] == 'gerSubRegionFacet') {
+                val = 'GER '+ val
+            }
+            return nameVal[0]+':'+val
+        }
+
+        params.put('fq', modifiedFacets)
+
+        allFacets += userFacets
+        def selectedFacets = allFacets.collectEntries{
+            def nameVal = it.split(':')
 
             def name = nameVal[0].substring(0, nameVal[0].indexOf('Facet'))
-            return [(name):nameVal[1]]
 
+            return [(name):nameVal[1]]
         }
 
         def facetConfig = metadataService.getGeographicFacetConfig()
@@ -48,6 +64,11 @@ class HomeController {
         }
 
         def resp = searchService.HomePageFacets(params)
+        resp?.facets?.gerSubRegionFacet?.terms?.each {
+            if (it.term.startsWith('GER')) {
+                it.term = it.term.substring(4)
+            }
+        }
         [   facetsList: params.facets.tokenize(","),
             geographicFacets:geographicFacetConfig,
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
