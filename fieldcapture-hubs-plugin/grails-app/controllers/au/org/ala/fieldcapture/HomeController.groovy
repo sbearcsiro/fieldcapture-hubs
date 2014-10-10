@@ -56,10 +56,11 @@ class HomeController {
         def geographicFacetConfig = []
         selectedFacets.each {name, value ->
             def config = facetConfig[name]
-            if (config) {
-                if (config[value]) {
-                    geographicFacetConfig << config[value]
-                }
+            if (name == 'gerSubRegion') {
+                value = 'GER '+value
+            }
+            if (config && config[value]) {
+                geographicFacetConfig << config[value]
             }
         }
 
