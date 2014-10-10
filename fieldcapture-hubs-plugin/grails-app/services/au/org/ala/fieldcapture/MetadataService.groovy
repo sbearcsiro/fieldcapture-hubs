@@ -232,7 +232,7 @@ class MetadataService {
             facetConfig.grouped.each { k, v ->
                 v.each { name, fid ->
                     def objects = webService.getJson(grailsApplication.config.spatial.baseUrl + '/ws/objects/'+fid)
-                    results[k] << [(objects[0].name):objects[0]]
+                    results[k] << [(objects[0].fieldname):objects[0]] // Using the fieldname instead of the name for grouped facets is a temp workaround for the GER.
                 }
 
             }
