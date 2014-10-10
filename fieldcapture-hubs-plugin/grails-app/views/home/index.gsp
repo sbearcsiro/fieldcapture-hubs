@@ -100,8 +100,8 @@
                     <g:set var="safeId" value="${'facet-'+facetNum}"/>
                     <g:if test="${fn != 'class' && f?.terms?.size() > 0}">
                         <g:set var="fName"><g:message code="label.${fn}" default="${fn?.capitalize()}"/></g:set>
-                        <h4 data-toggle="collapse" data-target="#${safeId}"><i id="chevron-${safeId}" class="icon-chevron-down"></i> ${fName}</h4>
-                        <div id="${safeId}" class="in">
+                        <h4 data-toggle="collapse" data-target="#${safeId}"><i id="chevron-${safeId}" class="${facetNum?'icon-chevron-right':'icon-chevron-down'}"></i> ${fName}</h4>
+                        <div id="${safeId}" class="collapse ${facetNum?'':'in'}">
                             <ul class="facetValues">
                                 <g:each var="t" in="${f.terms}" status="i">
                                     <g:if test="${i < max}">
