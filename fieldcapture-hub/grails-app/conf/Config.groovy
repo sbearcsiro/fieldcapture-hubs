@@ -277,7 +277,7 @@ log4j = {
             production {
                 rollingFile name: "fieldcaptureLog",
                         maxFileSize: 104857600,
-                        file: logging.dir+"fieldcapture-hub.log",
+                        file: logging.dir+"/fieldcapture-hub.log",
                         threshold: org.apache.log4j.Level.INFO,
                         layout: pattern(conversionPattern: "%d %-5p [%c{1}]  %m%n")
                 rollingFile name: "stacktrace",
