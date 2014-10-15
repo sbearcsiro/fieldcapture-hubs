@@ -1,66 +1,66 @@
 <div class="row-fluid" id="${containerId}">
     <div data-bind="foreach:documents">
-        <g:if test="${editable}">
-            <div class="clearfix space-after media" data-bind="template:ko.utils.unwrapObservable(type) === 'image' ? 'imageDocEditTmpl' : 'objDocEditTmpl'"></div>
-        </g:if>
-        <g:else>
-            <div class="clearfix space-after media" data-bind="template:ko.utils.unwrapObservable(type) === 'image' ? 'imageDocTmpl' : 'objDocTmpl'"></div>
-        </g:else>
+            <g:if test="${editable}">
+                <div class="clearfix space-after media" data-bind="template:ko.utils.unwrapObservable(type) === 'image' ? 'imageDocEditTmpl' : 'objDocEditTmpl'"></div>
+            </g:if>
+            <g:else>
+                <div class="clearfix space-after media" data-bind="template:ko.utils.unwrapObservable(type) === 'image' ? 'imageDocTmpl' : 'objDocTmpl'"></div>
+            </g:else>
     </div>
 </div>
 
 <script id="imageDocTmpl" type="text/html">
-    <a class="pull-left" style="width:32px;height:32px;" data-bind="attr:{href:url}" target="_blank">
-        <img class="media-object img-rounded span1" data-bind="attr:{src:url}, alt:name" style="width:32px;height:32px;" width="32" height="32" alt="image preview icon">
-    </a>
-    <div data-bind="template:'imgMediaBody'"></div>
+<a class="pull-left" style="width:32px;height:32px;" data-bind="attr:{href:url}" target="_blank">
+    <img class="media-object img-rounded span1" data-bind="attr:{src:thumbnailUrl}, alt:name" style="width:32px;height:32px;" width="32" height="32" alt="image preview icon">
+</a>
+<div data-bind="template:'imgMediaBody'"></div>
 </script>
 
 <script id="objDocTmpl" type="text/html">
-    <a class="pull-left" data-bind="attr:{href:url}">
-        <img class="media-object" data-bind="attr:{src:filetypeImg(), alt:name}" alt="document icon">
-    </a>
-    <div data-bind="template:'docMediaBody'"></div>
+<a class="pull-left" data-bind="attr:{href:url}">
+    <img class="media-object" data-bind="attr:{src:filetypeImg(), alt:name}" alt="document icon">
+</a>
+<div data-bind="template:'docMediaBody'"></div>
 </script>
 
 <script id="imageDocEditTmpl" type="text/html">
-    <div class="btn-group pull-left" style="margin-top:4px;">
-        <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.deleteDocument"><i class="icon-remove"></i></button>
-        <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.editDocumentMetadata"><i class="icon-edit"></i></button>
-    </div>
-    <a class="pull-left" style="width:32px;height:32px;" data-bind="attr:{href:url}" target="_blank">
-        <img class="media-object img-rounded span1" data-bind="attr:{src:url, alt:name}" style="width:32px;height:32px;"  alt="image preview icon">
-    </a>
-    <div data-bind="template:'imgMediaBody'"></div>
+<div class="btn-group pull-left" style="margin-top:4px;">
+    <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.deleteDocument"><i class="icon-remove"></i></button>
+    <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.editDocumentMetadata"><i class="icon-edit"></i></button>
+</div>
+<a class="pull-left" style="width:32px;height:32px;" data-bind="attr:{href:url}" target="_blank">
+    <img class="media-object img-rounded span1" data-bind="attr:{src:thumbnailUrl, alt:name}" style="width:32px;height:32px;"  alt="image preview icon">
+</a>
+<div data-bind="template:'imgMediaBody'"></div>
 </script>
 
 <script id="objDocEditTmpl" type="text/html">
-    <div class="btn-group pull-left" style="margin-top:4px;">
-        <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.deleteDocument"><i class="icon-remove"></i></button>
-        <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.editDocumentMetadata"><i class="icon-edit"></i></button>
-    </div>
-    <a class="pull-left" data-bind="attr:{href:url}">
-        <img class="media-object" data-bind="attr:{src:filetypeImg(), alt:name}" alt="document icon">
-    </a>
-    <div data-bind="template:'docMediaBody'"></div>
+<div class="btn-group pull-left" style="margin-top:4px;">
+    <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.deleteDocument"><i class="icon-remove"></i></button>
+    <button class="btn btn-mini" type="button" data-bind="enable:!readOnly,click:$root.editDocumentMetadata"><i class="icon-edit"></i></button>
+</div>
+<a class="pull-left" data-bind="attr:{href:url}">
+    <img class="media-object" data-bind="attr:{src:filetypeImg(), alt:name}" alt="document icon">
+</a>
+<div data-bind="template:'docMediaBody'"></div>
 </script>
 
 <script id="docMediaBody" type="text/html">
-    <div class="media-body">
-        <a data-bind="attr:{href:url}">
-            <h5 class="media-heading" data-bind="text:name"></h5>
-        </a>
-        <span data-bind="text:attribution"></span>
-    </div>
+<div class="media-body">
+    <a data-bind="attr:{href:url}">
+        <h5 class="media-heading" data-bind="text:name"></h5>
+    </a>
+    <span data-bind="text:attribution"></span>
+</div>
 </script>
 
 <script id="imgMediaBody" type="text/html">
-    <div class="media-body">
-        <a data-bind="attr:{href:url}" target="_blank">
-            <h5 class="media-heading" data-bind="text:name"></h5>
-        </a>
-        <span data-bind="text:attribution"></span>
-    </div>
+<div class="media-body">
+    <a data-bind="attr:{href:url}" target="_blank">
+        <h5 class="media-heading" data-bind="text:name"></h5>
+    </a>
+    <span data-bind="text:attribution"></span>
+</div>
 </script>
 
 <r:script>
@@ -77,6 +77,7 @@
                 this.filename = doc.filename;
                 this.type = doc.type;
                 this.url = doc.url;
+                this.thumbnailUrl = doc.thumbnailUrl ? doc.thumbnailUrl : doc.url;
                 this.filetypeImg = function () {
                     return imageLocation + "/" + iconnameFromFilename(self.filename);
                 };
