@@ -14,9 +14,9 @@
 
         var initViewer = function(element) {
             var knockoutModel = ko.dataFor(element);
-            if (knockoutModel && knockoutModel.id) {
-                showViewer(knockoutModel.id);
-            }
+            //if (knockoutModel && knockoutModel.id) {
+            //    showViewer(knockoutModel.id);
+            //}
 
         }
 
@@ -24,7 +24,7 @@
 
             console.log(this);
             var knockoutModel = ko.dataFor(this.element.get(0));
-            if (knockoutModel && knockoutModel.id) {
+            if (false/*knockoutModel && knockoutModel.id*/) {
                 this.height = $(window).height() * 0.8;
                 this.width = $(window).width() * 0.8;
                 this.type = 'html';
@@ -42,6 +42,6 @@
 
         }
 
-        $('.imageList a').attr('rel', 'gallery').fancybox({type:'html', nextEffect:'fade', preload:0, 'prevEffect':'fade', beforeLoad:beforeHandler, afterShow:function(){ initViewer($.fancybox.current.element.get(0));}});
+        $('.imageList a[rel=gallery]').fancybox({type:'html', nextEffect:'fade', preload:0, 'prevEffect':'fade', beforeLoad:beforeHandler/*, afterShow:function(){ initViewer($.fancybox.current.element.get(0));}*/});
     });
 </r:script>

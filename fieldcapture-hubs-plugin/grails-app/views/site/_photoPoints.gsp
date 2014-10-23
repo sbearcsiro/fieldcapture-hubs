@@ -8,7 +8,7 @@
        <p>There are no photo points defined for the selected site.  To create a photo point, use the "New Photo Point" button below.</p>
     </div>
 
-    <table id="photoPointTable" class="table table-bordered photoPoints">
+    <table id="photoPointTable" class="table table-bordered photoPoints imageList">
         <thead>
             <tr>
                 <th style="width:20%">Photo point location:</th>
@@ -85,6 +85,7 @@
 
     </table>
 </div>
+    <g:render template="/shared/imagerViewerModal"></g:render>
 
 <script type="text/html" id="readOnlyPhotoPoint">
 
