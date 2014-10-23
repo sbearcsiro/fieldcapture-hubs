@@ -25,7 +25,7 @@
                             <tbody data-bind="foreach:photos">
                                 <tr data-bind="visible:status() !== 'deleted'">
                                     <td style="width:40%;">
-                                        <a data-bind="attr:{href:url, title:name}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
+                                        <a data-bind="attr:{href:url, alt:name, title:'[click to expand] '+name}" target="_photo" rel="gallery"><img data-bind="attr:{src:thumbnailUrl}"></a>
                                     </td>
                                     <td style="width:45%;" data-bind="template:{name:'${readOnly?'photoViewTemplate':'photoEditTemplate'}'}">
 
@@ -107,7 +107,7 @@
     </div>
 
     <div class="form-horizontal">
-        <div class="control-group">
+        <div class="control-group required">
             <label class="control-label">Name: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.name" data-validation-engine="validate[required]"></div>
         </div>
@@ -115,17 +115,17 @@
             <label class="control-label">Description: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.description"></div>
         </div>
-        <div class="control-group">
+        <div class="control-group required">
             <label class="control-label">Latitude: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.geometry.decimalLatitude" data-validation-engine="validate[required,custom[number],min[-90],max[0]]"></div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group required">
             <label class="control-label">Longitude: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.geometry.decimalLongitude" data-validation-engine="validate[required,custom[number],min[-180],max[180]]"></div>
         </div>
 
-        <div class="control-group">
+        <div class="control-group required">
             <label class="control-label">Bearing: </label>
             <div class="controls"><input type="text" data-bind="value:photoPoint.geometry.bearing" data-validation-engine="validate[required]"></div>
         </div>
@@ -138,16 +138,16 @@
 </script>
 <script id="photoEditTemplate" type="text/html">
 <div class="form-horizontal">
-    <div class="control-group">
+    <div class="control-group required">
         <label class="control-label">Title: </label>
         <div class="controls"><input type="text" data-bind="value:name" data-validation-engine="validate[required]"></div>
     </div>
-    <div class="control-group">
+    <div class="control-group required">
         <label class="control-label">Date Taken: </label>
-        <div class="controls"><div class="input-append"><fc:datePicker size="input-small" targetField="dateTaken.date" name="dateTaken"/></div></div>
+        <div class="controls"><div class="input-append"><fc:datePicker size="input-small" targetField="dateTaken.date" name="dateTaken" data-validation-engine="validate[required]"/></div></div>
     </div>
     <div class="control-group">
-        <label class="control-label">Attribution: </label>
+        <label class="control-label">Attribution <i class="icon-question-sign" data-bind="popover:{content:'The name of the photographer', placement:'top'}">&nbsp;</i>: </label>
         <div class="controls"><input type="text" data-bind="value:attribution"></div>
     </div>
     <div class="control-group">
@@ -174,7 +174,7 @@
     <label class="control-label">Date Taken: <span data-bind="text:dateTaken"></span></label>
 </div>
 <div class="control-group">
-    <label class="control-label">Attribution: <span data-bind="text:attribution"></span></label>
+    <label class="control-label">Attribution : <span data-bind="text:attribution"></span></label>
 </div>
 <div class="control-group">
     <label class="control-label">Notes: <span data-bind="text:notes"></span></label>
@@ -362,6 +362,7 @@
         if (!data) {
             data = {};
         }
+        data.role = 'photoPoint';
         data.dateTaken = ko.observable(data.dateTaken).extend({simpleDate:false});
         data.formattedSize = formatBytes(data.filesize);
         data.status = ko.observable(data.status);

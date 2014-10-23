@@ -19,6 +19,7 @@ class AdminController {
     def searchService
     def settingService
     def siteService
+    def outputService
 
     def index() {}
 
@@ -429,6 +430,13 @@ class AdminController {
         }
         def result = [count:count, errors:errors]
         render result as JSON
+    }
+
+    def migratePhotoPoints() {
+        def output = outputService.get('d6b107cf-22c8-4cff-8043-89e9c6efa1a5')
+        adminService.migratePhotoPoints([output])
+
+        render text:'ok'
     }
 
 }
