@@ -30,6 +30,9 @@ class AdminService {
 
     def migratePhotoPoints(photoPoints) {
 
+        def report = new File('/data/fieldcapture-hub/photoPointMigration.csv')
+        def writer = new PrintStream(new FileOutputStream(report))
+
         if (!photoPoints) {
             def outputs = outputService.list();
             def url = "${grailsApplication.config.ecodata.baseUrl}document"
@@ -38,81 +41,103 @@ class AdminService {
         }
         photoPoints.each { photoPointOutput ->
 
-            def activity = activityService.get(photoPointOutput.activityId)
-            if (!activity || activity.error) {
-                log.error("No activity for photopoint: ${photoPointOutput.outputId}, activityId:${photoPointOutput.activityId}")
-
-            }
-            else {
-                def site = siteService.get(activity.siteId)
-                if (!site || site.error) {
+            try {
+                def activity = activityService.get(photoPointOutput.activityId)
+                if (!activity || activity.error) {
                     log.error("No activity for photopoint: ${photoPointOutput.outputId}, activityId:${photoPointOutput.activityId}")
+                    writer.println("No activity for photopoint: ${photoPointOutput.outputId}, activityId:${photoPointOutput.activityId}")
+
                 } else {
-                    photoPointOutput.data.photoPoints.each { photoPoint ->
+                    def site = siteService.get(activity.siteId)
+                    if (!site || site.error) {
+                        log.error("No activity for photopoint: ${photoPointOutput.outputId}, activityId:${photoPointOutput.activityId}")
+                        writer.println("No activity for photopoint: ${photoPointOutput.outputId}, activityId:${photoPointOutput.activityId}")
+                    } else {
+                        photoPointOutput.data.photoPoints.each { photoPoint ->
 
-                        def poi = site.poi?.findAll { it.name == photoPoint.name }
-                        if (!poi) {
-                            log.error("No POI found with name: ${photoPointOutput.name} in site: ${site.siteId}")
-                        } else if (poi.size() > 1) {
-                            log.error("Multiple POIs found with name ${photoPointOutput.name} in site: ${site.siteId}")
-                        } else if (!poi[0].poiId) {
-                            log.error("No poiId found for photo point ${poi[0].name} in site: ${site.siteId}")
-                        } else {
+                            def poi = site.poi?.findAll { it.name == photoPoint.name }
+                            if (!poi) {
+                                log.error("No POI found with name: ${photoPoint.name} in site: ${site.siteId}")
+                                writer.println("No POI found with name: ${photoPoint.name} in site: ${site.siteId} for output: ${photoPointOutput.outputId}")
+                            } else if (poi.size() > 1) {
+                                log.error("Multiple POIs found with name ${photoPoint.name} in site: ${site.siteId}")
+                                writer.println("Multiple POIs found with name ${photoPoint.name} in site: ${site.siteId} for output: ${photoPointOutput.outputId}")
+                            } else if (!poi[0].poiId) {
+                                log.error("No poiId found for photo point ${poi[0].name} in site: ${site.siteId}")
+                                writer.println("No poiId found for photo point ${poi[0].name} in site: ${site.siteId} for output: ${photoPointOutput.outputId}")
+                            } else {
 
-                            photoPoint.photo?.each { photo ->
-                                String filename = photo.name
-                                String ext = ''
-                                int extensionLoc = filename.lastIndexOf('.')
-                                if (extensionLoc > 0 && extensionLoc < filename.length()) {
-                                    ext = filename.substring(extensionLoc+1, filename.length())
+                                photoPoint.photo?.each { photo ->
+                                    String filename = photo.name
+                                    String ext = ''
+                                    int extensionLoc = filename.lastIndexOf('.')
+                                    if (extensionLoc > 0 && extensionLoc < filename.length()) {
+                                        ext = filename.substring(extensionLoc + 1, filename.length())
+                                    }
+                                    if (!ext) {
+                                        log.error("unable to determine file extension for photopoint: ${photoPointOutput.outputId}, filename=${filename}")
+                                        writer.println("unable to determine file extension for photopoint: ${photoPointOutput.outputId}, filename=${filename}")
+                                        return
+                                    }
+
+                                    File tmp = File.createTempFile("image", filename)
+                                    def fileOut = new BufferedOutputStream(new FileOutputStream(tmp))
+
+                                    def encodedUrl = photo.url
+
+                                    if (photo.url?.indexOf('image?id=') > 0 && photo.url?.indexOf(photo.name) > 0) { // Some of the old photo points are not URL encoded properly.
+                                        def filenameParamIndex = photo.url.indexOf('image?id=')+'image?id='.length()+1
+                                        def filenameParam = photo.url.substring(filenameParamIndex, photo.url.length())
+                                        encodedUrl = photo.url.replace(filenameParam, filenameParam.encodeAsURL().replaceAll('\\+', '%20'))
+                                    }
+
+
+                                    fileOut << new URL(encodedUrl).openStream()
+                                    fileOut.close()
+
+
+                                    def exifData = getExifMetadata(tmp)
+
+                                    def dateTaken
+                                    if (exifData.date) {
+                                        dateTaken = outputDateFormat.format(exifData.date)
+                                        dateTaken = dateTaken.replace("+0000", "Z")
+                                    } else {
+                                        writer.println("No exif data for photo: ${photoPointOutput.outputId} ${filename} using: ${activity.endDate} ")
+                                        dateTaken = activity.endDate
+                                    }
+
+                                    def doc = [
+                                            name      : filename,
+                                            poiId     : poi[0].poiId,
+                                            filesize  : photo.size,
+                                            filename  : filename,
+                                            type      : 'image',
+                                            role      : 'photoPoint',
+                                            activityId: photoPointOutput.activityId,
+                                            siteId    : activity.siteId,
+                                            notes     : photoPoint.comment,
+                                            dateTaken : dateTaken
+                                    ]
+
+                                    writer.println("Creating "+doc)
+                                    documentService.createDocument(doc, "image/${ext.toLowerCase()}", new FileInputStream(tmp))
+
+                                    tmp.delete()
+
                                 }
-                                if (!ext) {
-                                    log.error("unable to determine file extension for photopoint: ${photoPointOutput.outputId}, filename=${filename}")
-                                    return
-                                }
-
-                                File tmp = File.createTempFile("image", filename)
-                                def fileOut = new BufferedOutputStream(new FileOutputStream(tmp))
-
-                                fileOut << new URL(photo.url).openStream()
-                                fileOut.close()
-
-
-                                def exifData = getExifMetadata(tmp)
-
-                                def dateTaken
-                                if (exifData.date) {
-                                    dateTaken = outputDateFormat.format(exifData.date)
-                                    dateTaken = dateTaken.replace("+0000", "Z")
-                                } else {
-                                    dateTaken = activity.endDate
-                                }
-
-                                def doc = [
-                                        name      : filename,
-                                        poiId     : poi[0].poiId,
-                                        filesize  : photo.size,
-                                        filename  : filename,
-                                        type      : 'image',
-                                        role      : 'photoPoint',
-                                        activityId: photoPointOutput.activityId,
-                                        siteId    : activity.siteId,
-                                        notes     : photoPoint.comment,
-                                        dateTaken : dateTaken
-                                ]
-
-                                log.debug(doc)
-                                documentService.createDocument(doc, "image/${ext.toLowerCase()}", new FileInputStream(tmp))
-
-                                tmp.delete()
-
                             }
                         }
                     }
                 }
             }
+            catch (Exception e) {
+                log.error("Error migrating photopoint: ${photoPointOutput.outputId}",e)
+                writer.println("Error migrating photopoint: ${photoPointOutput.outputId}, ${e.getMessage()}")
+            }
 
         }
+        writer.close()
     }
 
     private Map getExifMetadata(file) {
