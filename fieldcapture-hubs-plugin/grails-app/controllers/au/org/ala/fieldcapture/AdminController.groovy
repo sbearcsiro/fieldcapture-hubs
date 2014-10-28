@@ -394,17 +394,19 @@ class AdminController {
     }
 
     def reloadSiteMetadata() {
-        def sites = siteService.list()
+        def sites = []
+        if (params.siteId) {
+            sites << siteService.get(params.siteId)
+        }
+        else {
+            sites = siteService.list()
+        }
+
         for (site in sites) {
              def siteId = site["siteId"]
              def geometry = site["extent"]["geometry"]
              if (geometry)
              if (geometry.containsKey("centre")) {
-                 def longitude = geometry["centre"][0]
-                 def latitude = geometry["centre"][1]
-                 def metadata = metadataService.getLocationMetadataForPoint(latitude, longitude)
-                 geometry.putAll(metadata)
-
                  def updatedSite = [:]
                  updatedSite["extent"] = site["extent"]
                  siteService.update(siteId, updatedSite)
@@ -433,9 +435,9 @@ class AdminController {
     }
 
     def migratePhotoPoints() {
-        def output = outputService.get('d6b107cf-22c8-4cff-8043-89e9c6efa1a5')
+        def output = outputService.get('966f6787-14d5-4395-80a2-431cabde729a')
         adminService.migratePhotoPoints([output])
-
+        //adminService.migratePhotoPoints()
         render text:'ok'
     }
 
