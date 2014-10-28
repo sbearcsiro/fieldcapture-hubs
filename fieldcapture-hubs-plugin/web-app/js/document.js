@@ -12,6 +12,8 @@ var imageLocation = "${imageUrl}";
  */
 function DocumentViewModel (doc, owner) {
     var self = this;
+
+    roles = [{id: 'programmeLogic', name:'Programme Logic'},{id:'information',name:'Information'}];
     // NOTE that attaching a file is optional, ie you can have a document record without a physical file
     this.filename = ko.observable(doc ? doc.filename : '');
     this.filesize = ko.observable(doc ? doc.filesize : '');
@@ -27,7 +29,7 @@ function DocumentViewModel (doc, owner) {
     this.role = ko.observable(doc.role);
     this.public = ko.observable(doc.public);
     this.url = doc.url;
-    this.thumbnailUrl = doc.thumbnailUrl;
+    this.thumbnailUrl = doc.thumbnailUrl ? doc.thumbnailUrl : doc.url;
     this.documentId = doc.documentId;
     this.hasPreview = ko.observable(false);
     this.error = ko.observable();
@@ -37,20 +39,13 @@ function DocumentViewModel (doc, owner) {
     this.fileButtonText = ko.computed(function() {
         return (self.filename() ? "Change file" : "Attach file");
     });
-    // this supports a checkbox that allows the user to assert that this image is to be used
-    // as the primary project image - implemented as a writeable computed
-    this.isPrimaryProjectImage = ko.computed({
-        read: function () {
-            return self.role() === 'primary' && self.type() === 'image';
-        },
-        write: function (value) {
-            if (value) {
-                self.role('primary');
-            } else {
-                self.role('information');
+    this.onRoleChange = function(val) {
+       if(this.role() == 'programmeLogic'){
+           this.public(false);
+           this.isPrimaryProjectImage(false);
             }
-        }
-    });
+    };
+    this.isPrimaryProjectImage = ko.observable(doc.isPrimaryProjectImage);
 
     // make this support both the old key/value syntax and any set of props so we can define more than
     // one owner attribute

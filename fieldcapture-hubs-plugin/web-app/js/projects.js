@@ -83,7 +83,7 @@ function addTimelineBasedOnStartDate (project, reportingPeriod, alignToCalendar)
     if (project.plannedEndDate === undefined || project.plannedEndDate === '') {
         // make one up so we can proceed
         var endDate = new Date(Date.now());
-        endDate.setUTCFullYear(endDate.getUTCFullYear()+5);
+        endDate = endDate.setUTCFullYear(endDate.getUTCFullYear()+5);
         project.plannedEndDate = endDate.toISOStringNoMillis();
     }
 
@@ -121,6 +121,28 @@ function addTimelineBasedOnStartDate (project, reportingPeriod, alignToCalendar)
 }
 
 /**
+ * Returns the from and to dates of the half year that the specified
+ * date falls in.
+ * @param date
+ * @returns {{fromDate: string, toDate: string}}
+ */
+function getSixMonthPeriodContainingDate (date) {
+    var year = date.getUTCFullYear(),
+        midYear = new Date(Date.UTC(year, 6, 0));
+    if (date.getTime() < midYear.getTime()) {
+        return {
+            fromDate: year + "-01-01T00:00:00Z",
+            toDate: year + "-07-01T00:00:00Z"
+        };
+    } else {
+        return {
+            fromDate: year + "-07-01T00:00:00Z",
+            toDate: (year + 1) + "-01-01T00:00:00Z"
+        };
+    }
+}
+
+/**
  * Returns the stage within the timeline that contains the specified date.
  * @param timeline
  * @param UTCDateStr date must be an ISO8601 string
@@ -130,9 +152,91 @@ function findStageFromDate (timeline, UTCDateStr) {
     var stage = 'unknown';
     // try a simple lexical comparison
     $.each(timeline, function (i, period) {
-        if (UTCDateStr > period.fromDate && UTCDateStr < period.toDate) {
+        if (UTCDateStr > period.fromDate && UTCDateStr <= period.toDate) {
             stage = period.name;
         }
     });
     return stage;
 }
+
+/**
+ * Returns the activities associated with the stage.
+ * @param activities
+ * @param timeline
+ * @param stage stage name
+ * @returns {[]}
+ */
+function findActivitiesForStage (activities, timeline, stage) {
+	var stageFromDate = '';
+	var stageToDate = '';
+
+	$.each(timeline, function (i, period) {
+		if(period.name == stage){
+			stageFromDate = period.fromDate;
+			stageToDate = period.toDate;
+		}
+	});
+
+    stageActivities = $.map(activities, function(act, i) {
+    	var endDate = act.endDate ? act.endDate : act.plannedEndDate;
+    	var startDate = act.startDate ? act.startDate : act.plannedStartDate;
+        if(startDate >= stageFromDate && endDate <= stageToDate){
+        	return act;
+        }
+    });
+    return stageActivities;
+}
+
+/**
+ * Is it a current or past stage
+ * @param timeline
+ * @param stage current stage name
+ * @param period stage period
+ * @returns true if past stage.
+ */
+function isPastStage(timeline, currentStage, period) {
+
+	var stageFromDate = '';
+	var stageToDate = '';
+	$.each(timeline, function (i, period) {
+		if(period.name == currentStage){
+			stageFromDate = period.fromDate;
+			stageToDate = period.toDate;
+		}
+	});
+	return period.toDate <= stageToDate;
+}
+
+function getBugetHeaders(timeline) {
+	var headers = [];
+	var startYr = '';
+	var endYr = '';
+	$.each(timeline, function (i, period) {
+		if (i == 0){
+			startYr = moment(period.fromDate).format('YYYY')
+			endYr = moment(period.toDate).format('YYYY');
+		}
+		else if(timeline.length == i+1)
+			endYr = moment(period.toDate).format('YYYY');
+	});
+	var count = endYr - startYr;
+	for (i = 0; i < count; i++){
+		//todo: check whether we need to cap the budget years
+		//if(i < 7)
+		headers.push(startYr + '/' + ++startYr);
+	}
+	return headers;
+}
+
+function isValid(p, a) {
+	 a = a.split(".");
+	 for (i in a) {
+		var key = a[i];
+		if (p[key] == null || p[key] == undefined){
+			return '';
+		}
+		p = p[key];
+	 }
+	 return p;
+}
+
