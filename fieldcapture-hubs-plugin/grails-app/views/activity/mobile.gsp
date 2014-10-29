@@ -141,7 +141,7 @@
     <g:set var="model" value="${outputModels[outputName]}"/>
     <md:modelStyles model="${model}" edit="true" forceHeaderWrap="true"/>
     <div class="output-block" id="ko${blockId}">
-        <h3 data-bind="css:{modified:dirtyFlag.isDirty},attr:{title:'Has been modified'}">${outputName}<i class="icon-asterisk modified-icon" data-bind="visible:dirtyFlag.isDirty" title="Has been modified" style="display: none;"></i></h3>
+            <h3 data-bind="css:{modified:dirtyFlag.isDirty},attr:{title:'Has been modified'}">${outputName}</h3>
         <!-- add the dynamic components -->
         <md:modelView model="${model}" site="${site}" edit="true" disableTableUpload="true" output="${outputName}" />
         <r:script>
@@ -378,34 +378,6 @@ $('.helphover').popover({animation: true, trigger:'hover'});
 $('#reset').click(function () {
 master.reset();
 });
-
-
-ko.bindingHandlers.editOutput = {
-init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    var outputName = ko.utils.unwrapObservable(valueAccessor()),
-        activity = bindingContext.$root,
-        outputId;
-
-    // search for corresponding outputs in the activity data
-    $.each(activity.outputs, function (i,output) { // iterate output data in the activity to
-                                                      // find any matching the meta-model name
-        if (output.name === outputName) {
-            outputId = output.outputId;
-        }
-    });
-    if (outputId) {
-        // build edit link
-        $(element).html('Edit data');
-        $(element).attr('href', fcConfig.serverUrl + "/output/edit/" + outputId +
-            "?returnTo=" + here);
-    } else {
-        // build create link
-        $(element).attr('href', fcConfig.serverUrl + '/output/create?activityId=' + activity.activityId +
-            '&outputName=' + encodeURIComponent(outputName) +
-            "&returnTo=" + here);
-    }
-}
-};
 
 function ViewModel (act, sites, themes) {
 var self = this;
