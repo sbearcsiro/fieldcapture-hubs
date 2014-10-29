@@ -139,10 +139,9 @@ class ImageController {
             if (file?.size) {  // will only have size if a file was selected
                 def filename = file.getOriginalFilename().replaceAll(' ','_')
                 def ext = FilenameUtils.getExtension(filename)
-                def filenamename = nextUniqueFileName(FilenameUtils.getBaseName(filename))
-                filename = filenamename +'.'+ ext
+                filename = nextUniqueFileName(FilenameUtils.getBaseName(filename)+'.'+ext)
 
-                def thumbFilename = filenamename + "-thumb." + ext
+                def thumbFilename = FilenameUtils.removeExtension(filename) + "-thumb." + ext
                 //println "filename=${filename}"
 
                 def colDir = new File(grailsApplication.config.upload.images.path as String)
@@ -228,9 +227,11 @@ class ImageController {
     private String nextUniqueFileName(filename) {
         int counter = 0;
         String newFilename = filename
-        while (new File(fullPath(newFilename)).exists()) {
+        File f = new File(fullPath(newFilename))
+        while (f.exists()) {
             newFilename = "${counter}_${filename}"
             counter++;
+            f = new File(fullPath(newFilename))
         }
         return newFilename;
     }
