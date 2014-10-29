@@ -15,7 +15,7 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
         excludes 'xercesImpl'
     }
-    legacyResolve = true
+
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
 
@@ -30,6 +30,8 @@ grails.project.dependency.resolution = {
         mavenCentral()
 
         mavenRepo "http://maven.ala.org.au/repository/"
+        mavenRepo "http://repo.opengeo.org"
+        mavenRepo "http://download.osgeo.org/webdav/geotools/"
 
     }
     def tomcatVersion = '7.0.54'
@@ -38,6 +40,7 @@ grails.project.dependency.resolution = {
     def imgscalrVersion = "4.2"
     def httpmimeVersion = "4.1.2"
     def jtsVersion = "1.8"
+    def geoToolsVersion = "11.1"
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 
@@ -45,6 +48,7 @@ grails.project.dependency.resolution = {
         compile "org.imgscalr:imgscalr-lib:${imgscalrVersion}"
         compile "org.apache.httpcomponents:httpmime:${httpmimeVersion}"
         compile "com.vividsolutions:jts:${jtsVersion}"
+        compile "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
         compile "joda-time:joda-time:2.3"
 
         compile group: 'au.org.ala',
@@ -59,6 +63,7 @@ grails.project.dependency.resolution = {
         test("org.seleniumhq.selenium:selenium-htmlunit-driver:$seleniumVersion") {
             exclude "xml-apis"
         }
+        test("org.seleniumhq.selenium:selenium-support:$seleniumVersion")
         test("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
         test("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion")
     }
@@ -69,7 +74,7 @@ grails.project.dependency.resolution = {
         // required by the cached-resources plugin
         runtime ":cache-headers:1.1.6"
 
-        //runtime ":cached-resources:1.0"
+        runtime ":cached-resources:1.0"
         runtime ":rest:0.8" // Override the web-theme-plugin rest version.
         compile (":ala-web-theme:1.0.0")
         runtime ":csv:0.3.1"
@@ -92,5 +97,6 @@ grails.project.dependency.resolution = {
         test (":spock:0.7") {
             exclude "spock-grails-support"
         }
+        build ":release:3.0.1"
     }
 }
