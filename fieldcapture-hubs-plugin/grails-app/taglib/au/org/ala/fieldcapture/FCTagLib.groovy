@@ -1,6 +1,7 @@
 package au.org.ala.fieldcapture
 
 import au.org.ala.cas.util.AuthenticationCookieUtils
+import grails.converters.JSON
 import groovy.xml.MarkupBuilder
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -537,6 +538,12 @@ class FCTagLib {
         } else {
             mb.div { mkp.yield("Error: User not found") }
         }
+    }
+
+    def encodeModel = { attrs ->
+        def json = (attrs.model?:attrs.default != null? attrs.default:[:] as JSON)
+        def modelJson = json.toString()
+        out << "JSON.parse('${modelJson.encodeAsJavaScript()}');"
     }
 
     /**

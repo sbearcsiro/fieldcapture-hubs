@@ -811,3 +811,28 @@ function exclusive (field, rules, i, options) {
     }
 };
 
+/**
+ * Converts markdown formatted text into html, filters an allowed list of tags.  (To prevent script injection).
+ * @param target the knockout observable holding the text.
+ * @param options unused.
+ * @returns {*}
+ */
+ko.extenders.markdown = function(target, options) {
+    var converter = new window.Showdown.converter();
+    var filterOptions = window.WMDEditor.defaults.tagFilter;
+
+    target.markdownToHtml = ko.computed(function() {
+        var text = target();
+        if (text) {
+            text = text.replace(/<[^<>]*>?/gi, function (tag) {
+                return (tag.match(filterOptions.allowedTags) || tag.match(filterOptions.patternLink) || tag.match(filterOptions.patternImage)) ? tag : "";
+            });
+        }
+        else {
+            text = '';
+        }
+        return converter.makeHtml(text);
+    });
+    return target;
+};
+

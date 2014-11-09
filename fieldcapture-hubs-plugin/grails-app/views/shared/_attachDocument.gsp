@@ -27,7 +27,7 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
+                    <div class="control-group" data-bind="visible:roles.length > 1">
                         <label class="control-label" for="documentRole">Document type</label>
 
                         <div class="controls">
@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
+                    <div class="control-group" data-bind="visible:settings.showSettings">
                         <label class="control-label" for="public">Settings</label>
                         <div class="controls">
                             <label class="checkbox" for="public">
@@ -69,7 +69,7 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
+                    <div class="control-group"  data-bind="visible:settings.showSettings">
                         <label class="control-label" for="documentFile">Image settings</label>
                         <div class="controls">
                             <label class="checkbox" for="documentRole">
@@ -115,16 +115,6 @@
                             <span class="alert alert-error" data-bind="text:error"></span>
                         </div>
                     </div>
-
-                    <g:if test="${grailsApplication.config.debugUI}">
-                        <div class="expandable-debug">
-                            <h3>Debug</h3>
-                            <div>
-                                <h4>Document model</h4>
-                                <pre class="row-fluid" data-bind="text:toJSONString()"></pre>
-                            </div>
-                        </div>
-                    </g:if>
 
                 </form>
             </div>

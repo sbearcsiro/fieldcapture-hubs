@@ -10,10 +10,15 @@ var imageLocation = "${imageUrl}";
  * @param owner an object containing key and value properties identifying the owning entity for the document. eg. {key:'projectId', value:'the_id_of_the_owning_project'}
  * @constructor
  */
-function DocumentViewModel (doc, owner) {
+function DocumentViewModel (doc, owner, settings) {
     var self = this;
 
-    roles = [{id: 'programmeLogic', name:'Programme Logic'},{id:'information',name:'Information'}];
+    var defaults = {
+        roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
+        showSettings: true
+    }
+    this.settings = $.extend({}, defaults, settings);
+
     // NOTE that attaching a file is optional, ie you can have a document record without a physical file
     this.filename = ko.observable(doc ? doc.filename : '');
     this.filesize = ko.observable(doc ? doc.filesize : '');
@@ -27,6 +32,7 @@ function DocumentViewModel (doc, owner) {
     this.license = ko.observable(doc ? doc.license : '');
     this.type = ko.observable(doc.type);
     this.role = ko.observable(doc.role);
+    this.roles = this.settings.roles;
     this.public = ko.observable(doc.public);
     this.url = doc.url;
     this.thumbnailUrl = doc.thumbnailUrl ? doc.thumbnailUrl : doc.url;
@@ -40,10 +46,10 @@ function DocumentViewModel (doc, owner) {
         return (self.filename() ? "Change file" : "Attach file");
     });
     this.onRoleChange = function(val) {
-       if(this.role() == 'programmeLogic'){
-           this.public(false);
-           this.isPrimaryProjectImage(false);
-            }
+        if(this.role() == 'programmeLogic'){
+            this.public(false);
+            this.isPrimaryProjectImage(false);
+        }
     };
     this.isPrimaryProjectImage = ko.observable(doc.isPrimaryProjectImage);
 
@@ -144,7 +150,7 @@ function DocumentViewModel (doc, owner) {
     }
 
     this.modelForSaving = function() {
-        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText']});
+        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'settings']});
     }
 }
 
