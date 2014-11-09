@@ -103,6 +103,10 @@ class ProjectService {
         [targets:scoresWithTargetsByOutput, other:scoresWithoutTargetsByOutputs]
     }
 
+    def search(params) {
+        webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/search', params)
+    }
+
     def enrichTestData() {
         def p = projects['Bushbids'.encodeAsMD5()]
         if (p) {p.project_description = dummyProjects[0].project_description}
