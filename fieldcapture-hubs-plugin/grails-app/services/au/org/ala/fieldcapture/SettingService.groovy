@@ -6,6 +6,7 @@ import groovy.text.GStringTemplateEngine
 class SettingService {
 
     private static def ThreadLocal localHubConfig = new ThreadLocal()
+    private static final String HUB_CONFIG_KEY_SUFFIX = '.hub.configuration'
 
     public static void setHubConfig(hubConfig) {
         localHubConfig.set(hubConfig)
@@ -21,6 +22,31 @@ class SettingService {
 
     def webService, cacheService
     def grailsApplication
+
+
+    def loadHubConfig(hub) {
+        def settings = getHubSettings(hub)
+        if (!settings) {
+            settings = [
+                    settingsPageKeyPrefix:''
+            ]
+        }
+
+        SettingService.setHubConfig(settings)
+
+
+        // Lookup portal from database?  Or simply parse the URL?  Or access request?
+//        def hubConfig = [
+//                bannerUrl            : 'http://www.greateasternranges.org.au/templates/rt_chapelco/images/main/bg-header-mt.png',
+//                logoUrl              : 'http://www.greateasternranges.org.au/wp-content/themes/ger/images/ger-logo-205x150px.png',
+//                title                : 'Great Eastern Ranges',
+//                settingsPageKeyPrefix: 'ger.',
+//                availableFacets      : "organisationFacet,gerSubRegionFacet,associatedProgramFacet,mainThemeFacet,stateFacet,lgaFacet,mvgFacet",
+//                defaultFacetQuery    : ['otherFacet:Great Eastern Ranges Initiative']
+//        ]
+
+
+    }
 
     def getSettingText(SettingPageType type) {
         def key = localHubConfig.get().settingsPageKeyPrefix + type.key
@@ -39,6 +65,13 @@ class SettingService {
         String url = grailsApplication.config.ecodata.baseUrl + "setting/ajaxGetSettingTextForKey?key=${key}"
         def res = cacheService.get(key,{ webService.getJson(url) })
         return res?.settingText?:""
+    }
+
+    private def getJson(key) {
+        cacheService.get(key, {
+            def settings = get(key)
+            return settings ? JSON.parse(settings) : [:]
+        })
     }
 
     private def set(key, settings) {
@@ -65,13 +98,17 @@ class SettingService {
     }
 
     def getProjectSettings(projectId) {
-        def settings = get(projectSettingsKey(projectId))
-        return settings ? JSON.parse(settings) : [:]
+        getJson(projectSettingsKey(projectId))
     }
 
     def updateProjectSettings(projectId, settings) {
         def key = projectSettingsKey(projectId)
         set(key, (settings as JSON).toString())
+    }
+
+    def getHubSettings(hub) {
+        if (!hub) { hub == 'default' }
+        getJson(hub+HUB_CONFIG_KEY_SUFFIX)
     }
 
 }
