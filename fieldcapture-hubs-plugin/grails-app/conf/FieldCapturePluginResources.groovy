@@ -211,4 +211,28 @@ modules = {
         resource 'js/organisation.js'
     }
 
+    slickgrid {
+        dependsOn 'jquery', 'jquery_ui'
+        resource 'slickgrid/slick.grid.css'
+        resource 'slickgrid/slick-default-theme.css'
+        //resource 'slickgrid/css/smoothness/jquery-ui-1.8.16.custom.css'
+        //resource 'slickgrid/examples.css'
+
+        resource 'slickgrid/lib/jquery.event.drag-2.2.js'
+        resource 'slickgrid/lib/jquery.event.drop-2.2.js'
+
+        resource 'slickgrid/slick.core.js'
+        //resource 'slickgrid/plugins/slick.cellcopymanager.js'
+        //resource 'slickgrid/plugins/slick.cellrangedecorator.js'
+        //resource 'slickgrid/plugins/slick.cellrangeselector.js'
+        //resource 'slickgrid/plugins/slick.cellselectionmodel.js'
+
+
+        resource 'slickgrid/slick.formatters.js'
+        resource 'slickgrid/slick.editors.js'
+
+        resource 'slickgrid/slick.grid.js'
+
+    }
+
 }
