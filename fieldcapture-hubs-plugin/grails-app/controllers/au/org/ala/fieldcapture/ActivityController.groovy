@@ -280,6 +280,26 @@ class ActivityController {
         }
     }
 
+    def bulkEdit() {
+
+        def serviceProvider = params.serviceProvider
+        def activityType = 'Revegetation'
+        def outputs = metadataService.getActivityModel(activityType).outputs?.collect { metadataService.annotatedOutputDataModel(it)}
+        def outputType = 'Participant Information'
+        def outputModel = metadataService.annotatedOutputDataModel(outputType)
+        def projects = webService.doPost(grailsApplication.config.ecodata.baseUrl+'project/search/', [serviceProviderName:serviceProvider])
+        def criteria = [type:activityType, projectId:projects.resp.projects.collect{it.projectId}]
+        def activityResp = webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
+        def activities = activityResp?.resp.activities
+        def outputData = activities.collect { act ->
+            def output = act.outputs?.find{ it.name == outputType }
+            output?output.data:outputModel.collectEntries{[(it.name):0]}
+        }
+
+        [model:outputModel, data:outputData]
+    }
+
+
     private def updatePhotoPoints(activityId, photoPoints) {
 
         def allPhotos = photoPoints.photos?:[]

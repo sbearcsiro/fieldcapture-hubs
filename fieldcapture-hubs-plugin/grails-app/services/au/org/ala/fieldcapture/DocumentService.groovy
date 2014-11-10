@@ -15,7 +15,7 @@ class DocumentService {
     }
 
     def updateDocument(doc) {
-        def url = grailsApplication.config.ecodata.baseUrl + "document/"+doc.documentId
+        def url = "${grailsApplication.config.ecodata.baseUrl}document/${doc.documentId?:''}"
 
         return webService.doPost(url, doc)
     }

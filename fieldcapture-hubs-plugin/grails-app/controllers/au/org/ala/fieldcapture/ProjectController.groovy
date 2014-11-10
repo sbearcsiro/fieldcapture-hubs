@@ -33,6 +33,9 @@ class ProjectController {
             //log.debug activityService.activitiesForProject(id)
             //todo: ensure there are no control chars (\r\n etc) in the json as
             //todo:     this will break the client-side parser
+			TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
+			def now = new Date()
+
             [project: project,
              activities: activityService.activitiesForProject(id),
              mapFeatures: commonService.getMapFeatures(project),
@@ -45,7 +48,8 @@ class ProjectController {
              outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
              institutions: metadataService.institutionList(),
              programs: projectService.programsModel(),
-             enableReporting: grailsApplication.config.enableReporting
+             today:now.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+             themes:metadataService.getThemesForProject(project)
             ]
         }
     }
@@ -146,35 +150,7 @@ class ProjectController {
         }
     }
 
-    @PreAuthorise(accessLevel = 'admin')
-    def ajaxSubmitReport(String id) {
 
-        def reportDetails = request.JSON
-
-        def result = projectService.submitStageReport(id, reportDetails)
-
-        render result as JSON
-    }
-
-    @PreAuthorise(accessLevel = 'caseManager')
-    def ajaxApproveReport(String id) {
-
-        def reportDetails = request.JSON
-
-        def result = projectService.approveStageReport(id, reportDetails)
-        render result as JSON
-    }
-
-    @PreAuthorise(accessLevel = 'caseManager')
-    def ajaxRejectReport(String id) {
-
-        def reportDetails = request.JSON
-
-        def result = projectService.rejectStageReport(id, reportDetails)
-
-        render result as JSON
-
-    }
 
 
     @PreAuthorise
@@ -242,6 +218,26 @@ class ProjectController {
             render status:403, text: 'User not logged-in or does not have permission'
         } else {
             render status:500, text: 'Unexpected error'
+        }
+    }
+
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadProjectData() {
+        String projectId = params.id
+
+        if (!projectId) {
+            render status:400, text: 'Required params not provided: id'
+        }
+        else{
+            def path = "project/downloadProjectData/${projectId}"
+
+            if (params.view == 'xlsx' || params.view == 'json') {
+                path += ".${params.view}"
+            }else{
+                path += ".json"
+            }
+            def url = grailsApplication.config.ecodata.baseUrl + path
+            webService.proxyGetRequest(response, url, true, true,120000)
         }
     }
 }

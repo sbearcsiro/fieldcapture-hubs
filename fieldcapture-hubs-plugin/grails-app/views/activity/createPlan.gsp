@@ -172,7 +172,7 @@
             self.plannedStartDate = ko.observable(act.plannedStartDate).extend({simpleDate: false});
             self.plannedEndDate = ko.observable(act.plannedEndDate).extend({simpleDate: false});
             self.projectStage = 'Stage 1'; // hardwire until we have a scheme for picking the stage by date
-            self.progress = ko.observable('started');
+            self.progress = ko.observable('planned');
             self.censusMethod = ko.observable(act.censusMethod);
             self.methodAccuracy = ko.observable(act.methodAccuracy);
             self.collector = ko.observable(act.collector)/*.extend({ required: true })*/;
@@ -231,7 +231,7 @@
                                 // Redirect to the edit page for a new started activity, otherwise go back to
                                 // where you came from (the project or site activity list most likely).
                                 if (self.progress() != 'planned') {
-                                    document.location.href = "${createLink(action: 'enterData')}"+'/'+data.activityId+'?returnTo='+returnTo;
+                                    document.location.href = "${createLink(action: 'edit')}"+'/'+data.activityId+'?returnTo='+returnTo;
                                 }
                                 else {
                                     document.location.href = returnTo;
@@ -249,7 +249,7 @@
                 bootbox.confirm("Delete this entire activity? Are you sure?", function(result) {
                     if (result) {
                         document.location.href = "${createLink(action:'delete',id:activity.activityId,
-                            params:[returnTo:grailsApplication.config.grails.serverURL + '/' + returnTo])}";
+        params:[returnTo:grailsApplication.config.grails.serverURL + '/' + returnTo])}";
                     }
                 });
             };
@@ -259,12 +259,12 @@
         }
 
         var viewModel = new ViewModel(
-            ${(activity as JSON).toString()},
-            ${((sites ?: []) as JSON).toString()},
-            ${((projects ?: []) as JSON).toString()},
-            ${site ?: 'null'},
-            ${project ?: 'null'},
-            ${(activityTypes as JSON).toString()});
+    ${(activity as JSON).toString()},
+    ${((sites ?: []) as JSON).toString()},
+    ${((projects ?: []) as JSON).toString()},
+    ${site ?: 'null'},
+    ${project ?: 'null'},
+    ${(activityTypes as JSON).toString()});
         ko.applyBindings(viewModel,document.getElementById('koActivityMainBlock'));
 
 

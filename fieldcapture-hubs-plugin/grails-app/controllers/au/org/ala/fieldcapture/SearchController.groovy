@@ -40,4 +40,40 @@ class SearchController {
         webService.proxyGetRequest(response, url, true, true)
     }
 
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadAllData() {
+
+        params.query = "docType:project"
+        def path = "search/downloadAllData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        def facets = []
+        facets.addAll(params.getList("fq"))
+        facets << "className:au.org.ala.ecodata.Project"
+        params.put("fq", facets)
+
+        def url = grailsApplication.config.ecodata.baseUrl + path +  commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadSummaryData() {
+        params.query = "docType:project"
+        def path = "search/downloadSummaryData"
+
+        if (params.view == 'xlsx' || params.view == 'json') {
+            path += ".${params.view}"
+        }else{
+            path += ".json"
+        }
+
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
 }

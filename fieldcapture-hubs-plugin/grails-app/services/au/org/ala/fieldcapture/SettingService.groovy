@@ -28,7 +28,8 @@ class SettingService {
         def settings = getHubSettings(hub)
         if (!settings) {
             settings = [
-                    settingsPageKeyPrefix:''
+                    settingsPageKeyPrefix:'',
+                    availableFacets: "status,organisationFacet,associatedProgramFacet,associatedSubProgramFacet,mainThemeFacet,stateFacet,nrmFacet,lgaFacet,mvgFacet,ibraFacet,imcra4_pbFacet,otherFacet"
             ]
         }
 

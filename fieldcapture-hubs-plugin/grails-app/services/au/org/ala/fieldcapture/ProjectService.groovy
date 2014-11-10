@@ -7,8 +7,6 @@ class ProjectService {
 
     def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService
 
-    LinkGenerator grailsLinkGenerator
-
     def list(brief = false) {
         def params = brief ? '?brief=true' : ''
         def resp = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'project/' + params)
@@ -105,13 +103,6 @@ class ProjectService {
 
     def search(params) {
         webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/search', params)
-    }
-
-    def enrichTestData() {
-        def p = projects['Bushbids'.encodeAsMD5()]
-        if (p) {p.project_description = dummyProjects[0].project_description}
-        projects.put dummyProjects[1].project_id, dummyProjects[1]
-        projects.put dummyProjects[2].project_id, dummyProjects[2]
     }
 
     /**
@@ -211,77 +202,6 @@ class ProjectService {
     }
 
     /**
-     * Submits a report of the activities performed during a specific time period (a project stage).
-     * @param projectId the project the performing the activities.
-     * @param stageDetails details of the activities, specifically a list of activity ids.
-     */
-    def submitStageReport(projectId, stageDetails) {
-
-        def activities = activityService.activitiesForProject(projectId);
-
-        def allowedStates = ['finished', 'deferred', 'cancelled']
-        def readyForSubmit = true
-        stageDetails.activityIds.each { activityId ->
-            def activity = activities.find {it.activityId == activityId}
-            if (!allowedStates.contains(activity?.progress)) {
-                readyForSubmit = false
-            }
-        }
-        if (!readyForSubmit) {
-            return [error:'All activities must be finished, deferred or cancelled']
-        }
-        def result = activityService.updatePublicationStatus(stageDetails.activityIds, 'pendingApproval')
-        def project = get(projectId)
-        stageDetails.project = project
-        if (!result.resp.error) {
-            emailService.sendReportSubmittedEmail(projectId, stageDetails)
-        }
-
-        result
-    }
-
-    /**
-     * Approves a submitted stage report.
-     * @param projectId the project the performing the activities.
-     * @param stageDetails details of the activities, specifically a list of activity ids.
-     */
-    def approveStageReport(projectId, stageDetails) {
-        def result = activityService.updatePublicationStatus(stageDetails.activityIds, 'published')
-
-        // TODO Send a message to GMS.
-        def project = get(projectId, 'all')
-        def readableId = project.grantId + (project.externalId?'-'+project.externalId:'')
-        def name = "${readableId} ${stageDetails.stage} approval"
-        def doc = [name:name, projectId:projectId, type:'text', role:'approval',filename:name, readOnly:true, public:false]
-        documentService.createTextDocument(doc, (project as JSON).toString())
-        stageDetails.project = project
-        if (!result.resp.error) {
-            emailService.sendReportApprovedEmail(projectId, stageDetails)
-        }
-
-        result
-    }
-
-    /**
-     * Rejects a submitted stage report.
-     * @param projectId the project the performing the activities.
-     * @param stageDetails details of the activities, specifically a list of activity ids.
-     */
-    def rejectStageReport(projectId, stageDetails) {
-        def result = activityService.updatePublicationStatus(stageDetails.activityIds, 'unpublished')
-
-        // TODO Send a message to GMS.  Delete previous approval document (only an issue for withdrawal of approval)?
-        def project = get(projectId)
-        stageDetails.project = project
-
-        if (!result.resp.error) {
-            emailService.sendReportRejectedEmail(projectId, stageDetails)
-        }
-
-        result
-    }
-
-    /**
      * Returns the programs model for use by a particular project.  At the moment, merit programmes are filtered out.
      */
     def programsModel() {
@@ -292,7 +212,7 @@ class ProjectService {
     /**
      * Returns a filtered list of activities for use by a project
      */
-    def activityTypesList(projectId) {
+    public List activityTypesList(String projectId) {
         def projectSettings = settingService.getProjectSettings(projectId)
         def activityTypes = metadataService.activityTypesList()
 
