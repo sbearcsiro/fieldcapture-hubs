@@ -53,7 +53,7 @@ class ModelTagLib {
                     photoPoints out, attrs, mod, index
                     break
                 case 'template':
-                    out << g.render(template:mod.source)
+                    out << g.render(template:mod.source, plugin: 'fieldcapture-plugin')
                     break
             }
         }
@@ -741,7 +741,7 @@ class ModelTagLib {
         // embedded inside table view/edit templates. (as happened if an image type was included in a table row).
         def templates = pageScope.getVariable(DEFERRED_TEMPLATES_KEY)
         templates?.each {
-            out << g.render(template: it)
+            out << g.render(template: it, plugin:'fieldcapture-plugin')
         }
         pageScope.setVariable(DEFERRED_TEMPLATES_KEY, null)
     }

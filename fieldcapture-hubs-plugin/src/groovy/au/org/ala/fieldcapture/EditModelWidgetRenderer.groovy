@@ -76,14 +76,14 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.addDeferredTemplate('/output/fileUploadTemplate')
         context.databindAttrs.add 'imageUpload', "{target:${context.source}, config:{}}"
 
-        context.writer << context.g.render(template: '/output/imageDataTypeTemplate', model: [databindAttrs:context.databindAttrs.toString(), source: context.source])
+        context.writer << context.g.render(template: '/output/imageDataTypeTemplate', plugin:'fieldcapture-plugin', model: [databindAttrs:context.databindAttrs.toString(), source: context.source])
     }
 
     @Override
     void renderEmbeddedImage(WidgetRenderContext context) {
         context.addDeferredTemplate('/output/fileUploadTemplate')
         context.databindAttrs.add 'imageUpload', "{target:${context.source}, config:{}}"
-        context.writer << context.g.render(template: '/output/imageDataTypeTemplate', model: [databindAttrs: context.databindAttrs.toString(), source: context.source])
+        context.writer << context.g.render(template: '/output/imageDataTypeTemplate', plugin:'fieldcapture-plugin', model: [databindAttrs: context.databindAttrs.toString(), source: context.source])
     }
 
     @Override
@@ -101,7 +101,7 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         newAttrs.add "event", "{focusout:focusLost}"
         newAttrs.add "autocomplete", "{url:'${link}', render: renderItem, listId: list, result:speciesSelected, valueChangeCallback:textFieldChanged}"
 
-        context.writer << context.g.render(template: '/output/speciesTemplate', model:[source: context.source, databindAttrs: newAttrs.toString(), validationAttrs:context.validationAttr])
+        context.writer << context.g.render(template: '/output/speciesTemplate', plugin:'fieldcapture-plugin', model:[source: context.source, databindAttrs: newAttrs.toString(), validationAttrs:context.validationAttr])
     }
 
     @Override

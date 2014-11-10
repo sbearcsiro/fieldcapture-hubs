@@ -624,7 +624,7 @@ class ModelJSTagLib {
     def photoPointModel(attrs, model, out) {
         listViewModel(attrs, model, out)
 
-        out << g.render(template:"/output/photoPointTemplate", model:[model:model]);
+        out << g.render(template:"/output/photoPointTemplate", plugin:'fieldcapture-plugin', model:[model:model]);
     }
 
     def speciesModel(attrs, model, out) {
