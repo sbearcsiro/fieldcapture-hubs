@@ -378,11 +378,15 @@
                     alert("Nothing to save.");
                     return;
                 }
+                // Don't allow another save to be initiated.
+                blockUIWithMessage("Saving activity data...");
+
                 if (activityData === undefined) { activityData = {}}
                 activityData.outputs = outputs;
 
                 var toSave = JSON.stringify(activityData);
                 amplify.store('activity-${activity.activityId}', toSave);
+                var unblock = true;
                 $.ajax({
                     url: "${createLink(action: 'ajaxUpdate', id: activity.activityId)}",
                     type: 'POST',
@@ -400,6 +404,8 @@
                             errorText += "<p>Any other changes should have been saved.</p>";
                             bootbox.alert(errorText);
                         } else {
+                            unblock = false; // We will be transitioning off this page.
+                            blockUIWithMessage("Activity data saved.")
                             self.reset();
                             self.saved();
                         }
@@ -415,6 +421,12 @@
                         }
                         else {
                             alert('An unhandled error occurred: ' + error);
+                        }
+
+                    },
+                    complete: function () {
+                        if (unblock) {
+                            $.unblockUI();
                         }
                     }
                 });
@@ -437,7 +449,7 @@
 
     $(function(){
 
-        $('#validation-container').validationEngine('attach', {scroll: false});
+        $('#validation-container').validationEngine('attach', {scroll: true});
 
         $('.helphover').popover({animation: true, trigger:'hover'});
 
