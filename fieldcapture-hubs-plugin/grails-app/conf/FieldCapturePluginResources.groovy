@@ -207,7 +207,7 @@ modules = {
     }
 
     organisation {
-        dependsOn 'jquery', 'knockout'
+        dependsOn 'jquery', 'knockout','wmd'
         resource 'js/organisation.js'
     }
 

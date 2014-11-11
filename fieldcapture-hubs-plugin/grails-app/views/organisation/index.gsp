@@ -18,23 +18,11 @@
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation"/>
 
-    <style type="text/css">
-        .organisation-header {
-            background-repeat: no-repeat;
-            background-position: right;
-            background-color: #f0f0e8;
-            margin-top: -10px;
-            margin-bottom: 10px;
-            padding-top: 10px;
-            border-bottom: 1px solid #ddd;
-
-        }
-    </style>
 </head>
 <body>
 
 
-    <div class="container-fluid organisation-header" data-bind="style:{'backgroundImage':bannerUrl}">
+    <div class="container-fluid organisation-header organisation-banner" data-bind="">
         <div class="row-fluid">
             <ul class="breadcrumb">
                 <li>

@@ -15,24 +15,15 @@
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationViewUrl: '${g.createLink(action:"index")}',
             organisationListUrl: '${g.createLink(action:"list")}',
-            organisationSaveUrl: "${createLink(action:'ajaxUpdate')}"
+            organisationSaveUrl: "${createLink(action:'ajaxUpdate')}",
+            returnTo: "${params.returnTo?:createLink(action:'index', id:organisation.organisationId)}"
 
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,jqueryValidationEngine,organisation"/>
 
     <style type="text/css">
-        .organisation-header {
-            background-repeat: no-repeat;
-            background-position: right;
-            background-color: #f0f0e8;
-            margin-top: -10px;
-            margin-bottom: 10px;
-            padding-top: 10px;
-            border-bottom: 1px solid #ddd;
-            margin:3px;
 
-        }
 
         .image-box {
             border-style:dashed;
@@ -70,6 +61,14 @@
             margin-bottom: 5px;
             margin-top: 2px;
         }
+        .main-image-button {
+            top:120px;
+            left:0;
+            right:0;
+            width:140px;
+            margin:auto;
+            position:absolute;
+        }
     </style>
 </head>
 <body>
@@ -79,7 +78,7 @@
     Edit the page content inline below.  When you are finished, use the save button at the bottom of the page.
 </div>
 
-<div class="container-fluid organisation-header image-box" data-bind="style:{'backgroundImage':bannerUrl}">
+<div class="container-fluid organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':bannerUrl}">
 
     <div class="row-fluid">
         <ul class="breadcrumb demphasise">
@@ -91,7 +90,7 @@
         </ul>
     </div>
     <div class="row-fluid">
-        <span class="span9"><button class="pull-left btn" style="margin-top:5px; margin-right:5px;"><i class="icon-edit"></i></button><h2 data-bind="text:name" style="display:inline"></h2></span>
+        <span class="span9"><button class="pull-left btn" data-bind="click:function() {name.editing(true);}" style="margin-top:5px; margin-right:5px;"><i class="icon-edit"></i></button><h2 data-bind="clickToEdit:name" style="display:inline"></h2></span>
         <span class="span3">
         <button class="btn pull-right" data-bind="click:attachBannerImage, visible:!bannerUrl()"><i class="icon-plus"></i> Attach Background Image</button>
         <button class="btn pull-right" data-bind="click:removeBannerImage, visible:bannerUrl()"><i class="icon-remove"></i> Remove Background Image</button>
@@ -104,13 +103,13 @@
     <div class="row-fluid">
         <span class="span3 image-box" style="text-align: center; min-height:300px; position:relative">
             <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-            <button class="btn" data-bind="click:attachMainImage, visible:!mainImageUrl()" style="top:120px; left:0; right:0; width:140px; margin:auto; position:absolute;"><i class="icon-plus"></i> Attach Image</button>
-            <button class="btn" data-bind="click:removeMainImage,  visible:mainImageUrl()" style="top:120px; left:0; right:0; width:140px; margin:auto; position:absolute;"><i class="icon-plus"></i> Remove Image</button>
+            <button class="btn main-image-button" data-bind="click:attachMainImage, visible:!mainImageUrl()"><i class="icon-plus"></i> Attach Image</button>
+            <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-plus"></i> Remove Image</button>
         </span>
 
 
         <span class="span6">
-            <button class="btn popup-edit" data-bind="click:editDescription"><i class="icon-edit"></i></button> <h4 class="demphasise">Description</h4>
+            <button class="btn popup-edit" data-bind="click:editDescription"><i class="icon-edit"></i></button> <a data-bind="click:editDescription"><h4 class="demphasise">Description</h4></a>
             <div class="well">
 
                 <span class="demphasise" data-bind="html:description.markdownToHtml()"></span>
@@ -118,7 +117,7 @@
         </span>
 
         <span class="span3">
-            <button class="btn popup-edit" data-bind="click:editNewsAndEvents"><i class="icon-edit"></i></button> <h4 class="demphasise">News and events</h4>
+            <button class="btn popup-edit" data-bind="click:editNewsAndEvents"><i class="icon-edit"></i></button> <a data-bind="click:editNewsAndEvents"><h4 class="demphasise">News and events</h4></a>
             <div class="well">
                 <span class="demphasise"  data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'No news is good news...'"></span>
 
@@ -152,7 +151,9 @@
             self.editNewsAndEvents = function() {
                 editWithMarkdown('Edit news and events', self.newsAndEvents);
             };
-
+            self.cancel = function() {
+                window.location = fcConfig.returnTo;
+            }
 
         };
 
