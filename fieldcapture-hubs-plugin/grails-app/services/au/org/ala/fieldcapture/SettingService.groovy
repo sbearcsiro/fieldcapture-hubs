@@ -23,6 +23,12 @@ class SettingService {
     def webService, cacheService
     def grailsApplication
 
+    /**
+     * Checks if there is a configuration defined for the specified hub.
+     */
+    boolean isValidHub(hub) {
+        getHubSettings(hub) as boolean
+    }
 
     def loadHubConfig(hub) {
         def settings = getHubSettings(hub)
@@ -107,9 +113,20 @@ class SettingService {
         set(key, (settings as JSON).toString())
     }
 
+    private def hubSettingsKey(hub) {
+        if (!hub) {
+            throw new IllegalArgumentException("the hub parameter must not be null")
+        }
+        return hub+HUB_CONFIG_KEY_SUFFIX
+    }
+
     def getHubSettings(hub) {
-        if (!hub) { hub == 'default' }
-        getJson(hub+HUB_CONFIG_KEY_SUFFIX)
+        if (!hub) { hub = 'default' }
+        getJson(hubSettingsKey(hub))
+    }
+
+    def updateHubSettings(hub, settings) {
+        set(hubSettingsKey(hub), settings)
     }
 
 }

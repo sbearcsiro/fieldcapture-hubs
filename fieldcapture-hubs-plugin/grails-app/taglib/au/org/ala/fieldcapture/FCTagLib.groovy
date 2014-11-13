@@ -202,7 +202,7 @@ class FCTagLib {
 
         //mb.ul(class:'nav visible-desktop ') {
             mb.li(class:attrs.active == 'home' ? 'active' : '') {
-                a(href:createLink(uri: '/'), class: 'visible-desktop') {
+                a(href:createLink(controller: 'home'), class: 'visible-desktop') {
                     i(class:"icon-home") {
                         mkp.yieldUnescaped("&nbsp;")
                     }

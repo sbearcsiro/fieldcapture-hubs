@@ -1,4 +1,6 @@
-package au.org.ala.fieldcapture
+package au.org.ala.fieldcapture.hub
+
+import au.org.ala.fieldcapture.SettingService
 
 import javax.servlet.*
 

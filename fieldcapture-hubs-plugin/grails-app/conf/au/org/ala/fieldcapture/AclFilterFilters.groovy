@@ -1,6 +1,5 @@
 package au.org.ala.fieldcapture
 
-import org.codehaus.groovy.grails.web.json.JSONObject
 
 /**
  * Grails Filter to check for controller methods annotated with <code>@{@link PreAuthorise}</code>
@@ -11,6 +10,8 @@ class AclFilterFilters {
     def grailsApplication, userService, projectService, roleService
 
     def roles = []
+
+    def dependsOn = [HubConfigurationFilters]
 
     def filters = {
         all(controller:'*', action:'*') {

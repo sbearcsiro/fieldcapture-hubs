@@ -44,7 +44,7 @@ Brief summary/description of the plugin.
         lastMapping + {
             'filter' {
                 'filter-name' ('Hub configuration filter')
-                'filter-class' ('au.org.ala.fieldcapture.HubConfigurationFilter')
+                'filter-class' ('au.org.ala.fieldcapture.hub.HubConfigurationFilter')
             }
             'filter-mapping' {
                 'filter-name' ('Hub configuration filter')

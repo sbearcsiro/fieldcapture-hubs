@@ -45,7 +45,7 @@
         %{--<div class="navbar-inner">--}%
             <div class="container-fluid">
                 <div class="nav logo">
-                    <a href="${createLink(uri:"/")}">
+                    <a href="${createLink(controller:"home")}">
                         <img src="${hubConfig.logoUrl}" alt="${hubConfig.title}" />
                     </a>
                 </div>
