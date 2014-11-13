@@ -31,7 +31,6 @@ println "[${appName}] (*) grails.config.locations = ${grails.config.locations}"
  \******************************************************************************/
 reloadable.cfgs = ["file:/data/${appName}/config/${appName}-config.properties"]
 
-grails.project.groupId = "au.org.ala." + appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
 grails.mime.types = [
@@ -210,7 +209,7 @@ environments {
         ecodata.baseUrl = 'http://ecodata-test.ala.org.au/ws/'
         upload.images.url = grails.serverURL+'/image/'
         emailFilter = /[A-Z0-9._%-]+@csiro\.au|chris\.godwin\.ala@gmail.com/
-        logging.dir=/data/${appName}/log
+        //logging.dir=/data/${appName}/log
     }
     production {
         grails.logging.jul.usebridge = false
