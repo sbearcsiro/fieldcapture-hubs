@@ -24,56 +24,51 @@ class HomeController {
     def index() {
         params.facets = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
 
-        def allFacets = []
-        allFacets += SettingService.getHubConfig().defaultFacetQuery?:[]
-        def userFacets = params.getList('fq').grep{it.contains('Facet') && it.contains(':')}
+        def facetsList = params.facets.tokenize(",")
+        def allFacets = params.getList('fq') + (SettingService.getHubConfig().defaultFacetQuery?:[])
 
-        // Workaround for each partnership region in the GER being a separate layer and each layer name is
-        // prefixed with GER to make it discoverable in the spatial portal.
-        // TODO implement an optional display name lookup for facet values.
-        def modifiedFacets = userFacets.collect{
-            def nameVal = it.split(':');
-            def val = nameVal[1]
-            if (nameVal[0] == 'gerSubRegionFacet') {
-                val = 'GER '+ val
-            }
-            return nameVal[0]+':'+val
-        }
+        def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)
 
-        params.put('fq', modifiedFacets)
+        def resp = searchService.HomePageFacets(params)
 
-        allFacets += userFacets
-        def selectedFacets = allFacets.collectEntries{
+        [   facetsList: facetsList,
+            geographicFacets:selectedGeographicFacets,
+            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
+            results: resp ]
+    }
+
+    /**
+     * The purpose of this method is to enable the display of the spatial object corresponding to a selected
+     * value from a geographic facet (e.g. to display the polygon representing NSW on the map if the user has
+     * selected NSW from the "state" facet list.
+     *
+     * First we check to see if we have a geographic facet configuration for any of the user's facet selections.
+     * If so, we find the spatial object configuration matching the selected value and add that to the returned
+     * model.  The selected polygon can then be requested by PID from geoserver.
+     *
+     * By convention, the facet field names in the search index have a suffix of "Facet" whereas the facet configuration
+     * doesn't include the word "Facet" (although maybe it should).
+     */
+    private ArrayList findSelectedGeographicFacets(Collection allFacets) {
+        def selectedFacets = allFacets.collectEntries {
             def nameVal = it.split(':')
-
-            def name = nameVal[0].substring(0, nameVal[0].indexOf('Facet'))
-
-            return [(name):nameVal[1]]
+            return [(nameVal[0]): nameVal[1]]
         }
 
         def facetConfig = metadataService.getGeographicFacetConfig()
 
-        def geographicFacetConfig = []
-        selectedFacets.each {name, value ->
-            def config = facetConfig[name]
-            if (name == 'gerSubRegion') {
-                value = 'GER '+value
-            }
-            if (config && config[value]) {
-                geographicFacetConfig << config[value]
-            }
-        }
+        def selectedGeographicFacets = []
+        selectedFacets.each { name, value ->
 
-        def resp = searchService.HomePageFacets(params)
-        resp?.facets?.gerSubRegionFacet?.terms?.each {
-            if (it.term.startsWith('GER')) {
-                it.term = it.term.substring(4)
+            def matchingFacet = facetConfig.find { name.startsWith(it.key) }
+            if (matchingFacet) {
+                def matchingValue = matchingFacet.value.find { it.key == value }
+                if (matchingValue) {
+                    selectedGeographicFacets << matchingValue.value
+                }
             }
         }
-        [   facetsList: params.facets.tokenize(","),
-            geographicFacets:geographicFacetConfig,
-            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
-            results: resp ]
+        selectedGeographicFacets
     }
 
     def tabbed() {
