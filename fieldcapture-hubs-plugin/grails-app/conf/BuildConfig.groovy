@@ -38,7 +38,7 @@ grails.project.dependency.resolution = {
     def seleniumVersion = "2.21.0"
     def metadataExtractorVersion = "2.6.2"
     def imgscalrVersion = "4.2"
-    def httpmimeVersion = "4.1.2"
+    def httpmimeVersion = "4.2.1"
     def jtsVersion = "1.8"
     def geoToolsVersion = "11.1"
     dependencies {
@@ -50,6 +50,10 @@ grails.project.dependency.resolution = {
         compile "com.vividsolutions:jts:${jtsVersion}"
         compile "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
         compile "joda-time:joda-time:2.3"
+        compile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
+        compile "org.apache.httpcomponents:httpcore:4.2.1"
+        compile "org.apache.httpcomponents:httpclient:4.2.1"
+
 
         compile group: 'au.org.ala',
                 name: 'ala-cas-client',
@@ -75,8 +79,10 @@ grails.project.dependency.resolution = {
         runtime ":cache-headers:1.1.6"
 
         runtime ":cached-resources:1.0"
-        runtime ":rest:0.8" // Override the web-theme-plugin rest version.
-        compile (":ala-web-theme:1.0.0")
+        runtime (":rest:0.8") {
+            excludes "httpclient", "httpcore"
+        }
+        compile (":ala-web-theme:1.0.1")
         runtime ":csv:0.3.1"
         runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
