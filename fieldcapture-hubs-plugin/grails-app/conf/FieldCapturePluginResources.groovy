@@ -24,8 +24,8 @@ modules = {
     nrmSkin {
         dependsOn 'application,bootstrap'
         resource url: [dir:'css/nrm/css', file:'screen.css', plugin: 'fieldcapture-plugin'], plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
-        resource url: 'css/capture.css', plugin: 'fieldcapture-plugin'
-        resource url: 'css/nrm/images/AustGovt_inline_white_on_transparent.png', plugin: 'fieldcapture-plugin'
+        resource url: [dir:'css/', file:'capture.css', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
+        resource url: [dir:'css/nrm/images/', file:'AustGovt_inline_white_on_transparent.png', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
     }
 
     wmd {
