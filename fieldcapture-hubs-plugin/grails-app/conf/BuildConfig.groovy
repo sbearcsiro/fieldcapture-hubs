@@ -8,6 +8,7 @@ grails.project.source.level = 1.6
 grails.project.fork.run=false
 
 //grails.plugin.location.'images-client-plugin'='../images-client-plugin'
+grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
