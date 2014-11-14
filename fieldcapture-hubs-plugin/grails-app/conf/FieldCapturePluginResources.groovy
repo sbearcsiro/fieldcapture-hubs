@@ -25,6 +25,7 @@ modules = {
         dependsOn 'application,bootstrap'
         resource url: [dir:'css/nrm/css', file:'screen.css', plugin: 'fieldcapture-plugin'], plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         resource url: 'css/capture.css', plugin: 'fieldcapture-plugin'
+        resource url: 'css/nrm/images/AustGovt_inline_white_on_transparent.png', plugin: 'fieldcapture-plugin'
     }
 
     wmd {
@@ -164,9 +165,13 @@ modules = {
 
 
     jqueryGantt {
-        resource url:'jquery-gantt/css/style.css', plugin: 'fieldcapture-plugin'
+        resource url:[dir:'jquery-gantt/css/', file:'style.css', plugin: 'fieldcapture-plugin']
         resource url:'css/gantt.css', plugin: 'fieldcapture-plugin'
-        resource url:'jquery-gantt/js/jquery.fn.gantt.js', plugin: 'fieldcapture-plugin'
+        resource url:[dir:'jquery-gantt/js/', file:'jquery.fn.gantt.js', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'jquery-gantt/img/', file:'grid.png', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'jquery-gantt/img/', file:'icon_sprite.png', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'jquery-gantt/img/', file:'slider_handle.png', plugin: 'fieldcapture-plugin']
+
     }
 
     projects {
