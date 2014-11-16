@@ -15,7 +15,7 @@ before_install:
   's/^app\.grails\.version=//g'`
 - gvm install grails $GRAILS_VERSION || true
 before_script:
-- mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_old.groovy
+- mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_new.groovy
 - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
   grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
 script: 
@@ -23,5 +23,5 @@ script:
   - cd ../fieldcapture-hub; grails clean; grails refresh-dependencies --non-interactive; grails prod war --non-interactive && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
 env:
   global:
-  - secure: cWYm92Lwc8jyxwd4eYDEEtXJhF5SrFD/eN+e2d6V3Vk22qTlCZDOzKY3XEg5O5KAM0htYdSVcif47fpFJh6GFnvO0C2AiSoWLeqMXwiTijQK/nfc/WirqRK71UtGvQYTVjNn3Si8XETsFB3jwYuqV5T20cJ/13bZxxWCc6cU6M4=
-  - secure: us9oCHkG8Ls9EogTh6h5ZbICKiwuKFX4IhuaayyGlPBgg5XLl3VY+FHEPMsxrSOaEhCvdXz3dijvfRp43HRa9bx9No1iL3ttIERwaXP7ERYKlRWUD6xh8p30XZ+NABo9xCFsIOYSJQbkvxaAFAbG11h4BX557s7bwNwJbVDBspc=
+  - secure: enbmAS6MFwP5f/94ZK8UHbGu0uJtdKNGr1HJsVTCa2Nfv5P3zXRkbmW2kKsvV7AXROUOz7+GAkNYzWbb1NApLkNcjwq5Dptip20uYfYCXqgVw76S2ddubpsOWoBgGETpSCO0zi6YnBwzdc1aY5+IP8UKgY34sHjgppNfe39UUmQ=
+  - secure: K6gmCiU2ADA9MnNneisQ9gH+66D5exszR5zAshEN45VwbT9FEW8y5LYGjyMPKJZW18zW926q2Hd6jExOjpjOqS5Pbm8ST+Jn/T8Hbd1k33X4O5BJ344xk2wi9J4skZX2gCuS4NX0HuKbcAFin8LQN/MXS1w9cJkFEOjSQlGkoFk=
