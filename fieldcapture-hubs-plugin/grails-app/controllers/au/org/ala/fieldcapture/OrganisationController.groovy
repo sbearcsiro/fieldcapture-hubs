@@ -4,7 +4,7 @@ import grails.converters.JSON
 
 class OrganisationController {
 
-    def organisationService
+    def organisationService, searchService
 
     def list() {
         def organisations = organisationService.list()
@@ -15,11 +15,14 @@ class OrganisationController {
     def index(String id) {
         def organisation = organisationService.get(id, 'all')
 
-        [organisation:organisation]
+        // Get dashboard information for the organisation.
+        def dashboard = searchService.dashboardReport([fq:'organisationFacet:'+organisation.name])
+
+        [organisation:organisation, dashboard:dashboard]
     }
 
     def create() {
-        render model:[organisation:[:]]
+        [organisation:[:]]
     }
 
     def edit(String id) {

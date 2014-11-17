@@ -5,6 +5,8 @@
     <meta name="layout" content="${grailsApplication.config.layout.skin?:'main'}"/>
     <title>${organisation.name.encodeAsHTML()} | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
+    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+
     <r:script disposition="head">
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
@@ -13,7 +15,8 @@
             documentDeleteUrl: '${g.createLink(controller:"proxy", action:"deleteDocument")}',
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
-            organisationListUrl: '${g.createLink(action:"list")}'
+            organisationListUrl: '${g.createLink(action:"list")}',
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'dashboardReport', params: params)}"
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation"/>
@@ -44,15 +47,25 @@
 
 
         <div class="row-fluid">
-            <span class="span12" >
-                <h4>Projects</h4>
-                <div class="row-fluid">
-                    <g:render template="/shared/projectsList"/>
-                </div>
-            </span>
-
+            <ul class="nav nav-tabs" data-tabs="tabs">
+                <li class="active tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+            </ul>
         </div>
     </div>
+
+<div class="tab-content">
+    <div class="tab-pane active" id="projects">
+            <g:render template="/shared/projectsList"/>
+    </div>
+
+    <div class="tab-pane" id="dashboard">
+        <div class="loading-message">
+            <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+        </div>
+    </div>
+
+</div>
 
 
 
@@ -89,12 +102,28 @@
 
     $(function () {
 
-        var organisation = <fc:encodeModel model="${organisation}"/>
+        var organisation =<fc:encodeModel model="${organisation}"/>
         var organisationViewModel = new OrganisationViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);
 
+        var dashboardShown = false;
+        $('#dashboard-tab').on('shown', function (e) {
+
+            if (!dashboardShown) {
+                dashboardShown = true;
+
+                $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name}, function(data) {
+                    $('#dashboard').html(data);
+                    $('#dashboard .helphover').popover({animation: true, trigger:'hover', container:'body'});
+                });
+
+            }
+        });
+
     });
+
+
 
 
 
