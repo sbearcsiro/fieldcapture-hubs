@@ -22,9 +22,8 @@ class HomeController {
         ]
     }
     def index() {
-        params.facets = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+        def facetsList = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
 
-        def facetsList = params.facets.tokenize(",")
         def allFacets = params.getList('fq') + (SettingService.getHubConfig().defaultFacetQuery?:[])
 
         def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)

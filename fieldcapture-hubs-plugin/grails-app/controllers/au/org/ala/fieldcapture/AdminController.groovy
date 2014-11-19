@@ -1,5 +1,6 @@
 package au.org.ala.fieldcapture
 
+import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
 import grails.util.Environment
 import grails.util.GrailsNameUtils
@@ -417,6 +418,7 @@ class AdminController {
         render result as JSON
     }
 
+    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def assignPOIIds() {
         def errors = []
         def count = 0
@@ -434,11 +436,34 @@ class AdminController {
         render result as JSON
     }
 
+    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def migratePhotoPoints() {
         def output = outputService.get('966f6787-14d5-4395-80a2-431cabde729a')
         adminService.migratePhotoPoints([output])
         //adminService.migratePhotoPoints()
         render text:'ok'
+    }
+
+    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
+    def manageHubs() {
+        render view:'editHub', model:[programsModel: metadataService.programsModel()]
+    }
+
+    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
+    def loadHubSettings(String id) {
+        response.contentType = 'application/json'
+        render settingService.getHubSettings(id) as JSON
+    }
+
+    @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
+    def saveHubSettings() {
+        HubSettings settings = new HubSettings(request.JSON)
+        settingService.updateHubSettings(settings)
+
+        response.contentType = 'application/json'
+        def message = [status:'ok']
+        render message as JSON
+
     }
 
 }

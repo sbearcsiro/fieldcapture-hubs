@@ -111,7 +111,7 @@ class SearchService {
         params.fsort = "term"
         //params.offset = 0
         params.query = "docType:project"
-        params.facets = params.facets ? params.facets : SettingService.getHubConfig().availableFacets
+        params.facets = params.facets ?: SettingService.getHubConfig().availableFacets.join(',')
 
         addDefaultFacetQuery(params)
 

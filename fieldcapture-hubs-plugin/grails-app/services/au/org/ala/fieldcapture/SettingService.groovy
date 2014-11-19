@@ -1,5 +1,6 @@
 package au.org.ala.fieldcapture
 
+import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
 import groovy.text.GStringTemplateEngine
 
@@ -8,15 +9,15 @@ class SettingService {
     private static def ThreadLocal localHubConfig = new ThreadLocal()
     private static final String HUB_CONFIG_KEY_SUFFIX = '.hub.configuration'
 
-    public static void setHubConfig(hubConfig) {
-        localHubConfig.set(hubConfig)
+    public static void setHubConfig(HubSettings hubSettings) {
+        localHubConfig.set(hubSettings)
     }
 
     public static void clearHubConfig() {
         localHubConfig.remove()
     }
 
-    public static Map getHubConfig() {
+    public static HubSettings getHubConfig() {
         return localHubConfig.get()
     }
 
@@ -35,7 +36,7 @@ class SettingService {
         if (!settings) {
             settings = [
                     settingsPageKeyPrefix:'',
-                    availableFacets: "status,organisationFacet,associatedProgramFacet,associatedSubProgramFacet,mainThemeFacet,stateFacet,nrmFacet,lgaFacet,mvgFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+                    availableFacets: ['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet']
             ]
         }
 
@@ -56,14 +57,14 @@ class SettingService {
     }
 
     def getSettingText(SettingPageType type) {
-        def key = localHubConfig.get().settingsPageKeyPrefix + type.key
+        def key = localHubConfig.get().id + type.key
 
         get(key)
 
     }
 
     def setSettingText(SettingPageType type, String content) {
-        def key = localHubConfig.get().settingsPageKeyPrefix + type.key
+        def key = localHubConfig.get().id + type.key
 
         set(key, content)
     }
@@ -120,13 +121,14 @@ class SettingService {
         return hub+HUB_CONFIG_KEY_SUFFIX
     }
 
-    def getHubSettings(hub) {
-        if (!hub) { hub = 'default' }
-        getJson(hubSettingsKey(hub))
+    HubSettings getHubSettings(hub) {
+        if (!hub) { hub = grailsApplication.config.app.default.hub?:'default' }
+        def json = getJson(hubSettingsKey(hub))
+        new HubSettings(new HashMap(json))
     }
 
-    def updateHubSettings(hub, settings) {
-        set(hubSettingsKey(hub), settings)
+    def updateHubSettings(HubSettings settings) {
+        set(hubSettingsKey(settings.id), (settings as JSON).toString())
     }
 
 }
