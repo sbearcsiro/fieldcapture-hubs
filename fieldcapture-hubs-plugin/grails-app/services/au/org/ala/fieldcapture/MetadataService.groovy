@@ -2,7 +2,7 @@ package au.org.ala.fieldcapture
 
 class MetadataService {
 
-    def grailsApplication, webService, cacheService
+    def grailsApplication, webService, cacheService, settingService
 
     def activitiesModel() {
         return cacheService.get('activity-model',{
@@ -26,10 +26,22 @@ class MetadataService {
     }
 
     def programsModel() {
-        return cacheService.get('programs-model',{
+        def allPrograms = new HashMap(cacheService.get('programs-model',{
             webService.getJson(grailsApplication.config.ecodata.baseUrl +
                 'metadata/programsModel')
-        })
+        }))
+
+        def hubPrograms = SettingService.getHubConfig().supportedPrograms?:allPrograms.programs.findAll { !it.isMeritProgramme }.collect { it.name }
+
+        if (hubPrograms) {
+            allPrograms.programs.each { program ->
+               if (!(program.name in hubPrograms)) {
+                    program.readOnly = true
+                }
+            }
+        }
+        allPrograms
+
     }
 
     def programModel(program) {

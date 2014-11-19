@@ -520,6 +520,9 @@
 
                 self.loadPrograms = function (programsModel) {
                     $.each(programsModel.programs, function (i, program) {
+                        if (program.readOnly) {
+                            return;
+                        }
                         self.transients.programs.push(program.name);
                         self.transients.subprograms[program.name] = $.map(program.subprograms,function (obj, i){return obj.name});
                     });

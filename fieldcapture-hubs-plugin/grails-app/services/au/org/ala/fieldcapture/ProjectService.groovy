@@ -202,11 +202,11 @@ class ProjectService {
     }
 
     /**
-     * Returns the programs model for use by a particular project.  At the moment, merit programmes are filtered out.
+     * Returns the programs model for use by a particular project.  At the moment, this method just delegates to the metadataservice,
+     * however a per organisation programs model is something being discussed.
      */
     def programsModel() {
-        def fullModel = metadataService.programsModel()
-        [programs: fullModel.programs.grep{!it.isMeritProgramme}] as JSON
+        metadataService.programsModel()
     }
 
     /**
