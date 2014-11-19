@@ -19,12 +19,10 @@ before_script:
 
 script: 
   - cd fieldcapture-hubs-plugin; 
-  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
-  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties | grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
   - grails clean; grails refresh-dependencies && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
   - cd ../fieldcapture-hub; 
-  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
-  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties | grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
   - grails clean; grails refresh-dependencies --non-interactive; grails prod war --non-interactive && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
 env:
   global:
