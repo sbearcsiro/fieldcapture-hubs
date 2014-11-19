@@ -11,16 +11,21 @@ before_install:
 - ~/install_gvm.sh
 - echo "gvm_auto_answer=true" > ~/.gvm/etc/config
 - source ~/.gvm/bin/gvm-init.sh
-- GRAILS_VERSION=`grep '^app\.grails\.version=' ./application.properties | sed -e
+- GRAILS_VERSION=`grep '^app\.grails\.version=' ./fieldcapture-hubs-plugin/application.properties | sed -e
   's/^app\.grails\.version=//g'`
 - gvm install grails $GRAILS_VERSION || true
 before_script:
 - mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_new.groovy
-- MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
-  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+
 script: 
-  - cd fieldcapture-hubs-plugin; grails clean; grails refresh-dependencies && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
-  - cd ../fieldcapture-hub; grails clean; grails refresh-dependencies --non-interactive; grails prod war --non-interactive && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
+  - cd fieldcapture-hubs-plugin; 
+  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
+  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+  - grails clean; grails refresh-dependencies && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
+  - cd ../fieldcapture-hub; 
+  - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties |
+  grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
+  - grails clean; grails refresh-dependencies --non-interactive; grails prod war --non-interactive && grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
 env:
   global:
   - secure: enbmAS6MFwP5f/94ZK8UHbGu0uJtdKNGr1HJsVTCa2Nfv5P3zXRkbmW2kKsvV7AXROUOz7+GAkNYzWbb1NApLkNcjwq5Dptip20uYfYCXqgVw76S2ddubpsOWoBgGETpSCO0zi6YnBwzdc1aY5+IP8UKgY34sHjgppNfe39UUmQ=
