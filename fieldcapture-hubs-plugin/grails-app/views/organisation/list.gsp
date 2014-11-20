@@ -137,7 +137,7 @@
 
         };
 
-        var organisations = <fc:encodeModel model="${organisations}" default="${[]}"/>
+        var organisations = <fc:modelAsJavascript model="${organisations}" default="${[]}"/>;
         var organisationsViewModel = new OrganisationsViewModel(organisations);
 
         ko.applyBindings(organisationsViewModel);

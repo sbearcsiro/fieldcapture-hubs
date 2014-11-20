@@ -451,8 +451,11 @@ class AdminController {
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def loadHubSettings(String id) {
-        response.contentType = 'application/json'
-        render settingService.getHubSettings(id) as JSON
+        def hubSettings = settingService.getHubSettings(id)
+        if (!hubSettings) {
+            hubSettings = new HubSettings()
+        }
+        respond hubSettings, [formats:['json','xml']]
     }
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
@@ -460,9 +463,8 @@ class AdminController {
         HubSettings settings = new HubSettings(request.JSON)
         settingService.updateHubSettings(settings)
 
-        response.contentType = 'application/json'
         def message = [status:'ok']
-        render message as JSON
+        respond message, [formats:['json','xml']]
 
     }
 

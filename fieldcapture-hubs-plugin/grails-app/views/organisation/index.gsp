@@ -102,7 +102,7 @@
 
     $(function () {
 
-        var organisation =<fc:encodeModel model="${organisation}"/>
+        var organisation =<fc:modelAsJavascript model="${organisation}"/>;
         var organisationViewModel = new OrganisationViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);

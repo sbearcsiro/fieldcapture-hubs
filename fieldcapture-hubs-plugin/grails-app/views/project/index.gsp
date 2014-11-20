@@ -778,7 +778,7 @@
                 ${project.sites},
                 ${activities ?: []},
                 ${user?.isEditor?:false});
-            viewModel.loadPrograms(${programs});
+            viewModel.loadPrograms(<fc:modelAsJavascript model="${programs}"/>);
             ko.applyBindings(viewModel);
 
             // retain tab state for future re-visits

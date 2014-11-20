@@ -157,7 +157,7 @@
 
         };
 
-        var organisation = <fc:encodeModel model="${organisation}"/>
+        var organisation = <fc:modelAsJavascript model="${organisation}"/>;
         var organisationViewModel = new OrganisationEditViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);

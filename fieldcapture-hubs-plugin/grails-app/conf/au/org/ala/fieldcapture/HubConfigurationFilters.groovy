@@ -8,7 +8,6 @@ class HubConfigurationFilters {
         all(controller: '*', action: '*') {
             before = {
                 settingService.loadHubConfig(params.hub)
-                request.setAttribute('hubConfig', SettingService.getHubConfig())
             }
             after = { Map model ->
 

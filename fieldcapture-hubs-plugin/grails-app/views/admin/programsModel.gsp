@@ -230,7 +230,7 @@
             };
         };
         var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-        var viewModel = new ViewModel(${programsModel}, activityTypes);
+        var viewModel = new ViewModel(<fc:modelAsJavascript model="${programsModel}"/>, activityTypes);
         ko.applyBindings(viewModel);
     });
 </r:script>

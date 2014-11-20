@@ -107,13 +107,18 @@
            };
 
            self.transients.selectedHub.subscribe(function(newValue) {
-               $.get(getSettingsUrl, {hub:newValue}, function(data) {
+               $.get(getSettingsUrl, {id:newValue, format:'json'}, function(data) {
                     if (!data.id) {
                         self.transients.message('Creating a new hub with id: '+newValue);
                         data.id = newValue;
                     }
+                    else {
+                        self.transients.message('');
+                    }
                     self.loadSettings(data);
 
+               }, 'json').fail(function() {
+                 self.transients.message('Error loading hub details');
                });
            });
 
@@ -148,7 +153,7 @@
            };
 
         };
-        var programsModel = <fc:encodeModel model="${programsModel}"/>;
+        var programsModel = <fc:modelAsJavascript model="${programsModel}"/>;
         var viewModel = new HubSettingsViewModel(programsModel);
 
         ko.applyBindings(viewModel);

@@ -241,7 +241,7 @@
         }
 
         var viewModel = new ViewModel(${project ?: [:]});
-        viewModel.loadPrograms(${programs});
+        viewModel.loadPrograms(<fc:modelAsJavascript model="${programs}"/>);
         ko.applyBindings(viewModel);
 
     });

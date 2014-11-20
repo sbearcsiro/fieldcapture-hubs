@@ -3,18 +3,23 @@ package au.org.ala.fieldcapture
 import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
 import groovy.text.GStringTemplateEngine
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import org.springframework.web.context.request.RequestAttributes
 
 class SettingService {
 
     private static def ThreadLocal localHubConfig = new ThreadLocal()
     private static final String HUB_CONFIG_KEY_SUFFIX = '.hub.configuration'
+    public static final String HUB_CONFIG_ATTRIBUTE_NAME = 'hubConfig'
 
     public static void setHubConfig(HubSettings hubSettings) {
         localHubConfig.set(hubSettings)
+        GrailsWebRequest.lookup()?.setAttribute(HUB_CONFIG_ATTRIBUTE_NAME, hubSettings, RequestAttributes.SCOPE_REQUEST)
     }
 
     public static void clearHubConfig() {
         localHubConfig.remove()
+        GrailsWebRequest.lookup()?.setAttribute(HUB_CONFIG_ATTRIBUTE_NAME, null, RequestAttributes.SCOPE_REQUEST)
     }
 
     public static HubSettings getHubConfig() {
@@ -26,18 +31,27 @@ class SettingService {
 
     /**
      * Checks if there is a configuration defined for the specified hub.
+     * Side effect:  if the supplied hub is invalid, the default hub will be loaded.  This is done as
+     * the URL mappings validation is done in a servlet filter and if the validation returns false the
+     * 404 page will be rendered without our hub filter being invoked.
      */
     boolean isValidHub(hub) {
-        getHubSettings(hub) as boolean
+        def result = (getHubSettings(hub) != null)
+        if (!result) {
+            loadHubConfig(null) // Load the default hub so the 404 page has access to theme information
+        }
+        result
     }
 
     def loadHubConfig(hub) {
         def settings = getHubSettings(hub)
         if (!settings) {
-            settings = [
-                    settingsPageKeyPrefix:'',
+            log.warn("no settings returned!")
+            settings = new HubSettings(
+                    title:'Default',
+                    id:'default',
                     availableFacets: ['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet']
-            ]
+            )
         }
 
         SettingService.setHubConfig(settings)
@@ -124,7 +138,8 @@ class SettingService {
     HubSettings getHubSettings(hub) {
         if (!hub) { hub = grailsApplication.config.app.default.hub?:'default' }
         def json = getJson(hubSettingsKey(hub))
-        new HubSettings(new HashMap(json))
+
+        json.id ? new HubSettings(new HashMap(json)) : null
     }
 
     def updateHubSettings(HubSettings settings) {

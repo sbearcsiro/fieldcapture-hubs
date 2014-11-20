@@ -219,7 +219,7 @@ environments {
 
 // log4j configuration
 if (!logging.dir) {
-    logging.dir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs'  : '/var/log/tomcat6')
+    logging.dir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs'  : '.')
 }
 def loggingDir = logging.dir
 log4j = {

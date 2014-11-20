@@ -290,7 +290,7 @@
         }
         var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
         var viewModel = new ViewModel(${project ?: [:]}, activityTypes);
-        viewModel.loadPrograms(${programs});
+        viewModel.loadPrograms(<fc:modelAsJavascript model="${programs}"/>);
         ko.applyBindings(viewModel);
 
         $('#selectAll').change(function() {
