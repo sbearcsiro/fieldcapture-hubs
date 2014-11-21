@@ -91,7 +91,9 @@
         </ul>
     </div>
     <div class="row-fluid">
-        <span class="span9"><button class="pull-left btn" data-bind="click:function() {name.editing(true);}" style="margin-top:5px; margin-right:5px;"><i class="icon-edit"></i></button><h2 data-bind="clickToEdit:name" style="display:inline"></h2></span>
+        <span class="span9">
+            <button class="pull-left btn" data-bind="click:function() {name.editing(true);}" style="margin-top:5px; margin-right:5px;"><i class="icon-edit"></i></button><h2 data-bind="clickToEdit:name" style="display:inline"></h2>
+        </span>
         <span class="span3">
             <span class="btn fileinput-button pull-right"
                   data-url="${createLink(controller: 'image', action:'upload')}"
@@ -128,6 +130,8 @@
 
                 <span class="demphasise" data-bind="html:description.markdownToHtml()"></span>
             </div>
+            <div class="smallFont demphasise">Learn more at:</div><div style="display:inline"><button class="btn popup-edit" data-bind="click:function() {url.editing(true);}"><i class="icon-edit"></i></button> <span data-prompt="your organisation homepage" data-bind="clickToEdit:url"></span></div>
+
         </span>
 
         <span class="span3">

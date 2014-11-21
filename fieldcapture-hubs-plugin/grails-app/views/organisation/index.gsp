@@ -77,6 +77,7 @@
     <span class="span6">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
     </span>
     <span class="span3">
         <h4>News and events</h4>
@@ -88,6 +89,8 @@
     <span class="span9">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+
     </span>
     <span class="span3">
         <h4>News and events</h4>
