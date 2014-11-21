@@ -836,3 +836,108 @@ ko.extenders.markdown = function(target, options) {
     return target;
 };
 
+
+ko.bindingHandlers.stagedImageUpload = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+
+        var defaultConfig = {
+            maxWidth: 300,
+            minWidth:150,
+            minHeight:150,
+            maxHeight: 300,
+            previewSelector: '.preview'
+        };
+        var size = ko.observable();
+        var progress = ko.observable();
+        var error = ko.observable();
+        var complete = ko.observable(true);
+
+        var uploadProperties = {
+            size: size,
+            progress: progress,
+            error:error,
+            complete:complete
+        };
+        var innerContext = bindingContext.createChildContext(bindingContext);
+        ko.utils.extend(innerContext, uploadProperties);
+
+        var target = valueAccessor();
+        var $elem = $(element);
+        var role = $elem.data('role');
+        var ownerKey = $elem.data('owner-type');
+        var ownerValue = $elem.data('owner-id');
+        var url = $elem.data('url');
+        var owner = {};
+        owner[ownerKey] = ownerValue;
+        var config = {
+            url:url,
+            role: role,
+            owner:owner
+        };
+        config = $.extend({}, defaultConfig, config);
+
+         // Expected to be a ko.observableArray
+        $(element).fileupload({
+            url:config.url,
+            autoUpload:true,
+            forceIframeTransport: true
+        }).on('fileuploadadd', function(e, data) {
+            complete(false);
+            progress(1);
+        }).on('fileuploadprocessalways', function(e, data) {
+            if (data.files[0].preview) {
+                if (config.previewSelector !== undefined) {
+                    var previewElem = $(element).parent().find(config.previewSelector);
+                    previewElem.append(data.files[0].preview);
+                }
+            }
+        }).on('fileuploadprogressall', function(e, data) {
+            progress(Math.floor(data.loaded / data.total * 100));
+            size(data.total);
+        }).on('fileuploaddone', function(e, data) {
+
+            var resultText = $('pre', data.result).text();
+            var result = $.parseJSON(resultText);
+
+            if (!result) {
+                result = {};
+                error('No response from server');
+            }
+
+            if (result.files[0]) {
+                target.push(ko.bindingHandlers.stagedImageUpload.toDocument(result.files[0], config));
+                complete(true);
+            }
+            else {
+                error(result.error);
+            }
+
+        }).on('fileuploadfail', function(e, data) {
+            error(data.errorThrown);
+        });
+
+        ko.applyBindingsToDescendants(innerContext, element);
+
+        return { controlsDescendantBindings: true };
+    },
+    toDocument:function(f, config) {
+
+        var data = {
+            thumbnailUrl: f.thumbnail_url,
+            url: f.url,
+            contentType: f.contentType,
+            filename: f.name,
+            filesize: f.size,
+            dateTaken: f.isoDate,
+            lat: f.decimalLatitude,
+            lng: f.decimalLongitude,
+            name: f.name,
+            type: 'image',
+            role:config.role
+        };
+
+        return $.extend({}, data, config.owner);
+    }
+};
+
+

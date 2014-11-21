@@ -4,7 +4,7 @@ import grails.converters.JSON
 
 class OrganisationController {
 
-    def organisationService, searchService
+    def organisationService, searchService, documentService
 
     def list() {
         def organisations = organisationService.list()
@@ -46,8 +46,15 @@ class OrganisationController {
 
     def ajaxUpdate() {
         def organisationDetails = request.JSON
+
+        def documents = organisationDetails.remove('documents')
         def result = organisationService.update(organisationDetails.organisationId?:'', organisationDetails)
 
+        documents.each { doc ->
+            doc.organisationId = organisationDetails.organisationId?:result.resp?.organisationId
+            documentService.saveStagedImageDocument(doc)
+
+        }
         if (result.error) {
             render result as JSON
         } else {

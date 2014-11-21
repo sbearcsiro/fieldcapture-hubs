@@ -16,11 +16,12 @@
             organisationViewUrl: '${g.createLink(action:"index")}',
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationSaveUrl: "${createLink(action:'ajaxUpdate')}",
+            imageUploadUrl: "${createLink(controller: 'image', action:'upload')}",
             returnTo: "${params.returnTo?:createLink(action:'index', id:organisation.organisationId)}"
 
             };
     </r:script>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,jqueryValidationEngine,organisation"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,jqueryValidationEngine,organisation,jQueryFileUpload"/>
 
     <style type="text/css">
 
@@ -92,8 +93,14 @@
     <div class="row-fluid">
         <span class="span9"><button class="pull-left btn" data-bind="click:function() {name.editing(true);}" style="margin-top:5px; margin-right:5px;"><i class="icon-edit"></i></button><h2 data-bind="clickToEdit:name" style="display:inline"></h2></span>
         <span class="span3">
-        <button class="btn pull-right" data-bind="click:attachBannerImage, visible:!bannerUrl()"><i class="icon-plus"></i> Attach Background Image</button>
-        <button class="btn pull-right" data-bind="click:removeBannerImage, visible:bannerUrl()"><i class="icon-remove"></i> Remove Background Image</button>
+            <span class="btn fileinput-button pull-right"
+                  data-url="${createLink(controller: 'image', action:'upload')}"
+                  data-role="banner"
+                  data-owner-key="organisationId"
+                  data-owner-id="${organisation.organisationId}"
+                  data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input type="file" name="files"><span>Attach Background Image</span></span>
+
+            <button class="btn pull-right" data-bind="click:removeBannerImage, visible:bannerUrl()"><i class="icon-remove"></i> Remove Background Image</button>
         </span>
 
 
@@ -103,7 +110,14 @@
     <div class="row-fluid">
         <span class="span3 image-box" style="text-align: center; min-height:300px; position:relative">
             <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-            <button class="btn main-image-button" data-bind="click:attachMainImage, visible:!mainImageUrl()"><i class="icon-plus"></i> Attach Image</button>
+
+            <span class="btn fileinput-button main-image-button"
+                  data-url="${createLink(controller: 'image', action:'upload')}"
+                  data-role="mainImage"
+                  data-owner-key="organisationId"
+                  data-owner-id="${organisation.organisationId}"
+                  data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input type="file" name="files"><span>Attach Photo</span></span>
+
             <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-plus"></i> Remove Image</button>
         </span>
 
@@ -153,7 +167,11 @@
             };
             self.cancel = function() {
                 window.location = fcConfig.returnTo;
-            }
+            };
+            self.uploadConfig = {
+                url: fcConfig.imageUploadUrl,
+                owner: {organisationId:organisation.organisationid}
+            };
 
         };
 

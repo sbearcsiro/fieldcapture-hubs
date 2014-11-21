@@ -32,4 +32,26 @@ class DocumentService {
         def url = "${grailsApplication.config.ecodata.baseUrl}site/${id}/documents"
         return webService.doPost(url, [:])
     }
+
+    /**
+     * This method saves a document that has been staged (the image uploaded, but the document object not
+     * created).  The purpose of this is to support atomic create / edits of objects that include document
+     * references, e.g. activities containing photo point photos and organisations.
+     * @param document the document to save.
+     */
+    def saveStagedImageDocument(document) {
+        if (!document.documentId) {
+            document.remove('url')
+            def file = new File(grailsApplication.config.upload.images.path, document.filename)
+            // Create a new document, supplying the file that was uploaded to the ImageController.
+            def result = createDocument(document, document.contentType, new FileInputStream(file))
+            if (!result.error) {
+                file.delete()
+            }
+        }
+        else {
+            // Just update the document.
+            updateDocument(document)
+        }
+    }
 }
