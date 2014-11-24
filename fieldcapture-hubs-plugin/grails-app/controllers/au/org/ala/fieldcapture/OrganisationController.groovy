@@ -2,23 +2,30 @@ package au.org.ala.fieldcapture
 
 import grails.converters.JSON
 
+/**
+ * Processes requests relating to organisations in field capture.
+ */
 class OrganisationController {
 
     def organisationService, searchService, documentService
 
     def list() {
         def organisations = organisationService.list()
-        println organisations
         [organisations:organisations.list?:[]]
     }
 
     def index(String id) {
         def organisation = organisationService.get(id, 'all')
 
-        // Get dashboard information for the organisation.
-        def dashboard = searchService.dashboardReport([fq:'organisationFacet:'+organisation.name])
+        if (!organisation || organisation.error) {
+            organisationNotFound(id, organisation)
+        }
+        else {
+            // Get dashboard information for the response.
+            def dashboard = searchService.dashboardReport([fq: 'organisationFacet:' + organisation.name])
 
-        [organisation:organisation, dashboard:dashboard]
+            [organisation: organisation, dashboard: dashboard]
+        }
     }
 
     def create() {
@@ -28,7 +35,12 @@ class OrganisationController {
     def edit(String id) {
         def organisation = organisationService.get(id)
 
-        [organisation:organisation]
+        if (!organisation || organisation.error) {
+            organisationNotFound(id, organisation)
+        }
+        else {
+            [organisation: organisation]
+        }
     }
 
     def delete(String id) {
@@ -40,8 +52,7 @@ class OrganisationController {
     def ajaxDelete(String id) {
         def result = organisationService.update(id, [status:'deleted'])
 
-        response.contentType = 'application/json'
-        render result as JSON
+        respond result
     }
 
     def ajaxUpdate() {
@@ -58,8 +69,19 @@ class OrganisationController {
         if (result.error) {
             render result as JSON
         } else {
-            //println "json result is " + (result as JSON)
             render result.resp as JSON
         }
+    }
+
+    /**
+     * Redirects to the home page with an error message in flash scope.
+     * @param response the response that triggered this method call.
+     */
+    private void organisationNotFound(id, response) {
+        flash.message = "No organisation found with id: ${id}"
+        if (response?.error) {
+            flash.message += "<br/>${response.error}"
+        }
+        redirect(controller: 'home', model: [error: flash.message])
     }
 }

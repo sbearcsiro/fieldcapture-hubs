@@ -45,28 +45,32 @@
 
         <div class="row-fluid" data-bind="template:detailsTemplate"></div>
 
+        <g:if test="${organisation.projects}">
+            <div class="row-fluid">
+                <ul class="nav nav-tabs" data-tabs="tabs">
+                    <li class="active tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+                </ul>
+            </div>
+            <div class="tab-content row-fluid">
+                <div class="tab-pane active" id="projects">
+                        <g:render template="/shared/projectsList"/>
+                </div>
 
-        <div class="row-fluid">
-            <ul class="nav nav-tabs" data-tabs="tabs">
-                <li class="active tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
-                <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
-            </ul>
-        </div>
+                <div class="tab-pane" id="dashboard">
+                    <div class="loading-message">
+                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+                    </div>
+                </div>
+
+            </div>
+        </g:if>
+        <g:else>
+            <div class="row-fluid">
+               <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+            </div>
+        </g:else>
     </div>
-
-<div class="tab-content">
-    <div class="tab-pane active" id="projects">
-            <g:render template="/shared/projectsList"/>
-    </div>
-
-    <div class="tab-pane" id="dashboard">
-        <div class="loading-message">
-            <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
-        </div>
-    </div>
-
-</div>
-
 
 
 <script id="hasMainImageTemplate" type="text/html">

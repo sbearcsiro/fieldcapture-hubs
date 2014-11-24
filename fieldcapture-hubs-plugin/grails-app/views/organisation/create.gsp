@@ -48,24 +48,41 @@
         <div class="control-group">
             <label class="control-label" for="banner">Banner image</label>
             <div class="controls">
-                <img data-bind="visible:bannerDocument, attr:{src:bannerUrl}">
-                <button class="btn" id="banner" data-bind="click:attachBannerImage">Attach Image</button>
+                <img data-bind="visible:bannerUrl(), attr:{src:bannerUrl}">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action:'upload')}"
+                      data-role="banner"
+                      data-owner-key="organisationId"
+                      data-owner-id="${organisation.organisationId}"
+                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
             </div>
         </div>
 
-        <div class="control-group">
-            <label class="control-label" for="logo">Logo</label>
-            <div class="controls">
-                <img data-bind="visible:logoDocument, attr:{src:logoUrl}">
-                <button class="btn" id="logo" data-bind="click:attachLogoImage">Attach Logo</button>
-            </div>
-        </div>
+        %{--<div class="control-group">--}%
+            %{--<label class="control-label" for="logo">Logo</label>--}%
+            %{--<div class="controls">--}%
+                %{--<img data-bind="visible:logoUrl(), attr:{src:logoUrl}">--}%
+                %{--<span class="btn fileinput-button pull-right"--}%
+                      %{--data-url="${createLink(controller: 'image', action:'upload')}"--}%
+                      %{--data-role="logo"--}%
+                      %{--data-owner-key="organisationId"--}%
+                      %{--data-owner-id="${organisation.organisationId}"--}%
+                      %{--data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Logo</span></span>--}%
+
+            %{--</div>--}%
+        %{--</div>--}%
 
         <div class="control-group">
             <label class="control-label" for="mainImage">Organisation Image</label>
             <div class="controls">
-                <img data-bind="visible:mainImageDocument, attr:{src:mainImageUrl}">
-                <button class="btn" id="mainImage" data-bind="click:attachMainImage">Attach Image</button>
+                <img data-bind="visible:mainImageUrl(), attr:{src:mainImageUrl}">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action:'upload')}"
+                      data-role="mainImage"
+                      data-owner-key="organisationId"
+                      data-owner-id="${organisation.organisationId}"
+                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="mainImage" type="file" name="files"><span>Attach Main Organisation Image</span></span>
+
             </div>
         </div>
 
