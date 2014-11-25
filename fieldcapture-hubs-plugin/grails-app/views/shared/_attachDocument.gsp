@@ -35,6 +35,12 @@
                         </div>
                     </div>
 
+					<div class="control-group" >
+                        <label class="control-label" for="documentStage">Associate to Stage</label>
+                        <div class="controls">
+                            <select style="width: 35%;" data-bind="options:stages, optionsCaption: 'Please select', value:stage"></select>
+                        </div>
+                    </div>
 
                     <div class="control-group">
                         <label class="control-label" for="documentLicense">License</label>
@@ -44,7 +50,7 @@
 
                         </div>
                     </div>
-
+                    
                     <div class="control-group" data-bind="visible:settings.showSettings">
                         <label class="control-label" for="public">Settings</label>
                         <div class="controls">
@@ -78,7 +84,7 @@
                             </label>
                         </div>
                     </div>
-
+                    
                     <div class="control-group">
                         <label class="control-label" for="fileLabel"></label>
 
