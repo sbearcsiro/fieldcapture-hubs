@@ -39,26 +39,8 @@ class ActivityService {
     }
 
     def get(id) {
-        def record = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'activity/' + id)
-        // extract primary outputs
-        /*
-         NOTE we have to be careful to inject JSONObjects not LinkedHashMaps so they will toString correctly
-         when we use the strings to initialise Javascript objects in the GSP.
-         */
-        record.outputs.each {
-            def o = outputService.get(it.outputId)
-            if (o?.data) {
-                it.scores = new JSONArray()
-                o.data.each { k, v ->
-                    // todo: using the prefix 'total' as a marker
-                    // todo: will need to use the data meta-model
-                    if (k.startsWith('total')) {
-                        it.scores << new JSONObject([name: k, score: v])
-                    }
-                }
-            }
-        }
-        record
+        def activity = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'activity/' + id)
+        activity
     }
 
     def update(id, body) {
