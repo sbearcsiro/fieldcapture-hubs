@@ -280,26 +280,6 @@ class ActivityController {
         }
     }
 
-    def bulkEdit() {
-
-        def serviceProvider = params.serviceProvider
-        def activityType = 'Revegetation'
-        def outputs = metadataService.getActivityModel(activityType).outputs?.collect { metadataService.annotatedOutputDataModel(it)}
-        def outputType = 'Participant Information'
-        def outputModel = metadataService.annotatedOutputDataModel(outputType)
-        def projects = webService.doPost(grailsApplication.config.ecodata.baseUrl+'project/search/', [serviceProviderName:serviceProvider])
-        def criteria = [type:activityType, projectId:projects.resp.projects.collect{it.projectId}]
-        def activityResp = webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
-        def activities = activityResp?.resp.activities
-        def outputData = activities.collect { act ->
-            def output = act.outputs?.find{ it.name == outputType }
-            output?output.data:outputModel.collectEntries{[(it.name):0]}
-        }
-
-        [model:outputModel, data:outputData]
-    }
-
-
     private def updatePhotoPoints(activityId, photoPoints) {
 
         def allPhotos = photoPoints.photos?:[]
@@ -321,20 +301,8 @@ class ActivityController {
 
         allPhotos.each { photo ->
 
-            photo.remove('url')
             photo.activityId = activityId
-            if (!photo.documentId) {
-                def file = new File(grailsApplication.config.upload.images.path, photo.filename)
-                // Create a new document for the photo point image, supplying the file that was uploaded to the ImageController.
-                def result = documentService.createDocument(photo, photo.contentType, new FileInputStream(file))
-                if (!result.error) {
-                    file.delete()
-                }
-            }
-            else {
-                // Just update the document.
-                documentService.updateDocument(photo)
-            }
+            documentService.saveStagedImageDocument(photo)
 
         }
     }
