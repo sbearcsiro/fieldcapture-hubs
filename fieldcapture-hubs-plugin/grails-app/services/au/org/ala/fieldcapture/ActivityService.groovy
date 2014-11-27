@@ -6,6 +6,8 @@ class ActivityService {
 
     def webService, grailsApplication, outputService, metadataService
 
+    static dateFormat = "yyyy-MM-dd'T'hh:mm:ssZ"
+
     def getCommonService() {
         grailsApplication.mainContext.commonService
     }
@@ -86,6 +88,17 @@ class ActivityService {
     def bulkUpdateActivities(activityIds, props) {
         def ids = activityIds.collect{"id=${it}"}.join('&')
         webService.doPost(grailsApplication.config.ecodata.baseUrl + "activities/?$ids", props)
+    }
+
+    /** @see au.org.ala.ecodata.ActivityController for a description of the criteria required. */
+    def search(criteria) {
+        // Convert dates to UTC format.
+        criteria.each { key, value ->
+            if (value instanceof Date) {
+                criteria.key = value.format(dateFormat, TimeZone.getTimeZone("UTC"))
+            }
+        }
+        webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
     }
 
         /*def convertToSimpleDate(value) {
