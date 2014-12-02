@@ -82,7 +82,7 @@ grails.project.dependency.resolution = {
             compile ":fieldcapture-plugin:1.0-SNAPSHOT"
         }
 
-        //compile ":fieldcapture-plugin:0.1"
+        build ":release:3.0.1"
 
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"
