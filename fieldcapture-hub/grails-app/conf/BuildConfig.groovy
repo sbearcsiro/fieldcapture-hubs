@@ -51,10 +51,8 @@ grails.project.dependency.resolution = {
         grailsCentral()
         mavenCentral()
         mavenRepo "http://maven.ala.org.au/repository/"
-        // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "http://repo.opengeo.org"
+        mavenRepo "http://download.osgeo.org/webdav/geotools/"
     }
 
     dependencies {
