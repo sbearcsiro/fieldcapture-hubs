@@ -84,9 +84,15 @@
     </div>
 
     <div class="control-group">
-        <label class="control-label" for="default-facets">Default Facet Query (Searches will automatically include these facets)</label>
+        <label class="control-label" for="default-facets-list">Default Facet Query (Searches will automatically include these facets)</label>
         <div class="controls">
-            <input type="text" class="input-xxlarge" id="default-facets" data-bind="value:defaultFacetQuery" placeholder="query string as produced by the home page">
+            <ul id="default-facets-list" data-bind="foreach:defaultFacetQuery">
+                <li>
+                    <input type="text" class="input-xxlarge"  data-bind="value:query" placeholder="query string as produced by the home page"> <button class="btn" data-bind="click:$root.removeDefaultFacetQuery">Remove</button>
+                </li>
+            </ul>
+            <button class="btn" data-bind="click:$root.addDefaultFacetQuery">Add</button>
+
         </div>
     </div>
 
@@ -109,7 +115,7 @@
             self.title = ko.observable();
             self.supportedPrograms = ko.observableArray();
             self.availableFacets = ko.observableArray();
-            self.defaultFacetQuery = ko.observable();
+            self.defaultFacetQuery = ko.observableArray();
             self.bannerUrl = ko.observable();
             self.logoUrl = ko.observable();
             self.documents = ko.observableArray();
@@ -147,6 +153,12 @@
                 selectedHub:ko.observable()
             };
 
+            self.removeDefaultFacetQuery = function(data) {
+                self.defaultFacetQuery.remove(data);
+            };
+            self.addDefaultFacetQuery = function() {
+                self.defaultFacetQuery.push({query:ko.observable()});
+            };
             self.facetOrder = function(facet) {
 
                 var facetList = self.availableFacets ? self.availableFacets : [];
@@ -160,10 +172,14 @@
                self.title(settings.title);
                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
                self.availableFacets(self.orEmptyArray(settings.availableFacets));
-               self.defaultFacetQuery(self.orBlank(settings.defaultFacetQuery));
                self.bannerUrl(self.orBlank(settings.bannerUrl));
                self.logoUrl(self.orBlank(settings.logoUrl));
 
+               if (settings.defaultFacetQuery && settings.defaultFacetQuery instanceof Array) {
+                   $.each(settings.defaultFacetQuery, function(i, obj) {
+                       self.defaultFacetQuery.push({query: ko.observable(obj)});
+                   });
+               }
             };
 
             self.transients.selectedHub.subscribe(function(newValue) {
@@ -186,6 +202,9 @@
                if (value === undefined || value === null) {
                    return [];
                }
+               else if (!(value instanceof Array)) {
+                    value = [value];
+               }
                return value;
            }
            self.orBlank = function(value) {
@@ -197,7 +216,17 @@
 
 
            self.save = function() {
-               var json = JSON.stringify(ko.mapping.toJS(self, {ignore:'transients'}));
+               var js = ko.mapping.toJS(self, {ignore:'transients'});
+               // Unwrap the default facet query which we wrapped to allow binding to values in the array
+               var defaultFacetQuery = [];
+               $.each(js.defaultFacetQuery, function(i, query) {
+                   if (query.query) {
+                       defaultFacetQuery.push(query.query);
+                   }
+               });
+               js.defaultFacetQuery = defaultFacetQuery;
+               var json = JSON.stringify(js);
+
                $.ajax(saveSettingsUrl, {type:'POST', data:json, contentType:'application/json'}).done( function(data) {
                 if (data.errors) {
                     self.transients.message(data.errors);

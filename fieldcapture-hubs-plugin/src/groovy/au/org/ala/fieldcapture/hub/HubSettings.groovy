@@ -21,7 +21,7 @@ class HubSettings {
     List<String> availableFacets
 
     /** All searches made in this hub will automatically include this (facet) query.  Should be of the form <facetName>:<value> */
-    String defaultFacetQuery
+    List<String> defaultFacetQuery
 
     /** Projects created within this hub will only be able to select from the programs configured here */
     List<String> supportedPrograms
