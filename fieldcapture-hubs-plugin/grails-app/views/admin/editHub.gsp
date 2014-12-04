@@ -3,7 +3,7 @@
 <head>
     <meta name="layout" content="adminLayout"/>
     <title>Metadata | Admin | Data capture | Atlas of Living Australia</title>
-    <r:require modules="jquery,knockout,jqueryValidationEngine"/>
+    <r:require modules="jquery,knockout,jqueryValidationEngine,attachDocuments"/>
 </head>
 
 <body>
@@ -13,6 +13,9 @@
 <div class="alert" data-bind="visible:transients.message()">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
     <span data-bind="text:transients.message"></span>
+</div>
+<div>
+    Current hub: ${hubConfig.id}
 </div>
 
 <div>
@@ -24,6 +27,33 @@
         <label class="control-label" for="name">Hub id (used in the URL, so keep short)</label>
         <div class="controls required">
             <input type="text" id="name" class="input-xxlarge" data-bind="value:id" data-validation-engine="validate[required]" readonly="readonly" placeholder="Hub id">
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="banner">Banner image</label>
+        <div class="controls">
+            <img data-bind="visible:bannerUrl(), attr:{src:bannerUrl}">
+            <button type="button" class="btn" data-bind="visible:bannerUrl(), click:removeBanner">Remove Banner</button>
+            <span class="btn fileinput-button pull-right"
+                  data-url="${createLink(controller: 'image', action:'upload')}"
+                  data-role="banner"
+                  data-owner-key="hubId"
+                  data-bind="attr:{'data-owner-id':name}, stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
+        </div>
+    </div>
+
+
+    <div class="control-group">
+        <label class="control-label" for="banner">Logo image</label>
+        <div class="controls">
+            <img data-bind="visible:logoUrl(), attr:{src:logoUrl}">
+            <button type="button" class="btn" data-bind="visible:logoUrl(), click:removeLogo">Remove Logo</button>
+            <span class="btn fileinput-button pull-right"
+                  data-url="${createLink(controller: 'image', action:'upload')}"
+                  data-role="logo"
+                  data-owner-key="hubId"
+                  data-bind="attr:{'data-owner-id':name}, stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Organisation Logo</span></span>
         </div>
     </div>
     <div class="control-group">
@@ -73,22 +103,49 @@
         var getSettingsUrl = '${createLink(controller:'admin', action: 'loadHubSettings')}';
 
         var HubSettingsViewModel = function(programsModel) {
-           var self = this;
+            var self = this;
 
-           self.id = ko.observable();
-           self.title = ko.observable();
-           self.supportedPrograms = ko.observableArray();
-           self.availableFacets = ko.observableArray();
-           self.defaultFacetQuery = ko.observable();
-           var programNames = $.map(programsModel.programs, function(program, i) {
+            self.id = ko.observable();
+            self.title = ko.observable();
+            self.supportedPrograms = ko.observableArray();
+            self.availableFacets = ko.observableArray();
+            self.defaultFacetQuery = ko.observable();
+            self.bannerUrl = ko.observable();
+            self.logoUrl = ko.observable();
+            self.documents = ko.observableArray();
+
+            self.documents.subscribe(function(documents) {
+                $.each(documents, function(i, document) {
+                    if (document.role == 'banner') {
+                        self.bannerUrl(document.url);
+                    }
+                    else if (document.role == 'logo') {
+                        self.logoUrl(document.url);
+                    }
+                });
+            });
+
+            self.removeLogo = function() {
+                self.logoUrl(null);
+                var document = findDocumentByRole(self.documents(), 'logo');
+                self.documents.remove(document);
+            };
+
+            self.removeBanner = function() {
+                self.bannerUrl(null);
+                var document = findDocumentByRole(self.documents(), 'banner');
+                self.documents.remove(document);
+            };
+
+            var programNames = $.map(programsModel.programs, function(program, i) {
                return program.name;
-           });
-           self.transients = {
+            });
+            self.transients = {
                 availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet'],
                 programNames:programNames,
                 message:ko.observable(),
                 selectedHub:ko.observable()
-           };
+            };
 
             self.facetOrder = function(facet) {
 
@@ -98,15 +155,18 @@
                 return index >= 0 ? '('+(index + 1)+')' : '';
             }
 
-           self.loadSettings = function(settings) {
+            self.loadSettings = function(settings) {
                self.id(settings.id);
                self.title(settings.title);
                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
                self.availableFacets(self.orEmptyArray(settings.availableFacets));
                self.defaultFacetQuery(self.orBlank(settings.defaultFacetQuery));
-           };
+               self.bannerUrl(self.orBlank(settings.bannerUrl));
+               self.logoUrl(self.orBlank(settings.logoUrl));
 
-           self.transients.selectedHub.subscribe(function(newValue) {
+            };
+
+            self.transients.selectedHub.subscribe(function(newValue) {
                $.get(getSettingsUrl, {id:newValue, format:'json'}, function(data) {
                     if (!data.id) {
                         self.transients.message('Creating a new hub with id: '+newValue);

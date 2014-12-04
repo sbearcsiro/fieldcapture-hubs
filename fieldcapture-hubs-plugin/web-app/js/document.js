@@ -291,3 +291,12 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
 
     return result;
 }
+
+function findDocumentByRole(documents, role) {
+    for (var i=0; i<documents.length; i++) {
+        if (documents[i].role === role && documents[i].status !== 'deleted') {
+            return documents[i];
+        }
+    }
+    return null;
+};

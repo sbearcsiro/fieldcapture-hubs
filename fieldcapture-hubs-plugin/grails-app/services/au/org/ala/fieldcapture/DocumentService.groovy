@@ -9,6 +9,11 @@ class DocumentService {
 
     def webService, grailsApplication
 
+    def get(String id) {
+        def url = "${grailsApplication.config.ecodata.baseUrl}document/${id}"
+        return webService.getJson(url)
+    }
+
     def createTextDocument(doc, content) {
         doc.content = content
         updateDocument(doc)
@@ -40,18 +45,20 @@ class DocumentService {
      * @param document the document to save.
      */
     def saveStagedImageDocument(document) {
+        def result
         if (!document.documentId) {
             document.remove('url')
             def file = new File(grailsApplication.config.upload.images.path, document.filename)
             // Create a new document, supplying the file that was uploaded to the ImageController.
-            def result = createDocument(document, document.contentType, new FileInputStream(file))
+            result = createDocument(document, document.contentType, new FileInputStream(file))
             if (!result.error) {
                 file.delete()
             }
         }
         else {
             // Just update the document.
-            updateDocument(document)
+            result = updateDocument(document)
         }
+        result
     }
 }

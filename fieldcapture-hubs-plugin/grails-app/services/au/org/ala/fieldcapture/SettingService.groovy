@@ -49,7 +49,7 @@ class SettingService {
             log.warn("no settings returned!")
             settings = new HubSettings(
                     title:'Default',
-                    id:'default',
+                    id:grailsApplication.config.app.default.hub?:'default',
                     availableFacets: ['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet']
             )
         }
