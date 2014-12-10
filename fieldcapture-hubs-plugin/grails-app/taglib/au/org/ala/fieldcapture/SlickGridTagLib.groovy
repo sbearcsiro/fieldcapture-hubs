@@ -5,35 +5,27 @@ import grails.converters.JSON
 class SlickGridTagLib {
     static namespace = "fc"
 
-    def slickGridOptions = { attrs ->
-        def options = [
-            editable: true,
-            enableAddRow: true,
-            enableCellNavigation: true,
-            asyncEditorLoading: true,
-            forceFitColumns: true,
-
-            topPanelHeight: 25
-        ] as JSON
-
-        out << "var options = JSON.parse('${options.toString().encodeAsJavaScript()}');"
-    }
 
     def slickGridColumns = { attrs ->
-        def dataModel = attrs.model
+
         def columns = []
+        // Add the project name as the first column.
+        columns << [id: 'projectName', name: 'Project', field:'projectName']
+
+        def dataModel = attrs.model
+
         dataModel.each {
 
             def editor = null
             switch(it.dataType) {
                 case 'number':
-                    editor = 'Integer'
+                    editor = 'Test'
                     break;
                 case 'integer':
-                    editor = 'Integer'
+                    editor = 'Test'
                     break;
                 case 'text':
-                    editor = 'Text'
+                    editor = 'Test'
                     break;
                 case 'date':
                 case 'simpleDate':
@@ -53,11 +45,17 @@ class SlickGridTagLib {
                 case 'lookupRange':
                     break; // do nothing
             }
+            def header = it.label && it.description ? it.label+fc.iconHelp([container:'body'], it.description) : it.name
+            def column = [id: it.name, name: header ?: it.name, field: it.name, outputName:attrs.outputName]
             if (editor) {
-                columns << [id: it.name, name: it.label ?: it.name, field: it.name, editorType:editor]
+                column << [editorType:editor, validationRules:'validate[required]']
             }
+            columns << column
+
         }
-        out << "JSON.parse('${(columns as JSON).toString().encodeAsJavaScript()}');"
+
+        columns << [id:'progress', name:'Progress', field:'progress']
+        out << (columns as JSON).toString()+';'
 
 
 

@@ -50,6 +50,7 @@
                 <ul class="nav nav-tabs" data-tabs="tabs">
                     <li class="active tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+                    <g:if test="${organisation.reports}"><li class="tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
                 </ul>
             </div>
             <div class="tab-content row-fluid">
@@ -62,6 +63,30 @@
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
                     </div>
                 </div>
+
+                <g:if test="${organisation.reports}">
+                <div class="tab-pane" id="reporting">
+                    <table>
+                        <table style="width:100%;">
+
+                            <thead>
+                            <tr>
+                                <td>Description</td>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <g:each in="${organisation.reports}" var="report">
+                                <tr>
+                                    <td><a href="${createLink(action:'report', id:organisation.organisationId, params: [type:report.type, plannedStartDate:report.plannedStartDate, plannedEndDate:report.plannedEndDate])}">${report.description}</a></td>
+                                </tr>
+                            </g:each>
+
+                            </tbody>
+                        </table>
+                    </table>
+                </div>
+                </g:if>
 
             </div>
         </g:if>

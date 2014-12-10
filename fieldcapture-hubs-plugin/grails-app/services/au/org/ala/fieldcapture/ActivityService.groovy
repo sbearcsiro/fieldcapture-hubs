@@ -1,10 +1,16 @@
 package au.org.ala.fieldcapture
-import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONObject
+
+import org.joda.time.DateTime
+import org.joda.time.Period
+import org.joda.time.format.DateTimeFormat
 
 class ActivityService {
 
-    def webService, grailsApplication, outputService, metadataService
+    def webService, grailsApplication, metadataService
+
+    private static def PROGRESS = ['planned', 'started', 'finished', 'cancelled', 'deferred']
+
+    public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
 
     static dateFormat = "yyyy-MM-dd'T'hh:mm:ssZ"
 
@@ -43,6 +49,10 @@ class ActivityService {
     def get(id) {
         def activity = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'activity/' + id)
         activity
+    }
+
+    def create(activity) {
+        update('', activity)
     }
 
     def update(id, body) {
@@ -101,37 +111,24 @@ class ActivityService {
         webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
     }
 
-        /*def convertToSimpleDate(value) {
-            def pattern = ~/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/
-            if (value instanceof String && pattern.matcher(value).matches()) {
-                return "${value[8..9]}-${value[5..6]}-${value[0..3]}"
-            }
-            return value
-        }
+    /**
+     * Creates a description for the supplied activity based on the activity type and dates.
+     */
+    String defaultDescription(activity) {
+        def start = activity.plannedStartDate
+        def end = activity.plannedEndDate
 
-        def convertFromSimpleDate(value) {
-            def pattern = ~/\d\d-\d\d-\d\d\d\d/
-            if (value instanceof String && pattern.matcher(value).matches()) {
-                return "${value[6..9]}-${value[3..4]}-${value[0..1]}T00:00:00Z"
-            }
-            return value
-        }
+        DateTime startDate = DateUtils.parse(start)
+        DateTime endDate = DateUtils.parse(end)
 
-        def convertToSimpleDates(map) {
-            def pattern = ~/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/
-            // top level only for now
-            map.each {entry ->
-                entry.value = convertToSimpleDate(entry.value)
-            }
-            map
-        }
+        Period period = new Period(startDate.toLocalDate(), endDate.toLocalDate())
 
-        def convertFromSimpleDates(map) {
-            def pattern = ~/\d\d-\d\d-\d\d\d\d/
-            // top level only for now
-            map.each {entry ->
-                entry.value = convertFromSimpleDate(entry.value)
-            }
-            map
-        }*/
+        def description = DateTimeFormat.forPattern("MMM yyyy").print(endDate)
+        if (period.months > 1) {
+            description = DateTimeFormat.forPattern("MMM").print(startDate) + ' - ' + description
+        }
+        "${activity.type} (${description})"
+
+    }
+
 }

@@ -238,6 +238,8 @@ modules = {
 
         resource 'slickgrid/slick.grid.js'
 
+        resource 'js/slickgrid.support.js'
+
         resource url:'slickgrid/images/header-columns-bg.gif', plugin:'fieldcapture-plugin'
         resource url:'slickgrid/images/header-columns-over-bg.gif', plugin:'fieldcapture-plugin'
 

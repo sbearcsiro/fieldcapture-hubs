@@ -1,8 +1,5 @@
 package au.org.ala.fieldcapture
 
-import grails.converters.JSON
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-
 class ProjectService {
 
     def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService

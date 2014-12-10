@@ -1,0 +1,104 @@
+package au.org.ala.fieldcapture
+
+import org.joda.time.DateTime
+import org.joda.time.DateTimeConstants
+import org.joda.time.DateTimeZone
+import org.joda.time.Interval
+import org.joda.time.Period
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.ISODateTimeFormat
+
+import java.text.SimpleDateFormat
+
+/**
+ * Utilities for working with fieldcapture / ecodata ISO8601 dates.
+ */
+class DateUtils {
+
+    /** Fieldcapture / Ecodata work with ISO8601 formatted dates */
+    private static DateTimeFormatter DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZoneUTC()
+    private static DateTimeFormatter DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis() //DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withZoneUTC()
+
+    /**
+     * Aligns the supplied DateTime to the start date of the period it falls into.
+     * The period is defined relative to the Calandar year.
+     * For example, a date of 03/1/2014 aligned to a 3 month period falls into the Jan - March period so
+     * 01/01/2014 will be returned.
+     * @param toAlign the date to align
+     * @param period the period to align to.
+     * @return the start date of the period the date falls into.
+     */
+    static DateTime alignToPeriod(DateTime toAlign, Period period) {
+
+        DateTime periodStart = new DateTime(toAlign.year().get(), DateTimeConstants.JANUARY, 1, 0, 0, toAlign.getZone())
+
+        Interval interval = new Interval(periodStart, period)
+
+        while (interval.isBefore(toAlign)) {
+            interval = new Interval(interval.getEnd(), period)
+            println periodStart.toString()+', '+toAlign.toString()
+        }
+
+        return interval.getStart()
+    }
+
+    /**
+     * Parses a String formatted as approximately ISO8601.  The Java 6/7 time zone offset format of +0000 is supported
+     * as well as the ISO8601 +00:00
+     *
+     * @param dateString the string to parse.
+     * @return a new Joda Time DateTime instance, with the UTC time zone.
+     */
+    static DateTime parse(String dateString) {
+        if (dateString =~ /\+[0-9]{4}/) {
+            // This is a java formatted time which is not ISO8901 compatible.
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ")
+            return new DateTime(dateFormat.parse(dateString)).withZone(DateTimeZone.UTC)
+        }
+        return DATE_PARSER.parseDateTime(dateString)
+    }
+
+    static String format(Date date) {
+        return DATE_FORMATTER.print(new DateTime(date))
+    }
+
+    static String format(DateTime date) {
+        return DATE_FORMATTER.print(date)
+    }
+
+    /**
+     * Groups the supplied data into time intervals defined by the supplied start date and period.
+     * If no start date is supplied, it will be set to the earliest date in the supplied data.
+     * @param data the data to group.
+     * @param dateAccessor closure that returns a date String from an item of the data List.
+     * @param period the period of each grouping.
+     * @param startDate the start date of the first group.  Items of the data list before this date will not be returned.
+     * @param endDate the end date. Items that occur after the end date of the period containing this date will not be included.
+     *
+     * @return a LinkedHashMap (keys in chronological order) containing the intervals and grouped data.
+     */
+    static LinkedHashMap<Interval, List> groupByDateRange(List data, Closure dateAccessor, Period period, DateTime startDate = null, DateTime endDate = null) {
+
+
+        if (!startDate) {
+            def start = dateAccessor(data.min(dateAccessor))
+            startDate = parse(start)
+        }
+        if (!endDate) {
+            def end = dateAccessor(data.max(dateAccessor))
+            endDate = parse(end)
+        }
+
+        def results = new LinkedHashMap()
+        Interval interval = new Interval(startDate, period)
+        while (interval.isBefore(endDate) || interval.contains(endDate)) {
+            def periodData = data.findAll {
+                interval.contains(parse(dateAccessor(it)))
+            }
+
+            results << [(interval): periodData]
+            interval = new Interval(interval.getEnd(), period)
+        }
+        results
+    }
+}
