@@ -50,7 +50,8 @@ class SettingService {
             settings = new HubSettings(
                     title:'Default',
                     id:grailsApplication.config.app.default.hub?:'default',
-                    availableFacets: ['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet']
+                    availableFacets: ['status', 'organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet'],
+                    adminFacets: ['electFacet']
             )
         }
 
