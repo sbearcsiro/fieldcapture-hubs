@@ -20,6 +20,9 @@ class HubSettings {
     /** The (ordered) list of facets that will be displayed on the home and search pages */
     List<String> availableFacets
 
+    /** Admin only facets */
+    List<String> adminFacets
+
     /** All searches made in this hub will automatically include this (facet) query.  Should be of the form <facetName>:<value> */
     List<String> defaultFacetQuery
 
