@@ -84,6 +84,17 @@
     </div>
 
     <div class="control-group">
+        <label class="control-label" for="available-facets">Admin Facets (Only these facets will display on the home page)</label>
+        <div class="controls">
+            <ul id="admin-facets" data-bind="foreach:transients.adminFacets" class="unstyled">
+                <li><label><input type="checkbox" data-bind="checked:$root.adminFacets, attr:{value:$data}"> <span data-bind="text:$data"></span> <span data-bind="text:$root.facetAdminOrder($data)"></span></label></li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="control-group">
         <label class="control-label" for="default-facets-list">Default Facet Query (Searches will automatically include these facets)</label>
         <div class="controls">
             <ul id="default-facets-list" data-bind="foreach:defaultFacetQuery">
@@ -115,6 +126,7 @@
             self.title = ko.observable();
             self.supportedPrograms = ko.observableArray();
             self.availableFacets = ko.observableArray();
+            self.adminFacets = ko.observableArray();
             self.defaultFacetQuery = ko.observableArray();
             self.bannerUrl = ko.observable();
             self.logoUrl = ko.observable();
@@ -147,7 +159,8 @@
                return program.name;
             });
             self.transients = {
-                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet'],
+                availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet'],
+                adminFacets:['electFacet'],
                 programNames:programNames,
                 message:ko.observable(),
                 selectedHub:ko.observable()
@@ -160,10 +173,14 @@
                 self.defaultFacetQuery.push({query:ko.observable()});
             };
             self.facetOrder = function(facet) {
-
                 var facetList = self.availableFacets ? self.availableFacets : [];
                 var index = facetList.indexOf(facet);
+                return index >= 0 ? '('+(index + 1)+')' : '';
+            }
 
+            self.facetAdminOrder = function(facet) {
+                var facetList = self.adminFacets ? self.adminFacets : [];
+                var index = facetList.indexOf(facet);
                 return index >= 0 ? '('+(index + 1)+')' : '';
             }
 
@@ -172,6 +189,7 @@
                self.title(settings.title);
                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
                self.availableFacets(self.orEmptyArray(settings.availableFacets));
+               self.adminFacets(self.orEmptyArray(settings.adminFacets))
                self.bannerUrl(self.orBlank(settings.bannerUrl));
                self.logoUrl(self.orBlank(settings.logoUrl));
 
