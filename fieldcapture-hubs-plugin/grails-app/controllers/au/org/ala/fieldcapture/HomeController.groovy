@@ -56,24 +56,23 @@ class HomeController {
      * doesn't include the word "Facet" (although maybe it should).
      */
     private ArrayList findSelectedGeographicFacets(Collection allFacets) {
-        def selectedFacets = allFacets.collectEntries {
-            def nameVal = it.split(':')
-            return [(nameVal[0]): nameVal[1]]
-        }
 
         def facetConfig = metadataService.getGeographicFacetConfig()
-
         def selectedGeographicFacets = []
-        selectedFacets.each { name, value ->
 
-            def matchingFacet = facetConfig.find { name.startsWith(it.key) }
-            if (matchingFacet) {
-                def matchingValue = matchingFacet.value.find { it.key == value }
-                if (matchingValue) {
-                    selectedGeographicFacets << matchingValue.value
+        allFacets.each { facet ->
+            def token = facet.split(':')
+            if(token.size() == 2){
+                def matchingFacet = facetConfig.find { token[0].startsWith(it.key) }
+                if (matchingFacet) {
+                    def matchingValue = matchingFacet.value.find { it.key == token[1] }
+                    if (matchingValue) {
+                        selectedGeographicFacets << matchingValue.value
+                    }
                 }
             }
         }
+
         selectedGeographicFacets
     }
 
