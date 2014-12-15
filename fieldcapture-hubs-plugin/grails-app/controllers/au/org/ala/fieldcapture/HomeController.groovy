@@ -10,30 +10,49 @@ class HomeController {
     def searchService
     def settingService
     def metadataService
+    def userService;
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
         [
-            projects: projectService.list(),
-            sites: siteService.list(),
-            //sites: siteService.injectLocationMetadata(siteService.list()),
-            activities: activityService.list(),
-            assessments: activityService.assessments(),
+                projects   : projectService.list(),
+                sites      : siteService.list(),
+                //sites: siteService.injectLocationMetadata(siteService.list()),
+                activities : activityService.list(),
+                assessments: activityService.assessments(),
         ]
     }
-    def index() {
-        def facetsList = SettingService.getHubConfig().availableFacets //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
 
-        def allFacets = params.getList('fq') + (SettingService.getHubConfig().defaultFacetQuery?:[])
+    def index() {
+        def facetsList = SettingService.getHubConfig().availableFacets
+        //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+
+        def allFacets = params.getList('fq') + (SettingService.getHubConfig().defaultFacetQuery ?: [])
 
         def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)
 
         def resp = searchService.HomePageFacets(params)
 
-        [   facetsList: facetsList,
-            geographicFacets:selectedGeographicFacets,
-            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
-            results: resp ]
+        [facetsList      : facetsList,
+         geographicFacets: selectedGeographicFacets,
+         description     : settingService.getSettingText(SettingPageType.DESCRIPTION),
+         results         : resp]
+    }
+
+    def citizenScience() {
+        def userId = userService.getUser()?.userId;
+        [projects: searchService.allProjects(params)?.hits.hits.collect {
+            def p = it._source // pass array instead of object to reduce size
+            [p.projectId,
+             p.coverage ?: '',
+             p.description,
+             userId && projectService.canUserEditProject(userId, p.projectId) ? 'y' : '',
+             p.name,
+             p.organisationName,
+             p.status,
+             (p.urlAndroid ?: '') + ' ' + (p.urlITunes ?: ''),
+             p.urlWeb ?: '']
+        }];
     }
 
     /**
@@ -71,12 +90,12 @@ class HomeController {
     }
 
     def tabbed() {
-        [ geoPoints: searchService.allGeoPoints(params) ]
+        [geoPoints: searchService.allGeoPoints(params)]
     }
 
     def geoService() {
-        params.max = params.max?:9999
-        if(params.geo){
+        params.max = params.max ?: 9999
+        if (params.geo) {
             render searchService.allProjectsWithSites(params) as JSON
         } else {
             render searchService.allProjects(params) as JSON
@@ -115,6 +134,6 @@ class HomeController {
 
     private renderStaticPage(SettingPageType settingType, showNews = false) {
         def content = settingService.getSettingText(settingType)
-        render view: 'about', model: [settingType: settingType, content: content, showNews:showNews]
+        render view: 'about', model: [settingType: settingType, content: content, showNews: showNews]
     }
 }

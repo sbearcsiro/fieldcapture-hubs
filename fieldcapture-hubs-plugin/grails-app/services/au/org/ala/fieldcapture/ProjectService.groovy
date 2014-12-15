@@ -174,7 +174,7 @@ class ProjectService {
         if (userCanEdit) {
             def project = get(projectId, 'brief')
             def program = metadataService.programModel(project.associatedProgram)
-            userCanEdit = !program.isMeritProgramme
+            userCanEdit = !program?.isMeritProgramme
         }
 
         userCanEdit

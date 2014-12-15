@@ -227,6 +227,15 @@ class FCTagLib {
                     mkp.yield(message(code:'default.help.label', default: 'Help'))
                 }
             }
+        mb.li(class:attrs.active == 'citizenScience' ? 'active' : '') {
+            a(href:createLink(controller: 'home', action: 'citizenScience')) {
+                i(class:"icon-user") {
+                    mkp.yieldUnescaped("&nbsp;")
+                }
+                mkp.yieldUnescaped("&nbsp;")
+                mkp.yield(message(code:'default.citizenScience.label', default: 'Citizen Science'))
+            }
+        }
             mb.li(class:attrs.active == 'contacts' ? 'active' : '') {
                 a(href:createLink(controller: 'home', action: 'contacts')) {
                     i(class:"icon-envelope") {
