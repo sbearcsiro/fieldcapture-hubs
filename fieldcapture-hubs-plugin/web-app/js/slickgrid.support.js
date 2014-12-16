@@ -114,9 +114,11 @@ var outputValueEditor = function(item, column, value) {
         var output = ko.utils.arrayFirst(item.outputs, function(output) {
             return output.name === column.outputName;
         });
-        if (output) {
-            output.data[column.field] = value;
+        if (!output) {
+            output = {name:column.outputName, data:{}, activityId: item.activityId, progress:'started'};
+            item.outputs.push(output);
         }
+        output.data[column.field] = value;
     }
     item[column.field] = value;
 };
