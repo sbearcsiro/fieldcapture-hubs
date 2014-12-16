@@ -103,7 +103,7 @@ class DateUtils {
             }
 
             results << [(interval): periodData]
-            interval = new Interval(interval.getEnd(), period)
+            interval = new Interval(interval.start.plus(period), period)
         }
         results
     }
