@@ -19,7 +19,7 @@
             dashboardUrl: "${g.createLink(controller: 'report', action: 'dashboardReport', params: params)}"
             };
     </r:script>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects"/>
 
 </head>
 <body>
@@ -202,13 +202,13 @@
                     return self.allReports();
                 }
                 var filteredReports = [];
+                var nextMonth = moment().add(1, 'months').format();
+
                 $.each(self.allReports(), function(i, report) {
                     if (self.hideApproved() && report.publicationStatus === 'published') {
                         return;
                     }
-                    var nextMonth = '2014-12-31';
 
-                    console.log(report.dueDate);
                     if (self.hideFutureReports() && report.dueDate > nextMonth) {
                         return;
                     }
