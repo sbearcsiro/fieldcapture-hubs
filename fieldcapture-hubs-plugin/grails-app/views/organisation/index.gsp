@@ -16,7 +16,8 @@
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}"
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}",
+            returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects"/>
@@ -80,7 +81,7 @@
                                 </th>
                                 <th>Actions</th>
                                 <th>Report Progress</th>
-                                <th>Status<br/><label for="hide-approved-reports"><input id="hide-approved-reports" type="checkbox" data-bind="checked:hideFutureReports"> Hide approved reports</label></th>
+                                <th>Status<br/><label for="hide-approved-reports"><input id="hide-approved-reports" type="checkbox" data-bind="checked:hideApprovedReports"> Hide approved reports</label></th>
                             </tr>
                             </thead>
                             <tbody data-bind="foreach:filteredReports">
@@ -181,7 +182,7 @@
 
             this.dueDate = ko.observable(report.dueDate).extend({simpleDate:false})
             var baseUrl = '${createLink(action:'report', id:organisation.organisationId)}';
-            this.editUrl = baseUrl + '?type='+report.type+'&plannedStartDate='+report.plannedStartDate+'&plannedEndDate='+report.plannedEndDate;
+            this.editUrl = baseUrl + '?type='+report.type+'&plannedStartDate='+report.plannedStartDate+'&plannedEndDate='+report.plannedEndDate+'&returnTo='+fcConfig.returnTo;
 
             this.percentComplete = function() {
                 if (report.count == 0) {
@@ -194,18 +195,18 @@
         var ReportsViewModel = function(reports) {
             var self = this;
             self.allReports = ko.observableArray(reports);
-            self.hideApproved = ko.observable(true);
+            self.hideApprovedReports = ko.observable(true);
             self.hideFutureReports = ko.observable(true);
 
             self.filteredReports = ko.computed(function() {
-                if (!self.hideApproved() && !self.hideFutureReports()) {
+                if (!self.hideApprovedReports() && !self.hideFutureReports()) {
                     return self.allReports();
                 }
                 var filteredReports = [];
                 var nextMonth = moment().add(1, 'months').format();
 
                 $.each(self.allReports(), function(i, report) {
-                    if (self.hideApproved() && report.publicationStatus === 'published') {
+                    if (self.hideApprovedReports() && report.publicationStatus === 'published') {
                         return;
                     }
 

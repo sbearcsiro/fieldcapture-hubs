@@ -11,7 +11,8 @@
         serverUrl: "${grailsApplication.config.grails.serverURL}",
         projectViewUrl: "${createLink(controller: 'project', action: 'index')}/",
         saveUrl: "${createLink(controller:'activity', action:'ajaxUpdate')}",
-        siteViewUrl: "${createLink(controller: 'site', action: 'index')}/"
+        siteViewUrl: "${createLink(controller: 'site', action: 'index')}/",
+        returnTo: "${params.returnTo}"
         },
         here = document.location.href;
   </r:script>
@@ -106,8 +107,15 @@
             $.each(activities, function(i, activity) {
                 var outputData = {outputs:activity.outputs};
                 var url = fcConfig.saveUrl+'/'+activity.activityId;
-                $.ajax(url, {type:'POST', data:JSON.stringify(outputData), dataType:'json', contentType:'application/json'}).done( function(data) { console.log(data); });
+                $.ajax(url, {type:'POST', data:JSON.stringify(outputData), dataType:'json', contentType:'application/json'}).done(
+                    function(data) {
+                        window.location = fcConfig.returnTo;
+                    });
             });
+        });
+
+        $('#cancel').click(function() {
+            window.location = fcConfig.returnTo;
         });
 
         // Hacky slickgrid / jqueryValidationEngine integration for some amount of user experience consistency.
