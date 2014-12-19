@@ -16,7 +16,7 @@
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'dashboardReport', params: params)}"
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}"
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects"/>
