@@ -85,13 +85,19 @@
                 if (dataItem.description) {
                     columnHeader += helpHover(dataItem.description);
                 }
+
+                var editor = OutputValueEditor;
+                if (dataItem.constraints) {
+                    editor = OutputSelectEditor;
+                }
                 
                 columns.push({
                     id: dataItem.name,
                     name: columnHeader,
                     field: dataItem.name,
                     outputName:outputModel.name,
-                    editor:OutputValueEditor
+                    options:dataItem.constraints,
+                    editor:editor
                 });
             });
         });

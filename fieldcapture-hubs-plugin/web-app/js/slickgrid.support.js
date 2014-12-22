@@ -12,11 +12,11 @@ function OutputValueEditor(args) {
         $input = $("<INPUT type=text class='editor-text' data-prompt-target='blah'/>")
             .addClass(args.column.validationRules)// Using class because of way jqueryValidationEngine determines the pattern used.
             .appendTo(args.container)
-            .bind("keydown.nav", function (e) {
-                if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
-                    e.stopImmediatePropagation();
-                }
-            })
+            //.bind("keydown.nav", function (e) {
+            //    if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+            //        e.stopImmediatePropagation();
+            //    }
+            //})
             .focus()
             .select();
     };
@@ -97,6 +97,61 @@ function OutputValueEditor(args) {
 
     this.init();
 }
+
+function OutputSelectEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+
+        $select = $("<SELECT tabIndex='0' class='editor-yesno'></SELECT>");
+        for (var i=0; i<args.column.options.length; i++) {
+            $select.append($("<OPTION name=\""+args.column.options[i]+"\" value=\""+args.column.options[i]+"\">"+args.column.options[i]+"</OPTION>"));
+        }
+        $select.appendTo(args.container);
+        $select.focus();
+    };
+
+    this.destroy = function () {
+        $select.remove();
+    };
+
+    this.focus = function () {
+        $select.focus();
+        $select.size == args.column.options.length;
+    };
+
+    this.loadValue = function (item) {
+
+        defaultValue = args.grid.getOptions().dataItemColumnValueExtractor(item, args.column);
+
+        $select.val(defaultValue);
+        $select.select();
+    };
+
+    this.serializeValue = function () {
+        return ($select.val());
+    };
+
+    this.applyValue = function (item, state) {
+        outputValueEditor(item, args.column, state);
+    };
+
+    this.isValueChanged = function () {
+        return ($select.val() != defaultValue);
+    };
+
+    this.validate = function () {
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+
+    this.init();
+}
+
 
 // The item is an activity containing an array of outputs.
 var outputValueExtractor = function(item, column) {
