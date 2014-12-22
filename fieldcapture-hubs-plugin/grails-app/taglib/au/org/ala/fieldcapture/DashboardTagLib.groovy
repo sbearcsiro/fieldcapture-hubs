@@ -101,7 +101,7 @@ class DashboardTagLib {
 
 
         out << "<div id=\"${elementId}\"></div>"
-        out << gvisualization.barChart(height:400, elementId:elementId, columns:reportData.columns, data:reportData.rows, dynamicLoading:true)
+        out << gvisualization.barChart(height:300, elementId:elementId, columns:reportData.columns, data:reportData.rows, dynamicLoading:true)
     }
 
     def pieChart = {attrs, body ->

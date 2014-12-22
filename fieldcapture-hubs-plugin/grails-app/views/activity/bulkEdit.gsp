@@ -78,10 +78,14 @@
         $.each(outputModels, function(i, outputModel) {
             $.each(outputModel.dataModel, function(i, dataItem) {
 
+                if (dataItem.computed) {
+                    return;
+                }
                 var columnHeader = dataItem.label ? dataItem.label : dataItem.name;
                 if (dataItem.description) {
                     columnHeader += helpHover(dataItem.description);
                 }
+                
                 columns.push({
                     id: dataItem.name,
                     name: columnHeader,
