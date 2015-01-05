@@ -29,6 +29,9 @@ class HubSettings {
     /** Projects created within this hub will only be able to select from the programs configured here */
     List<String> supportedPrograms
 
+    /** Home page map facets */
+    List<String> availableMapFacets
+
     /**
      * Allows the property to be set using a JSONArray which has an implementation of join which is
      * incompatible with how this is used by the SearchService.

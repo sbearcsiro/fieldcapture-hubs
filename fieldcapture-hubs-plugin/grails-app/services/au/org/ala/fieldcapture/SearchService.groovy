@@ -82,13 +82,10 @@ class SearchService {
             params.query += " AND " + searchTerm
         }
 
-        params.facets = "statesFacet,lgasFacet,nrmsFacet,organisationFacet,mvgsFacet"
-        //def url = elasticBaseUrl + commonService.buildUrlParamsFromMap(params)
         def url = grailsApplication.config.ecodata.baseUrl + 'search/elasticGeo' + commonService.buildUrlParamsFromMap(params)
         log.debug "url = $url"
         webService.getJson(url)
     }
-
 
     def allSites(params) {
         addDefaultFacetQuery(params)

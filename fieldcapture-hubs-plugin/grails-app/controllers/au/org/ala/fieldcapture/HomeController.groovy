@@ -25,10 +25,12 @@ class HomeController {
 
     def index() {
         def facetsList = SettingService.getHubConfig().availableFacets
+        def mapFacets = SettingService.getHubConfig().availableMapFacets
 
         if(!userService.userIsAlaOrFcAdmin()) {
             def adminFacetList = SettingService.getHubConfig().adminFacets
             facetsList.removeAll(adminFacetList)
+            mapFacets.removeAll(adminFacetList)
         }
 
         def fqList = params.getList('fq')
@@ -38,6 +40,7 @@ class HomeController {
         def resp = searchService.HomePageFacets(params)
 
         [   facetsList: facetsList,
+            mapFacets: mapFacets,
             geographicFacets:selectedGeographicFacets,
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
             results: resp ]
@@ -83,6 +86,7 @@ class HomeController {
     def geoService() {
         params.max = params.max?:9999
         if(params.geo){
+            params.facets = SettingService.getHubConfig().availableFacets.join(',')
             render searchService.allProjectsWithSites(params) as JSON
         } else {
             render searchService.allProjects(params) as JSON

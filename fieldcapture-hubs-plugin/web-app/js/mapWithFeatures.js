@@ -59,7 +59,8 @@
         // keep a running bounds for loaded locations so we can zoom when all are loaded
         featureBounds: new google.maps.LatLngBounds(),
         // URL to small dot icon
-        smallDotIcon: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle.png", // blue: measle_blue.png
+        smallDotIcon: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle_blue.png", // blue: measle_blue.png
+        allMarkers : [],
         // URL to red google marker icon
         redMarkerIcon: "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png",
         //spatial portal URL
@@ -109,6 +110,15 @@
             }
             return this;
         },
+
+        removeMarkers:function(type, _map){
+            for(var i = 0; i < map.allMarkers.length; i++){
+                var entry = map.allMarkers[i];
+                if(type == entry["layerName"]){
+                    entry.marker.setMap(_map);
+                }
+            }
+        },
         reset:function(){
             var self = this;
             self.map.setCenter(self.defaultCenter);
@@ -132,7 +142,6 @@
             var self = this, f;
             var loaded = false;
             if(loc != null && loc.type != null){
-                //console.log("Loading feature type: " + loc.type);
                 if (loc.type.toLowerCase() === 'point') {
                     var ll = new google.maps.LatLng(Number(loc.coordinates[1]), Number(loc.coordinates[0]));
                     f = new google.maps.Marker({
@@ -144,13 +153,32 @@
                     self.addFeature(f, loc);
                     loaded = true;
                 } else if (loc.type === 'dot') {
+
+                    var marker = map.smallDotIcon;
+                    if (loc.color != "-1"){
+                        marker = {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            strokeColor: ""+loc.color,
+                            scale: 2,
+                            strokeWeight: 3
+                        }
+                    }
+
                     var ll = new google.maps.LatLng(Number(loc.latitude), Number(loc.longitude));
                     f = new google.maps.Marker({
                         map: self.map,
                         position: ll,
                         title: loc.name,
-                        icon: map.smallDotIcon
+                        icon: marker
                     });
+
+                    if(loc.color != "-1"){
+                        var markerMap = {};
+                        markerMap["layerName"] = loc.layerName;
+                        markerMap["marker"] = f;
+                        map.allMarkers.push(markerMap);
+                    }
+
                     self.featureBounds.extend(ll);
                     self.addFeature(f, loc, iw);
                     loaded = true;
@@ -257,14 +285,8 @@
             if (loc.popup && iw) {
                 // add infoWindow popu
                 google.maps.event.addListener(f, 'click', function(event) {
-                    if (prevMarker) {
-                        prevMarker.setIcon(map.smallDotIcon);
-                    }
                     iw.setContent(loc.popup);
                     iw.open(self.map, f);
-                    //console.log("f", f)
-                    f.setIcon(map.redMarkerIcon);
-                    prevMarker = f;
                 });
 
                 google.maps.event.addListener(iw, 'closeclick', function(){
@@ -518,6 +540,7 @@
     windows.mapSite = mapSite;
     windows.clearMap = clearMap;
     windows.alaMap = map;
+
 
 }(this));
 
