@@ -46,6 +46,64 @@ class DashboardTagLib {
 
     }
 
+    private Map formatGroupedReportData(scores, data) {
+        def rows = []
+
+        def columns = scores.collect {
+            ['number', it.label]
+        }
+        columns = [['string', '']] + columns // Add the group column
+
+        data.each { group ->
+
+            def row = []
+            row << group.group
+
+            def rowData = [:]
+            group.results?.each { subgroup ->
+                subgroup.results?.each {
+                    rowData << [(it.label):it.result]
+                }
+            }
+
+            scores.each { score ->
+                row << rowData[score.label] ?: 0
+            }
+
+            rows << row
+        }
+
+        [columns:columns, rows:rows]
+    }
+
+    def groupedTable = {attrs, body ->
+
+        def scores = attrs.scores
+        def data = attrs.data
+
+        def reportData = formatGroupedReportData(scores, data)
+
+
+        out << "<div id=\"${attrs.elementId}\"></div>"
+        out << gvisualization.table(elementId:attrs.elementId, columns:reportData.columns, data:reportData.rows, dynamicLoading:true)
+
+    }
+
+
+    def groupedChart = {attrs, body ->
+
+
+        def scores = attrs.scores
+        def data = attrs.data
+        def elementId = attrs.elementId
+
+        def reportData = formatGroupedReportData(scores, data)
+
+
+        out << "<div id=\"${elementId}\"></div>"
+        out << gvisualization.barChart(height:300, elementId:elementId, columns:reportData.columns, data:reportData.rows, dynamicLoading:true)
+    }
+
     def pieChart = {attrs, body ->
         def columnDefs = [['string', attrs.label], ['number', 'Count']]
         def chartData = toArray(attrs.data)

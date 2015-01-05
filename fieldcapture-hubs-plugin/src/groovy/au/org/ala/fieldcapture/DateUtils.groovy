@@ -5,6 +5,7 @@ import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeZone
 import org.joda.time.Interval
 import org.joda.time.Period
+import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
@@ -18,6 +19,7 @@ class DateUtils {
     /** Fieldcapture / Ecodata work with ISO8601 formatted dates */
     private static DateTimeFormatter DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZoneUTC()
     private static DateTimeFormatter DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis() //DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withZoneUTC()
+    private static DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormat.forPattern("dd-MM-yyyy").withZone(DateTimeZone.default)
 
     /**
      * Aligns the supplied DateTime to the start date of the period it falls into.
@@ -66,6 +68,10 @@ class DateUtils {
         return DATE_FORMATTER.print(date)
     }
 
+    static String displayFormat(DateTime date) {
+        return DISPLAY_DATE_FORMATTER.print(date)
+    }
+
     /**
      * Groups the supplied data into time intervals defined by the supplied start date and period.
      * If no start date is supplied, it will be set to the earliest date in the supplied data.
@@ -97,7 +103,7 @@ class DateUtils {
             }
 
             results << [(interval): periodData]
-            interval = new Interval(interval.getEnd(), period)
+            interval = new Interval(interval.start.plus(period), period)
         }
         results
     }

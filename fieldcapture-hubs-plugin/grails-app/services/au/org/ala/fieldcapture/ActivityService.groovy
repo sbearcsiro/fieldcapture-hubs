@@ -119,7 +119,7 @@ class ActivityService {
         def end = activity.plannedEndDate
 
         DateTime startDate = DateUtils.parse(start)
-        DateTime endDate = DateUtils.parse(end)
+        DateTime endDate = DateUtils.parse(end).minusDays(1)
 
         Period period = new Period(startDate.toLocalDate(), endDate.toLocalDate())
 

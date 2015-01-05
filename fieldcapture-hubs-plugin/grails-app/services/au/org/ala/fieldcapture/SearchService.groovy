@@ -159,4 +159,11 @@ class SearchService {
 
 
     }
+
+    def report(params) {
+        addDefaultFacetQuery(params)
+        params.query = 'docType:project'
+        def url = grailsApplication.config.ecodata.baseUrl + 'search/report' + commonService.buildUrlParamsFromMap(params)
+        webService.getJson(url, 1200000)
+    }
 }
