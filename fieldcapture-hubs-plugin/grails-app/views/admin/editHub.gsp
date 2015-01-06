@@ -80,7 +80,6 @@
             </ul>
 
         </div>
-
     </div>
 
     <div class="control-group">
@@ -91,7 +90,16 @@
             </ul>
 
         </div>
+    </div>
 
+    <div class="control-group">
+        <label class="control-label" for="available-facets">Available Map Facets (Only these facets will display on the home page map menu)</label>
+        <div class="controls">
+            <ul id="admin-map-facets" data-bind="foreach:transients.availableMapFacets" class="unstyled">
+                <li><label><input type="checkbox" data-bind="checked:$root.availableMapFacets, attr:{value:$data}"> <span data-bind="text:$data"></span> <span data-bind="text:$root.facetMapAdminOrder($data)"></span></label></li>
+            </ul>
+
+        </div>
     </div>
 
     <div class="control-group">
@@ -127,6 +135,7 @@
             self.supportedPrograms = ko.observableArray();
             self.availableFacets = ko.observableArray();
             self.adminFacets = ko.observableArray();
+            self.availableMapFacets = ko.observableArray();
             self.defaultFacetQuery = ko.observableArray();
             self.bannerUrl = ko.observable();
             self.logoUrl = ko.observable();
@@ -160,6 +169,7 @@
             });
             self.transients = {
                 availableFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','mainThemeFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','otherFacet', 'gerSubRegionFacet','electFacet'],
+                availableMapFacets:['status','organisationFacet','associatedProgramFacet','associatedSubProgramFacet','stateFacet','nrmFacet','lgaFacet','mvgFacet','ibraFacet','imcra4_pbFacet','electFacet'],
                 adminFacets:['electFacet'],
                 programNames:programNames,
                 message:ko.observable(),
@@ -184,12 +194,19 @@
                 return index >= 0 ? '('+(index + 1)+')' : '';
             }
 
+            self.facetMapAdminOrder = function(facet) {
+                var facetList = self.availableMapFacets ? self.availableMapFacets : [];
+                var index = facetList.indexOf(facet);
+                return index >= 0 ? '('+(index + 1)+')' : '';
+            }
+
             self.loadSettings = function(settings) {
                self.id(settings.id);
                self.title(settings.title);
                self.supportedPrograms(self.orEmptyArray(settings.supportedPrograms));
                self.availableFacets(self.orEmptyArray(settings.availableFacets));
-               self.adminFacets(self.orEmptyArray(settings.adminFacets))
+               self.adminFacets(self.orEmptyArray(settings.adminFacets));
+               self.availableMapFacets(self.orEmptyArray(settings.availableMapFacets));
                self.bannerUrl(self.orBlank(settings.bannerUrl));
                self.logoUrl(self.orBlank(settings.logoUrl));
 
