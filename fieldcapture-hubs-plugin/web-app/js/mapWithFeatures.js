@@ -111,7 +111,7 @@
             return this;
         },
 
-        toggleMarkerVisibilty:function(type, _map){
+        toggleMarkerVisibility:function(type, _map){
             for(var i = 0; i < map.allMarkers.length; i++){
                 var entry = map.allMarkers[i];
                 if(type == entry["legendName"]){
