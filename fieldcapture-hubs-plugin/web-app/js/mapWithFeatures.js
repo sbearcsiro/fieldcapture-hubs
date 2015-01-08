@@ -111,10 +111,10 @@
             return this;
         },
 
-        removeMarkers:function(type, _map){
+        toggleMarkerVisibilty:function(type, _map){
             for(var i = 0; i < map.allMarkers.length; i++){
                 var entry = map.allMarkers[i];
-                if(type == entry["layerName"]){
+                if(type == entry["legendName"]){
                     entry.marker.setMap(_map);
                 }
             }
@@ -174,7 +174,7 @@
 
                     if(loc.color != "-1"){
                         var markerMap = {};
-                        markerMap["layerName"] = loc.layerName;
+                        markerMap["legendName"] = loc.legendName;
                         markerMap["marker"] = f;
                         map.allMarkers.push(markerMap);
                     }
