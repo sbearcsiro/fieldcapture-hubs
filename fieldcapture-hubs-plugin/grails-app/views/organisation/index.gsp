@@ -17,6 +17,7 @@
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
             dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}",
+            activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
@@ -84,13 +85,16 @@
                                 <th>Status<br/><label for="hide-approved-reports"><input id="hide-approved-reports" type="checkbox" data-bind="checked:hideApprovedReports"> Hide approved reports</label></th>
                             </tr>
                             </thead>
-                            <tbody data-bind="foreach:filteredReports">
+                            <tbody data-bind="foreach:{ data:filteredReports, as:'report' }">
 
                                 <tr>
-                                    <td data-bind="text:programme"></td>
+                                    <td data-bind="text:report.programme"></td>
                                     <td><a data-bind="attr:{href:editUrl}"><span data-bind="text:description"></span></a></td>
                                     <td data-bind="text:dueDate.formattedDate()"></td>
-                                    <td><button type="button" class="btn btn-container" data-bind="click:$root.editReport"><i class="icon-edit" title="Edit report"></i></button></td>
+                                    <td>
+                                        <button type="button" class="btn btn-container" data-bind="click:$root.viewAllReports"><i data-bind="css:{'icon-plus':!activitiesVisible(), 'icon-minus':activitiesVisible()}" title="View all reports"></i></button>
+                                        <button type="button" class="btn btn-container" data-bind="visible:bulkEditable, click:$root.editReport"><i class="icon-edit" title="Edit report"></i></button>
+                                    </td>
                                     <td>
                                         <div class="progress active"  data-bind="css:{'progress-success':percentComplete>=100, 'progress-info':percentComplete < 100}">
                                             <div class="bar" data-bind="style:{width:percentComplete+'%'}"></div>
@@ -99,9 +103,30 @@
 
                                     </td>
                                     <td><span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span></td>
+
+                                <tr data-bind="visible:report.activitiesVisible()">
+                                    <td></td>
+                                    <td colspan="5">
+                                        <table>
+                                            <tbody data-bind="foreach:{data:report.activities, as:'activity'}">
+
+                                                <tr>
+
+                                                    <td>
+                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}">
+                                                            <span data-bind="text:$root.getProject(projectId).name"></span>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span data-bind="text:progress"></span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
                                 </tr>
 
-
+                            </tr>
                             </tbody>
 
                     </table>
@@ -176,10 +201,11 @@
         });
 
         var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
+        var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
 
         var ReportViewModel = function(report) {
             $.extend(this, report);
-
+            var self = this;
             this.dueDate = ko.observable(report.dueDate).extend({simpleDate:false})
             var baseUrl = '${createLink(action:'report', id:organisation.organisationId)}';
             this.editUrl = baseUrl + '?type='+report.type+'&plannedStartDate='+report.plannedStartDate+'&plannedEndDate='+report.plannedEndDate+'&returnTo='+fcConfig.returnTo;
@@ -190,10 +216,17 @@
                 }
                 return report.finishedCount / report.count * 100;
             }();
+
+            this.toggleActivities = function() {
+                self.activitiesVisible(!self.activitiesVisible());
+            };
+            this.activitiesVisible = ko.observable(false);
+            self.activities = report.activities;
         };
 
-        var ReportsViewModel = function(reports) {
+        var ReportsViewModel = function(reports, projects) {
             var self = this;
+            self.projects = projects;
             self.allReports = ko.observableArray(reports);
             self.hideApprovedReports = ko.observable(true);
             self.hideFutureReports = ko.observable(true);
@@ -228,12 +261,21 @@
 
             self.editReport = function(report) {
                 window.location = report.editUrl;
+            };
+
+            self.viewAllReports = function(report) {
+                report.toggleActivities();
+            };
+
+            self.getProject = function(projectId) {
+                var projects = $.grep(self.projects, function(project) {
+                    return project.projectId === projectId;
+                });
+                return projects ? projects[0] : {name:''};
             }
 
-
-
         };
-        ko.applyBindings(new ReportsViewModel(reports), document.getElementById('reporting'));
+        ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
 
     });
 
