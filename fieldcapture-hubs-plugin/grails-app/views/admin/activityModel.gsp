@@ -49,6 +49,9 @@
     <div>Category: <span data-bind="text:category"></span></div>
     <div>Enabled: <span data-bind="text:enabled"></span></div>
     <div>GMS ID: <span data-bind="text:gmsId"></span></div>
+    <div>Supports Sites: <span data-bind="text:supportsSites"></span></div>
+    <div>Supports Photo Points: <span data-bind="text:supportsPhotoPoints"></span></div>
+
 
     <div>Outputs: <ul data-bind="foreach:outputs">
         <li data-bind="text:$data"></li>
@@ -59,10 +62,12 @@
 
 <script id="editActivityTmpl" type="text/html">
     <div style="margin-top:4px"><span class="span2">Name:</span> <input type="text" class="input-large pull-right" data-bind="value:name"></div>
-    <div class="clearfix"><span class="span2">Type:</span> <select data-bind="options:['Activity','Assessment'],value:type" class="pull-right"></select></div>
+    <div class="clearfix"><span class="span2">Type:</span> <select data-bind="options:['Activity','Assessment','Report'],value:type" class="pull-right"></select></div>
     <div class="clearfix"><span class="span2">Category:</span> <input type="text" class="input-large pull-right" data-bind="value:category"></div>
     <div class="clearfix"><span class="span2">Enabled:</span><input type="checkbox" class="pull-right" data-bind="checked:enabled"></div>
     <div class="clearfix"><span class="span2">GMS ID:</span> <input type="text" class="input-large pull-right" data-bind="value:gmsId"></div>
+    <div class="clearfix"><span class="span2">Sites?:</span><input type="checkbox" class="pull-right" data-bind="checked:supportsSites,enable:type()!='Report'"></div>
+    <div class="clearfix"><span class="span2">Photo points?:</span><input type="checkbox" class="pull-right" data-bind="checked:supportsPhotoPoints,enable:type()!='Report'"></div>
 
     <div>Outputs: <ul data-bind="sortable:{data:outputs}" class="output-drop-target sortableList small">
         <li>
@@ -171,6 +176,9 @@
             this.enabled = ko.observable(!act.status || act.status == 'active');
             this.status = ko.observable(act.status);
             this.gmsId = ko.observable(act.gmsId);
+            this.supportsSites = ko.observable(act.supportsSites);
+            this.supportsPhotoPoints = ko.observable(act.supportsPhotoPoints);
+
             this.enabled.subscribe(function (enabled) {
                 if (enabled) {
                     self.status('active');
@@ -193,6 +201,12 @@
                     model.selectedActivity(undefined);
                 }
             };
+            this.type.subscribe(function(newType) {
+                if (newType === 'Report') {
+                    self.supportsSites(false);
+                    self.supportsPhotoPoints(false);
+                }
+            });
             this.editing = ko.observable(false);
             this.edit = function () { self.editing(true) };
             this.done = function () { self.editing(false) };
