@@ -90,15 +90,21 @@
                 if (dataItem.constraints) {
                     editor = OutputSelectEditor;
                 }
-                
-                columns.push({
+
+
+                var column = {
                     id: dataItem.name,
                     name: columnHeader,
                     field: dataItem.name,
                     outputName:outputModel.name,
                     options:dataItem.constraints,
-                    editor:editor
-                });
+                    editor:editor,
+                    cssClass:'text-center'
+                };
+                if (dataItem.validate) {
+                    column.validationRules = 'validate['+dataItem.validate+']';
+                }
+                columns.push(column);
             });
         });
 
