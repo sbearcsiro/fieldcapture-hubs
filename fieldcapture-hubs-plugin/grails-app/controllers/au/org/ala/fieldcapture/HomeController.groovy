@@ -29,8 +29,8 @@ class HomeController {
 
         if(!userService.userIsAlaOrFcAdmin()) {
             def adminFacetList = SettingService.getHubConfig().adminFacets
-            facetsList.removeAll(adminFacetList)
-            mapFacets.removeAll(adminFacetList)
+            facetsList?.removeAll(adminFacetList)
+            mapFacets?.removeAll(adminFacetList)
         }
 
         def fqList = params.getList('fq')

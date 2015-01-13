@@ -59,7 +59,8 @@
         // keep a running bounds for loaded locations so we can zoom when all are loaded
         featureBounds: new google.maps.LatLngBounds(),
         // URL to small dot icon
-        smallDotIcon: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle_blue.png", // blue: measle_blue.png
+        smallDotIcon: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle.png", // blue: measle_blue.png
+
         allMarkers : [],
         // URL to red google marker icon
         redMarkerIcon: "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png",
@@ -112,12 +113,11 @@
         },
 
         toggleMarkerVisibility:function(type, _map){
-            for(var i = 0; i < map.allMarkers.length; i++){
-                var entry = map.allMarkers[i];
-                if(type == entry["legendName"]){
-                    entry.marker.setMap(_map);
+            $.each(this.allMarkers, function(idx, marker){
+                if(type == marker["legendName"]){
+                    marker.marker.setMap(_map);
                 }
-            }
+            });
         },
         reset:function(){
             var self = this;
@@ -125,6 +125,7 @@
             self.map.setZoom(self.defaultZoom);
             self.featureIndex = {};
             self.featureBounds =  new google.maps.LatLngBounds();
+            self.allMarkers = [];
         },
         replaceAllFeatures: function(features) {
             this.features.features = features;
@@ -156,12 +157,11 @@
 
                     var marker = map.smallDotIcon;
                     if (loc.color != "-1"){
-                        marker = {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            strokeColor: ""+loc.color,
-                            scale: 2,
-                            strokeWeight: 3
-                        }
+                        // strokeColor is resource hungry. google maps performs well with encoded image data.
+                         marker = {
+                            url: "data:image/gif;base64,R0lGODlhAQABAPAAA"+encodeHex(loc.color)+"///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==",
+                            scaledSize: new google.maps.Size(5,5)
+                        };
                     }
 
                     var ll = new google.maps.LatLng(Number(loc.latitude), Number(loc.longitude));
@@ -176,7 +176,7 @@
                         var markerMap = {};
                         markerMap["legendName"] = loc.legendName;
                         markerMap["marker"] = f;
-                        map.allMarkers.push(markerMap);
+                        this.allMarkers.push(markerMap);
                     }
 
                     self.featureBounds.extend(ll);
@@ -576,4 +576,18 @@ function initialiseState(state) {
             }
             return initials;
     }
+}
+
+function encodeHex(s) {
+    s = s.substring(1, 7);
+    if (s.length < 6) {
+        s = s[0]+s[0]+s[1]+s[1]+s[2]+s[2];
+    }
+    return encodeRGB(parseInt(s[0]+s[1], 16),parseInt(s[2]+s[3], 16), parseInt(s[4]+s[5], 16));
+}
+
+function encodeRGB(r, g, b) {
+    var k = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    return k.charAt(((0 & 3) << 4) | (r >> 4)) + k.charAt(((r & 15) << 2) | (g >> 6)) +
+        k.charAt(g & 63) + k.charAt(b >> 2) + k.charAt(((b & 3) << 4) | (255 >> 4))
 }
