@@ -1,4 +1,3 @@
-<form id="projectDetails" class="form-horizontal">
     <div class="row-fluid">
         <div class="span6">
             <h4 class="header"><g:message code="project.details.tell"/></h4>
@@ -7,7 +6,7 @@
                 <label class="control-label span2" for="name"><g:message code="g.project.name"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="name" data-bind="value:name"
+                    <g:textField class="span12" name="name" data-bind="value:name"
                            data-validation-engine="validate[required]"/>
                 </div>
             </div>
@@ -16,8 +15,8 @@
                 <label class="control-label span2" for="description"><g:message code="g.project.description"/>:</label>
 
                 <div class="controls span10">
-                    <textarea class="span12" id="description" data-bind="value:description"
-                              data-validation-engine="validate[required]" rows="3"></textarea>
+                    <g:textArea class="span12" name="description" data-bind="value:description"
+                              data-validation-engine="validate[required]" rows="3"/>
                 </div>
             </div>
 
@@ -25,21 +24,8 @@
                 <label class="control-label span2" for="aim"><g:message code="project.details.aim"/></label>
 
                 <div class="controls span10">
-                    <textarea class="span12" id="aim" data-bind="value:aim"
-                              data-validation-engine="validate[required]" rows="2"></textarea>
-                </div>
-            </div>
-
-            <div class="clearfix control-group">
-                <label class="control-label span2"
-                       for="organisation"><g:message code="project.details.org"/>:</label>
-
-                <div class="controls span10">
-                    <select class="span12" id="organisation"
-                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisation, optionsCaption: 'Choose...'"></select>
-                    <label class="text-center"><g:message code="project.details.orgCustom"/></label>
-                    <input class="span12" id="organisationName" data-bind="value:organisationName"
-                           data-validation-engine="validate[funcCall[exclusive[organisation,You can only specify one organisation. One field must be cleared.]]]"/>
+                    <g:textArea class="span12" name="aim" data-bind="value:aim"
+                              data-validation-engine="validate[required]" rows="2"/>
                 </div>
             </div>
 
@@ -47,34 +33,54 @@
                 <label class="control-label span2" for="manager"><g:message code="project.details.manager"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" type="email" data-bind="value:manager" id="manager"/>
+                    <g:textField class="span12" type="email" data-bind="value:manager" name="manager"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="startDate"><g:message code="g.project.startDate"/>:
-                <fc:iconHelp><g:message code="g.project.startDate.help"/></fc:iconHelp>
+                <label class="control-label span2" for="plannedStartDate"><g:message code="g.project.plannedStartDate"/>:
+                <fc:iconHelp><g:message code="g.project.plannedStartDate.help"/></fc:iconHelp>
                 </label>
 
                 <div class="controls span10">
-                    <fc:datePicker targetField="plannedStartDate.date" name="startDate"
-                                   id="startDate" data-validation-engine="validdate[required]"/>
+                    <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate"
+                                   id="plannedStartDate" data-validation-engine="validate[required]"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="endDate"><g:message code="g.project.endDate"/>:
-                <fc:iconHelp><g:message code="g.project.endDate.help"/></fc:iconHelp>
+                <label class="control-label span2" for="plannedEndDate"><g:message code="g.project.plannedEndDate"/>:
+                <fc:iconHelp><g:message code="g.project.plannedEndDate.help"/></fc:iconHelp>
                 </label>
 
                 <div class="controls span10">
-                    <fc:datePicker targetField="plannedEndDate.date" name="endDate"
-                                   id="endDate" data-validation-engine="validate[future[startDate]]"/>
+                    <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate"
+                                   id="plannedEndDate" data-validation-engine="validate[future[plannedStartDate]]"/>
+                </div>
+            </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span2" for="actualStartDate"><g:message code="g.project.actualStartDate"/>:
+                <fc:iconHelp><g:message code="g.project.actualStartDate.help"/></fc:iconHelp>
+                </label>
+
+                <div class="controls span10">
+                    <fc:datePicker targetField="actualStartDate.date" name="actualStartDate" id="actualStartDate"/>
+                </div>
+            </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span2" for="actualEndDate"><g:message code="g.project.actualEndDate"/>:
+                <fc:iconHelp><g:message code="g.project.actualEndDate.help"/></fc:iconHelp>
+                </label>
+
+                <div class="controls span10">
+                    <fc:datePicker targetField="actualEndDate.date" name="actualEndDate" id="actualEndDate"/>
                 </div>
             </div>
         </div>
 
-        <div data-bind="visible:projectType() != 'citizen'" class="span6">
+        <div data-bind="visible:!isCitizenScience()" class="span6">
             <h4 class="header">&nbsp;</h4>
 
             <div class="control-group">
@@ -97,7 +103,7 @@
                 <label class="control-label span2" for="funding"><g:message code="g.project.funding"/>:</label>
 
                 <div class="controls span10">
-                    <g:textField class="span12" id="funding" name="funding" data-bind="value:funding"
+                    <g:textField class="span12" name="funding" data-bind="value:funding"
                                  data-validation-engine="validate[custom[number]]"/>
                 </div>
             </div>
@@ -120,26 +126,47 @@
                             data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...'"></select>
                 </div>
             </div>
-        </div>
 
-        <div data-bind="visible:projectType() == 'citizen'" class="span6">
-            <h4 class="header span12"><g:message code="project.details.involved"/></h4>
-
-            <div class="control-group">
+            <div class="clearfix control-group">
                 <label class="control-label span2"
-                       for="participants"><g:message code="project.details.participants"/></label>
+                       for="orgGrantee"><g:message code="project.details.orgGrantee"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="participants" data-bind="value:participants"/>
+                    <select class="span12" id="orgGrantee"
+                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdGrantee, optionsCaption: 'Choose...'"></select>
                 </div>
             </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span2"
+                       for="orgSponsor"><g:message code="project.details.orgSponsor"/>:</label>
+
+                <div class="controls span10">
+                    <select class="span12" id="orgSponsor"
+                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdSponsor, optionsCaption: 'Choose...'"></select>
+                </div>
+            </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span2"
+                       for="orgSvcProvider"><g:message code="project.details.orgSvcProvider"/>:</label>
+
+                <div class="controls span10">
+                    <select class="span12" id="orgSvcProvider"
+                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdSvcProvider, optionsCaption: 'Choose...'"></select>
+                </div>
+            </div>
+        </div>
+
+        <div data-bind="visible:isCitizenScience()" class="span6">
+            <h4 class="header span12"><g:message code="project.details.involved"/></h4>
 
             <div class="clearfix control-group">
                 <label class="control-label span2" for="getInvolved"><g:message code="project.details.involved"/></label>
 
                 <div class="controls span10">
-                    <textarea class="span12" id="getInvolved" data-bind="value:getInvolved"
-                              rows="2"></textarea>
+                    <g:textArea class="span12" name="getInvolved" data-bind="value:getInvolved"
+                              rows="2"/>
                 </div>
             </div>
 
@@ -148,11 +175,15 @@
                        for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="scienceType" data-bind="value:scienceType"/>
+                    <g:textField class="span12" name="scienceType" data-bind="value:scienceType"/>
                 </div>
             </div>
         </div>
     </div>
+
+    <hr class="clearfix"/>
+    <g:render template="/site/map" model="${pageScope.variables}"/>
+    <hr class="clearfix"/>
 
     <div class="row-fluid">
         <div class="span6">
@@ -162,7 +193,7 @@
                 <label class="control-label span2" for="urlWeb"><g:message code="g.website"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="urlWeb" data-bind="value:urlWeb"/>
+                    <g:textField class="span12" tye="url" name="urlWeb" data-bind="value:urlWeb"/>
                 </div>
             </div>
 
@@ -170,7 +201,7 @@
                 <label class="control-label span2" for="urlAndroid"><g:message code="g.android"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="urlAndroid" data-bind="value:urlAndroid"/>
+                    <g:textField class="span12" tye="url" name="urlAndroid" data-bind="value:urlAndroid"/>
                 </div>
             </div>
 
@@ -178,7 +209,7 @@
                 <label class="control-label span2" for="urlITunes"><g:message code="g.iTunes"/>:</label>
 
                 <div class="controls span10">
-                    <input class="span12" id="urlITunes" data-bind="value:urlITunes"/>
+                    <g:textField class="span12" tye="url" name="urlITunes" data-bind="value:urlITunes"/>
                 </div>
             </div>
         </div>
@@ -190,35 +221,45 @@
                 <label class="control-label span2" for="keywords"><g:message code="g.keywords"/>:</label>
 
                 <div class="controls span10">
-                    <textarea class="span12" id="keywords" data-bind="value:keywords" rows="2"></textarea>
+                    <g:textArea class="span12" name="keywords" data-bind="value:keywords" rows="2"/>
                 </div>
             </div>
         </div>
     </div>
-</form>
 <r:script>
+var initViewModel;
 $(function(){
-    var organisations = ${institutions};
+    var organisations = ${institutions}, organisationsMap = {}, organisationsRMap = {};
+    organisations.map(function(org) {
+        organisationsMap[org.uid] = org.name;
+        organisationsRMap[org.name] = org.uid;
+    })
     function ViewModel (data, activityTypes) {
         var self = this;
+        self.actualEndDate = ko.observable(data.actualEndDate).extend({simpleDate: false});
+        self.actualStartDate = ko.observable(data.actualStartDate).extend({simpleDate: false});
         self.aim = ko.observable(data.aim);
         self.associatedProgram = ko.observable(); // don't initialise yet
         self.associatedSubProgram = ko.observable(data.associatedSubProgram);
-        self.currentStage = ko.observable(data.currentStage);
         self.description = ko.observable(data.description);
         self.externalId = ko.observable(data.externalId);
         self.funding = ko.observable(data.funding).extend({currency:{}});
         self.getInvolved = ko.observable(data.getInvolved);
         self.grantId = ko.observable(data.grantId);
+        self.isCitizenScience = ko.observable(data.isCitizenScience);
         self.keywords = ko.observable(data.keywords);
         self.manager = ko.observable(data.manager);
         self.name = ko.observable(data.name);
-        self.participants = ko.observable(data.participants);
-        self.projectType = ko.observable(data.projectType);
-        self.organisation = ko.observable(data.organisation);
-        self.organisationName = ko.observable(data.organisationName);
+        self.organisationId = ko.observable(data.organisationId || organisationsRMap[data.organisationName]);
+        self.organisationName = ko.computed(function() {
+            return organisationsMap[self.organisationId()];
+        });
+        self.orgIdGrantee = ko.observable(data.orgIdGrantee);
+        self.orgIdSponsor = ko.observable(data.orgIdSponsor);
+        self.orgIdSvcProvider = ko.observable(data.orgIdSvcProvider);
         self.plannedEndDate = ko.observable(data.plannedEndDate).extend({simpleDate: false});
         self.plannedStartDate = ko.observable(data.plannedStartDate).extend({simpleDate: false});
+        self.projectType = ko.observable(data.projectType || "works");
         self.scienceType = ko.observable(data.scienceType);
         self.selectedActivities = ko.observableArray();
         self.urlAndroid = ko.observable(data.urlAndroid);
@@ -242,10 +283,6 @@ $(function(){
         });
         self.associatedProgram(data.associatedProgram); // to trigger the computation of sub-programs
 
-        self.removeTransients = function (jsData) {
-            delete jsData.transients;
-            return jsData;
-        };
         self.save = function () {
             if ($('#validation-container').validationEngine('validate')) {
                 if (self.transients.activitySource() === 'program') {
@@ -253,7 +290,8 @@ $(function(){
                 }
 
                 var jsData = ko.toJS(self);
-                var json = JSON.stringify(self.removeTransients(jsData));
+                delete jsData.transients;
+                var json = JSON.stringify(jsData);
                 var id = "${project?.projectId ? '/' + project.projectId : ''}";
                 $.ajax({
                     url: "${createLink(action: 'ajaxUpdate')}" + id,
@@ -279,6 +317,8 @@ $(function(){
     }
 
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-    ko.applyBindings(new ViewModel(${project ?: [:]}, activityTypes), document.getElementById("projectDetails"));
+    initViewModel = function() {
+        return new ViewModel(${project ?: [:]}, activityTypes);
+    }
 });
 </r:script>

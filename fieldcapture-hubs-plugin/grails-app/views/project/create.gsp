@@ -1,13 +1,13 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="net.sf.json.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap"/>
 </head>
 
 <body>
-<div class="container-fluid  fuelux">
+<div class="container-fluid fuelux">
 
 <ul class="breadcrumb">
     <li><g:link controller="home"><g:message code="g.home"/></g:link> <span class="divider">/</span></li>
@@ -21,6 +21,7 @@
         <li data-step="3" class="active"><span class="badge">3</span><g:message code="g.settings"/><span class="chevron"></span></li>
     </ul>
 
+    <form id="projectDetails" class="form-horizontal">
     <div class="step-content">
 
         <div class="step-pane active validationEngineContainer" data-step="1">
@@ -28,16 +29,24 @@
             <div class="row-fluid">
                 <h3><g:message code="project.create.type.heading"/>:</h3>
 
-                <div class="control-group">
-                    <span><label for="citizen" class="control-label"><input type="radio" name="projectType"
-                                                                           value="citizen" id="citizen"
-                                                                           data-validation-engine="validate[minCheckbox[1]]"> <strong><g:message code="g.project.type.citizen"/></strong>
-                    </label></span><g:message code="project.create.type.citizen"/>
-                    <span><label for="works" class="control-label"><input type="radio" name="projectType" value="works"
-                                                                        id="works"
-                                                                        data-validation-engine="validate[minCheckbox[1]]"> <strong><g:message code="g.project.type.works"/></strong>
+                <div class="control-group span12">
+                    <label class="control-label"
+                           for="organisationId"><g:message code="project.details.org"/>:</label>
+                    <select id="organisationId"
+                            data-validation-engine="validate[required]"
+                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisationId, optionsCaption: 'Choose...'"></select>
+                </div>
+
+                <div class="clearfix control-group span12">
+                    <g:checkBox name="isCitizenScience" data-bind="checked:isCitizenScience"/><strong><g:message code="project.create.isCitizenScience"/></strong>
+                </div>
+
+                <div class="clearfix control-group">
+                    <span><label for="works" class="control-label"><input type="radio" name="projectType" data-bind="checked:projectType"
+                                                                          value="works" id="works"
+                                                                          data-validation-engine="validate[minCheckbox[1]]"> <strong><g:message code="g.project.type.works"/></strong>
                     </label></span><g:message code="project.create.type.works"/>
-                    <span><label for="survey" class="control-label"><input type="radio" name="projectType"
+                    <span><label for="survey" class="control-label"><input type="radio" name="projectType" data-bind="checked:projectType"
                                                                            value="survey" id="survey"
                                                                            data-validation-engine="validate[minCheckbox[1]]"> <strong><g:message code="g.project.type.survey"/></strong>
                     </label></span><g:message code="project.create.type.survey"/>
@@ -78,6 +87,7 @@
             </div>
         </div>
     </div>
+    </form>
 
     <div class="form-actions" style="clear:both;">
         <button class="btn btn-default btn-prev"><span class="glyphicon glyphicon-arrow-left"></span><g:message code="g.prev"/></button>
@@ -102,7 +112,6 @@
             <g:textField class="" name="currentStage" data-bind="value:currentStage"/>
         </div>
     </div>
-    </div>
 </g:if>
 </div>
 <r:script>
@@ -117,34 +126,20 @@ $(function(){
         $('#activityTypes input[type=checkbox]').prop('checked', checked);
     });
 
-    var viewModel = ko.dataFor(document.getElementById("projectDetails"));
+    var viewModel = initViewModel();
+<g:if test="${citizenScience}">
+    $("#isCitizenScience").prop("disabled", true);
+    viewModel.isCitizenScience(true);
+</g:if>
+    ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('.wizard').on('finished.fu.wizard', function() {
         viewModel.save();
-    }).on('changed.fu.wizard', function(e) {
-        var selected = $(this).wizard('selectedItem');
-        if (selected.step === 2)
-            viewModel.projectType($("#citizen").prop("checked")? "citizen"
-            : $("#survey").prop("checked")? "survey": "works");
     }).on('actionclicked.fu.wizard', function(e) {
         var selected = $(this).wizard('selectedItem');
         if (!$('.step-pane[data-step='+selected.step+']').validationEngine('validate')) {
             e.preventDefault();
         }
     });
-
-    $(document).ready(function() {
-    <g:if test="${citizenScience}">
-        $("#survey").prop("disabled", true);
-        $("#works").prop("disabled", true);
-        $("#citizen").prop("checked", true);
-        if ($('.wizard').wizard('selectedItem').step == 1)
-            $('.wizard').wizard('next');
-    </g:if>
-    <g:else>
-        $("#works").prop("checked", true)
-    </g:else>
-    });
-
 });
 </r:script>
 

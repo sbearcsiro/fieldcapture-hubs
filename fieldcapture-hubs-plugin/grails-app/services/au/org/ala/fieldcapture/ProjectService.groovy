@@ -3,12 +3,41 @@ package au.org.ala.fieldcapture
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
+
 class ProjectService {
 
     def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService
 
-    def list(brief = false) {
+    private def mapAttributesToCollectory(props) {
+        def specialProps = [
+            description: 'pubDescription',
+            manager: 'email',
+            name: 'name',
+            organisation: null,
+            projectId: null,
+            urlWeb: 'websiteUrl'
+        ]
+        def collectoryProps = [
+            api_key: grailsApplication.config.api_key
+        ]
+        def hiddenJSON = [:]
+        props.each { k, v ->
+            if (specialProps.containsKey(k)) {
+                def kMapped = specialProps[k]
+                if (kMapped != null) collectoryProps[kMapped] = v
+            } else if (v != null) {
+                hiddenJSON[k] = v
+            }
+        }
+        if (props.projectId) collectoryProps.uid = props.projectId
+        collectoryProps.hiddenJSON = hiddenJSON
+        println("collectory hiddenJSON = " + hiddenJSON)
+        collectoryProps
+    }
+
+    def list(brief = false, citizenScienceOnly = false) {
         def params = brief ? '?brief=true' : ''
+        if (citizenScienceOnly) params += (brief ? '&' : '?') + 'citizenScienceOnly=true'
         def resp = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'project/' + params)
         resp.list
     }
@@ -44,10 +73,17 @@ class ProjectService {
 
         def activities = props.remove('selectedActivities')
 
-        def result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
-
-        def projectId = result?.resp?.projectId
+        def collectoryProps = mapAttributesToCollectory(props)
+        def result = webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/', collectoryProps)
+        def projectId = result?.headers?.location?.first().toString().tokenize('/').last()
         if (projectId) {
+            collectoryProps.remove('hiddenJSON')
+            collectoryProps.dataProvider = [uid:projectId]
+            collectoryProps.institution = [uid:props.organisationId]
+            result = webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataResource/', collectoryProps)
+            props.projectId = projectId
+            props.dataResourceId = result?.headers?.location?.first().toString().tokenize('/').last()
+            result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
             // Add the user who created the project as an admin of the project
             userService.addUserAsRoleToProject(userService.getUser().userId, projectId, RoleService.PROJECT_ADMIN_ROLE)
             if (activities) {
@@ -59,8 +95,11 @@ class ProjectService {
     }
 
     def update(id, body) {
-
         webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
+        // recreate 'hiddenJSON' in collectory every time (minus some attributes)
+        body = getRich(id) as Map
+        ['id','dateCreated','documents','lastUpdated','organisationName','sites'].each { body.remove(it) }
+        webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/' + id, mapAttributesToCollectory(body))
     }
 
     /**
@@ -78,8 +117,8 @@ class ProjectService {
      * @return the returned status
      */
     def destroy(id) {
-        webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'project/' + id +
-            '?destroy=true')
+        webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'project/' + id + '?destroy=true')
+        webService.doDelete(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/' + id)
     }
 
     /**

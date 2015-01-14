@@ -26,7 +26,7 @@ class SiteController {
     }
 
     def create(){
-        render view: 'edit', model: [create:true]
+        render view: 'edit', model: [create:true, documents:[]]
     }
 
     def createForProject(){

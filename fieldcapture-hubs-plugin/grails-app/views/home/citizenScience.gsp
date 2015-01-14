@@ -26,7 +26,7 @@
         <div class="span6" id="heading">
             <h1 class="pull-left"><g:message code="home.citizenScience.heading"/></h1>
         </div>
-        <g:if test="true || ${user}">
+        <g:if test="${user}">
             <div class="pull-right space-after">
                 <button data-bind="click:newPortal" type="button" class="btn"><g:message
                         code="home.citizenScience.portalLink"/></button>

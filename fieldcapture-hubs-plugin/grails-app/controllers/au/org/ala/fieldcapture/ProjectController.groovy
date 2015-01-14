@@ -59,6 +59,8 @@ class ProjectController {
         def project = projectService.get(id)
         if (project) {
             [project: project,
+             documents: [],
+             site: project.site,
              institutions: metadataService.institutionList(),
              programs: metadataService.programsModel()]
         } else {
@@ -69,6 +71,7 @@ class ProjectController {
     def create() {
         [
                 citizenScience: params.citizenScience,
+                documents: [],
                 institutions: metadataService.institutionList(),
                 programs: projectService.programsModel(),
                 activityTypes: metadataService.activityTypesList()
