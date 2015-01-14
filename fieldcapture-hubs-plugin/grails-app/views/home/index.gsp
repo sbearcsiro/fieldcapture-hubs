@@ -167,20 +167,25 @@
                         <span id="colorOptions">
                             <select style="font-size:100%; width:150px; opacity:0.8;filter:alpha(opacity=50);" id="mapchange" onchange="generateMap(this.options[this.selectedIndex].value)">
                                 <option value="-1">Mark points by</option>
-                                <g:each var="fn" in="${mapFacets}">
-                                    <g:set var="f" value="${results.facets.get(fn)}"/>
-                                    <g:if test="${fn != 'class' && f?.terms?.size() > 0}">
+                                    <g:each var="fn" in="${mapFacets}">
+                                        <g:set var="f" value="${results.facets.get(fn)}"/>
+                                        <g:if test="${fn != 'class' && f?.terms?.size() > 0}">
                                         <g:set var="fName"><g:message code="label.${fn}" default="${fn?.capitalize()}"/></g:set>
                                         <option value="${fn.encodeAsURL()}">${fName}</option>
-                                    </g:if>
-                                </g:each>
+                                        </g:if>
+                                    </g:each>
                             </select>
-                            <span style="">
-                                <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%;" id="legend" >
+                            <img style="display:none;" id="map-colorby-status" width="23" height="23" src="${request.contextPath}/images/loading-1.gif" alt="Loading"/>
+                            <div id="legend-table">
+                                <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%; display:inline-block;" id="legend-1" >
                                     <tbody>
                                     </tbody>
                                 </table>
-                            </span>
+                                <table style="opacity:1.0; filter:alpha(opacity=50); border: none; font-size : 80%; display:inline-block;" id="legend-2" >
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
                         </span>
                     </div>
                 </div>
@@ -602,29 +607,33 @@
             <g:set var="fqList" value="${[params.fq].flatten()}"/>
             url += "&fq=${fqList.collect{it.encodeAsURL()}.join('&fq=')}";
         </g:if>
-
+        $("#legend-table").hide();
+        $("#map-colorby-status").show();
         $.getJSON(url, function(data) {
-            var features = [];
-            var projectIdMap = {};
-            var bounds = new google.maps.LatLngBounds();
-            var geoPoints = data;
-            var legends = [];
 
-            if (geoPoints.total) {
-                var projectLinkPrefix = "${createLink(controller:'project')}/";
+        var features = [];
+        var projectIdMap = {};
+        var bounds = new google.maps.LatLngBounds();
+        var geoPoints = data;
+        var legends = [];
+
+        if (geoPoints.total) {
+            var projectLinkPrefix = "${createLink(controller:'project')}/";
                 var siteLinkPrefix = "${createLink(controller:'site')}/";
                 $("#numberOfSites").html(geoPoints.total + " sites");
 
                 if (geoPoints.total > 0) {
-                    var staticColors = ['#A52A2A','#00008B','#8B7355','#53868B','#458B00','#8B4513','#6495ED','#8B8878','#006400','#483D8B','#8B0A50','#8B6914']
+                    var staticColors =
+                    ['#458B00','#FF0000','#FF00FF','#282828','#8B4513','#FF8000','#1E90FF','#a549f6','#20988e','#afaec9',
+                    '#dc0430','#aa7f69','#1077f1','#6da1ab','#3598e6','#95294d','#f27ad5','#dfd06e','#c16b54','#34f242'];
                     $.each(geoPoints.selectedFacetTerms, function(i,facet){
                         var legend = {};
-                        legend.color = i < staticColors.length ? staticColors[facet.index] : getRandomColor();
+                        var hex = i < staticColors.length ? staticColors[facet.index] : getRandomColor();
+                        legend.color = hex;
                         legend.legendName = facet.legendName;
                         legend.count = facet.count;
                         legends.push(legend);
                     });
-
                     $.each(geoPoints.projects, function(j, project) {
                         var projectId = project.projectId
                         var projectName = project.name
@@ -672,6 +681,12 @@
                 }
             }
 
+
+            //To reduce memory footprint and leak, make sure to clear feature before loading new feature.
+            alaMap.map ? clearMap() : "";
+            $("#legend-table").fadeIn();
+            $("#map-colorby-status").hide();
+
             initialiseMap(features, bounds);
             mapBounds = bounds;
             updateProjectTable();
@@ -688,9 +703,9 @@
             "zoomLimit": 12,
             "highlightOnHover": false,
             "features": features
-        }
+        };
 
-        var layers = ${(geographicFacets as JSON).toString()};
+        var layers = ${(geographicFacets as grails.converters.JSON).toString()};
         $.each(layers, function(i, layer) {
             layer.type = 'pid';
             layer.style = 'polygon';
@@ -841,13 +856,34 @@
     }
 
     function showLegends(legends){
-        var table = $("#legend tbody");
+        legends.sort(function(a, b){
+            if (a.legendName > b.legendName) {
+                return 1;
+            }
+            if (a.legendName < b.legendName) {
+                return -1;
+            }
+            return 0;
+        });
+        var table = $("#legend-1 tbody");
         $(table).empty();
-        $.each(legends, function(idx, legend){
+        var firstHalf = Math.ceil(legends.length / 2);
+        var legends1 = legends.slice(0,firstHalf);
+        var legends2 = legends.slice(firstHalf,legends.length);
+        $.each(legends1, function(idx, legend){
             table.append('<tr>' +
-             '<td><input checked type="checkbox" class="legendSelection" id="'+idx+'" value="'+legend.legendName+'"></td>' +
-              '<td style="background:'+legend.color+'"></td>' +
-               '<td>'+legend.legendName + ' (' + legend.count + ')</td></tr>');
+             '<td><input checked type="checkbox" class="legendSelection" id="a'+idx+'" value="'+legend.legendName+'"></td>' +
+               '<td style="background:'+legend.color+'"></td>' +
+               '<td width="200"> '+legend.legendName + ' (' + legend.count + ')</td></tr>');
+        });
+
+        var table1 = $("#legend-2 tbody");
+        $(table1).empty();
+        $.each(legends2, function(idx, legend){
+            table1.append('<tr>' +
+             '<td><input checked type="checkbox" class="legendSelection" id="b'+idx+'" value="'+legend.legendName+'"></td>' +
+               '<td style="background:'+legend.color+'"></td>' +
+               '<td width="200">'+legend.legendName + ' (' + legend.count + ')</td></tr>');
         });
         $('input[type="checkbox"][class="legendSelection"]').change(function() {
             var map = $('#'+this.id).prop('checked') ? alaMap.map : null;
