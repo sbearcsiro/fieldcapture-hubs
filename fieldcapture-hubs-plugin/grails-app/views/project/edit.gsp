@@ -1,9 +1,9 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="net.sf.json.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap"/>
 </head>
 
 <body>
@@ -16,7 +16,9 @@
     </li>
     <li class="active"><g:message code="g.edit"/></li>
 </ul>
+<form id="projectDetails" class="form-horizontal">
 <g:render template="details" model="${pageScope.variables}"/>
+</form>
 <div class="form-actions">
     <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
     <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
@@ -46,10 +48,15 @@ $(function(){
     $('#validation-container').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
-    var viewModel = ko.dataFor(document.getElementById("projectDetails"));
+    var viewModel = initViewModel();
+    ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('#cancel').click(function () {
-        document.location.href = viewModel.projectType() == 'simple'? "${createLink(controller: 'home', action: 'citizenScience')}" :
-            "${createLink(action: 'index', id: project?.projectId)}";
+    <g:if test="${citizenScience}">
+        document.location.href = "${createLink(controller: 'home', action: 'citizenScience')}";
+    </g:if>
+    <g:else>
+        document.location.href = "${createLink(action: 'index', id: project?.projectId)}";
+    </g:else>
     });
     $('#save').click(function () {
         viewModel.save();
