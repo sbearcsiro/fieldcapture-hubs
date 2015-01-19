@@ -134,6 +134,10 @@ $(function(){
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('.wizard').on('finished.fu.wizard', function() {
         viewModel.save();
+    }).on('changed.fu.wizard', function(e) {
+        var selected = $(this).wizard('selectedItem');
+        if (selected.step == 2 && !viewModel.projectSite)
+            viewModel.projectSite = initSiteViewModel();
     }).on('actionclicked.fu.wizard', function(e) {
         var selected = $(this).wizard('selectedItem');
         if (!$('.step-pane[data-step='+selected.step+']').validationEngine('validate')) {

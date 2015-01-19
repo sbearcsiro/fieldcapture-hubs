@@ -12,7 +12,7 @@
                     </h1>
                 </div>
             </div>
-            <g:if test="${project}">
+            <g:if test="${project && controllerName.equals('site')}">
             <div class="row-fluid" style="padding-bottom:15px;">
                 <span>Project name:</span>
                 <g:link controller="project" action="index" id="${project?.projectId}">${project?.name?.encodeAsHTML()}</g:link>
@@ -194,166 +194,150 @@
 </div>
 </script>
 
-<script type="text/html" id="poi">
-<div class="drawLocationDiv row-fluid">
-    <div class="span12">
-        <div class="row-fluid alert" style="box-sizing:border-box;" data-bind="visible:hasDocuments">
-            This point of interest has documents attached and cannot be removed.
-        </div>
-        <div class="row-fluid controls-row">
-            <fc:textField data-bind="value:name" outerClass="span6" label="Name" data-validation-engine="validate[required]"/>
-        </div>
-        <div class="row-fluid controls-row">
-            <fc:textArea rows="2" data-bind="value:description" outerClass="span12" class="span12" label="Description"/>
-        </div>
-        <div class="row-fluid controls-row">
-            <label for="type">Point type</label>
-            <g:select data-bind="value: type"
-                      name='type'
-                      from="['choose type','photopoint', 'location of previous surveys', 'other']"
-                      keys="['none','photopoint', 'survey', 'other']"/>
-        </div>
-        <div class="row-fluid controls-row">
-            <fc:textField data-bind="value:geometry().decimalLatitude" outerClass="span4" label="Latitude" data-validation-engine="validate[required,custom[number],min[-90],max[0]]" data-prompt-position="topRight:-150"/>
-            <fc:textField data-bind="value:geometry().decimalLongitude" outerClass="span4" label="Longitude" data-validation-engine="validate[required,custom[number],min[-180],max[180]]"/>
-            <fc:textField data-bind="value:geometry().bearing" outerClass="span4" label="Bearing (degrees)" data-validation-engine="validate[custom[number],min[0],max[360]]" data-prompt-position="topRight:-150"/>
-        </div>
-        <div class="row-fluid controls-row" style="display:none;">
-            <fc:textField data-bind="value:geometry().uncertainty, enable: hasCoordinate()" outerClass="span4" label="Uncertainty"/>
-            <fc:textField data-bind="value:geometry().precision, enable: hasCoordinate()" outerClass="span4" label="Precision"/>
-            <fc:textField data-bind="value:geometry().datum, enable: hasCoordinate()" outerClass="span4" label="Datum" placeholder="e.g. WGS84"/>
+    <script type="text/html" id="poi">
+    <div class="drawLocationDiv row-fluid">
+        <div class="span12">
+            <div class="row-fluid alert" style="box-sizing:border-box;" data-bind="visible:hasDocuments">
+                This point of interest has documents attached and cannot be removed.
+            </div>
+            <div class="row-fluid controls-row">
+                <fc:textField data-bind="value:name" outerClass="span6" label="Name" data-validation-engine="validate[required]"/>
+            </div>
+            <div class="row-fluid controls-row">
+                <fc:textArea rows="2" data-bind="value:description" outerClass="span12" class="span12" label="Description"/>
+            </div>
+            <div class="row-fluid controls-row">
+                <label for="type">Point type</label>
+                <g:select data-bind="value: type"
+                          name='type'
+                          from="['choose type','photopoint', 'location of previous surveys', 'other']"
+                          keys="['none','photopoint', 'survey', 'other']"/>
+            </div>
+            <div class="row-fluid controls-row">
+                <fc:textField data-bind="value:geometry().decimalLatitude" outerClass="span4" label="Latitude" data-validation-engine="validate[required,custom[number],min[-90],max[0]]" data-prompt-position="topRight:-150"/>
+                <fc:textField data-bind="value:geometry().decimalLongitude" outerClass="span4" label="Longitude" data-validation-engine="validate[required,custom[number],min[-180],max[180]]"/>
+                <fc:textField data-bind="value:geometry().bearing" outerClass="span4" label="Bearing (degrees)" data-validation-engine="validate[custom[number],min[0],max[360]]" data-prompt-position="topRight:-150"/>
+            </div>
+            <div class="row-fluid controls-row" style="display:none;">
+                <fc:textField data-bind="value:geometry().uncertainty, enable: hasCoordinate()" outerClass="span4" label="Uncertainty"/>
+                <fc:textField data-bind="value:geometry().precision, enable: hasCoordinate()" outerClass="span4" label="Precision"/>
+                <fc:textField data-bind="value:geometry().datum, enable: hasCoordinate()" outerClass="span4" label="Datum" placeholder="e.g. WGS84"/>
+            </div>
         </div>
     </div>
-</div>
-</script>
+    </script>
 
-<script type="text/html" id="pid">
-<div id="pidLocationDiv" class="drawLocationDiv row-fluid">
-    <div class="span12">
-        <select data-bind="
+    <script type="text/html" id="pid">
+    <div id="pidLocationDiv" class="drawLocationDiv row-fluid">
+        <div class="span12">
+            <select data-bind="
             options: layers(),
             optionsCaption:'Choose a layer...',
             optionsValue: 'id',
             optionsText:'name',
             value: chosenLayer,
             event: { change: refreshObjectList }"></select>
-        <select data-bind="options: layerObjects, disable: layerObjects().length == 0,
+            <select data-bind="options: layerObjects, disable: layerObjects().length == 0,
             optionsCaption:'Choose shape ...',
             optionsValue: 'pid',
             optionsText:'name', value: layerObject, event: { change: updateSelectedPid }"></select>
-        <div class="row-fluid controls-row" style="display:none;">
-            <span class="label label-success">PID</span> <span data-bind="text:geometry().pid"></span>
-        </div>
-        <div class="row-fluid controls-row">
-            <span class="label label-success">Name</span> <span data-bind="text:geometry().name"></span>
-        </div>
-        <div class="row-fluid controls-row" style="display:none;">
-            <span class="label label-success">LayerID</span> <span data-bind="text:geometry().fid"></span>
-        </div>
-        <div class="row-fluid controls-row">
-            <span class="label label-success">Layer</span> <span data-bind="text:geometry().layerName"></span>
-        </div>
-        <div class="row-fluid controls-row">
-            <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().area"></span>
+            <div class="row-fluid controls-row" style="display:none;">
+                <span class="label label-success">PID</span> <span data-bind="text:geometry().pid"></span>
+            </div>
+            <div class="row-fluid controls-row">
+                <span class="label label-success">Name</span> <span data-bind="text:geometry().name"></span>
+            </div>
+            <div class="row-fluid controls-row" style="display:none;">
+                <span class="label label-success">LayerID</span> <span data-bind="text:geometry().fid"></span>
+            </div>
+            <div class="row-fluid controls-row">
+                <span class="label label-success">Layer</span> <span data-bind="text:geometry().layerName"></span>
+            </div>
+            <div class="row-fluid controls-row">
+                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().area"></span>
+            </div>
         </div>
     </div>
-</div>
-</script>
+    </script>
 
-<script type="text/html" id="upload">
+    <script type="text/html" id="upload">
     <h3> Not implemented - waiting on web services...</h3>
-</script>
+    </script>
 
-<script type="text/html" id="drawn">
-<div id="drawnLocationDiv" class="drawLocationDiv row-fluid">
-    <div class="span12">
+    <script type="text/html" id="drawn">
+    <div id="drawnLocationDiv" class="drawLocationDiv row-fluid">
+        <div class="span12">
 
-        <div class="row-fluid controls-row" style="display:none;">
-            <span class="label label-success">Type</span> <span data-bind="text:geometry().type"></span>
-        </div>
-        <div class="row-fluid controls-row" data-bind="visible: geometry!=null && geometry().areaKmSq!=null && geometry().areaKmSq != '' ">
-            <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().areaKmSq"></span>
-        </div>
+            <div class="row-fluid controls-row" style="display:none;">
+                <span class="label label-success">Type</span> <span data-bind="text:geometry().type"></span>
+            </div>
+            <div class="row-fluid controls-row" data-bind="visible: geometry!=null && geometry().areaKmSq!=null && geometry().areaKmSq != '' ">
+                <span class="label label-success">Area (km&sup2;)</span> <span data-bind="text:geometry().areaKmSq"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().state!=null && geometry().state!=''">
-            <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().state!=null && geometry().state!=''">
+                <span class="label label-success">State/territory</span> <span data-bind="text:geometry().state"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().lga!=null && geometry().lga!=''">
-            <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties" data-bind="visible: geometry!=null && geometry().lga!=null && geometry().lga!=''">
+                <span class="label label-success">Local Gov. Area</span> <span data-bind="text:geometry().lga"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties">
-            <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties">
+                <span class="label label-success">NRM</span> <span data-bind="text:geometry().nrm"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties">
-            <span class="label label-success">Locality</span> <span data-bind="text:geometry().locality"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties">
+                <span class="label label-success">Locality</span> <span data-bind="text:geometry().locality"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties">
-            <span class="label label-success">NVIS major vegetation group:</span> <span data-bind="text:geometry().mvg"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties">
+                <span class="label label-success">NVIS major vegetation group:</span> <span data-bind="text:geometry().mvg"></span>
+            </div>
 
-        <div class="row-fluid controls-row gazProperties">
-            <span class="label label-success">NVIS major vegetation subgroup:</span> <span data-bind="text:geometry().mvs"></span>
-        </div>
+            <div class="row-fluid controls-row gazProperties">
+                <span class="label label-success">NVIS major vegetation subgroup:</span> <span data-bind="text:geometry().mvs"></span>
+            </div>
 
-        <div style="display:none;" class="row-fluid controls-row">
-            <span class="label label-success">Center</span> <span data-bind="text:geometry().centre"></span>
-        </div>
-        <div class="row-fluid controls-row circleProperties propertyGroup">
-            <span class="label label-success">Radius (m)</span> <span data-bind="text:geometry().radius"></span>
-        </div>
+            <div style="display:none;" class="row-fluid controls-row">
+                <span class="label label-success">Center</span> <span data-bind="text:geometry().centre"></span>
+            </div>
+            <div class="row-fluid controls-row circleProperties propertyGroup">
+                <span class="label label-success">Radius (m)</span> <span data-bind="text:geometry().radius"></span>
+            </div>
 
-        <div style="display:none;" class="row-fluid controls-row  propertyGroup">
-            <span class="label">GeoJSON</span> <span data-bind="text:ko.toJSON(geometry())"></span>
-        </div>
+            <div style="display:none;" class="row-fluid controls-row  propertyGroup">
+                <span class="label">GeoJSON</span> <span data-bind="text:ko.toJSON(geometry())"></span>
+            </div>
 
-        <div class="row-fluid controls-row rectangleProperties propertyGroup">
-            <span class="label label-success">Latitude (SW)</span> <span data-bind="text:geometry().minLat"></span>
-            <span class="label label-success">Longitude (SW)</span> <span data-bind="text:geometry().minLon"></span>
+            <div class="row-fluid controls-row rectangleProperties propertyGroup">
+                <span class="label label-success">Latitude (SW)</span> <span data-bind="text:geometry().minLat"></span>
+                <span class="label label-success">Longitude (SW)</span> <span data-bind="text:geometry().minLon"></span>
+            </div>
+            <div class="row-fluid controls-row rectangleProperties propertyGroup">
+                <span class="label label-success">Latitude (NE)</span> <span data-bind="text:geometry().maxLat"></span>
+                <span class="label label-success">Longitude (NE)</span> <span data-bind="text:geometry().maxLon"></span>
+            </div>
         </div>
-        <div class="row-fluid controls-row rectangleProperties propertyGroup">
-            <span class="label label-success">Latitude (NE)</span> <span data-bind="text:geometry().maxLat"></span>
-            <span class="label label-success">Longitude (NE)</span> <span data-bind="text:geometry().maxLon"></span>
-        </div>
+        %{--<div class="smallMap span8" style="width:500px;height:300px;"></div>--}%
     </div>
-    %{--<div class="smallMap span8" style="width:500px;height:300px;"></div>--}%
-</div>
-</script>
+    </script>
 </div>
 <!-- /ko -->
 
 <r:script>
-var initSiteViewModel;
-$(function(){
-    var siteViewModel = null;
+function initSiteViewModel() {
     // server side generated paths & properties
     var SERVER_CONF = {
-        <g:if test="${project}">
-        pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'createForProject', params:[projectId:project.projectId,checkForState:true])}",
-        projectUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'project', action:'index', id:project.projectId)}",
-        </g:if>
-        <g:elseif test="${site}">
-        pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'edit', id: site?.siteId, params:[checkForState:true])}",
-        </g:elseif>
-        <g:else>
-        pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'create', params:[checkForState:true])}",
-        </g:else>
-        <g:if test="${project}">
+    <g:if test="${project}">
         projectList : ['${project.projectId}'],
-        </g:if>
-        <g:else>
+    </g:if>
+    <g:else>
         projectList : ${projectList?:'[]'},
-        </g:else>
-        sitePageUrl : "${createLink(action: 'index', id: site?.siteId)}",
-        homePageUrl : "${createLink(controller: 'home', action: 'index')}",
-        drawSiteUrl : "${createLink(controller: 'site', action: 'draw')}",
-        ajaxUpdateUrl: "${createLink(action: 'ajaxUpdate', id: site?.siteId)}",
-        siteData: ${json?:'{}'},
+    </g:else>
+        siteData: '${site?:[] as grails.converters.JSON}',
         checkForState: ${params.checkForState?:'false'},
-        spatialService: '${createLink(controller:'proxy', action:'feature')}',
+        spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
         featuresService: "${createLink(controller: 'proxy', action: 'features')}",
         featureService: "${createLink(controller: 'proxy', action: 'feature')}",
@@ -371,12 +355,12 @@ $(function(){
         description : "${site?.description?.encodeAsJavaScript()}",
         notes : "${site?.notes?.encodeAsJavaScript()}",
         documents : JSON.parse('${documents.encodeAsJavaScript()}'),
-        <g:if test="${project}">
+    <g:if test="${project}">
         projects : ['${project.projectId}'],
-        </g:if>
-        <g:else>
+    </g:if>
+    <g:else>
         projects : ${site?.projects?:'[]'}
-        </g:else>
+    </g:else>
     };
 
     // returns blank string if the property is undefined, else the value
@@ -452,7 +436,7 @@ $(function(){
         });
     }
 
-    $(function(){
+    (function(){
         var DrawnLocation = function (l) {
             var self = this;
             self.source = ko.observable('drawn');
@@ -856,32 +840,6 @@ $(function(){
                 self.location.push(temp);
                 var temp2 = ko.mapping.toJS(self.location);
             };
-            self.save = function () {
-                if ($('#validation-container').validationEngine('validate')) {
-                    var json = ko.toJSON(self);
-                    $.ajax({
-                        url: SERVER_CONF.ajaxUpdateUrl,
-                        type: 'POST',
-                        data: json,
-                        contentType: 'application/json',
-                        success: function (data) {
-                            if(data.status == 'created'){
-                                <g:if test="${project}">
-                                document.location.href = SERVER_CONF.projectUrl;
-                                </g:if>
-                                <g:else>
-                                document.location.href = SERVER_CONF.sitePageUrl + '/' + data.id;
-                                </g:else>
-                            } else {
-                                document.location.href = SERVER_CONF.sitePageUrl;
-                            }
-                        },
-                        error: function (data) {
-                            alert('There was a problem saving this site');
-                        }
-                    });
-                }
-            };
             self.notImplemented = function () {
                 alert("Not implemented yet.")
             };
@@ -894,7 +852,7 @@ $(function(){
         };
 
         //retrieve serialised model
-        siteViewModel = new SiteViewModel(savedSiteData);
+        var siteViewModel = new SiteViewModel(savedSiteData);
         ko.applyBindings(siteViewModel, document.getElementById("sitemap"));
 
         init_map({
@@ -916,7 +874,7 @@ $(function(){
         if(SERVER_CONF.siteData != null && SERVER_CONF.siteData.extent != undefined && SERVER_CONF.siteData.extent.geometry != null){
             renderSavedShape(SERVER_CONF.siteData.extent.geometry);
         }
-    });
+    }());
 
     var DRAW_TOOL = {
         drawnShape : null
@@ -924,175 +882,175 @@ $(function(){
 
     function renderSavedShape(currentDrawnShape){
         //retrieve the current shape if exists
-        %{--var currentDrawnShape = siteViewModel.extent().geometry();--}%
-        %{--console.log('Retrieved shape: ' + currentDrawnShape);--}%
-        console.log(currentDrawnShape);
+%{--var currentDrawnShape = siteViewModel.extent().geometry();--}%
+%{--console.log('Retrieved shape: ' + currentDrawnShape);--}%
+    console.log(currentDrawnShape);
 
-        if(currentDrawnShape !== undefined){
-            if(currentDrawnShape.type == 'Polygon'){
-                console.log('Redrawing polygon');
-                showOnMap('polygon', geoJsonToPath(currentDrawnShape));
-                zoomToShapeBounds();
-            } else if(currentDrawnShape.type == 'Circle'){
-                console.log('Redrawing circle');
-                showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
-                zoomToShapeBounds();
-            } else if(currentDrawnShape.type == 'Rectangle'){
-                console.log('Redrawing rectangle');
-                var shapeBounds = new google.maps.LatLngBounds(
-                    new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
-                    new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
-                );
-                //render on the map
-                showOnMap('rectangle', shapeBounds);
-                zoomToShapeBounds();
-            } else if(currentDrawnShape.type == 'pid'){
-                console.log('Loading the PID...' + currentDrawnShape.pid);
-                showObjectOnMap(currentDrawnShape.pid);
-                siteViewModel.extent().setCurrentPID();
-            } else if(currentDrawnShape.type == 'Point'){
-                console.log('Loading the point...' + currentDrawnShape.pid);
-                showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
-                zoomToShapeBounds();
-                showSatellite();
-                //addMarker(currentDrawnShape.decimalLatitude,currentDrawnShape.decimalLongitude);
-            }
+    if(currentDrawnShape !== undefined){
+        if(currentDrawnShape.type == 'Polygon'){
+            console.log('Redrawing polygon');
+            showOnMap('polygon', geoJsonToPath(currentDrawnShape));
+            zoomToShapeBounds();
+        } else if(currentDrawnShape.type == 'Circle'){
+            console.log('Redrawing circle');
+            showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
+            zoomToShapeBounds();
+        } else if(currentDrawnShape.type == 'Rectangle'){
+            console.log('Redrawing rectangle');
+            var shapeBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
+                new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
+            );
+            //render on the map
+            showOnMap('rectangle', shapeBounds);
+            zoomToShapeBounds();
+        } else if(currentDrawnShape.type == 'pid'){
+            console.log('Loading the PID...' + currentDrawnShape.pid);
+            showObjectOnMap(currentDrawnShape.pid);
+            siteViewModel.extent().setCurrentPID();
+        } else if(currentDrawnShape.type == 'Point'){
+            console.log('Loading the point...' + currentDrawnShape.pid);
+            showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
+            zoomToShapeBounds();
+            showSatellite();
+            //addMarker(currentDrawnShape.decimalLatitude,currentDrawnShape.decimalLongitude);
         }
     }
+}
 
-    function setPageValues(){}
+function setPageValues(){}
 
-    function clearSessionData(){}
+function clearSessionData(){}
 
-    function clearData() {
-        $('#drawnArea > div').css('display','none');
-        $('#drawnArea input').val("");
-        $('#wkt').val("");
-        $('#circleLat').val("");
-        $('#circleLon').val("");
-        $('#circleRadius').val("");
-    }
+function clearData() {
+    $('#drawnArea > div').css('display','none');
+    $('#drawnArea input').val("");
+    $('#wkt').val("");
+    $('#circleLat').val("");
+    $('#circleLon').val("");
+    $('#circleRadius').val("");
+}
 
-    function shapeDrawn(source, type, shape) {
-        console.log("[shapeDrawn] shapeDrawn called: " + type);
-        if (source === 'clear') {
-            DRAW_TOOL.drawnShape = null;
-            clearData();
-            clearSessionData('drawnShapes');
-            $('#useLocation').addClass("disabled");
-        } else {
-            $('#useLocation').removeClass("disabled");
-            switch (type) {
-                case google.maps.drawing.OverlayType.CIRCLE:
-                    /*// don't show or set circle props if source is a locality
-                     if (source === "user-drawn") {*/
-                    var center = shape.getCenter();
-                    // set coord display
-                    $('#circLat').val(round(center.lat()));
-                    $('#circLon').val(round(center.lng()));
-                    $('#circRadius').val(round(shape.getRadius()/1000,2) + "km");
-                    $('#circleArea').css('display','block');
-                    // set hidden inputs
-                    $('#circleLat').val(center.lat());
-                    $('#circleLon').val(center.lng());
-                    $('#circleRadius').val(shape.getRadius());
-                    console.log("circle lat: " + center.lat());
-                    console.log("circle lng: " + center.lng());
-                    console.log("circle radius: " + shape.getRadius());
+function shapeDrawn(source, type, shape) {
+    console.log("[shapeDrawn] shapeDrawn called: " + type);
+    if (source === 'clear') {
+        DRAW_TOOL.drawnShape = null;
+        clearData();
+        clearSessionData('drawnShapes');
+        $('#useLocation').addClass("disabled");
+    } else {
+        $('#useLocation').removeClass("disabled");
+        switch (type) {
+            case google.maps.drawing.OverlayType.CIRCLE:
+                /*// don't show or set circle props if source is a locality
+                 if (source === "user-drawn") {*/
+                var center = shape.getCenter();
+                // set coord display
+                $('#circLat').val(round(center.lat()));
+                $('#circLon').val(round(center.lng()));
+                $('#circRadius').val(round(shape.getRadius()/1000,2) + "km");
+                $('#circleArea').css('display','block');
+                // set hidden inputs
+                $('#circleLat').val(center.lat());
+                $('#circleLon').val(center.lng());
+                $('#circleRadius').val(shape.getRadius());
+                console.log("circle lat: " + center.lat());
+                console.log("circle lng: " + center.lng());
+                console.log("circle radius: " + shape.getRadius());
 
-                    var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
-                    $('#calculatedArea').html(calcAreaKm);
-                    //calculate the area
-                    DRAW_TOOL.drawnShape = {
-                        type:'Circle',
-                        userDrawn: 'Circle',
-                        coordinates:[center.lng(), center.lat()],
-                        centre: [center.lng(), center.lat()],
-                        radius: shape.getRadius(),
-                        areaKmSq:calcAreaKm
-                    };
-                    break;
-                case google.maps.drawing.OverlayType.RECTANGLE:
-                    var bounds = shape.getBounds(),
-                            sw = bounds.getSouthWest(),
-                            ne = bounds.getNorthEast();
-                    // set coord display
-                    $('#swLat').val(round(sw.lat()));
-                    $('#swLon').val(round(sw.lng()));
-                    $('#neLat').val(round(ne.lat()));
-                    $('#neLon').val(round(ne.lng()));
+                var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
+                $('#calculatedArea').html(calcAreaKm);
+                //calculate the area
+                DRAW_TOOL.drawnShape = {
+                    type:'Circle',
+                    userDrawn: 'Circle',
+                    coordinates:[center.lng(), center.lat()],
+                    centre: [center.lng(), center.lat()],
+                    radius: shape.getRadius(),
+                    areaKmSq:calcAreaKm
+                };
+                break;
+            case google.maps.drawing.OverlayType.RECTANGLE:
+                var bounds = shape.getBounds(),
+                        sw = bounds.getSouthWest(),
+                        ne = bounds.getNorthEast();
+                // set coord display
+                $('#swLat').val(round(sw.lat()));
+                $('#swLon').val(round(sw.lng()));
+                $('#neLat').val(round(ne.lat()));
+                $('#neLon').val(round(ne.lng()));
+                $('#rectangleArea').css('display','block');
+
+                //calculate the area
+                var mvcArray = new google.maps.MVCArray();
+                mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+                mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
+                mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
+                mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
+                mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+
+                var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
+                var calcAreaKm = ((calculatedArea)/1000)/1000;
+                $('#calculatedArea').html(calcAreaKm);
+
+                var centreY = (sw.lat() + ne.lat())/2;
+                var centreX =  (sw.lng() + ne.lng())/2;
+
+                DRAW_TOOL.drawnShape = {
+                    type: 'Polygon',
+                    userDrawn: 'Rectangle',
+                    coordinates:[[
+                        [sw.lng(),sw.lat()],
+                        [sw.lng(),ne.lat()],
+                        [ne.lng(),ne.lat()],
+                        [ne.lng(),sw.lat()],
+                        [ne.lng(),sw.lat()]
+                    ]],
+                    bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
+                    areaKmSq:calcAreaKm,
+                    centre: [centreX,centreY]
+                }
+                break;
+            case google.maps.drawing.OverlayType.POLYGON:
+                /*
+                 * Note that the path received from the drawing manager does not end by repeating the starting
+                 * point (number coords = number vertices). However the path derived from a WKT does repeat
+                 * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
+                 * first and if so ignore it.
+                 */
+                var path,
+                        $lat = null,
+                        $ul = $('#polygonArea ul'),
+                        realLength = 0,
+                        isRect;
+
+                if(shape.getPath()){
+                    path = shape.getPath();
+                } else {
+                    path = shape;
+                }
+
+                isRect = representsRectangle(path);
+
+                // set coord display
+                if (isRect) {
+                    $('#swLat').val(round(path.getAt(0).lat()));
+                    $('#swLon').val(round(path.getAt(0).lng()));
+                    $('#neLat').val(round(path.getAt(2).lat()));
+                    $('#neLon').val(round(path.getAt(2).lng()));
                     $('#rectangleArea').css('display','block');
-
-                    //calculate the area
-                    var mvcArray = new google.maps.MVCArray();
-                    mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-                    mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
-                    mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
-                    mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
-                    mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-
-                    var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
-                    var calcAreaKm = ((calculatedArea)/1000)/1000;
-                    $('#calculatedArea').html(calcAreaKm);
-
-                    var centreY = (sw.lat() + ne.lat())/2;
-                    var centreX =  (sw.lng() + ne.lng())/2;
-
-                    DRAW_TOOL.drawnShape = {
-                        type: 'Polygon',
-                        userDrawn: 'Rectangle',
-                        coordinates:[[
-                            [sw.lng(),sw.lat()],
-                            [sw.lng(),ne.lat()],
-                            [ne.lng(),ne.lat()],
-                            [ne.lng(),sw.lat()],
-                            [ne.lng(),sw.lat()]
-                        ]],
-                        bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
-                        areaKmSq:calcAreaKm,
-                        centre: [centreX,centreY]
+                } else {
+                    $ul.find('li').remove();
+                    realLength = path.getLength();
+                    if (path.getAt(0).equals(path.getAt(path.length - 1))) {
+                        realLength = realLength - 1;
                     }
-                    break;
-                case google.maps.drawing.OverlayType.POLYGON:
-                    /*
-                     * Note that the path received from the drawing manager does not end by repeating the starting
-                     * point (number coords = number vertices). However the path derived from a WKT does repeat
-                     * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
-                     * first and if so ignore it.
-                     */
-                    var path,
-                            $lat = null,
-                            $ul = $('#polygonArea ul'),
-                            realLength = 0,
-                            isRect;
-
-                    if(shape.getPath()){
-                        path = shape.getPath();
-                    } else {
-                        path = shape;
-                    }
-
-                    isRect = representsRectangle(path);
-
-                    // set coord display
-                    if (isRect) {
-                        $('#swLat').val(round(path.getAt(0).lat()));
-                        $('#swLon').val(round(path.getAt(0).lng()));
-                        $('#neLat').val(round(path.getAt(2).lat()));
-                        $('#neLon').val(round(path.getAt(2).lng()));
-                        $('#rectangleArea').css('display','block');
-                    } else {
-                        $ul.find('li').remove();
-                        realLength = path.getLength();
-                        if (path.getAt(0).equals(path.getAt(path.length - 1))) {
-                            realLength = realLength - 1;
-                        }
-                        for (i = 0; i < realLength; i++) {
-                            // check whether widget exists
-                            $lat = $('#lat' + i);
-                            if ($lat.length === 0) {
-                                // doesn't so create it
-                                $lat = $('<li><input type="text" id="lat' + i +
+                    for (i = 0; i < realLength; i++) {
+                        // check whether widget exists
+                        $lat = $('#lat' + i);
+                        if ($lat.length === 0) {
+                            // doesn't so create it
+                            $lat = $('<li><input type="text" id="lat' + i +
                                         '"/><input type="text" id="lon' + i + '"/></li>')
                                         .appendTo($ul);
                             }
@@ -1211,5 +1169,7 @@ $(function(){
         if (arr[1].lat() != arr[2].lat()) { return false; }
         return true
     }
-});
+
+    return siteViewModel;
+}
 </r:script>

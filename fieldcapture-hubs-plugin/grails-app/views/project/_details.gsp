@@ -3,78 +3,78 @@
             <h4 class="header"><g:message code="project.details.tell"/></h4>
 
             <div class="control-group">
-                <label class="control-label span2" for="name"><g:message code="g.project.name"/>:</label>
+                <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" name="name" data-bind="value:name"
                            data-validation-engine="validate[required]"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="description"><g:message code="g.project.description"/>:</label>
+                <label class="control-label span3" for="description"><g:message code="g.project.description"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textArea class="span12" name="description" data-bind="value:description"
                               data-validation-engine="validate[required]" rows="3"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="aim"><g:message code="project.details.aim"/></label>
+                <label class="control-label span3" for="aim"><g:message code="project.details.aim"/></label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textArea class="span12" name="aim" data-bind="value:aim"
                               data-validation-engine="validate[required]" rows="2"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="manager"><g:message code="project.details.manager"/>:</label>
+                <label class="control-label span3" for="manager"><g:message code="project.details.manager"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" type="email" data-bind="value:manager" name="manager"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="plannedStartDate"><g:message code="g.project.plannedStartDate"/>:
+                <label class="control-label span3" for="plannedStartDate"><g:message code="g.project.plannedStartDate"/>:
                 <fc:iconHelp><g:message code="g.project.plannedStartDate.help"/></fc:iconHelp>
                 </label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate"
                                    id="plannedStartDate" data-validation-engine="validate[required]"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="plannedEndDate"><g:message code="g.project.plannedEndDate"/>:
+                <label class="control-label span3" for="plannedEndDate"><g:message code="g.project.plannedEndDate"/>:
                 <fc:iconHelp><g:message code="g.project.plannedEndDate.help"/></fc:iconHelp>
                 </label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate"
                                    id="plannedEndDate" data-validation-engine="validate[future[plannedStartDate]]"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="actualStartDate"><g:message code="g.project.actualStartDate"/>:
+                <label class="control-label span3" for="actualStartDate"><g:message code="g.project.actualStartDate"/>:
                 <fc:iconHelp><g:message code="g.project.actualStartDate.help"/></fc:iconHelp>
                 </label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <fc:datePicker targetField="actualStartDate.date" name="actualStartDate" id="actualStartDate"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="actualEndDate"><g:message code="g.project.actualEndDate"/>:
+                <label class="control-label span3" for="actualEndDate"><g:message code="g.project.actualEndDate"/>:
                 <fc:iconHelp><g:message code="g.project.actualEndDate.help"/></fc:iconHelp>
                 </label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <fc:datePicker targetField="actualEndDate.date" name="actualEndDate" id="actualEndDate"/>
                 </div>
             </div>
@@ -84,34 +84,34 @@
             <h4 class="header">&nbsp;</h4>
 
             <div class="control-group">
-                <label class="control-label span2" for="externalId"><g:message code="g.project.externalId"/>:</label>
+                <label class="control-label span3" for="externalId"><g:message code="g.project.externalId"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" name="externalId" data-bind="value:externalId"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="grantId"><g:message code="g.project.grantId"/>:</label>
+                <label class="control-label span3" for="grantId"><g:message code="g.project.grantId"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" name="grantId" data-bind="value:grantId"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="funding"><g:message code="g.project.funding"/>:</label>
+                <label class="control-label span3" for="funding"><g:message code="g.project.funding"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" name="funding" data-bind="value:funding"
                                  data-validation-engine="validate[custom[number]]"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="program"><g:message code="g.program.name"/>:</label>
+                <label class="control-label span3" for="program"><g:message code="g.program.name"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <select class="span12" id="program"
                             data-bind="value:associatedProgram,options:transients.programs,optionsCaption: 'Choose...'"
                             data-validation-engine="validate[required]"></select>
@@ -119,39 +119,39 @@
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="subProgram"><g:message code="g.subprogram.name"/>:</label>
+                <label class="control-label span3" for="subProgram"><g:message code="g.subprogram.name"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <select class="span12" id="subProgram"
                             data-bind="value:associatedSubProgram,options:transients.subprogramsToDisplay,optionsCaption: 'Choose...'"></select>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2"
+                <label class="control-label span3"
                        for="orgGrantee"><g:message code="project.details.orgGrantee"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <select class="span12" id="orgGrantee"
                             data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdGrantee, optionsCaption: 'Choose...'"></select>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2"
+                <label class="control-label span3"
                        for="orgSponsor"><g:message code="project.details.orgSponsor"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <select class="span12" id="orgSponsor"
                             data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdSponsor, optionsCaption: 'Choose...'"></select>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2"
+                <label class="control-label span3"
                        for="orgSvcProvider"><g:message code="project.details.orgSvcProvider"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <select class="span12" id="orgSvcProvider"
                             data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:orgIdSvcProvider, optionsCaption: 'Choose...'"></select>
                 </div>
@@ -162,19 +162,19 @@
             <h4 class="header span12"><g:message code="project.details.involved"/></h4>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="getInvolved"><g:message code="project.details.involved"/></label>
+                <label class="control-label span3" for="getInvolved"><g:message code="project.details.involved"/></label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textArea class="span12" name="getInvolved" data-bind="value:getInvolved"
                               rows="2"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2"
+                <label class="control-label span3"
                        for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" name="scienceType" data-bind="value:scienceType"/>
                 </div>
             </div>
@@ -182,7 +182,7 @@
     </div>
 
     <hr class="clearfix"/>
-    <g:render template="/site/map" model="${pageScope.variables}"/>
+        <g:render template="/site/map" model="${pageScope.variables}"/>
     <hr class="clearfix"/>
 
     <div class="row-fluid">
@@ -190,25 +190,25 @@
             <h4 class="header"><g:message code="project.details.find"/>:</h4>
 
             <div class="control-group">
-                <label class="control-label span2" for="urlWeb"><g:message code="g.website"/>:</label>
+                <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" tye="url" name="urlWeb" data-bind="value:urlWeb"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="urlAndroid"><g:message code="g.android"/>:</label>
+                <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" tye="url" name="urlAndroid" data-bind="value:urlAndroid"/>
                 </div>
             </div>
 
             <div class="clearfix control-group">
-                <label class="control-label span2" for="urlITunes"><g:message code="g.iTunes"/>:</label>
+                <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textField class="span12" tye="url" name="urlITunes" data-bind="value:urlITunes"/>
                 </div>
             </div>
@@ -218,17 +218,16 @@
             <h4 class="header">&nbsp;</h4>
 
             <div class="control-group">
-                <label class="control-label span2" for="keywords"><g:message code="g.keywords"/>:</label>
+                <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
 
-                <div class="controls span10">
+                <div class="controls span9">
                     <g:textArea class="span12" name="keywords" data-bind="value:keywords" rows="2"/>
                 </div>
             </div>
         </div>
     </div>
 <r:script>
-var initViewModel;
-$(function(){
+function initViewModel() {
     var organisations = ${institutions}, organisationsMap = {}, organisationsRMap = {};
     organisations.map(function(org) {
         organisationsMap[org.uid] = org.name;
@@ -259,6 +258,7 @@ $(function(){
         self.orgIdSvcProvider = ko.observable(data.orgIdSvcProvider);
         self.plannedEndDate = ko.observable(data.plannedEndDate).extend({simpleDate: false});
         self.plannedStartDate = ko.observable(data.plannedStartDate).extend({simpleDate: false});
+        self.projectSiteId = data.projectSiteId;
         self.projectType = ko.observable(data.projectType || "works");
         self.scienceType = ko.observable(data.scienceType);
         self.selectedActivities = ko.observableArray();
@@ -317,8 +317,6 @@ $(function(){
     }
 
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-    initViewModel = function() {
-        return new ViewModel(${project ?: [:]}, activityTypes);
-    }
-});
+    return new ViewModel(${project ?: [:]}, activityTypes);
+}
 </r:script>

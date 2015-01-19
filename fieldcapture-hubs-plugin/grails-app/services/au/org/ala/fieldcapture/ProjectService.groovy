@@ -9,12 +9,12 @@ class ProjectService {
     def webService, grailsApplication, siteService, activityService, authService, emailService, documentService, userService, metadataService, settingService
 
     private def mapAttributesToCollectory(props) {
-        def specialProps = [
+        def mapKeyEcoDataToCollectory = [
             description: 'pubDescription',
             manager: 'email',
             name: 'name',
-            organisation: null,
-            projectId: null,
+            organisation: '', // ignore this property
+            projectId: 'uid',
             urlWeb: 'websiteUrl'
         ]
         def collectoryProps = [
@@ -22,14 +22,14 @@ class ProjectService {
         ]
         def hiddenJSON = [:]
         props.each { k, v ->
-            if (specialProps.containsKey(k)) {
-                def kMapped = specialProps[k]
-                if (kMapped != null) collectoryProps[kMapped] = v
-            } else if (v != null) {
-                hiddenJSON[k] = v
+            if (v != null) {
+                def keyCollectory = mapKeyEcoDataToCollectory[k]
+                if (keyCollectory == null) // not mapped to first class collectory property
+                    hiddenJSON[k] = v
+                else if (keyCollectory != '') // not to be ignored
+                    collectoryProps[keyCollectory] = v
             }
         }
-        if (props.projectId) collectoryProps.uid = props.projectId
         collectoryProps.hiddenJSON = hiddenJSON
         println("collectory hiddenJSON = " + hiddenJSON)
         collectoryProps
@@ -98,7 +98,7 @@ class ProjectService {
         webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
         // recreate 'hiddenJSON' in collectory every time (minus some attributes)
         body = getRich(id) as Map
-        ['id','dateCreated','documents','lastUpdated','organisationName','sites'].each { body.remove(it) }
+        ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
         webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/' + id, mapAttributesToCollectory(body))
     }
 

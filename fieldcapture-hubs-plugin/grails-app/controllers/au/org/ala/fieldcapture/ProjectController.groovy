@@ -4,6 +4,7 @@ import grails.converters.JSON
 class ProjectController {
 
     def projectService, metadataService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def siteService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
 
@@ -56,11 +57,12 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
-        def project = projectService.get(id)
+        def project = projectService.get(id) as Map
         if (project) {
+            def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
-             documents: [],
-             site: project.site,
+             documents: siteInfo.documents?:'[]',
+             site: siteInfo.site,
              institutions: metadataService.institutionList(),
              programs: metadataService.programsModel()]
         } else {
@@ -123,8 +125,24 @@ class ProjectController {
 
         log.debug "json=" + (values as JSON).toString()
         log.debug "id=${id} class=${id?.getClass()}"
+        def projectSite = values.projectSite
+        values.remove("projectSite")
         def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
+        if (projectSite && !result.error) {
+            if (!id) id = result.resp.projectId
+            if (!projectSite.projects)
+                projectSite.projects = [id]
+            else if (!projectSite.projects.contains(id))
+                projectSite.projects += id
+            def siteResult = siteService.updateRaw(values.projectSiteId, projectSite)
+            if (siteResult.status == 'error')
+                result = [error:'SiteService failed']
+            else if (siteResult.status == 'created') {
+                def updateResult = projectService.update(id, [projectSiteId: siteResult.id])
+                if (updateResult.error) result = updateResult
+            }
+        }
         if (result.error) {
             render result as JSON
         } else {
