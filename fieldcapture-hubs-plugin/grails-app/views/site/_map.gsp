@@ -327,6 +327,10 @@
 
 <r:script>
 function initSiteViewModel() {
+    var siteViewModel;
+    var DRAW_TOOL = {
+        drawnShape : null
+    };
     // server side generated paths & properties
     var SERVER_CONF = {
     <g:if test="${project}">
@@ -335,7 +339,7 @@ function initSiteViewModel() {
     <g:else>
         projectList : ${projectList?:'[]'},
     </g:else>
-        siteData: '${site?:[] as grails.converters.JSON}',
+        siteData: ${site?:[] as grails.converters.JSON},
         checkForState: ${params.checkForState?:'false'},
         spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
@@ -852,7 +856,7 @@ function initSiteViewModel() {
         };
 
         //retrieve serialised model
-        var siteViewModel = new SiteViewModel(savedSiteData);
+        siteViewModel = new SiteViewModel(savedSiteData);
         ko.applyBindings(siteViewModel, document.getElementById("sitemap"));
 
         init_map({
@@ -875,10 +879,6 @@ function initSiteViewModel() {
             renderSavedShape(SERVER_CONF.siteData.extent.geometry);
         }
     }());
-
-    var DRAW_TOOL = {
-        drawnShape : null
-    }
 
     function renderSavedShape(currentDrawnShape){
         //retrieve the current shape if exists

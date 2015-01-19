@@ -49,6 +49,7 @@ $(function(){
     $('.helphover').popover({animation: true, trigger:'hover'});
 
     var viewModel = initViewModel();
+    viewModel.projectSite = initSiteViewModel();
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
