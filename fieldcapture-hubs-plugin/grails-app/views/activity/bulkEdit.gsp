@@ -66,6 +66,11 @@
             return '<a title="'+value+'" href="'+'${createLink(controller: "activity", action:"enterData")}'+'/'+dataContext.activityId+'">'+value+'</a>';
         };
 
+        var progressFormatter = function( row, cell, value, columnDef, dataContext ) {
+
+            return "<span class=\"label "+activityProgressClass(value)+"\">"+value+"</span>"
+        };
+
         var activities = <fc:modelAsJavascript model="${activities}"/>;
         var outputModels = <fc:modelAsJavascript model="${outputModels}"/>;
 
