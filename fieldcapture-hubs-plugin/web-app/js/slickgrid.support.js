@@ -173,10 +173,6 @@ var outputValueEditor = function(item, column, value) {
     item[column.field] = value;
 };
 
-var progressFormatter = function( row, cell, value, columnDef, dataContext ) {
-    return '<span class="btn-info">'+value+"</span>";
-};
-
 
 //---- taken from jqueryValidationEngine with minor modifications ------
 var validationSupport = {
