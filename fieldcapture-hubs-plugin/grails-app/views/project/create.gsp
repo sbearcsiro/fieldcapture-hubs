@@ -136,8 +136,11 @@ $(function(){
         viewModel.save();
     }).on('changed.fu.wizard', function(e) {
         var selected = $(this).wizard('selectedItem');
-        if (selected.step == 2 && !viewModel.projectSite)
+        if (selected.step == 2 && !viewModel.projectSite) {
             viewModel.projectSite = initSiteViewModel();
+            viewModel.projectSite.type("projectArea");
+            $("#siteType").prop("disabled", 'disabled');
+        }
     }).on('actionclicked.fu.wizard', function(e) {
         var selected = $(this).wizard('selectedItem');
         if (!$('.step-pane[data-step='+selected.step+']').validationEngine('validate')) {

@@ -50,6 +50,8 @@ $(function(){
 
     var viewModel = initViewModel();
     viewModel.projectSite = initSiteViewModel();
+    viewModel.projectSite.type("projectArea");
+    $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">

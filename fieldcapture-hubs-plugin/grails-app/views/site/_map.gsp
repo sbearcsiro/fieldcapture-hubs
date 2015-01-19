@@ -19,26 +19,36 @@
             </div>
             </g:if>
             <div class="row-fluid">
-                <div class="span4">
+                <div class="span3">
                     <label for="externalId">External Id
                         <fc:iconHelp title="External id">Identifier code for the site - used in external documents.</fc:iconHelp>
                     </label>
                     <input data-bind="value:externalId" id="externalId" type="text" class="span12"/>
                 </div>
-                <div class="span4">
-                    <label for="type">Type</label>
-                    %{--<input data-bind="value: type" id="type" type="text" class="span12"/>--}%
-                    <g:select id="type"
+                <div class="span3">
+                    <label for="siteType">Type</label>
+                    %{--<input data-bind="value: type" id="siteType" type="text" class="span12"/>--}%
+                    <g:select id="siteType"
                               data-bind="value: type"
                               class="span12"
                               name='type'
-                              from="['choose site type','Pastoral','Industrial','Urban','Coastal', 'Reserve', 'Private land']"
+                              from="['Works Area','Project Area']"
+                              keys="['worksArea','projectArea']"/>
+                </div>
+                <div class="span3">
+                    <label for="siteContext">Context</label>
+                    %{--<input data-bind="value: context" id="siteContext" type="text" class="span12"/>--}%
+                    <g:select id="siteContext"
+                              data-bind="value: context"
+                              class="span12"
+                              name='context'
+                              from="['choose site context','Pastoral','Industrial','Urban','Coastal', 'Reserve', 'Private land']"
                               keys="['none','Pastoral','Industrial','Urban','Coastal','Reserve', 'Private land']"/>
                 </div>
-                <div class="span4">
-                    <label for="area">Area (decimal hectares)
+                <div class="span3">
+                    <label for="siteArea">Area (decimal hectares)
                         <fc:iconHelp title="Area of site">The area in decimal hectares (4dp) enclosed within the boundary of the shape file.</fc:iconHelp></label>
-                    <input data-bind="value: area" id="area" type="text" class="span12"/>
+                    <input data-bind="value: area" id="siteArea" type="text" class="span12"/>
                 </div>
             </div>
 
@@ -352,6 +362,7 @@ function initSiteViewModel() {
         id: "${site?.id}",
         name : "${site?.name?.encodeAsJavaScript()}",
         externalId : "${site?.externalId}",
+        context : "${site?.context}",
         type : "${site?.type}",
         extent: ${site?.extent?:'null'},
         poi: ${site?.poi?:'[]'},
@@ -726,6 +737,7 @@ function initSiteViewModel() {
             self.id = ko.observable(siteData.id);
             self.name = ko.observable(siteData.name);
             self.externalId = ko.observable(siteData.externalId);
+            self.context = ko.observable(siteData.context);
             self.type = ko.observable(siteData.type);
             self.area = ko.observable(siteData.area);
             self.description = ko.observable(siteData.description);
