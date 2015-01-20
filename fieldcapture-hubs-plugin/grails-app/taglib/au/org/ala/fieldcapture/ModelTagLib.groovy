@@ -140,6 +140,9 @@ class ModelTagLib {
             case 'date':
                 renderer.renderDate(renderContext)
                 break
+            case 'document':
+                renderer.renderDocument(renderContext)
+                break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
                 break

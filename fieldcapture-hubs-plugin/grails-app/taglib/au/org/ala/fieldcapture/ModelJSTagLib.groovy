@@ -62,6 +62,9 @@ class ModelJSTagLib {
             else if (mod.dataType == 'date') {
                 dateViewModel(mod, out)
             }
+            else if (mod.dataType == 'document') {
+                documentViewModel(mod, out)
+            }
         }
         out << INDENT*3 << "self.transients.site = site;"
     }
@@ -97,6 +100,9 @@ class ModelJSTagLib {
             else if (mod.dataType == 'species') {
                 out << INDENT*4 << "self.data['${mod.name}'].loadData(data['${mod.name}']);\n"
             }
+            else if (mod.dataType == 'document') {
+                out << INDENT*4 << "self.data['${mod.name}'](findDocumentById(documents, data['${mod.name}']));\n"
+            }
         }
     }
 
@@ -123,6 +129,14 @@ class ModelJSTagLib {
                 out << INDENT*4 << "delete jsData.${it.source}TableDataUploadOptions\n"
                 out << INDENT*4 << "delete jsData.${it.source}TableDataUploadVisible\n"
 
+            }
+
+
+        })
+        attrs.model?.dataModel?.each({
+            if (it.dataType == 'document') {
+                // Convert an embedded document into a document id.
+                out << INDENT*4 << "if (jsData.data && jsData.data.${it.name}) { jsData.data.${it.name} = jsData.data.${it.name}.documentId; }"
             }
         })
     }
@@ -440,6 +454,10 @@ class ModelJSTagLib {
 
     def dateViewModel(model, out) {
         out << "\n" << INDENT*3 << "self.data.${model.name} = ko.observable().extend({simpleDate: false});\n"
+    }
+
+    def documentViewModel(model, out) {
+        out << "\n" << INDENT*3 << "self.data.${model.name} = ko.observable();\n"
     }
 
     def computedObservable(model, propertyContext, dependantContext, out) {
