@@ -18,7 +18,7 @@
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}",
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
@@ -66,9 +66,22 @@
                 </div>
 
                 <div class="tab-pane" id="dashboard">
-                    <div class="loading-message">
-                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+                    <div class="row-fluid">
+                        <span class="span3">
+                            <ul class="nav nav-list nav-stacked nav-tabs">
+                                <li><a href="#" data-report="programMetrics">Programme Metrics <i class="icon-chevron-right">&nbsp;</i></a></li>
+                                <li class="active"><a href="#" data-report="greenArmy">Green Army <i class="icon-chevron-right">&nbsp;</i></a></li>
+                            </ul>
+                        </span>
+                        <span class="span9">
+                            <div id="dashboard-content">
+                                <div class="loading-message">
+                                    <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+                                </div>
+                            </div>
+                        </span>
                     </div>
+
                 </div>
 
                 <g:if test="${organisation.reports}">
@@ -251,24 +264,9 @@
 
         ko.applyBindings(organisationViewModel);
 
-        var dashboardShown = false;
-        $('#dashboard-tab').on('shown', function (e) {
-
-            if (!dashboardShown) {
-                dashboardShown = true;
-
-                $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name}, function(data) {
-                    $('#dashboard').html(data);
-                    $('#dashboard .helphover').popover({animation: true, trigger:'hover', container:'body'});
-                });
-
-            }
-        });
 
         var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
-
-
 
 
         var ActivityViewModel = function(activity) {
@@ -412,6 +410,29 @@
 
         };
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
+
+        $('#dashboard a').click(function(e) {
+            var report = $(e.currentTarget).data('report');
+            $('#dashboard li').removeClass('active');
+            $(e.currentTarget).parent('li').addClass('active');
+
+
+            $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:report}).done(function(data) {
+                $('#dashboard-content').html(data);
+                $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+            });
+        });
+
+        var dashboardShown = false;
+        $('#dashboard-tab').on('shown', function (e) {
+
+            if (!dashboardShown) {
+                dashboardShown = true;
+
+                $('#dashboard a[data-report*=greenArmy]').click();
+
+            }
+        });
 
     });
 
