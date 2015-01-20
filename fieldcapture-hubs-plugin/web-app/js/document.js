@@ -180,7 +180,10 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
         url:uploadUrl,
         formData:function(form) {return [{name:'document', value:documentViewModel.toJSONString()}]},
         autoUpload:false,
-        forceIframeTransport: true
+        forceIframeTransport: true,
+        getFilesFromResponse: function(data) { // This is to support file upload on pages that include the fileupload-ui which expects a return value containing an array of files.
+            return data;
+        }
     }).on('fileuploadadd', function(e, data) {
 
         fileUploadHelper = data;
@@ -197,8 +200,18 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
         documentViewModel.uploadProgress(data.loaded, data.total);
     }).on('fileuploaddone', function(e, data) {
 
-        var resultText = $('pre', data.result).text();
-        var result = $.parseJSON(resultText);
+        var result;
+
+        // Because of the iframe upload, the result will be returned as a query object wrapping a document containing
+        // the text in a <pre></pre> block.  If the fileupload-ui script is included, the data will be extracted
+        // before this callback is invoked, thus the check.*
+        if (data.result instanceof jQuery) {
+            var resultText = $('pre', data.result).text();
+            result = JSON.parse(resultText);
+        }
+        else {
+            result = data.result;
+        }
 
         if (!result) {
             result = {};
@@ -300,3 +313,46 @@ function findDocumentByRole(documents, role) {
     }
     return null;
 };
+
+function findDocumentById(documents, id) {
+    if (documents) {
+        for (var i=0; i<documents.length; i++) {
+            if (documents[i].documentId === id && documents[i].status !== 'deleted') {
+                return documents[i];
+            }
+        }
+    }
+    return null;
+}
+
+var DocModel = function (doc) {
+    var self = this;
+    this.name = doc.name;
+    this.attribution = doc.attribution;
+    this.filename = doc.filename;
+    this.type = doc.type;
+    this.url = doc.url;
+    this.thumbnailUrl = doc.thumbnailUrl ? doc.thumbnailUrl : doc.url;
+    this.filetypeImg = function () {
+        return imageLocation + "/" + iconnameFromFilename(self.filename);
+    };
+};
+function DocListViewModel(documents) {
+    var self = this;
+    this.documents = ko.observableArray($.map(documents, function(doc) { return new DocModel(doc)} ));
+}
+function iconnameFromFilename(filename) {
+    if (filename === undefined) { return "_blank.png"; }
+    var ext = filename.split('.').pop(),
+        types = ['aac','ai','aiff','avi','bmp','c','cpp','css','dat','dmg','doc','dotx','dwg','dxf',
+            'eps','exe','flv','gif','h','hpp','html','ics','iso','java','jpg','key','mid','mp3','mp4',
+            'mpg','odf','ods','odt','otp','ots','ott','pdf','php','png','ppt','psd','py','qt','rar','rb',
+            'rtf','sql','tga','tgz','tiff','tif','txt','wav','xls','xlsx'];
+    ext = ext.toLowerCase();
+    if (ext === 'docx') { ext = 'doc' }
+    if ($.inArray(ext, types) >= 0) {
+        return ext + '.png';
+    } else {
+        return "_blank.png";
+    }
+}
