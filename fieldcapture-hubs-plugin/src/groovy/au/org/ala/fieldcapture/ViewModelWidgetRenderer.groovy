@@ -100,4 +100,11 @@ class ViewModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << "<span data-bind=\"text:${context.source}.formattedDate\"></span>"
     }
 
+    @Override
+    void renderDocument(WidgetRenderContext context) {
+        context.writer << """<div data-bind="if:(${context.source}())">"""
+        context.writer << """    <div data-bind="template:{name:'documentViewTemplate', data:${context.source}}"></div>"""
+        context.writer << """</div>"""
+    }
+
 }

@@ -125,4 +125,16 @@ public class EditModelWidgetRenderer implements ModelWidgetRenderer {
         context.writer << "<span class=\"add-on open-datepicker\"><i class=\"icon-th\"></i></span></div>"
     }
 
+
+    @Override
+    void renderDocument(WidgetRenderContext context) {
+        context.writer << """<div data-bind="if:(${context.source}())">"""
+        context.writer << """    <div data-bind="template:{name:'documentEditTemplate', data:${context.source}}"></div>"""
+        context.writer << """</div>"""
+        context.writer << """<div data-bind="ifnot:${context.source}()">"""
+        context.writer << """    <button class="btn" id="doAttach" data-bind="click:function(target) {attachDocument(${context.source})}">Attach Document</button>"""
+        context.writer << """</div>"""
+
+
+    }
 }

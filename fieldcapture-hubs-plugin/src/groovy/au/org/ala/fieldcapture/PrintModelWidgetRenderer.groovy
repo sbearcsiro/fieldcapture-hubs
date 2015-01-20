@@ -82,6 +82,11 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
         defaultRender(context)
     }
 
+    @Override
+    void renderDocument(WidgetRenderContext context) {
+        defaultRender(context)
+    }
+
     private void defaultRender(WidgetRenderContext context) {
 
 
@@ -101,5 +106,4 @@ class PrintModelWidgetRenderer implements ModelWidgetRenderer {
             </ul>
         """
     }
-
 }
