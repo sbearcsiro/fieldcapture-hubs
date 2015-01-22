@@ -41,15 +41,24 @@
     </div>
 </g:if>
 <div id="body-wrapper">
-    <div class="navbar navbar-inverse navbar-static-top" id="header" style="background:url(${hubConfig.bannerUrl}) repeat-x">
+    <g:if test="${hubConfig.bannerUrl}">
+        <div class="navbar navbar-inverse navbar-static-top" id="header" style="background:url(${hubConfig.bannerUrl}) repeat-x">
+    </g:if>
+    <g:else>
+        <div class="navbar navbar-inverse navbar-static-top" id="header">
+    </g:else>
         %{--<div class="navbar-inner">--}%
             <div class="container-fluid">
+                <g:if test="${hubConfig.logoUrl}">
                 <div class="nav logo">
+
                     <a href="${createLink(controller:"home")}">
                         <img src="${hubConfig.logoUrl}" alt="${hubConfig.title}" />
                     </a>
                 </div>
+                </g:if>
                 <div class="nav-collapse collapse pull-right">
+                    <g:if test="${hubConfig.title}"><span class="merit">${hubConfig.title}</span></g:if>
                     <g:form controller="search" method="GET" class="search merit">
                         <p>
                             <label for="keywords"><span class="hide">Full text search</span><input type="text" name="query" id="keywords" value="${params.query}"></label>

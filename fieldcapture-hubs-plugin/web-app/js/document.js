@@ -15,10 +15,19 @@ function DocumentViewModel (doc, owner, settings) {
 
     var defaults = {
         roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
+        stages:[],
         showSettings: true
     }
     this.settings = $.extend({}, defaults, settings);
 
+    //Associate project document to stages.
+    this.maxStages = doc.maxStages;
+    for(i = 0; i < this.maxStages; i++){
+    	this.settings.stages.push((i+1))
+    }
+    this.stage = ko.observable(doc ? doc.stage : 0);
+    this.stages = this.settings.stages;
+    
     // NOTE that attaching a file is optional, ie you can have a document record without a physical file
     this.filename = ko.observable(doc ? doc.filename : '');
     this.filesize = ko.observable(doc ? doc.filesize : '');
@@ -28,6 +37,7 @@ function DocumentViewModel (doc, owner, settings) {
     this.filetypeImg = function () {
         return imageLocation + "/" + iconnameFromFilename(self.filename());
     };
+    
     this.attribution = ko.observable(doc ? doc.attribution : '');
     this.license = ko.observable(doc ? doc.license : '');
     this.type = ko.observable(doc.type);
@@ -150,7 +160,7 @@ function DocumentViewModel (doc, owner, settings) {
     }
 
     this.modelForSaving = function() {
-        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'settings']});
+        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings']});
     }
 }
 
@@ -281,3 +291,12 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
 
     return result;
 }
+
+function findDocumentByRole(documents, role) {
+    for (var i=0; i<documents.length; i++) {
+        if (documents[i].role === role && documents[i].status !== 'deleted') {
+            return documents[i];
+        }
+    }
+    return null;
+};

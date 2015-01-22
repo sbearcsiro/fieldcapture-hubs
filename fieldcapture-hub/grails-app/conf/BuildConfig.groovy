@@ -1,3 +1,5 @@
+import grails.util.Environment
+
 grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
@@ -21,10 +23,13 @@ grails.project.fork = [
     console: false// [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]
 
+def inlinePluginAvailable = new File('../fieldcapture-hubs-plugin/application.properties').exists()
+
 // settings for the inline fieldcapture-plugin
-
-grails.plugin.location.'fieldcapture-plugin'='../fieldcapture-hubs-plugin'
-
+if (Environment.current == Environment.DEVELOPMENT && inlinePluginAvailable) {
+    grails.plugin.location.'fieldcapture-plugin' = '../fieldcapture-hubs-plugin'
+    println('Using inline fieldcapture-plugin...')
+}
 grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
 
@@ -46,10 +51,8 @@ grails.project.dependency.resolution = {
         grailsCentral()
         mavenCentral()
         mavenRepo "http://maven.ala.org.au/repository/"
-        // uncomment these (or add new ones) to enable remote dependency resolution from public Maven repositories
-        //mavenRepo "http://repository.codehaus.org"
-        //mavenRepo "http://download.java.net/maven/2/"
-        //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "http://repo.opengeo.org"
+        mavenRepo "http://download.osgeo.org/webdav/geotools/"
     }
 
     dependencies {
@@ -75,7 +78,11 @@ grails.project.dependency.resolution = {
 
         runtime ":lesscss-resources:1.3.3"
 
-        //compile ":fieldcapture-plugin:0.1"
+        if (Environment.current != Environment.DEVELOPMENT || !inlinePluginAvailable) {
+            compile ":fieldcapture-plugin:1.0-SNAPSHOT"
+        }
+
+        build ":release:3.0.1"
 
         // Uncomment these (or add new ones) to enable additional resources capabilities
         //runtime ":zipped-resources:1.0.1"

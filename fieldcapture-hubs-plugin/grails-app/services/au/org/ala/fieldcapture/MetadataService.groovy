@@ -13,8 +13,8 @@ class MetadataService {
 
     def annotatedOutputDataModel(type) {
         return cacheService.get('annotated-output-model'+type,{
-            webService.getJson(grailsApplication.config.ecodata.baseUrl +
-                    'metadata/annotatedOutputDataModel?type='+type.encodeAsURL())
+            Collections.unmodifiableList(webService.getJson(grailsApplication.config.ecodata.baseUrl +
+                    'metadata/annotatedOutputDataModel?type='+type.encodeAsURL()))
         })
     }
 

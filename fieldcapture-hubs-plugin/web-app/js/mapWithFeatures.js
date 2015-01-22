@@ -60,6 +60,8 @@
         featureBounds: new google.maps.LatLngBounds(),
         // URL to small dot icon
         smallDotIcon: "https://maps.gstatic.com/intl/en_us/mapfiles/markers2/measle.png", // blue: measle_blue.png
+
+        allMarkers : [],
         // URL to red google marker icon
         redMarkerIcon: "http://www.google.com/intl/en_us/mapfiles/ms/micons/red-dot.png",
         //spatial portal URL
@@ -109,12 +111,21 @@
             }
             return this;
         },
+
+        toggleMarkerVisibility:function(type, _map){
+            $.each(this.allMarkers, function(idx, marker){
+                if(type == marker["legendName"]){
+                    marker.marker.setMap(_map);
+                }
+            });
+        },
         reset:function(){
             var self = this;
             self.map.setCenter(self.defaultCenter);
             self.map.setZoom(self.defaultZoom);
             self.featureIndex = {};
             self.featureBounds =  new google.maps.LatLngBounds();
+            self.allMarkers = [];
         },
         replaceAllFeatures: function(features) {
             this.features.features = features;
@@ -132,7 +143,6 @@
             var self = this, f;
             var loaded = false;
             if(loc != null && loc.type != null){
-                //console.log("Loading feature type: " + loc.type);
                 if (loc.type.toLowerCase() === 'point') {
                     var ll = new google.maps.LatLng(Number(loc.coordinates[1]), Number(loc.coordinates[0]));
                     f = new google.maps.Marker({
@@ -144,13 +154,31 @@
                     self.addFeature(f, loc);
                     loaded = true;
                 } else if (loc.type === 'dot') {
+
+                    var marker = map.smallDotIcon;
+                    if (loc.color != "-1"){
+                        // strokeColor is resource hungry. google maps performs well with encoded image data.
+                         marker = {
+                            url: "data:image/gif;base64,R0lGODlhAQABAPAAA"+encodeHex(loc.color)+"///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==",
+                            scaledSize: new google.maps.Size(5,5)
+                        };
+                    }
+
                     var ll = new google.maps.LatLng(Number(loc.latitude), Number(loc.longitude));
                     f = new google.maps.Marker({
                         map: self.map,
                         position: ll,
                         title: loc.name,
-                        icon: map.smallDotIcon
+                        icon: marker
                     });
+
+                    if(loc.color != "-1"){
+                        var markerMap = {};
+                        markerMap["legendName"] = loc.legendName;
+                        markerMap["marker"] = f;
+                        this.allMarkers.push(markerMap);
+                    }
+
                     self.featureBounds.extend(ll);
                     self.addFeature(f, loc, iw);
                     loaded = true;
@@ -257,14 +285,8 @@
             if (loc.popup && iw) {
                 // add infoWindow popu
                 google.maps.event.addListener(f, 'click', function(event) {
-                    if (prevMarker) {
-                        prevMarker.setIcon(map.smallDotIcon);
-                    }
                     iw.setContent(loc.popup);
                     iw.open(self.map, f);
-                    //console.log("f", f)
-                    f.setIcon(map.redMarkerIcon);
-                    prevMarker = f;
                 });
 
                 google.maps.event.addListener(iw, 'closeclick', function(){
@@ -519,6 +541,7 @@
     windows.clearMap = clearMap;
     windows.alaMap = map;
 
+
 }(this));
 
 function geojsonToPaths(obj) {
@@ -553,4 +576,18 @@ function initialiseState(state) {
             }
             return initials;
     }
+}
+
+function encodeHex(s) {
+    s = s.substring(1, 7);
+    if (s.length < 6) {
+        s = s[0]+s[0]+s[1]+s[1]+s[2]+s[2];
+    }
+    return encodeRGB(parseInt(s[0]+s[1], 16),parseInt(s[2]+s[3], 16), parseInt(s[4]+s[5], 16));
+}
+
+function encodeRGB(r, g, b) {
+    var k = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    return k.charAt(((0 & 3) << 4) | (r >> 4)) + k.charAt(((r & 15) << 2) | (g >> 6)) +
+        k.charAt(g & 63) + k.charAt(b >> 2) + k.charAt(((b & 3) << 4) | (255 >> 4))
 }

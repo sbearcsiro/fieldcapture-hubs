@@ -21,6 +21,7 @@ class AdminController {
     def settingService
     def siteService
     def outputService
+    def documentService
 
     def index() {}
 
@@ -460,11 +461,29 @@ class AdminController {
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def saveHubSettings() {
-        HubSettings settings = new HubSettings(request.JSON)
+        def json = request.JSON
+        def documents = json.remove('documents')
+
+
+        documents.each { document ->
+            def response = documentService.saveStagedImageDocument(document)
+            if (response?.content.documentId) {
+                def savedDoc = documentService.get(response.content.documentId)
+                if (savedDoc.role == 'banner') {
+                    json.bannerUrl = savedDoc.url
+                }
+                else if (savedDoc.role == 'logo') {
+                    json.logoUrl = savedDoc.url
+                }
+            }
+
+        }
+
+        HubSettings settings = new HubSettings(json)
         settingService.updateHubSettings(settings)
 
         def message = [status:'ok']
-        respond message, [formats:['json','xml']]
+        respond ((Object)message,  (Map)[formats:['json','xml']])
 
     }
 

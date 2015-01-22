@@ -142,6 +142,17 @@
                 </div>
 
                 <div class="clearfix" style="font-size:14px;">
+                    <div class="span3" data-bind="visible:status" style="margin-bottom: 0">
+                        <span data-bind="if: status().toLowerCase() == 'active'">
+                            Project Status:
+                            <span style="text-transform:uppercase;" data-bind="text:status" class="badge badge-success" style="font-size: 13px;"></span>
+                        </span>
+                        <span data-bind="if: status().toLowerCase() == 'completed'">
+                            Project Status:
+                            <span style="text-transform:uppercase;" data-bind="text:status" class="badge badge-info" style="font-size: 13px;"></span>
+                        </span>
+
+                    </div>
                     <div class="span4" data-bind="visible:grantId" style="margin-bottom: 0">
                         Grant Id:
                         <span data-bind="text:grantId"></span>
@@ -491,6 +502,12 @@
                     return project.plannedStartDate != self.plannedStartDate() ||
                            project.plannedEndDate != self.plannedEndDate();
                 });
+                var projectDefault = "active";
+				if(project.status){
+					projectDefault = project.status;
+				}
+				self.status = ko.observable(projectDefault.toLowerCase());
+				self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
 
                 self.organisation = ko.observable(project.organisation);
                 self.organisationName = ko.observable(project.organisationName);

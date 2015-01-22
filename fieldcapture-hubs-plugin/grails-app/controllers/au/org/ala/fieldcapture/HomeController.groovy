@@ -10,7 +10,7 @@ class HomeController {
     def searchService
     def settingService
     def metadataService
-    def userService;
+    def userService
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
@@ -25,18 +25,25 @@ class HomeController {
 
     def index() {
         def facetsList = SettingService.getHubConfig().availableFacets
-        //"organisationFacet,associatedProgramFacet,associatedSubProgramFacet,fundingSourceFacet,mainThemeFacet,statesFacet,nrmsFacet,lgasFacet,mvgsFacet,ibraFacet,imcra4_pbFacet,otherFacet"
+        def mapFacets = SettingService.getHubConfig().availableMapFacets
 
-        def allFacets = params.getList('fq') + (SettingService.getHubConfig().defaultFacetQuery ?: [])
+        if(!userService.userIsAlaOrFcAdmin()) {
+            def adminFacetList = SettingService.getHubConfig().adminFacets
+            facetsList?.removeAll(adminFacetList)
+            mapFacets?.removeAll(adminFacetList)
+        }
 
+        def fqList = params.getList('fq')
+        def allFacets = fqList + (SettingService.getHubConfig().defaultFacetQuery?:[])
         def selectedGeographicFacets = findSelectedGeographicFacets(allFacets)
 
         def resp = searchService.HomePageFacets(params)
 
-        [facetsList      : facetsList,
-         geographicFacets: selectedGeographicFacets,
-         description     : settingService.getSettingText(SettingPageType.DESCRIPTION),
-         results         : resp]
+        [   facetsList: facetsList,
+            mapFacets: mapFacets,
+            geographicFacets:selectedGeographicFacets,
+            description: settingService.getSettingText(SettingPageType.DESCRIPTION),
+            results: resp ]
     }
 
     def citizenScience() {
@@ -70,24 +77,23 @@ class HomeController {
      * doesn't include the word "Facet" (although maybe it should).
      */
     private ArrayList findSelectedGeographicFacets(Collection allFacets) {
-        def selectedFacets = allFacets.collectEntries {
-            def nameVal = it.split(':')
-            return [(nameVal[0]): nameVal[1]]
-        }
 
         def facetConfig = metadataService.getGeographicFacetConfig()
-
         def selectedGeographicFacets = []
-        selectedFacets.each { name, value ->
 
-            def matchingFacet = facetConfig.find { name.startsWith(it.key) }
-            if (matchingFacet) {
-                def matchingValue = matchingFacet.value.find { it.key == value }
-                if (matchingValue) {
-                    selectedGeographicFacets << matchingValue.value
+        allFacets.each { facet ->
+            def token = facet.split(':')
+            if(token.size() == 2){
+                def matchingFacet = facetConfig.find { token[0].startsWith(it.key) }
+                if (matchingFacet) {
+                    def matchingValue = matchingFacet.value.find { it.key == token[1] }
+                    if (matchingValue) {
+                        selectedGeographicFacets << matchingValue.value
+                    }
                 }
             }
         }
+
         selectedGeographicFacets
     }
 
@@ -96,8 +102,9 @@ class HomeController {
     }
 
     def geoService() {
-        params.max = params.max ?: 9999
-        if (params.geo) {
+        params.max = params.max?:9999
+        if(params.geo){
+            params.facets = SettingService.getHubConfig().availableFacets.join(',')
             render searchService.allProjectsWithSites(params) as JSON
         } else {
             render searchService.allProjects(params) as JSON

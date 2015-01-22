@@ -225,7 +225,7 @@ modules = {
     slickgrid {
         dependsOn 'jquery', 'jquery_ui'
         resource 'slickgrid/slick.grid.css'
-        resource 'slickgrid/slick-default-theme.css'
+        //resource 'slickgrid/slick-default-theme.css'
         //resource 'slickgrid/css/smoothness/jquery-ui-1.8.16.custom.css'
         //resource 'slickgrid/examples.css'
 
@@ -243,6 +243,12 @@ modules = {
         resource 'slickgrid/slick.editors.js'
 
         resource 'slickgrid/slick.grid.js'
+
+        resource 'js/slickgrid.support.js'
+
+        resource url:'slickgrid/images/header-columns-bg.gif', plugin:'fieldcapture-plugin'
+        resource url:'slickgrid/images/header-columns-over-bg.gif', plugin:'fieldcapture-plugin'
+
 
     }
 

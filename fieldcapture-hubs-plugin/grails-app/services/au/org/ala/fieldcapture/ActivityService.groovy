@@ -1,10 +1,18 @@
 package au.org.ala.fieldcapture
-import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONObject
+
+import org.joda.time.DateTime
+import org.joda.time.Period
+import org.joda.time.format.DateTimeFormat
 
 class ActivityService {
 
-    def webService, grailsApplication, outputService, metadataService
+    def webService, grailsApplication, metadataService
+
+    private static def PROGRESS = ['planned', 'started', 'finished', 'cancelled', 'deferred']
+
+    public static Comparator<String> PROGRESS_COMPARATOR = {a,b -> PROGRESS.indexOf(a) <=> PROGRESS.indexOf(b)}
+
+    static dateFormat = "yyyy-MM-dd'T'hh:mm:ssZ"
 
     def getCommonService() {
         grailsApplication.mainContext.commonService
@@ -39,26 +47,12 @@ class ActivityService {
     }
 
     def get(id) {
-        def record = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'activity/' + id)
-        // extract primary outputs
-        /*
-         NOTE we have to be careful to inject JSONObjects not LinkedHashMaps so they will toString correctly
-         when we use the strings to initialise Javascript objects in the GSP.
-         */
-        record.outputs.each {
-            def o = outputService.get(it.outputId)
-            if (o?.data) {
-                it.scores = new JSONArray()
-                o.data.each { k, v ->
-                    // todo: using the prefix 'total' as a marker
-                    // todo: will need to use the data meta-model
-                    if (k.startsWith('total')) {
-                        it.scores << new JSONObject([name: k, score: v])
-                    }
-                }
-            }
-        }
-        record
+        def activity = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'activity/' + id)
+        activity
+    }
+
+    def create(activity) {
+        update('', activity)
     }
 
     def update(id, body) {
@@ -106,37 +100,35 @@ class ActivityService {
         webService.doPost(grailsApplication.config.ecodata.baseUrl + "activities/?$ids", props)
     }
 
-        /*def convertToSimpleDate(value) {
-            def pattern = ~/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/
-            if (value instanceof String && pattern.matcher(value).matches()) {
-                return "${value[8..9]}-${value[5..6]}-${value[0..3]}"
+    /** @see au.org.ala.ecodata.ActivityController for a description of the criteria required. */
+    def search(criteria) {
+        // Convert dates to UTC format.
+        criteria.each { key, value ->
+            if (value instanceof Date) {
+                criteria.key = value.format(dateFormat, TimeZone.getTimeZone("UTC"))
             }
-            return value
         }
+        webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
+    }
 
-        def convertFromSimpleDate(value) {
-            def pattern = ~/\d\d-\d\d-\d\d\d\d/
-            if (value instanceof String && pattern.matcher(value).matches()) {
-                return "${value[6..9]}-${value[3..4]}-${value[0..1]}T00:00:00Z"
-            }
-            return value
+    /**
+     * Creates a description for the supplied activity based on the activity type and dates.
+     */
+    String defaultDescription(activity) {
+        def start = activity.plannedStartDate
+        def end = activity.plannedEndDate
+
+        DateTime startDate = DateUtils.parse(start)
+        DateTime endDate = DateUtils.parse(end).minusDays(1)
+
+        Period period = new Period(startDate.toLocalDate(), endDate.toLocalDate())
+
+        def description = DateTimeFormat.forPattern("MMM yyyy").print(endDate)
+        if (period.months > 1) {
+            description = DateTimeFormat.forPattern("MMM").print(startDate) + ' - ' + description
         }
+        "${activity.type} (${description})"
 
-        def convertToSimpleDates(map) {
-            def pattern = ~/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ/
-            // top level only for now
-            map.each {entry ->
-                entry.value = convertToSimpleDate(entry.value)
-            }
-            map
-        }
+    }
 
-        def convertFromSimpleDates(map) {
-            def pattern = ~/\d\d-\d\d-\d\d\d\d/
-            // top level only for now
-            map.each {entry ->
-                entry.value = convertFromSimpleDate(entry.value)
-            }
-            map
-        }*/
 }

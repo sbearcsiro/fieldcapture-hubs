@@ -20,11 +20,17 @@ class HubSettings {
     /** The (ordered) list of facets that will be displayed on the home and search pages */
     List<String> availableFacets
 
+    /** Admin only facets */
+    List<String> adminFacets
+
     /** All searches made in this hub will automatically include this (facet) query.  Should be of the form <facetName>:<value> */
-    String defaultFacetQuery
+    List<String> defaultFacetQuery
 
     /** Projects created within this hub will only be able to select from the programs configured here */
     List<String> supportedPrograms
+
+    /** Home page map facets */
+    List<String> availableMapFacets
 
     /**
      * Allows the property to be set using a JSONArray which has an implementation of join which is
@@ -32,6 +38,9 @@ class HubSettings {
      */
     def setAvailableFacets(List<String> facets) {
         this.availableFacets = new ArrayList<String>(facets)
+    }
+    def setAvailableMapFacets(List<String> facets) {
+        this.availableMapFacets = new ArrayList<String>(facets)
     }
 
     def setSupportedPrograms(List<String> supportedPrograms) {
