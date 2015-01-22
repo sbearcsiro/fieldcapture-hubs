@@ -39,6 +39,9 @@ class HubSettings {
     def setAvailableFacets(List<String> facets) {
         this.availableFacets = new ArrayList<String>(facets)
     }
+    def setAvailableMapFacets(List<String> facets) {
+        this.availableMapFacets = new ArrayList<String>(facets)
+    }
 
     def setSupportedPrograms(List<String> supportedPrograms) {
         this.supportedPrograms = new ArrayList<String>(supportedPrograms)
