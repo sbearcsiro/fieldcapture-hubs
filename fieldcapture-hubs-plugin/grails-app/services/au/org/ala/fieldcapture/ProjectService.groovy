@@ -74,13 +74,13 @@ class ProjectService {
         def activities = props.remove('selectedActivities')
 
         def collectoryProps = mapAttributesToCollectory(props)
-        def result = webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/', collectoryProps)
+        def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/', collectoryProps)
         def projectId = result?.headers?.location?.first().toString().tokenize('/').last()
         if (projectId) {
             collectoryProps.remove('hiddenJSON')
             collectoryProps.dataProvider = [uid:projectId]
             collectoryProps.institution = [uid:props.organisationId]
-            result = webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataResource/', collectoryProps)
+            result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/', collectoryProps)
             props.projectId = projectId
             props.dataResourceId = result?.headers?.location?.first().toString().tokenize('/').last()
             result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
@@ -99,7 +99,7 @@ class ProjectService {
         // recreate 'hiddenJSON' in collectory every time (minus some attributes)
         body = getRich(id) as Map
         ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
-        webService.doPost(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/' + id, mapAttributesToCollectory(body))
+        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + id, mapAttributesToCollectory(body))
     }
 
     /**
@@ -118,7 +118,7 @@ class ProjectService {
      */
     def destroy(id) {
         webService.doDelete(grailsApplication.config.ecodata.baseUrl + 'project/' + id + '?destroy=true')
-        webService.doDelete(grailsApplication.config.collectory.baseURL + '/ws/dataProvider/' + id)
+        webService.doDelete(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + id)
     }
 
     /**
