@@ -4,6 +4,7 @@ import grails.converters.JSON
 class ProjectController {
 
     def projectService, metadataService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def siteService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
 
@@ -56,9 +57,12 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
-        def project = projectService.get(id)
+        def project = projectService.get(id) as Map
         if (project) {
+            def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
+             documents: siteInfo.documents?:'[]',
+             site: siteInfo.site,
              institutions: metadataService.institutionList(),
              programs: metadataService.programsModel()]
         } else {
@@ -68,33 +72,12 @@ class ProjectController {
 
     def create() {
         [
+                citizenScience: params.citizenScience,
+                documents: [],
                 institutions: metadataService.institutionList(),
                 programs: projectService.programsModel(),
                 activityTypes: metadataService.activityTypesList()
         ]
-    }
-
-    def ajaxCreate() {
-
-        if (!userService.getUser()) {
-            render status: 401, text: 'You do not have permission to create a project'
-        }
-
-        def postBody = request.JSON
-        def values = [:]
-        // filter params to remove keys in the ignore list
-        postBody.each { k, v ->
-            if (!(k in ignore)) {
-                values[k] = v
-            }
-        }
-
-        def result = projectService.create(values)
-        if (result.error) {
-            render result as JSON
-        } else {
-            render result.resp as JSON
-        }
     }
 
     /**
@@ -107,7 +90,6 @@ class ProjectController {
      */
     def ajaxUpdate(String id) {
         def postBody = request.JSON
-        if (!id) { id = ''}
         log.debug "Body: ${postBody}"
         log.debug "Params: ${params}"
         def values = [:]
@@ -120,8 +102,8 @@ class ProjectController {
 
         // The rule currently is that anyone is allowed to create a project so we only do these checks for
         // existing projects.
+        def userId = userService.getUser()?.userId
         if (id) {
-            def userId = userService.getUser()?.userId
             if (!projectService.canUserEditProject(userId, id)) {
                 render status:401, text: "User ${userId} does not have edit permissions for project ${id}"
                 log.debug "user not caseManager"
@@ -136,12 +118,31 @@ class ProjectController {
                     return
                 }
             }
+        } else if (!userId) {
+            render status: 401, text: 'You do not have permission to create a project'
         }
 
+
         log.debug "json=" + (values as JSON).toString()
-        log.debug "id=${id} class=${id.getClass()}"
-        def result = projectService.update(id, values)
+        log.debug "id=${id} class=${id?.getClass()}"
+        def projectSite = values.projectSite
+        values.remove("projectSite")
+        def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
+        if (projectSite && !result.error) {
+            if (!id) id = result.resp.projectId
+            if (!projectSite.projects)
+                projectSite.projects = [id]
+            else if (!projectSite.projects.contains(id))
+                projectSite.projects += id
+            def siteResult = siteService.updateRaw(values.projectSiteId, projectSite)
+            if (siteResult.status == 'error')
+                result = [error:'SiteService failed']
+            else if (siteResult.status == 'created') {
+                def updateResult = projectService.update(id, [projectSiteId: siteResult.id])
+                if (updateResult.error) result = updateResult
+            }
+        }
         if (result.error) {
             render result as JSON
         } else {

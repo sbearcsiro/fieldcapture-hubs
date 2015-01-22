@@ -4,7 +4,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class SiteController {
 
-    def siteService, projectService, activityService, metadataService, userService, searchService, importService, webService, documentService
+    def siteService, projectService, activityService, metadataService, userService, searchService, importService, webService
 
     static defaultAction = "index"
 
@@ -26,7 +26,7 @@ class SiteController {
     }
 
     def create(){
-        render view: 'edit', model: [create:true]
+        render view: 'edit', model: [create:true, documents:[]]
     }
 
     def createForProject(){
@@ -37,11 +37,6 @@ class SiteController {
             redirect(controller:'project', action:'index', id: params.projectId)
         }
         render view: 'edit', model: [create:true, project:project, documents:[]]
-    }
-
-    def draw(){
-        //any setup required ?
-        println("Set up drawing tool...");
     }
 
     def index(String id) {
@@ -69,23 +64,16 @@ class SiteController {
     }
 
     def edit(String id) {
-        def site = siteService.get(id, [raw:'true'])
-        if (site) {
-            // check user has persmissions to edit - user must have edit access to
-            // ALL linked projects to proceed.
-            if (!isUserMemberOfSiteProjects(site)) {
-                flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${p.projectId}"
-                redirect(controller:'project', action:'index', id: p.projectId)
-            }
-
-            if (site.shapePid && !(site.shapePid instanceof JSONArray)) {
-                log.debug "converting to array"
-                site.shapePid = [site.shapePid] as JSONArray
-            }
-            def documents = documentService.getDocumentsForSite(site.siteId).resp?.documents?:[]
-            [site: site, json: (site as JSON).toString(), documents:documents as JSON, meta: siteService.metaModel()]
-        } else {
+        def result = siteService.getRaw(id)
+        if (!result.site) {
             render 'no such site'
+        } else if (!isUserMemberOfSiteProjects(result.site)) {
+            // check user has permissions to edit - user must have edit access to
+            // ALL linked projects to proceed.
+            flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${p.projectId}"
+            redirect(controller:'project', action:'index', id: p.projectId)
+        } else {
+            result
         }
     }
 
@@ -337,12 +325,6 @@ class SiteController {
         }
         log.debug (values as JSON).toString()
 
-        //if its a drawn shape, save and get a PID
-        if(values?.extent?.source == 'drawn'){
-           def shapePid = siteService.persistSiteExtent(values.name, values.extent.geometry)
-           values.extent.geometry.pid = shapePid.resp?.id
-        }
-
         def result = [:]
         // check user has persmissions to edit/update site - user must have 'editor' access to
         // ALL linked projects to proceed.
@@ -355,16 +337,8 @@ class SiteController {
             }
         }
 
-        if (!result) {
-            if (id) {
-                siteService.update(id, values)
-                result = [status: 'updated']
-            } else {
-                def resp = siteService.create(values)
-                result = [status: 'created', id:resp.resp.siteId]
-            }
-        }
-
+        if (!result)
+            result = siteService.updateRaw(id, values)
         render result as JSON
     }
 

@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.geom.Point
 import com.vividsolutions.jts.io.WKTReader
 import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.geotools.kml.v22.KMLConfiguration
 import org.geotools.xml.Parser
@@ -12,6 +13,7 @@ import org.opengis.feature.simple.SimpleFeature
 class SiteService {
 
     def webService, grailsApplication, commonService, metadataService, userService
+    def documentService
     LinkGenerator grailsLinkGenerator
 
     def list() {
@@ -97,6 +99,34 @@ class SiteService {
     def get(id, Map urlParams = [:]) {
         webService.getJson(grailsApplication.config.ecodata.baseUrl + 'site/' + id +
                 commonService.buildUrlParamsFromMap(urlParams))
+    }
+
+    def getRaw(id) {
+        def site = get(id, [raw:'true'])
+        if (!site) return [:]
+
+        if (site.shapePid && !(site.shapePid instanceof JSONArray)) {
+            log.debug "converting to array"
+            site.shapePid = [site.shapePid] as JSONArray
+        }
+        def documents = documentService.getDocumentsForSite(site.siteId).resp?.documents?:[]
+        [site: site, documents:documents as JSON, meta: metaModel()]
+    }
+
+    def updateRaw(id, values) {
+        //if its a drawn shape, save and get a PID
+        if(values?.extent?.source == 'drawn'){
+            def shapePid = persistSiteExtent(values.name, values.extent.geometry)
+            values.extent.geometry.pid = shapePid.resp?.id
+        }
+
+        if (id) {
+            update(id, values)
+            [status: 'updated']
+        } else {
+            def resp = create(values)
+            [status: 'created', id:resp.resp.siteId]
+        }
     }
 
     def create(body){
