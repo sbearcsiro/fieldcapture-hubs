@@ -62,7 +62,13 @@
             </div>
             <div class="tab-content row-fluid">
                 <div class="tab-pane" id="projects">
-                        <table id="projectList" style="width:100%;"></table>
+                        <table id="projectList" style="width:100%;">
+                            <thead></thead>
+                            <tbody></tbody>
+                            <tfoot>
+                            <tr><td colspan="5"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
+                            </tfoot>
+                        </table>
                 </div>
 
                 <div class="tab-pane" id="dashboard">
@@ -443,8 +449,40 @@
 
 
         $('#projectList').dataTable( {
-            "aaData": projectRows,
-            "aoColumns": projectListHeader
+            "data": projectRows,
+            "columns": projectListHeader,
+            "footerCallback": function ( tfoot, data, start, end, display ) {
+                var api = this.api();
+
+                // Remove the formatting to get integer data for summation
+                var intVal = function ( i ) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+
+                // Total over all pages
+                var total = api
+                    .column( 5 )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    } );
+
+                // Total over this page
+                var pageTotal = api
+                    .column( 5, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0 );
+
+                // Update footer
+                $(api.column(5).footer()).find('span.total').text(
+                    '$'+pageTotal +' ( $'+ total +' total)'
+                );
+            }
         });
     });
 
