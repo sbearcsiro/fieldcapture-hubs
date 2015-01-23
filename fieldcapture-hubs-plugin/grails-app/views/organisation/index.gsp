@@ -62,7 +62,7 @@
             </div>
             <div class="tab-content row-fluid">
                 <div class="tab-pane" id="projects">
-                        <g:render template="/shared/projectsList"/>
+                        <table id="projectList" style="width:100%;"></table>
                 </div>
 
                 <div class="tab-pane" id="dashboard">
@@ -434,6 +434,18 @@
             }
         });
 
+        var projectListHeader =  [{sTitle:'Grant ID'}, {sTitle:'Name'}, {sTitle:'From Date'}, {sTitle:'To Date'}, {sTitle:'Status'}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+
+        var projectRows = [];
+        $.each(projects, function(i, project) {
+            projectRows.push([project.grantId || '', project.name || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
+        });
+
+
+        $('#projectList').dataTable( {
+            "aaData": projectRows,
+            "aoColumns": projectListHeader
+        });
     });
 
 </r:script>
