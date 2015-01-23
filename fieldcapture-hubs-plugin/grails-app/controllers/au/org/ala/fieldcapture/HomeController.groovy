@@ -15,11 +15,11 @@ class HomeController {
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def advanced() {
         [
-            projects: projectService.list(),
-            sites: siteService.list(),
-            //sites: siteService.injectLocationMetadata(siteService.list()),
-            activities: activityService.list(),
-            assessments: activityService.assessments(),
+                projects   : projectService.list(),
+                sites      : siteService.list(),
+                //sites: siteService.injectLocationMetadata(siteService.list()),
+                activities : activityService.list(),
+                assessments: activityService.assessments(),
         ]
     }
 
@@ -44,6 +44,24 @@ class HomeController {
             geographicFacets:selectedGeographicFacets,
             description: settingService.getSettingText(SettingPageType.DESCRIPTION),
             results: resp ]
+    }
+
+    def citizenScience() {
+        def user = userService.getUser()
+        def userId = user?.userId
+        [user: user,
+         projects: projectService.list(false, true).collect {
+            // pass array instead of object to reduce size
+            [it.projectId,
+             it.coverage ?: '',
+             it.description,
+             userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
+             it.name,
+             it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+             it.status,
+             (it.urlAndroid ?: '') + ' ' + (it.urlITunes ?: ''),
+             it.urlWeb ?: '']
+        }];
     }
 
     /**
@@ -80,7 +98,7 @@ class HomeController {
     }
 
     def tabbed() {
-        [ geoPoints: searchService.allGeoPoints(params) ]
+        [geoPoints: searchService.allGeoPoints(params)]
     }
 
     def geoService() {
@@ -125,6 +143,6 @@ class HomeController {
 
     private renderStaticPage(SettingPageType settingType, showNews = false) {
         def content = settingService.getSettingText(settingType)
-        render view: 'about', model: [settingType: settingType, content: content, showNews:showNews]
+        render view: 'about', model: [settingType: settingType, content: content, showNews: showNews]
     }
 }

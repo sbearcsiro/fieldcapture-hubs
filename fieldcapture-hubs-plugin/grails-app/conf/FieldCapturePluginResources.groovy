@@ -211,6 +211,12 @@ modules = {
 
     }
 
+    wizard {
+        dependsOn 'bootstrap'
+        resource 'fuelux/js/wizard.js'
+        resource 'fuelux/css/fuelux.min.css'
+    }
+
     organisation {
         dependsOn 'jquery', 'knockout','wmd'
         resource 'js/organisation.js'
