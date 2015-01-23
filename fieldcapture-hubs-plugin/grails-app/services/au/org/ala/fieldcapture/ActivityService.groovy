@@ -102,13 +102,15 @@ class ActivityService {
 
     /** @see au.org.ala.ecodata.ActivityController for a description of the criteria required. */
     def search(criteria) {
+        def modifiedCriteria = new HashMap(criteria?:[:])
         // Convert dates to UTC format.
         criteria.each { key, value ->
             if (value instanceof Date) {
-                criteria.key = value.format(dateFormat, TimeZone.getTimeZone("UTC"))
+                modifiedCriteria[key] = value.format(dateFormat, TimeZone.getTimeZone("UTC"))
             }
+
         }
-        webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', criteria)
+        webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', modifiedCriteria)
     }
 
     /**
