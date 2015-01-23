@@ -24,7 +24,7 @@
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable"/>
 
 </head>
 <body>
