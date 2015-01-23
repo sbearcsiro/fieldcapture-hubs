@@ -145,7 +145,7 @@ function findOutput(activity, name) {
     if (!name) {
         return;
     }
-    var output = ko.utils.arrayFirst(activity.outputs, function(output) {
+    var output = ko.utils.arrayFirst(activity.outputModels, function(output) {
         return output.name === name;
     });
     return output;
@@ -156,7 +156,7 @@ function findOutput(activity, name) {
 var outputValueExtractor = function(item, column) {
     if (column.outputName) {
         var output = findOutput(item, column.outputName);
-        return output ? output.data[column.field] : '';
+        return output ? ko.utils.unwrapObservable(output.data[column.field]) : '';
     }
     return item[column.field];
 };
@@ -168,9 +168,9 @@ var outputValueEditor = function(item, column, value) {
             output = {name:column.outputName, data:{}, activityId: item.activityId};
             item.outputs.push(output);
         }
-        output.data[column.field] = value;
+        output.data[column.field](value);
     }
-    item[column.field] = value;
+
 };
 
 

@@ -38,6 +38,10 @@
         <h2>${title}</h2>
     </div>
 
+    <div class="instructions well">
+        Each row of the table below allows the monthly status report for a single project to be completed.  Not all projects need to be edited at once.  If you would prefer to edit the report for an individual project, click the link in the "Project column".  When you are finished, press the save button.
+    </div>
+
     <div class="row-fluid">
         <span class="span12">
         <div id="myGrid" style="width:100%;"></div>
@@ -53,6 +57,76 @@
 <r:script>
 
     $(function () {
+
+    <g:each in="${outputModels}" var="outputModel">
+        <g:if test="${outputModel.name != 'Photo Points'}">
+            <g:set var="blockId" value="${fc.toSingleWord([name: outputModel.name])}"/>
+            <g:set var="model" value="${outputModel.dataModel}"/>
+
+
+
+            var viewModelName = "${blockId}ViewModel",
+                viewModelInstance = viewModelName + "Instance";
+
+            // load dynamic models - usually objects in a list
+                <md:jsModelObjects model="${model}" site="${site}" speciesLists="${speciesLists}" edit="true"
+                                   viewModelInstance="${blockId}ViewModelInstance"/>
+
+                this[viewModelName] = function (output) {
+                    var self = this;
+                    self.name = "${outputModel.name}";
+                self.outputId = orBlank(output.outputId);
+
+                self.data = {};
+                self.transients = {};
+                self.transients.dummy = ko.observable();
+
+                // add declarations for dynamic data
+                <md:jsViewModel model="${model}" output="${outputModel.name}" edit="true"
+                                viewModelInstance="${blockId}ViewModelInstance"/>
+
+                // this will be called when generating a savable model to remove transient properties
+                self.removeBeforeSave = function (jsData) {
+                    // add code to remove any transients added by the dynamic tags
+                    <md:jsRemoveBeforeSave model="${model}"/>
+                    delete jsData.activityType;
+                    delete jsData.transients;
+                    return jsData;
+                };
+
+            // this returns a JS object ready for saving
+            self.modelForSaving = function () {
+                // get model as a plain javascript object
+                var jsData = ko.mapping.toJS(self, {'ignore':['transients']});
+                // get rid of any transient observables
+                return self.removeBeforeSave(jsData);
+            };
+
+            // this is a version of toJSON that just returns the model as it will be saved
+            // it is used for detecting when the model is modified (in a way that should invoke a save)
+            // the ko.toJSON conversion is preserved so we can use it to view the active model for debugging
+            self.modelAsJSON = function () {
+                return JSON.stringify(self.modelForSaving());
+            };
+
+            self.loadData = function (data) {
+                // load dynamic data
+                <md:jsLoadModel model="${model}"/>
+
+                // if there is no data in tables then add an empty row for the user to add data
+                if (typeof self.addRow === 'function' && self.rowCount() === 0) {
+                    self.addRow();
+                }
+                self.transients.dummy.notifySubscribers();
+            };
+
+            if (output && output.data) {
+                self.loadData(output.data);
+            }
+        };
+</g:if>
+</g:each>
+
 
         var options = {
             editable: true,
@@ -74,6 +148,22 @@
         var activities = <fc:modelAsJavascript model="${activities}"/>;
         var outputModels = <fc:modelAsJavascript model="${outputModels}"/>;
 
+        var top = this;
+
+        $.each(activities, function(i, activity) {
+            if (activity.outputs) {
+                activity.outputModels = [];
+                $.each(activity.outputs, function(j, output) {
+                    var name = output.name.replace(/ /g , '_')+'ViewModel';
+                    console.log(top);
+                    console.log(name);
+                    activity.outputModels[j] = new top[name](output);
+                });
+            }
+        });
+
+        console.log(activities);
+
         var helpHover = function(helpText) {
             return '<a href="#" class="helphover" data-original-title="" data-placement="top" data-container="body" data-content="'+helpText+'">'+
                        '<i class="icon-question-sign">&nbsp;</i>'+
@@ -81,7 +171,7 @@
         };
         var columns = [];
         $.each(outputModels, function(i, outputModel) {
-            $.each(outputModel.dataModel, function(i, dataItem) {
+            $.each(outputModel.annotatedModel, function(i, dataItem) {
 
                 if (dataItem.computed) {
                     return;
@@ -120,15 +210,21 @@
         columns = [projectColumn].concat(columns, progressColumn);
 
         var grid = new Slick.Grid("#myGrid", activities, columns, options);
+        $('.slick-cell.r2')[0].click();
 
         $('#save').click(function() {
             var activities = grid.getData();
 
             // TODO Need to validate each row
             $.each(activities, function(i, activity) {
-                var outputData = {outputs:activity.outputs};
+
+                var outputData = [];
+                $.each(activity.outputModels, function(i, outputModel) {
+                    outputData.push(outputModel.modelForSaving());
+                });
+
                 var url = fcConfig.saveUrl+'/'+activity.activityId;
-                $.ajax(url, {type:'POST', data:JSON.stringify(outputData), dataType:'json', contentType:'application/json'}).done(
+                $.ajax(url, {type:'POST', data:JSON.stringify({outputs:outputData}), dataType:'json', contentType:'application/json'}).done(
                     function(data) {
                         window.location = fcConfig.returnTo;
                     });
