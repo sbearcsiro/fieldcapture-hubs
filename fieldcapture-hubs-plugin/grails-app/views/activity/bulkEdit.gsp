@@ -123,6 +123,7 @@
             if (output && output.data) {
                 self.loadData(output.data);
             }
+            self.dirtyFlag = ko.dirtyFlag(self, false);
         };
 </g:if>
 </g:each>
@@ -142,27 +143,88 @@
 
         var progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 
-            return "<span class=\"label "+activityProgressClass(value)+"\">"+value+"</span>"
+            var saving = dataContext.saving();
+
+            var progress = ko.utils.unwrapObservable(value);
+            var result =  "<span class=\"label "+activityProgressClass(progress)+"\">"+progress+"</span>"
+            if (saving) {
+                result += '<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>'
+            }
+            return result;
         };
+
 
         var activities = <fc:modelAsJavascript model="${activities}"/>;
         var outputModels = <fc:modelAsJavascript model="${outputModels}"/>;
 
         var top = this;
 
-        $.each(activities, function(i, activity) {
-            if (activity.outputs) {
-                activity.outputModels = [];
-                $.each(activity.outputs, function(j, output) {
-                    var name = output.name.replace(/ /g , '_')+'ViewModel';
-                    console.log(top);
-                    console.log(name);
-                    activity.outputModels[j] = new top[name](output);
-                });
-            }
-        });
 
-        console.log(activities);
+        var activityModels = [];
+        var ActivityViewModel = function(activity) {
+            var self = this;
+
+            $.extend(self, activity);
+            self.outputModels = [];
+            self.progress = ko.observable(activity.progress);
+
+            $.each(outputModels, function(i, outputModel) {
+
+                var viewModelName = outputModel.name.replace(/ /g , '_')+'ViewModel';
+
+                if (activity.outputs) {
+                    var output = {};
+                    var result = $.grep(activity.outputs, function(output) {
+                        return output.name == outputModel.name;
+                    });
+                    if (result && result[0]) {
+                        output = result[0];
+                    }
+                    self.outputModels.push(new top[viewModelName](output));
+                }
+            });
+
+            self.isDirty = ko.computed(function() {
+                var dirty = false;
+                $.each(self.outputModels, function(i, outputModel) {
+                    if (outputModel.dirtyFlag.isDirty()) {
+                        dirty = true;
+                        return false;
+                    }
+                });
+                return dirty;
+            });
+
+            self.isDirty.subscribe(function(dirty) {
+
+                if (activity.progress == 'planned') {
+                    if (dirty) {
+                        self.progress('started');
+                    }
+                    else {
+                        self.progress('planned');
+                    }
+                }
+            });
+
+            self.saving = ko.observable(false);
+
+            self.modelForSaving = function() {
+                var outputData = [];
+                var activityForSaving = {outputs:outputData, progress:'finished', activityId:activity.activityId};
+                $.each(self.outputModels, function(i, outputModel) {
+                    if (outputModel.dirtyFlag.isDirty()) {
+                        outputData.push(outputModel.modelForSaving());
+                    }
+
+                });
+                return activityForSaving;
+            }
+        };
+
+        $.each(activities, function(i, activity) {
+            activityModels.push(new ActivityViewModel(activity));
+        });
 
         var helpHover = function(helpText) {
             return '<a href="#" class="helphover" data-original-title="" data-placement="top" data-container="body" data-content="'+helpText+'">'+
@@ -176,7 +238,7 @@
                 if (dataItem.computed) {
                     return;
                 }
-                var columnHeader = dataItem.label ? dataItem.label : dataItem.name;
+                var columnHeader = dataItem.shortDescription ? dataItem.shortDescription : dataItem.label ? dataItem.label : dataItem.name;
                 if (dataItem.description) {
                     columnHeader += helpHover(dataItem.description);
                 }
@@ -185,7 +247,9 @@
                 if (dataItem.constraints) {
                     editor = OutputSelectEditor;
                 }
-
+                else if (dataItem.viewType == 'textarea') {
+                    editor = LongTextEditor;
+                }
 
                 var column = {
                     id: dataItem.name,
@@ -204,30 +268,45 @@
         });
 
         // Add the project columns
-        var projectColumn = {name:'Project', id:'projectName', field:'projectName', formatter:activityLinkFormatter};
+        var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter};
         var progressColumn = {name:'Progress', id:'progress', field:'progress', formatter:progressFormatter};
 
         columns = [projectColumn].concat(columns, progressColumn);
 
-        var grid = new Slick.Grid("#myGrid", activities, columns, options);
-        $('.slick-cell.r2')[0].click();
+        var grid = new Slick.Grid("#myGrid", activityModels, columns, options);
+        $('.slick-cell.r4')[0].click();
 
         $('#save').click(function() {
             var activities = grid.getData();
 
-            // TODO Need to validate each row
-            $.each(activities, function(i, activity) {
-
-                var outputData = [];
-                $.each(activity.outputModels, function(i, outputModel) {
-                    outputData.push(outputModel.modelForSaving());
-                });
-
+            var promises = [];
+            $.each(activityModels, function(i, activity) {
                 var url = fcConfig.saveUrl+'/'+activity.activityId;
-                $.ajax(url, {type:'POST', data:JSON.stringify({outputs:outputData}), dataType:'json', contentType:'application/json'}).done(
-                    function(data) {
-                        window.location = fcConfig.returnTo;
+
+                if (activity.isDirty()) {
+
+                    activity.saving(true);
+                    grid.invalidateRow(i);
+                    grid.render();
+                    var data = JSON.stringify(activity.modelForSaving());
+
+                    var promise = $.ajax(url, {type:'POST', data:data, dataType:'json', contentType:'application/json'}).done(
+                        function(data) {
+                            activity.progress('finished');
+                        }
+                    ).always(function() {
+                        activity.saving(false);
+                        grid.invalidateRow(i);
+                        grid.render();
                     });
+
+                    promises.push(promise);
+
+                }
+
+            });
+            $.when.apply($, promises).done(function() {
+                document.location.href = fcConfig.returnTo;
             });
         });
 

@@ -18,24 +18,7 @@ function OutputValueEditor(args) {
             .focus()
             .select();
 
-        $input.on('jqv.field.result', function(event, field, error, messageString) {
-
-            if (!args.item.invalidColumns) {
-                args.item.invalidColumns = {};
-            }
-            validationSupport.removePrompt(args.column.field);
-            if (error) {
-                args.item.invalidColumns[args.column.field] = messageString;
-
-                validationSupport._buildPrompt(field, args.column.field, messageString);
-            }
-            else {
-                args.item.invalidColumns[args.column.field] = null;
-
-             }
-
-            }
-        );
+        validationSupport.addValidationSupport($input, args.item, args.column.field);
     };
 
     this.destroy = function () {
@@ -76,8 +59,9 @@ function OutputValueEditor(args) {
 
     this.validate = function () {
 
-        var result = $input.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
+        $input.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
 
+        /** always return true as otherwise focus traversal will be blocked by the grid */
         return {
             valid: true,
             msg: null
@@ -100,6 +84,8 @@ function OutputSelectEditor(args) {
         }
         $select.appendTo(args.container);
         $select.focus();
+
+        validationSupport.addValidationSupport($input, args.item, args.column.field);
     };
 
     this.destroy = function () {
@@ -132,6 +118,9 @@ function OutputSelectEditor(args) {
     };
 
     this.validate = function () {
+
+        $select.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
+
         return {
             valid: true,
             msg: null
@@ -140,6 +129,115 @@ function OutputSelectEditor(args) {
 
     this.init();
 }
+
+/*
+ * An example of a "detached" editor.
+ * The UI is added onto document BODY and .position(), .show() and .hide() are implemented.
+ * KeyDown events are also handled to provide handling for Tab, Shift-Tab, Esc and Ctrl-Enter.
+ */
+function LongTextEditor(args) {
+    var $input, $wrapper;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+        var $container = $("body");
+
+        $wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
+            .appendTo($container);
+
+        $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
+            .appendTo($wrapper);
+
+        $("<DIV style='text-align:right'><BUTTON>Save</BUTTON><BUTTON>Cancel</BUTTON></DIV>")
+            .appendTo($wrapper);
+
+        $wrapper.find("button:first").bind("click", this.save);
+        $wrapper.find("button:last").bind("click", this.cancel);
+        $input.bind("keydown", this.handleKeyDown);
+
+        scope.position(args.position);
+        $input.focus().select();
+
+        validationSupport.addValidationSupport($input, args.item, args.column.field);
+    };
+
+    this.handleKeyDown = function (e) {
+        if (e.which == $.ui.keyCode.ENTER && e.ctrlKey) {
+            scope.save();
+        } else if (e.which == $.ui.keyCode.ESCAPE) {
+            e.preventDefault();
+            scope.cancel();
+        } else if (e.which == $.ui.keyCode.TAB && e.shiftKey) {
+            e.preventDefault();
+            args.grid.navigatePrev();
+        } else if (e.which == $.ui.keyCode.TAB) {
+            e.preventDefault();
+            args.grid.navigateNext();
+        }
+    };
+
+    this.save = function () {
+        args.commitChanges();
+    };
+
+    this.cancel = function () {
+        $input.val(defaultValue);
+        args.cancelChanges();
+    };
+
+    this.hide = function () {
+        $wrapper.hide();
+    };
+
+    this.show = function () {
+        $wrapper.show();
+    };
+
+    this.position = function (position) {
+        $wrapper
+            .css("top", position.top - 5)
+            .css("left", position.left - 5)
+    };
+
+    this.destroy = function () {
+        $wrapper.remove();
+    };
+
+    this.focus = function () {
+        $input.focus();
+    };
+
+    this.loadValue = function (item) {
+        defaultValue = args.grid.getOptions().dataItemColumnValueExtractor(item, args.column);
+        $input.val(defaultValue);
+        $input.select();
+    };
+
+    this.serializeValue = function () {
+        return $input.val();
+    };
+
+    this.applyValue = function (item, state) {
+        outputValueEditor(item, args.column, state);
+    };
+
+    this.isValueChanged = function () {
+        return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+        $input.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
+
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+
+    this.init();
+}
+
 
 function findOutput(activity, name) {
     if (!name) {
@@ -266,6 +364,26 @@ var validationSupport = {
 
     removePrompt: function(name) {
         this.findPrompt(name).remove();
+    },
+
+    addValidationSupport: function($elem, activity, fieldName) {
+        $elem.on('jqv.field.result', function(event, field, error, messageString) {
+
+            if (!activity.invalidColumns) {
+                activity.invalidColumns = {};
+            }
+            validationSupport.removePrompt(fieldName);
+            if (error) {
+                activity.invalidColumns[fieldName] = messageString;
+
+                validationSupport._buildPrompt(field, fieldName, messageString);
+            }
+            else {
+                activity.invalidColumns[fieldName] = null;
+
+            }
+
+        });
     },
 
     /**
