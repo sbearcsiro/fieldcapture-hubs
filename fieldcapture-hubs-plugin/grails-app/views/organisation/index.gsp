@@ -75,7 +75,7 @@
                     <div class="row-fluid">
                         <span class="span3">
                             <ul class="nav nav-list nav-stacked nav-tabs">
-                                <li><a href="#" data-report="programMetrics">Programme Metrics <i class="icon-chevron-right">&nbsp;</i></a></li>
+                                <li><a href="#" data-report="programMetrics">Activity Outputs <i class="icon-chevron-right">&nbsp;</i></a></li>
                                 <li class="active"><a href="#" data-report="greenArmy">Green Army <i class="icon-chevron-right">&nbsp;</i></a></li>
                             </ul>
                         </span>
@@ -440,7 +440,21 @@
             }
         });
 
-        var projectListHeader =  [{sTitle:'Grant ID'}, {sTitle:'Name'}, {sTitle:'From Date'}, {sTitle:'To Date'}, {sTitle:'Status'}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+        var projectUrlRenderer = function(data, type, row, meta) {
+            var projectId = projects[meta.row].projectId;
+            return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
+        };
+        var dateRenderer = function(data) {
+            return convertToSimpleDate(data, false);
+        };
+        var statusRenderer = function(data) {
+            var badge = 'badge';
+            if (data == 'active') {
+                badge += ' badge-success';
+            }
+            return '<span class="'+badge+'">'+data+'</span>';
+        }
+        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
 
         var projectRows = [];
         $.each(projects, function(i, project) {
