@@ -21,24 +21,12 @@ modules = {
         resource url: 'css/default.skin.css', plugin: 'fieldcapture-plugin'
     }
 
-    nrmSkin {
-        dependsOn 'application,bootstrap'
-        resource url: [dir:'css/nrm/css', file:'screen.css', plugin: 'fieldcapture-plugin'], plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
-        resource url: [dir:'css/', file:'capture.css', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
-        resource url: [dir:'css/nrm/images/', file:'AustGovt_inline_white_on_transparent.png', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
-    }
-
     wmd {
         resource url:[ dir:'wmd', file:"wmd.css", plugin:'fieldcapture-plugin']
         resource url:[ dir:'wmd', file:"showdown.js", plugin:'fieldcapture-plugin']
         resource url:[ dir:'wmd', file:"wmd.js", plugin:'fieldcapture-plugin']
         resource url:[ dir:'wmd', file:'wmd-buttons.png', plugin:'fieldcapture-plugin']
 
-    }
-
-    nrmPrintSkin {
-        dependsOn 'nrmSkin'
-        resource url: 'css/print.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
     }
 
     gmap3 {
@@ -114,6 +102,7 @@ modules = {
     }
 
     jquery_ui {
+        dependsOn 'jquery'
         resource url:'js/jquery-ui-1.9.2.custom.min.js', plugin: 'fieldcapture-plugin'
         resource url:'css/smoothness/jquery-ui-1.9.2.custom.min.css', plugin: 'fieldcapture-plugin'
         resource url:'css/jquery-autocomplete.css', plugin: 'fieldcapture-plugin'
