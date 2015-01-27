@@ -121,7 +121,9 @@
                                         <button type="button" class="btn btn-container" data-bind="visible:bulkEditable, click:$root.editReport"><i class="icon-edit" title="Edit reports for all projects in spreadsheet format"></i></button>
                                     </td>
                                     <td data-bind="text:report.programme"></td>
-                                    <td><a data-bind="attr:{href:editUrl}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a></td>
+                                    <td><a data-bind="visible:bulkEditable, attr:{href:editUrl}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a>
+                                        <span data-bind="visible:!bulkEditable, text:description"></span>
+                                    </td>
                                     <td data-bind="text:dueDate.formattedDate()"></td>
                                     <td>
                                         <div class="progress active"  data-bind="css:{'progress-success':percentComplete>=100, 'progress-info':percentComplete < 100}">
@@ -145,12 +147,12 @@
                                                 <tr>
 
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.viewProjectUrl+'/'+projectId}">
+                                                        <a data-bind="attr:{'href':fcConfig.viewProjectUrl+'/'+projectId}" title="Open the project page">
                                                             <span data-bind="text:$root.getProject(projectId).name"></span>
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}">
+                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}" title="Enter data for the report">
                                                             <span data-bind="text:description"></span>
                                                         </a>
                                                     </td>
