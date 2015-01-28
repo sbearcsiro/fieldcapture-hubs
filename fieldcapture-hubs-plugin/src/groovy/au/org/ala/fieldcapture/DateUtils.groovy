@@ -39,7 +39,6 @@ class DateUtils {
 
         while (interval.isBefore(toAlign)) {
             interval = new Interval(interval.getEnd(), period)
-            println periodStart.toString()+', '+toAlign.toString()
         }
 
         return interval.getStart()
