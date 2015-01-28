@@ -19,6 +19,7 @@
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
             dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
+            activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
