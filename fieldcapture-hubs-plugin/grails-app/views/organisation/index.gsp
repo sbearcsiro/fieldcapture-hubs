@@ -73,19 +73,13 @@
 
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
-                        <span class="span3">
-                            <ul class="nav nav-list nav-stacked nav-tabs">
-                                <li><a href="#" data-report="programMetrics">Activity Outputs <i class="icon-chevron-right">&nbsp;</i></a></li>
-                                <li class="active"><a href="#" data-report="greenArmy">Green Army <i class="icon-chevron-right">&nbsp;</i></a></li>
-                            </ul>
-                        </span>
-                        <span class="span9">
-                            <div id="dashboard-content">
-                                <div class="loading-message">
-                                    <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
-                                </div>
-                            </div>
-                        </span>
+                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><option value="greenArmy">Green Army</option><option value="outputs">Activity Outputs</option></select></span>
+                    </div>
+                    <div class="loading-message">
+                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
+                    </div>
+                    <div id="dashboard-content">
+
                     </div>
 
                 </div>
@@ -419,28 +413,22 @@
         };
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
 
-        $('#dashboard a').click(function(e) {
-            var report = $(e.currentTarget).data('report');
-            $('#dashboard li').removeClass('active');
-            $(e.currentTarget).parent('li').addClass('active');
+        $('#dashboardType').change(function(e) {
+            var $content = $('#dashboard-content');
+            var $loading = $('.loading-message');
+            $content.hide();
+            $loading.show();
 
+            var reportType = $('#dashboardType').val();
 
-            $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:report}).done(function(data) {
-                $('#dashboard-content').html(data);
+             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+                $content.html(data);
+                $loading.hide();
+                $content.show();
                 $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
             });
-        });
 
-        var dashboardShown = false;
-        $('#dashboard-tab').on('shown', function (e) {
-
-            if (!dashboardShown) {
-                dashboardShown = true;
-
-                $('#dashboard a[data-report*=greenArmy]').click();
-
-            }
-        });
+        }).trigger('change');
 
         var projectUrlRenderer = function(data, type, row, meta) {
             var projectId = projects[meta.row].projectId;
