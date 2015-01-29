@@ -56,13 +56,13 @@
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
                     <g:if test="${organisation.reports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <li class="<g:if test="${!organisation.reports}">active </g:if>tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
 
                 </ul>
             </div>
             <div class="tab-content row-fluid">
-                <div class="tab-pane" id="projects">
+                <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
                         <table id="projectList" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
@@ -74,7 +74,7 @@
 
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
-                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><option value="greenArmy">Green Army</option><option value="outputs">Activity Outputs</option></select></span>
+                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${organisation.reports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
                     </div>
                     <div class="loading-message">
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
@@ -412,8 +412,9 @@
             self.newReport = new AdHocReportViewModel();
 
         };
+        <g:if test="${organisation.projects && organisation.reports}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
-
+        </g:if>
         $('#dashboardType').change(function(e) {
             var $content = $('#dashboard-content');
             var $loading = $('.loading-message');
