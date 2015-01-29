@@ -22,6 +22,7 @@
         .slick-column-name { white-space: normal; }
         .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
         .slick-header { background: #DAE0B9; }
+
     </style>
 </head>
 <body>
@@ -268,7 +269,7 @@
         });
 
         // Add the project columns
-        var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter};
+        var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter, minWidth:100};
         var progressColumn = {name:'Progress', id:'progress', field:'progress', formatter:progressFormatter};
 
         columns = [projectColumn].concat(columns, progressColumn);
@@ -277,14 +278,20 @@
         $('.slick-cell.r4')[0].click();
 
         $('#save').click(function() {
+            Slick.GlobalEditorLock.commitCurrentEdit();
             var activities = grid.getData();
 
-            var promises = [];
+            var valid = true;
+
+            var pendingSaves = [];
             $.each(activityModels, function(i, activity) {
                 var url = fcConfig.saveUrl+'/'+activity.activityId;
 
                 if (activity.isDirty()) {
 
+                    activity.row = i;
+
+                    valid = valid && validate(grid, activity, outputModels);
                     activity.saving(true);
                     grid.invalidateRow(i);
                     grid.render();
@@ -300,13 +307,23 @@
                         grid.render();
                     });
 
-                    promises.push(promise);
+                    pendingSaves.push(promise);
 
                 }
 
             });
-            $.when.apply($, promises).done(function() {
-                document.location.href = fcConfig.returnTo;
+            $.when.apply($, pendingSaves).done(function() {
+                if (valid) {
+                    if (pendingSaves.length ==0) {
+                        alert('Nothing to save.');
+                    }
+                    else {
+                        document.location.href = fcConfig.returnTo;
+                    }
+                }
+                else {
+                    alert('Please correct validation errors and press Save again');
+                }
             });
         });
 

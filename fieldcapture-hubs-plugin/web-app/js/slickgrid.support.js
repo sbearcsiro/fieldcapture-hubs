@@ -271,6 +271,93 @@ var outputValueEditor = function(item, column, value) {
 
 };
 
+function validate(grid, activity, outputModels) {
+
+    var activityValid = true;
+    $.each(outputModels, function(i, outputModel) {
+        var output = findOutput(activity, outputModel.name);
+
+        var results = validateOutput(output, outputModel.dataModel);
+
+        $.each(results, function(j, result) {
+           if (!result.valid) {
+               var columnIdx = columnIndex(result.field, outputModel.dataModel);
+               var node = grid.getCellNode(activity.row, columnIdx);
+               console.log("Invalid: "+result.field+", message="+result.error);
+               if (node) {
+                   validationSupport._buildPrompt($(node), result.field, result.error);
+                   activityValid = false;
+               }
+           }
+        });
+    });
+    return activityValid;
+
+};
+
+function columnIndex(name, outputModel) {
+    var index = -1;
+    $.each(outputModel.dataModel, function(i, item) {
+        if (item.name == name) {
+            index = i;
+            return false;
+        }
+    });
+    return index;
+}
+
+function validateOutput(output, outputModel) {
+
+    var results = [];
+    $.each(outputModel.dataModel, function(i, dataItem) {
+        var value = output.data[dataItem.name];
+        var validations = dataItem.validate;
+        if (validations) {
+            validations = validations.split(',');
+
+            $.each(validations, function(j, validation) {
+                var args = undefined;
+                var validatorName = validation;
+                var argsIndex = validation.indexOf('[');
+                if (argsIndex > 0) {
+                    validatorName = validation.substring(0, argsIndex);
+                    args = validation.substring(argsIndex+1, validation.length-1);
+
+                }
+
+                var validator = validators[validatorName];
+                if (validator) {
+                    results.push(validator(dataItem.name, value(), args));
+                }
+
+
+            });
+        }
+
+    });
+    return results;
+};
+
+validators = {
+    required: function(field, value) {
+        if (!value) {
+            var error = $.validationEngineLanguage.allRules.required.alertText;
+            return {field:field, valid:false, error:error};
+        }
+        return {field:field, valid:true};
+    },
+    min: function(field, value, args) {
+        var min = Number(args);
+        var value = Number(value);
+        if (!value || value < min) {
+            var error = $.validationEngineLanguage.allRules.min.alertText + min;
+            return {field:field, valid:false, error:error};
+        }
+        return {field:field, valid:true};
+    }
+}
+
+
 
 //---- taken from jqueryValidationEngine with minor modifications ------
 var validationSupport = {
