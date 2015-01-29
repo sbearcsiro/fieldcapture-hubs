@@ -35,7 +35,7 @@ grails.project.dependency.resolution = {
         mavenRepo "http://download.osgeo.org/webdav/geotools/"
 
     }
-    def tomcatVersion = '7.0.54'
+    def tomcatVersion = '7.0.55'
     def seleniumVersion = "2.21.0"
     def metadataExtractorVersion = "2.6.2"
     def imgscalrVersion = "4.2"
@@ -83,7 +83,8 @@ grails.project.dependency.resolution = {
         runtime (":rest:0.8") {
             excludes "httpclient", "httpcore"
         }
-        compile (":ala-web-theme:1.0.1")
+        compile ":ala-auth:1.0.0"
+        compile (":ala-web-theme:1.1.0")
         runtime ":csv:0.3.1"
         runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"

@@ -72,8 +72,8 @@ modules = {
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
         //resource url: 'bootstrap/css/bootstrap.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         resource url: 'bootstrap/less/bootstrap.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
-        resource url: 'bootstrap/img/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
-        resource url: 'bootstrap/img/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
+        resource url: 'bootstrap/images/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
+        resource url: 'bootstrap/images/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
         resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?
     }
 
