@@ -275,11 +275,10 @@
         columns = [projectColumn].concat(columns, progressColumn);
 
         var grid = new Slick.Grid("#myGrid", activityModels, columns, options);
-        $('.slick-cell.r4')[0].click();
+        $('.slick-cell.r3')[0].click();
 
         $('#save').click(function() {
             Slick.GlobalEditorLock.commitCurrentEdit();
-            var activities = grid.getData();
 
             var valid = true;
 
