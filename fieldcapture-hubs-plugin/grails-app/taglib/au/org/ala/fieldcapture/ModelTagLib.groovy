@@ -530,14 +530,19 @@ class ModelTagLib {
             }
 
         }
-        if (attrs.edit && !attrs.printable) {
+        if (table.source && attrs.edit && !attrs.printable) {
             out << "<th></th>"
         }
         out << '\n' << INDENT*4 << "</tr></thead>\n"
     }
 
     def tableBodyView (out, attrs, table) {
-        out << INDENT*4 << "<tbody data-bind=\"foreach: data.${table.source}\"><tr>\n"
+        if (!table.source) {
+            out << INDENT*4 << "<tbody><tr>\n"
+        }
+        else {
+            out << INDENT*4 << "<tbody data-bind=\"foreach: data.${table.source}\"><tr>\n"
+        }
         table.columns.eachWithIndex { col, i ->
             col.type = col.type ?: getType(attrs, col.source, table.source)
             out << INDENT*5 << "<td>" << dataTag(attrs, col, '', false) << "</td>" << "\n"
@@ -565,11 +570,16 @@ class ModelTagLib {
         // body elements for main rows
         if (attrs.edit) {
             def templateName = table.editableRows ? "${table.source}templateToUse" : "'${table.source}viewTmpl'"
-            out << INDENT*4 << "<tbody data-bind=\"template:{name:${templateName}, foreach: data.${table.source}"
-//            if (table.editableRows) {
-//                out << ", afterRender:attachValidation"
-//            }
-            out << "}\"></tbody>\n"
+
+            def dataBind
+            if (table.source) {
+                dataBind = "template:{name:${templateName}, foreach: data.${table.source}}"
+            }
+            else {
+                dataBind = "template:{name:${templateName}, data: data}"
+            }
+
+            out << INDENT*4 << "<tbody data-bind=\"${dataBind}\"></tbody>\n"
             if (table.editableRows) {
                 // write the view template
                 tableViewTemplate(out, attrs, table, false)
@@ -627,7 +637,7 @@ class ModelTagLib {
                 out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.remove${model.source}Row, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
                 out << INDENT*5 << "</td>\n"
         } else {
-            if (edit) {
+            if (edit && model.source) {
                 out << INDENT*5 << "<td><i data-bind='click:\$root.remove${model.source}Row' class='icon-remove'></i></td>\n"
             }
         }
