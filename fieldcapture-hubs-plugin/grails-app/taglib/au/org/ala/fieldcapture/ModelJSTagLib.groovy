@@ -180,6 +180,9 @@ class ModelJSTagLib {
         else if (model.computed.operation == "lookup") {
             computedByNumberRangeLookupFunction out, attrs, model, "self.${model.computed.dependents[0]}"
         }
+        else if (model.computed.operation == 'count') {
+            out << INDENT*4 << "return ${dependantContext}.${model.computed.dependents.source}().length;\n"
+        }
         else if (model.computed.dependents.fromList) {
             out << INDENT*4 << "var total = 0;\n"
             if (model.computed.operation == 'average') {
