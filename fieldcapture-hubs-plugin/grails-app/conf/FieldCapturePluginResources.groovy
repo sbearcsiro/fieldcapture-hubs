@@ -67,23 +67,6 @@ modules = {
         resource url: 'bootstrap-datepicker/css/datepicker.css', plugin: 'fieldcapture-plugin'
     }
 
-    app_bootstrap {
-        dependsOn 'application'
-        resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
-        //resource url: 'bootstrap/css/bootstrap.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
-        resource url: 'bootstrap/less/bootstrap.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
-        resource url: 'bootstrap/images/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
-        resource url: 'bootstrap/images/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
-        resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?
-    }
-
-    app_bootstrap_responsive {
-        dependsOn 'app_bootstrap'
-        //resource url: '/bootstrap/css/bootstrap-responsive.min.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
-        resource url: 'bootstrap/less/responsive.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap_responsive'
-        resource url: 'css/empty.css', plugin: 'fieldcapture-plugin' // needed for less-resources plugin ?
-    }
-
     bootstrap_combo {
         resource url: 'js/bootstrap-combobox.js', plugin: 'fieldcapture-plugin'
         resource url: 'css/bootstrap-combobox.css', plugin: 'fieldcapture-plugin'

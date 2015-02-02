@@ -83,11 +83,10 @@ grails.project.dependency.resolution = {
         runtime (":rest:0.8") {
             excludes "httpclient", "httpcore"
         }
-        compile ":ala-auth:1.0.0"
-        compile (":ala-web-theme:1.1.0")
+        compile ":ala-auth-plugin:1.0.0"
         runtime ":csv:0.3.1"
-        runtime ":lesscss-resources:1.3.3"
         compile ":markdown:1.1.1"
+        compile ":resources:1.2.8"
 
         build ":tomcat:$tomcatVersion"
 
@@ -99,7 +98,9 @@ grails.project.dependency.resolution = {
         compile ":excel-export:0.2.0"
         compile ":excel-import:1.0.1"
 
-        compile (":images-client-plugin:0.2.3")
+        compile (":images-client-plugin:0.2.3") {
+            exclude "ala-web-theme"
+        }
 
         test ":geb:0.9.3"
         test (":spock:0.7") {
