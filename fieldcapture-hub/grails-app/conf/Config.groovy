@@ -52,9 +52,6 @@ grails.mime.types = [
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
 
-// What URL patterns should be processed by the resources plugin
-grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
-
 // The default codec used to encode data with ${}
 grails.views.default.codec = "none" // none, html, base64
 grails.views.gsp.encoding = "UTF-8"
@@ -92,8 +89,7 @@ if (!ala.baseURL) {
     ala.baseURL = "http://www.ala.org.au"
 }
 if (!collectory.baseURL) {
-//    collectory.baseURL = "http://collections.ala.org.au/"
-    collectory.baseURL = "http://localhost:8088/ala-collectory"
+    collectory.baseURL = "http://collections.ala.org.au/"
 }
 if (!headerAndFooter.baseURL) {
     headerAndFooter.baseURL = "http://www2.ala.org.au/commonui"
@@ -211,7 +207,7 @@ environments {
         grails.host = "http://devt.ala.org.au"
         serverName = "${grails.host}:${server.port}"
         grails.serverURL = serverName + "/${appName}"
-        layout.skin = "nrm"
+        layout.skin = "ala2"
         security.cas.appServerName = serverName
         security.cas.contextPath = "/" + appName
         ecodata.baseUrl = 'http://devt.ala.org.au:8080/ecodata/ws/'
