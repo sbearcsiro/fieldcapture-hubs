@@ -20,6 +20,7 @@ class DateUtils {
     private static DateTimeFormatter DATE_PARSER = ISODateTimeFormat.dateTimeParser().withZoneUTC()
     private static DateTimeFormatter DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis() //DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withZoneUTC()
     private static DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormat.forPattern("dd-MM-yyyy").withZone(DateTimeZone.default)
+    private static DateTimeFormatter MONTH_ONLY_FORMATTER = DateTimeFormat.forPattern('MMMMM yyyy')
 
     /**
      * Aligns the supplied DateTime to the start date of the period it falls into.
@@ -38,7 +39,6 @@ class DateUtils {
 
         while (interval.isBefore(toAlign)) {
             interval = new Interval(interval.getEnd(), period)
-            println periodStart.toString()+', '+toAlign.toString()
         }
 
         return interval.getStart()
@@ -106,5 +106,10 @@ class DateUtils {
             interval = new Interval(interval.start.plus(period), period)
         }
         results
+    }
+
+    static String formatSingleMonthInterval(Interval interval) {
+
+        return MONTH_ONLY_FORMATTER.print(interval.getStart())
     }
 }

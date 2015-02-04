@@ -20,6 +20,7 @@ public interface ModelWidgetRenderer {
     void renderPhotoPoint(WidgetRenderContext context)
     void renderLink(WidgetRenderContext context)
     void renderDate(WidgetRenderContext context)
+    void renderDocument(WidgetRenderContext context)
 
 }
 

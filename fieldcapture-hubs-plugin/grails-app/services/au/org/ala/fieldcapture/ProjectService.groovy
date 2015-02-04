@@ -232,7 +232,7 @@ class ProjectService {
         userCanView
     }
 
-    private isOfficerOrHigher() {
+    def isOfficerOrHigher() {
         (authService.userInRole(grailsApplication.config.security.cas.officerRole) || authService.userInRole(grailsApplication.config.security.cas.adminRole) || authService.userInRole(grailsApplication.config.security.cas.alaAdminRole))
     }
 

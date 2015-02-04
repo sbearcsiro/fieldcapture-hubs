@@ -38,6 +38,7 @@
                                 </tr>
 
                             </tbody>
+                            <g:if test="${!readOnly}">
                             <tfoot data-bind="photoPointUpload:uploadConfig">
                                 <tr data-bind="visible:!complete()">
                                     <td style="border-bottom: 0px;">
@@ -63,16 +64,22 @@
                                         </td>
 
                                 </tr>
-                                <td colspan="3" >
-                                    <span class="btn fileinput-button"><i class="icon-plus"></i> <input type="file" name="files"><span>Attach Photo</span></span>
 
-                                </td>
+                                <tr>
+                                    <td colspan="3" >
+                                        <span class="btn fileinput-button"><i class="icon-plus"></i> <input type="file" name="files"><span>Attach Photo</span></span>
+
+                                    </td>
+                                </tr>
+
                             </tfoot>
+                            </g:if>
                         </table>
                     </td>
 
                 </tr>
             </tbody>
+            <g:if test="${!readOnly}">
             <tfoot>
                 <tr>
                     <td colspan="2">
@@ -80,6 +87,7 @@
                     </td>
                 </tr>
             </tfoot>
+            </g:if>
         </thead>
 
 

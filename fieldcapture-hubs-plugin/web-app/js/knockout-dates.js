@@ -940,4 +940,26 @@ ko.bindingHandlers.stagedImageUpload = {
     }
 };
 
+var ACTIVITY_PROGRESS_CLASSES = {
+    'planned':'btn-warning',
+    'started':'btn-success',
+    'finished':'btn-info',
+    'deferred':'btn-danger',
+    'cancelled':'btn-inverse'
+};
+
+ko.bindingHandlers.activityProgress = {
+    update: function(element, valueAccessor) {
+        var progressValue = ko.utils.unwrapObservable(valueAccessor());
+
+        for (progress in ACTIVITY_PROGRESS_CLASSES) {
+            ko.utils.toggleDomNodeCssClass(element, ACTIVITY_PROGRESS_CLASSES[progress], progress === progressValue);
+        }
+    }
+}
+
+/** Returns a bootstrap class used to style activity progress labels */
+function activityProgressClass(progress) {
+    return ACTIVITY_PROGRESS_CLASSES[progress];
+}
 

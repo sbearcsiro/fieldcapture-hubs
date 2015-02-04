@@ -16,12 +16,16 @@
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'greenArmyReport', params: params)}",
+            organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
+            adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
+            activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
+            reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable"/>
 
 </head>
 <body>
@@ -52,35 +56,54 @@
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
                     <g:if test="${organisation.reports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <li class="<g:if test="${!organisation.reports}">active </g:if>tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
 
                 </ul>
             </div>
             <div class="tab-content row-fluid">
-                <div class="tab-pane" id="projects">
-                        <g:render template="/shared/projectsList"/>
+                <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
+                        <table id="projectList" style="width:100%;">
+                            <thead></thead>
+                            <tbody></tbody>
+                            <tfoot>
+                            <tr><td colspan="5"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
+                            </tfoot>
+                        </table>
                 </div>
 
                 <div class="tab-pane" id="dashboard">
+                    <div class="row-fluid">
+                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${organisation.reports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
+                    </div>
                     <div class="loading-message">
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
                     </div>
+                    <div id="dashboard-content">
+
+                    </div>
+
                 </div>
 
                 <g:if test="${organisation.reports}">
                     <!-- ko stopBinding: true -->
-                <div class="tab-pane active" id="reporting">
+
+                    <div class="tab-pane active" id="reporting">
+
+                        <div class="control-group" style="margin-bottom: 5px;">
+                            <span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>
+                        </div>
 
                         <table class="table table-striped" style="width:100%;">
                             <thead>
 
                             <tr>
+                                <th>Actions</th>
                                 <th>Programme</th>
                                 <th>Report Activity</th>
                                 <th>Date Due<br/><label for="hide-future-reports"><input id="hide-future-reports" type="checkbox" data-bind="checked:hideFutureReports"> Current reports only</label>
                                 </th>
-                                <th>Actions</th>
+
                                 <th>Report Progress</th>
                                 <th>Status<br/><label for="hide-approved-reports"><input id="hide-approved-reports" type="checkbox" data-bind="checked:hideApprovedReports"> Hide approved reports</label></th>
                             </tr>
@@ -88,13 +111,15 @@
                             <tbody data-bind="foreach:{ data:filteredReports, as:'report' }">
 
                                 <tr>
-                                    <td data-bind="text:report.programme"></td>
-                                    <td><a data-bind="attr:{href:editUrl}"><span data-bind="text:description"></span></a></td>
-                                    <td data-bind="text:dueDate.formattedDate()"></td>
                                     <td>
-                                        <button type="button" class="btn btn-container" data-bind="click:$root.viewAllReports"><i data-bind="css:{'icon-plus':!activitiesVisible(), 'icon-minus':activitiesVisible()}" title="View all reports"></i></button>
-                                        <button type="button" class="btn btn-container" data-bind="visible:bulkEditable, click:$root.editReport"><i class="icon-edit" title="Edit report"></i></button>
+                                        <button type="button" class="btn btn-container" data-bind="click:$root.viewAllReports"><i data-bind="css:{'icon-plus':!activitiesVisible(), 'icon-minus':activitiesVisible()}" title="List all project reports"></i></button>
+                                        <button type="button" class="btn btn-container" data-bind="visible:bulkEditable, click:$root.editReport"><i class="icon-edit" title="Edit reports for all projects in spreadsheet format"></i></button>
                                     </td>
+                                    <td data-bind="text:report.programme"></td>
+                                    <td><a data-bind="visible:bulkEditable, attr:{href:editUrl}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a>
+                                        <span data-bind="visible:!bulkEditable, text:description"></span>
+                                    </td>
+                                    <td data-bind="text:dueDate.formattedDate()"></td>
                                     <td>
                                         <div class="progress active"  data-bind="css:{'progress-success':percentComplete>=100, 'progress-info':percentComplete < 100}">
                                             <div class="bar" data-bind="style:{width:percentComplete+'%'}"></div>
@@ -105,20 +130,32 @@
                                     <td><span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span></td>
 
                                 <tr data-bind="visible:report.activitiesVisible()">
-                                    <td></td>
-                                    <td colspan="5">
-                                        <table>
+                                    <td colspan="6">
+                                        <table style="width:100%">
+                                            <thead>
+                                            <tr>
+                                                <td>Project</td> <td>Report</td><td>Report Status</td><td>Stage Report Status</td>
+                                            </tr>
+                                            </thead>
                                             <tbody data-bind="foreach:{data:report.activities, as:'activity'}">
 
                                                 <tr>
 
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}">
+                                                        <a data-bind="attr:{'href':fcConfig.viewProjectUrl+'/'+projectId}" title="Open the project page">
                                                             <span data-bind="text:$root.getProject(projectId).name"></span>
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <span data-bind="text:progress"></span>
+                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}" title="Enter data for the report">
+                                                            <span data-bind="text:description"></span>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span class="label" data-bind="text:progress, activityProgress:progress"></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="label" data-bind="text:$root.publicationStatusLabel(publicationStatus), css:{'label-success':publicationStatus=='published', 'label-info':publicationStatus=='pendingApproval', 'label-warning':publicationStatus == 'unpublished' || !publicationStatus}"></span>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -130,7 +167,51 @@
                             </tbody>
 
                     </table>
-                </div>
+
+                    <div id="addReport" class="modal fade" data-bind="with:newReport" style="display:none;">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="title">Add Report</h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form class="form-horizontal" id="reportForm">
+
+                                        <div class="control-group">
+                                            <label class="control-label" for="project">Project</label>
+
+                                            <div class="controls">
+                                                <select id="project" style="width: 97%;" data-bind="options:$parent.projects, optionsText: 'name', value:project"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="control-group">
+                                            <label class="control-label" for="project">Report Type</label>
+
+                                            <div class="controls">
+                                                <select id="reportType" style="width: 97%;" data-bind="enable:project(), options:availableReports, value:type"></select>
+                                            </div>
+                                        </div>
+
+
+                                    </form>
+                                </div>
+                                <div class="modal-footer control-group">
+                                    <div class="controls">
+                                        <button type="button" class="btn btn-success"
+                                                data-bind="enable:type() && project(), click:save">Create</button>
+                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('close')}">Cancel</button>
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
                     <!-- /ko -->
                 </g:if>
 
@@ -186,22 +267,16 @@
 
         ko.applyBindings(organisationViewModel);
 
-        var dashboardShown = false;
-        $('#dashboard-tab').on('shown', function (e) {
-
-            if (!dashboardShown) {
-                dashboardShown = true;
-
-                $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name}, function(data) {
-                    $('#dashboard').html(data);
-                    $('#dashboard .helphover').popover({animation: true, trigger:'hover', container:'body'});
-                });
-
-            }
-        });
 
         var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
+
+
+        var ActivityViewModel = function(activity) {
+            var self = this;
+            $.extend(self, activity);
+            self.publicationStatus = activity.publicationStatus ? activity.publicationStatus : 'not approved';
+        };
 
         var ReportViewModel = function(report) {
             $.extend(this, report);
@@ -221,7 +296,10 @@
                 self.activitiesVisible(!self.activitiesVisible());
             };
             this.activitiesVisible = ko.observable(false);
-            self.activities = report.activities;
+            self.activities = [];
+            $.each(report.activities, function(i, activity) {
+                self.activities.push(new ActivityViewModel(activity));
+            });
         };
 
         var ReportsViewModel = function(reports, projects) {
@@ -272,11 +350,146 @@
                     return project.projectId === projectId;
                 });
                 return projects ? projects[0] : {name:''};
-            }
+            };
+
+            self.addReport = function() {
+                $('#addReport').modal('show');
+            };
+
+            self.publicationStatusLabel = function(publicationStatus) {
+                switch (publicationStatus) {
+                    case 'unpublished':
+                        return '${g.message(code: 'report.publicationStatus.unpublished')}';
+                    case 'pendingApproval':
+                        return '${g.message(code:'report.publicationStatus.pendingApproval')}';
+                    case 'published':
+                        return '${g.message(code:'report.publicationStatus.published')}';
+                    default:
+                        return '${g.message(code: 'report.publicationStatus.')}';
+                }
+            };
+
+
+            // Data model for the new report dialog.
+            var AdHocReportViewModel = function() {
+
+                var self = this;
+                self.project =ko.observable();
+                self.type = ko.observable();
+
+                self.projectId = ko.computed(function() {
+                    if (self.project()) {
+                        return self.project().projectId;
+                    }
+                });
+                self.plannedStartDate = ko.computed(function() {
+                    if (self.project()) {
+                        return self.project().plannedStartDate;
+                    }
+                });
+                self.plannedEndDate = ko.computed(function() {
+                    if (self.project()) {
+                        return self.project().plannedEndDate;
+                    }
+                });
+                self.availableReports = ko.observableArray([]);
+
+                self.project.subscribe(function(project) {
+                    $.get(fcConfig.adHocReportsUrl+'/'+project.projectId).done(function(data) {
+                        self.availableReports(data);
+                    })
+
+                });
+
+                self.save = function() {
+                    var reportDetails = ko.mapping.toJS(this, {'ignore':['project', 'save']});
+
+                    var reportUrl = fcConfig.reportCreateUrl + '?' + $.param(reportDetails) + '&returnTo='+fcConfig.organisationViewUrl;
+
+                    window.location.href = reportUrl;
+                };
+            };
+            self.newReport = new AdHocReportViewModel();
 
         };
+        <g:if test="${organisation.projects && organisation.reports}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
+        </g:if>
+        $('#dashboardType').change(function(e) {
+            var $content = $('#dashboard-content');
+            var $loading = $('.loading-message');
+            $content.hide();
+            $loading.show();
 
+            var reportType = $('#dashboardType').val();
+
+             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+                $content.html(data);
+                $loading.hide();
+                $content.show();
+                $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+            });
+
+        }).trigger('change');
+
+        var projectUrlRenderer = function(data, type, row, meta) {
+            var projectId = projects[meta.row].projectId;
+            return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
+        };
+        var dateRenderer = function(data) {
+            return convertToSimpleDate(data, false);
+        };
+        var statusRenderer = function(data) {
+            var badge = 'badge';
+            if (data == 'active') {
+                badge += ' badge-success';
+            }
+            return '<span class="'+badge+'">'+data+'</span>';
+        }
+        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+
+        var projectRows = [];
+        $.each(projects, function(i, project) {
+            projectRows.push([project.grantId || '', project.name || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
+        });
+
+
+        $('#projectList').dataTable( {
+            "data": projectRows,
+            "columns": projectListHeader,
+            "footerCallback": function ( tfoot, data, start, end, display ) {
+                var api = this.api();
+
+                // Remove the formatting to get integer data for summation
+                var intVal = function ( i ) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '')*1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+
+                // Total over all pages
+                var total = api
+                    .column( 5 )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    } );
+
+                // Total over this page
+                var pageTotal = api
+                    .column( 5, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0 );
+
+                // Update footer
+                $(api.column(5).footer()).find('span.total').text(
+                    '$'+pageTotal +' ( $'+ total +' total)'
+                );
+            }
+        });
     });
 
 </r:script>

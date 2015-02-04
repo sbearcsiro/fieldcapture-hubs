@@ -140,6 +140,9 @@ class ModelTagLib {
             case 'date':
                 renderer.renderDate(renderContext)
                 break
+            case 'document':
+                renderer.renderDocument(renderContext)
+                break
             default:
                 log.warn("Unhandled widget type: ${model.type}")
                 break
@@ -500,7 +503,7 @@ class ModelTagLib {
 
         def extraClassAttrs = model.class ?: ""
         def tableClass = isprint ? "printed-form-table" : ""
-        def validation = model.editableRows ? "data-bind=\"independentlyValidated:data.${model.source}\"":""
+        def validation = model.editableRows && model.source ? "data-bind=\"independentlyValidated:data.${model.source}\"":""
         out << "<div class=\"row-fluid ${extraClassAttrs}\">\n"
         out << INDENT*3 << "<table class=\"table table-bordered ${model.source} ${tableClass}\" ${validation}>\n"
         tableHeader out, attrs, model
@@ -527,14 +530,19 @@ class ModelTagLib {
             }
 
         }
-        if (attrs.edit && !attrs.printable) {
+        if (table.source && attrs.edit && !attrs.printable) {
             out << "<th></th>"
         }
         out << '\n' << INDENT*4 << "</tr></thead>\n"
     }
 
     def tableBodyView (out, attrs, table) {
-        out << INDENT*4 << "<tbody data-bind=\"foreach: data.${table.source}\"><tr>\n"
+        if (!table.source) {
+            out << INDENT*4 << "<tbody><tr>\n"
+        }
+        else {
+            out << INDENT*4 << "<tbody data-bind=\"foreach: data.${table.source}\"><tr>\n"
+        }
         table.columns.eachWithIndex { col, i ->
             col.type = col.type ?: getType(attrs, col.source, table.source)
             out << INDENT*5 << "<td>" << dataTag(attrs, col, '', false) << "</td>" << "\n"
@@ -561,12 +569,19 @@ class ModelTagLib {
     def tableBodyEdit (out, attrs, table) {
         // body elements for main rows
         if (attrs.edit) {
-            def templateName = table.editableRows ? "${table.source}templateToUse" : "'${table.source}viewTmpl'"
-            out << INDENT*4 << "<tbody data-bind=\"template:{name:${templateName}, foreach: data.${table.source}"
-//            if (table.editableRows) {
-//                out << ", afterRender:attachValidation"
-//            }
-            out << "}\"></tbody>\n"
+
+            def dataBind
+            if (table.source) {
+                def templateName = table.editableRows ? "${table.source}templateToUse" : "'${table.source}viewTmpl'"
+                dataBind = "template:{name:${templateName}, foreach: data.${table.source}}"
+            }
+            else {
+                def count = getUnnamedTableCount(true)
+                def templateName = table.editableRows ? "${count}templateToUse" : "'${count}viewTmpl'"
+                dataBind = "template:{name:${templateName}, data: data}"
+            }
+
+            out << INDENT*4 << "<tbody data-bind=\"${dataBind}\"></tbody>\n"
             if (table.editableRows) {
                 // write the view template
                 tableViewTemplate(out, attrs, table, false)
@@ -612,7 +627,8 @@ class ModelTagLib {
     }
 
     def tableViewTemplate(out, attrs, model, edit) {
-        out << INDENT*4 << "<script id=\"${model.source}viewTmpl\" type=\"text/html\"><tr>\n"
+        def templateName = model.source ? "${model.source}viewTmpl" : "${getUnnamedTableCount(false)}viewTmpl"
+        out << INDENT*4 << "<script id=\"${templateName}\" type=\"text/html\"><tr>\n"
         model.columns.eachWithIndex { col, i ->
             col.type = col.type ?: getType(attrs, col.source, model.source)
             //log.debug "col = ${col}"
@@ -624,7 +640,7 @@ class ModelTagLib {
                 out << INDENT*6 << "<button class='btn btn-mini' data-bind='click:\$root.remove${model.source}Row, enable:!\$root.${model.source}Editing()' title='remove'><i class='icon-trash'></i> Remove</button>\n"
                 out << INDENT*5 << "</td>\n"
         } else {
-            if (edit) {
+            if (edit && model.source) {
                 out << INDENT*5 << "<td><i data-bind='click:\$root.remove${model.source}Row' class='icon-remove'></i></td>\n"
             }
         }
@@ -632,7 +648,8 @@ class ModelTagLib {
     }
 
     def tableEditTemplate(out, attrs, model) {
-        out << INDENT*4 << "<script id=\"${model.source}editTmpl\" type=\"text/html\"><tr>\n"
+        def templateName = model.source ? "${model.source}viewTmpl" : "${getUnnamedTableCount(false)}viewTmpl"
+        out << INDENT*4 << "<script id=\"${templateName}\" type=\"text/html\"><tr>\n"
         model.columns.eachWithIndex { col, i ->
             def edit = !col['readOnly'];
             // mechanism for additional data binding clauses
@@ -788,6 +805,24 @@ class ModelTagLib {
             }
 
         })
+    }
+
+    /**
+     * Uses a page scoped variable to track the number of unnamed tables on the page so each can have a unquie
+     * rendering template.
+     * @param increment true if the value should be incremented (the pre-incremented value will be returned)
+     * @return
+     */
+    private int getUnnamedTableCount(boolean increment = false) {
+        def name = 'unnamedTableCount'
+        def count = pageScope.getVariable(name) ?: 0
+
+        if (increment) {
+            count++
+        }
+        pageScope.setVariable(name, count)
+
+        return count
     }
 
 }
