@@ -95,8 +95,7 @@ class UserService {
     }
 
     def checkEmailExists(String email) {
-        def url = "http://auth.ala.org.au/userdetails/userDetails/getUserDetails?userName=${email}"
-        def resp = webService.doPost(url.toString(), [:])
-        return resp?.resp?.userId?:""
+        def user = authService.getUserForEmailAddress(email)
+        return user?.userId
     }
 }
