@@ -68,16 +68,14 @@
 
     <hf:banner logoutUrl="${grailsApplication.config.grails.serverURL}/logout/logout"/>
 
-    <hf:menu/>
-
     <g:if test="${fc.announcementContent()}">
         <div id="announcement">
             ${fc.announcementContent()}
         </div>
     </g:if>
-    <div id="dcNav" class="clearfix ">
+    <div id="nav-site" class="clearfix ">
 
-        <div class="navbar navbar-inverse container-fluid ">
+        <div class="navbar navbar-inner navbar-inverse container-fluid ">
             %{--<a href="${g.createLink(uri:"/")}" class="brand">MERI data capture prototype</a>--}%
             <ul class="nav">
                 <li><a href="/fieldcapture/" class="active hidden-desktop"><i class="icon-home">&nbsp;</i>&nbsp;Home</a></li>
@@ -104,6 +102,9 @@
                                 <div class="dropdown-menu pull-right">
                                     <fc:userProjectList />
                                 </div>
+                                <button class="btn btn-small btn-fc btnNewProject" title="new project">
+                                    <i class="icon-plus icon-white"></i><span class="">&nbsp; New Project</span>
+                                </button>
                             </div>
                             <g:if test="${fc.userIsSiteAdmin()}">
                                 <div class="btn-group">
