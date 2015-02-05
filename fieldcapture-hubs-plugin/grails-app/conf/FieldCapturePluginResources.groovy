@@ -11,9 +11,10 @@ modules = {
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
     }
 
-    bootstrap {
-        // override declaration in ala-web-theme plugin, so BS code (CSS, JS) is not duplicated as app already has its own version
-        dependsOn 'app_bootstrap_responsive'
+    app_bootstrap_responsive {
+        dependsOn 'application, bootstrap'
+        resource url: 'images/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
+        resource url: 'images/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
     }
 
     defaultSkin {

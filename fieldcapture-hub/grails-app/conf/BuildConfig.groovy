@@ -74,7 +74,7 @@ grails.project.dependency.resolution = {
         // plugins needed at runtime but not for compilation
         runtime ":jquery:1.11.1"
         //compile ':asset-pipeline:1.8.3'
-        compile (":ala-web-theme:1.1.0")
+        compile ":ala-bootstrap2:1.0-SNAPSHOT"
 
         if (Environment.current != Environment.DEVELOPMENT || !inlinePluginAvailable) {
             compile ":fieldcapture-plugin:1.0-SNAPSHOT"
