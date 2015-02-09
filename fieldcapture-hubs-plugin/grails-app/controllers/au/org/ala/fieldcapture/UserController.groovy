@@ -26,9 +26,11 @@ class UserController {
 
     private assembleUserData(user) {
         def recentEdits = userService.getRecentEditsForUserId(user.userId)
+        def memberOrganisations = userService.getOrganisationsForUserId(user.userId)
         def memberProjects = userService.getProjectsForUserId(user.userId)
         def starredProjects = userService.getStarredProjectsForUserId(user.userId)
-        [user: user, recentEdits: recentEdits, memberProjects: memberProjects, starredProjects: starredProjects]
+
+        [user: user, recentEdits: recentEdits, memberProjects: memberProjects, memberOrganisations:memberOrganisations, starredProjects: starredProjects]
     }
 
     @PreAuthorise(accessLevel = 'admin', redirectController = "home", projectIdParam = "projectId")

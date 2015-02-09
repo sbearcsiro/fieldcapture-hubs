@@ -57,6 +57,14 @@
                 </g:else>
             </div>
             <div class="span4">
+                <g:if test="${memberOrganisations}">
+                    <h4>Your organisations</h4>
+                    <ul>
+                        <g:each var="p" in="${memberOrganisations}">
+                            <li><g:link controller="organisation" id="${p.organisation?.organisationId}">${p.organisation?.name}</g:link></li>
+                        </g:each>
+                    </ul>
+                </g:if>
                 <h4>Active Projects</h4>
                 <g:if test="${memberProjects}">
                     <ul>

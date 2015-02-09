@@ -52,6 +52,11 @@ class UserService {
         webService.getJson(url)
     }
 
+    def getOrganisationsForUserId(userId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/getOrganisationsForUserId/${userId}"
+        webService.getJson(url)
+    }
+
     def getStarredProjectsForUserId(userId) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/getStarredProjectsForUserId/${userId}"
         webService.getJson(url)
