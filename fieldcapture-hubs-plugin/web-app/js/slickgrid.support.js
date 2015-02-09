@@ -331,21 +331,25 @@ var ValidationSupport = function() {
 
 
     var findPrompt = function(name) {
-        return $('#'+getPromptId(name));
+
+        var prompt = $('#'+getPromptId(name));
+        console.log(prompt);
+        return prompt;
     };
 
     self.addPrompt = function (field, id, fieldName, error) {
+        console.log('Adding: '+fieldName);
+        self.removePrompt(id, fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
         }
-        if (invalid[id][fieldName]) {
-            self.removePrompt(id, fieldName);
-        }
+
         invalid[id][fieldName] = error;
         _buildPrompt(field, fieldName, error);
     };
 
     self.removePrompt = function(id, fieldName) {
+        console.log('Removing: '+fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
         }
@@ -356,11 +360,9 @@ var ValidationSupport = function() {
     self.addValidationSupport = function($elem, activityId, fieldName) {
         $elem.on('jqv.field.result', function(event, field, error, messageString) {
 
+            self.removePrompt(activityId, fieldName);
             if (error) {
                 self.addPrompt($elem, activityId, fieldName, messageString);
-            }
-            else {
-                self.removePrompt(activityId, fieldName);
             }
         });
     };
@@ -431,7 +433,7 @@ function OutputValueEditor(args) {
 
     this.validate = function () {
 
-        $input.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
+        $input.closest('.validationEngineContainer').validationEngine('validate');
 
         /** always return true as otherwise focus traversal will be blocked by the grid */
         return {
@@ -726,6 +728,15 @@ validators = {
         var value = parseFloat(value);
         if (isNaN(value) || value < min) {
             var error = $.validationEngineLanguage.allRules.min.alertText + min;
+            return {field:field, valid:false, error:error};
+        }
+        return {field:field, valid:true};
+    },
+    max: function(field, value, args) {
+        var max = parseFloat(args);
+        var value = parseFloat(value);
+        if (isNaN(value) || value > max) {
+            var error = $.validationEngineLanguage.allRules.max.alertText + max;
             return {field:field, valid:false, error:error};
         }
         return {field:field, valid:true};

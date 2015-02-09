@@ -45,9 +45,18 @@
 
     <div class="row-fluid">
         <span class="span12">
-        <div id="myGrid" style="width:100%;"></div>
+        <div id="myGrid" class="validationEngineContainer" style="width:100%;"></div>
         </span>
     </div>
+
+    <div class="row-fluid" style="display:none; margin-top:10px;" id="validationError">
+        <div class="span12">
+            <div class="alert alert-error">
+                Please correct the validation errors then press Save again
+            </div>
+        </div>
+    </div>
+
     <div class="row-fluid">
         <div class="form-actions" style="text-align:right">
             <button type="button" id="save" class="btn btn-primary">Save</button>
@@ -275,7 +284,16 @@
         columns = [projectColumn].concat(columns, progressColumn);
 
         var grid = new Slick.Grid("#myGrid", activityModels, columns, options);
-        $('.slick-cell.r3')[0].click();
+
+        // Focus the first editable cell that doesn't contain a popup editor.
+        var highlightColumn = 0;
+        for (var i=0; i<columns.length; i++) {
+            if (columns[i].editor === OutputValueEditor) {
+                highlightColumn = i;
+                break;
+            }
+        }
+        $('.slick-cell.r'+highlightColumn)[0].click();
 
         $('#save').click(function() {
             Slick.GlobalEditorLock.commitCurrentEdit();
@@ -313,6 +331,7 @@
             });
             $.when.apply($, pendingSaves).done(function() {
                 if (valid) {
+                    $('#validationError').hide();
                     if (pendingSaves.length ==0) {
                         alert('Nothing to save.');
                     }
@@ -321,7 +340,7 @@
                     }
                 }
                 else {
-                    alert('Please correct validation errors and press Save again');
+                    $('#validationError').show();
                 }
             });
         });
@@ -330,8 +349,8 @@
             window.location = fcConfig.returnTo;
         });
 
-        // Hacky slickgrid / jqueryValidationEngine integration for some amount of user experience consistency.
-        $('.slick-row').addClass('validationEngineContainer').validationEngine({scroll:false});
+        // Slickgrid / jqueryValidationEngine integration for some amount of user experience consistency.
+        $('.validationEngineContainer').validationEngine({scroll:false});
 
          $('.helphover').popover({animation: true, trigger:'hover'});
     });
