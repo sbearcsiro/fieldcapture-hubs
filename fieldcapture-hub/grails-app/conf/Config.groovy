@@ -89,9 +89,7 @@ if (!ala.baseURL) {
     ala.baseURL = "http://www.ala.org.au"
 }
 if (!collectory.baseURL) {
-//    collectory.baseURL = "http://collections.ala.org.au/"
-//    collectory.baseURL = "http://localhost:8088/ala-collectory/"
-    collectory.baseURL = "http://144.6.225.176/ala-collectory/"
+    collectory.baseURL = "http://collections.ala.org.au/"
 }
 if (!headerAndFooter.baseURL) {
     headerAndFooter.baseURL = "http://www2.ala.org.au/commonui"
