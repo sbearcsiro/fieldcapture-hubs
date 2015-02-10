@@ -52,6 +52,11 @@ class UserService {
         webService.getJson(url)
     }
 
+    def getOrganisationsForUserId(userId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/getOrganisationsForUserId/${userId}"
+        webService.getJson(url)
+    }
+
     def getStarredProjectsForUserId(userId) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/getStarredProjectsForUserId/${userId}"
         webService.getJson(url)
@@ -95,8 +100,7 @@ class UserService {
     }
 
     def checkEmailExists(String email) {
-        def url = grailsApplication.config.security.cas.casServerName + "/userdetails/userDetails/getUserDetails?userName=${email}"
-        def resp = webService.doPost(url.toString(), [:])
-        return resp?.resp?.userId?:""
+        def user = authService.getUserForEmailAddress(email)
+        return user?.userId
     }
 }

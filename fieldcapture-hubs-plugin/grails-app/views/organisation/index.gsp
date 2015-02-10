@@ -113,11 +113,11 @@
                                 <tr>
                                     <td>
                                         <button type="button" class="btn btn-container" data-bind="click:$root.viewAllReports"><i data-bind="css:{'icon-plus':!activitiesVisible(), 'icon-minus':activitiesVisible()}" title="List all project reports"></i></button>
-                                        <button type="button" class="btn btn-container" data-bind="visible:bulkEditable, click:$root.editReport"><i class="icon-edit" title="Edit reports for all projects in spreadsheet format"></i></button>
+                                        <button type="button" class="btn btn-container" data-bind="visible:editable, click:$root.editReport"><i class="icon-edit" data-bind="attr:{title:title}" title="Edit reports for all projects in spreadsheet format"></i></button>
                                     </td>
                                     <td data-bind="text:report.programme"></td>
-                                    <td><a data-bind="visible:bulkEditable, attr:{href:editUrl}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a>
-                                        <span data-bind="visible:!bulkEditable, text:description"></span>
+                                    <td><a data-bind="visible:editable, attr:{href:editUrl, title:title}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a>
+                                        <span data-bind="visible:!editable, text:description"></span>
                                     </td>
                                     <td data-bind="text:dueDate.formattedDate()"></td>
                                     <td>
@@ -281,25 +281,35 @@
         var ReportViewModel = function(report) {
             $.extend(this, report);
             var self = this;
-            this.dueDate = ko.observable(report.dueDate).extend({simpleDate:false})
-            var baseUrl = '${createLink(action:'report', id:organisation.organisationId)}';
-            this.editUrl = baseUrl + '?type='+report.type+'&plannedStartDate='+report.plannedStartDate+'&plannedEndDate='+report.plannedEndDate+'&returnTo='+fcConfig.returnTo;
 
-            this.percentComplete = function() {
+            self.dueDate = ko.observable(report.dueDate).extend({simpleDate:false})
+            var baseUrl = '${createLink(action:'report', id:organisation.organisationId)}';
+            self.editUrl = '';
+            self.percentComplete = function() {
                 if (report.count == 0) {
                     return 0;
                 }
                 return report.finishedCount / report.count * 100;
             }();
 
-            this.toggleActivities = function() {
+            self.toggleActivities = function() {
                 self.activitiesVisible(!self.activitiesVisible());
             };
-            this.activitiesVisible = ko.observable(false);
+            self.activitiesVisible = ko.observable(false);
             self.activities = [];
             $.each(report.activities, function(i, activity) {
                 self.activities.push(new ActivityViewModel(activity));
             });
+            self.editable = report.bulkEditable || self.activities.length == 1;
+            self.title = 'Expand the activity list to complete the reports';
+            if (report.bulkEditable) {
+                self.title = 'Click to complete the reports in a spreadsheet format';
+                self.editUrl = baseUrl + '?type='+report.type+'&plannedStartDate='+report.plannedStartDate+'&plannedEndDate='+report.plannedEndDate+'&returnTo='+fcConfig.returnTo;
+            }
+            else if (self.editable) {
+                self.title = 'Click to complete the report';
+                self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId;
+            }
         };
 
         var ReportsViewModel = function(reports, projects) {

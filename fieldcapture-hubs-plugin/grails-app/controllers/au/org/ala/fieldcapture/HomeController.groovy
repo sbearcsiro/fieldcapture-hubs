@@ -59,8 +59,9 @@ class HomeController {
              it.name,
              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
              it.status,
-             (it.urlAndroid ?: '') + ' ' + (it.urlITunes ?: ''),
-             it.urlWeb ?: '']
+             it.urlAndroid,
+             it.urlITunes,
+             it.urlWeb]
         }];
     }
 

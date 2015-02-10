@@ -17,7 +17,7 @@
     }
     </r:script>
     <script type="text/javascript" src="//www.google.com/jsapi"></script>
-    <r:require modules="knockout,mapWithFeatures,jquery_bootstrap_datatable,js_iso8601,wmd"/>
+    <r:require modules="knockout,projectsTable,js_iso8601,wmd"/>
 </head>
 
 <body>
@@ -38,86 +38,52 @@
     </div>
 
     <div class="row-fluid"><g:message code="home.citizenScience.preamble"/></div>
-
-    <div class="row-fluid">
-        <p class="pull-right" data-bind="visible: projects.length > 0"><g:message code="g.clickToSort"/></p>
-    </div>
-
-    <div class="row-fluid">
-        <div class="span12">
-            <h3 class="pull-left"><g:message code="home.citizenScience.tableHeading"/></h3>
+    <div id="pt-root" class="span9">
+        <div class="well">
+            <div class="row-fluid">
+                    <span id="pt-resultsReturned"></span>
+                    <div class="input-append">
+                        <input type="text" name="pt-search" id="pt-search"/>
+                        <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
+                        <a href="javascript:void(0);" id="pt-reset"><a href="javascript:reset()" title="Remove all filters and sorting options" class="btn"><g:message code="g.reset" /></a></a>
+                    </div>
+                <a href="#" id="pt-downloadLink" class="btn pull-right"
+                   title="Download metadata for projects in JSON format">
+                    <i class="icon-download"></i><g:message code="g.download" /></a>
+            </div>
+            <div id="pt-searchControls">
+                <div id="pt-sortWidgets" class="row-fluid">
+                    <div class="span4">
+                        <label for="pt-per-page"><g:message code="g.projects"/>&nbsp;<g:message code="g.perPage"/></label>
+                        <g:select id="pt-per-page" name="pt-per-page" from="${[10,20,50,100,500]}" value="${pageSize ?: 20}"/>
+                    </div>
+                    <div class="span4">
+                        <label for="pt-sort"><g:message code="g.sortBy" /></label>
+                        <g:select id="pt-sort" name="pt-sort" from="${['name','description','organisationName','status']}"/>
+                    </div>
+                    <div class="span4">
+                        <label for="pt-dir"><g:message code="g.sortOrder" /></label>
+                        <g:select id="pt-dir" name="pt-dir" from="${['ascending','descending']}"/>
+                    </div>
+                </div>
+            </div><!--drop downs-->
         </div>
-    </div>
 
-    <div class="row-fluid">
-        <div class="span12">
-            <table class="table table-striped" id="projectsTable">
-                <thead>
-                <tr>
-                    <th><g:message code="g.coverage"/></th>
-                    <th><g:message code="g.project.name"/></th>
-                    <th><g:message code="g.project.description"/></th>
-                    <th><g:message code="g.org.name"/></th>
-                    <th><g:message code="g.status"/></th>
-                    <th><g:message code="g.website"/></th>
-                    <th><g:message code="g.appsLinks"/></th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+        <div id="pt-results">
+            <div id="pt-loading"><g:message code="project.table.loading" /> ..</div>
+        </div>
+
+        <div id="pt-searchNavBar" class="clearfix">
+            <div id="pt-navLinks"></div>
         </div>
     </div>
 </div>
 <r:script>
-function moreOrLess(dom, more) {
-    dom = $(dom).closest("DIV");
-    dom.hide();
-    if (more)
-        dom.next().show();
-    else
-        dom.prev().show();
-}
-$(document).ready(function () {
-    function moreless(text, maxLength) {
-        if (text.length < maxLength) return text;
-        return '<div>' + text.substring(0, maxLength - 4)
-                + '... <a onclick="moreOrLess(this, true)"><g:message code="g.more"/></a></div><div style="display:none">'
-                + text + '<a onclick="moreOrLess(this)"><g:message code="g.less"/></a></div>';
-    }
-    var markdown = new Showdown.converter();
-    var ProjectVM = function (props) {
-        var pid = props[0];
-        this.coverage = props[1];
-        this.description = markdown.makeHtml(props[2]);
-        this.descriptionTrimmed = moreless(this.description, 100);
-        this.editLink = props[3]? '<a href="${createLink(controller: 'project', action: 'edit')}/' + pid + '"><i class="icon-edit"></a>': '';
-        this.name = '<a href="${createLink(controller: 'project', action: 'index')}/' + pid + '">' + props[4] + '</a>';
-        this.organisationName = props[5];
-        this.status = props[6];
-        this.urlApps = props[7];
-        this.urlWeb = props[8];
-    }
-	var dt = $('#projectsTable').DataTable( {
-		columns: [
-			{ data: 'coverage' },
-			{ data: 'name' },
-			{ data: 'descriptionTrimmed' },
-			{ data: 'organisationName' },
-			{ data: 'status' },
-			{ data: 'urlWeb' },
-			{ data: 'urlApps' },
-			{ data: 'editLink' },
-		],
-		language: {
-    		searchPlaceholder: "Enter a location, topic, organisation, or project"
-		}
-	} );
-	dt.rows.add([
-    <g:each var="p" in="${projects}">new ProjectVM(${p as JSON}),</g:each>
-    ]).draw();
-});
+    $(document).ready(function () {
+        loadProjectsdTable([
+            <g:each var="p" in="${projects}">${p as JSON},</g:each>
+        ]);
+    });
 </r:script>
 </body>
 </html>
