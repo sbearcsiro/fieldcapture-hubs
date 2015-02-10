@@ -202,76 +202,54 @@ class FCTagLib {
      */
     def navbar = { attrs ->
 
+        def navbarConfig = [
+                home:[
+                        icon:"icon-home",
+                        link:createLink(controller: 'home'),
+                        cssClass:'visible-desktop',
+                        label:'Home'
+                ],
+                about:[
+                        icon:"icon-info-sign",
+                        link:createLink(controller: 'home', action: 'about'),
+                        label:'About'
+                ],
+                help:[
+                        icon:"icon-question-sign",
+                        link:createLink(controller: 'home', action: "help"),
+                        label:'Help'
+                ],
+                citizenScience:[
+                        icon:"icon-user",
+                        link:createLink(controller: 'home', action: 'citizenScience'),
+                        label:'Citizen Science'
+                ],
+                contacts:[
+                        icon:"icon-envelope",
+                        link:createLink(controller: 'home', action: 'contacts'),
+                        label:'Contacts'
+                ]
+        ]
+
+        def navDefaults = ['home', 'about', 'help', 'citizenScience', 'contacts']
+        def navItems = attrs.items ?: navDefaults
+
         def mb = new MarkupBuilder(out)
 
-        //mb.ul(class:'nav visible-desktop ') {
-            mb.li(class:attrs.active == 'home' ? 'active' : '') {
-                a(href:createLink(controller: 'home'), class: 'visible-desktop') {
-                    i(class:"icon-home") {
+        navItems.each { navItem ->
+
+            def config = navbarConfig[navItem]
+            mb.li(class:attrs.active == navItem ? 'active' : '') {
+                a(href:config.link, class:config.classClass?:'') {
+
+                    i(class:config.icon) {
                         mkp.yieldUnescaped("&nbsp;")
                     }
                     mkp.yieldUnescaped("&nbsp;")
-                    mkp.yield(message(code:'default.home.label', default: 'Home'))}
-            }
-            mb.li(class:attrs.active == 'about' ? 'active' : '') {
-                a(href:createLink(controller: 'home', action: 'about')) {
-                    i(class:"icon-info-sign") {
-                        mkp.yieldUnescaped("&nbsp;")
-                    }
-                    mkp.yieldUnescaped("&nbsp;")
-                    mkp.yield(message(code:'default.about.label', default: 'About'))
+                    mkp.yield(message(code:'default.'+navItem+'.label', default: config.label))
                 }
-            }
-            mb.li(class:attrs.help == 'help' ? 'active' : '') {
-                a(href:createLink(controller: 'home', action: "help")) {
-                    i(class:"icon-question-sign") {
-                        mkp.yieldUnescaped("&nbsp;")
-                    }
-                    mkp.yieldUnescaped("&nbsp;")
-                    mkp.yield(message(code:'default.help.label', default: 'Help'))
-                }
-            }
-        mb.li(class:attrs.active == 'citizenScience' ? 'active' : '') {
-            a(href:createLink(controller: 'home', action: 'citizenScience')) {
-                i(class:"icon-user") {
-                    mkp.yieldUnescaped("&nbsp;")
-                }
-                mkp.yieldUnescaped("&nbsp;")
-                mkp.yield(message(code:'default.citizenScience.label', default: 'Citizen Science'))
             }
         }
-            mb.li(class:attrs.active == 'contacts' ? 'active' : '') {
-                a(href:createLink(controller: 'home', action: 'contacts')) {
-                    i(class:"icon-envelope") {
-                        mkp.yieldUnescaped("&nbsp;")
-                    }
-                    mkp.yieldUnescaped("&nbsp;")
-                    mkp.yield(message(code:'default.contacts.label', default: 'Contacts'))
-                }
-            }
-//            mb.li(class:attrs.active == 'dashboard' ? 'active' : '') {
-//                a(href:createLink(controller: 'report', action:'dashboard')) {
-//                    i(class:"icon-signal") {
-//                        mkp.yieldUnescaped("&nbsp;")
-//                    }
-//                    mkp.yieldUnescaped("&nbsp")
-//                    mkp.yield(message(code:'default.dashboard.label', default: 'Dashboard'))
-//                }
-//            }
-//            Environment.executeForCurrentEnvironment {
-//              development {
-//                mb.li(class:attrs.active == 'advanced' ? 'active' : '') {
-//                    a(href:createLink(controller: 'home', action:'advanced')) {
-//                        i(class:"icon-th") {
-//                            mkp.yieldUnescaped("&nbsp;")
-//                        }
-//                        mkp.yieldUnescaped("&nbsp")
-//                        mkp.yield(message(code:'default.advanced.label', default: 'Advanced view'))
-//                    }
-//                }
-//              }
-//            }
-        //}
 
     }
 
@@ -513,7 +491,7 @@ class FCTagLib {
         }
 
         if (user) {
-            def j = 0 // keeps track of item count for both lists
+            def j = 0 // keeps track of navItem count for both lists
             // Active projects
             def memberProjects = userService.getProjectsForUserId(user.userId)
             mb.div(class:'listHeading') { mkp.yield("Active projects") }
