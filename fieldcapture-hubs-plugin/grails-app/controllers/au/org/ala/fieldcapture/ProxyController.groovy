@@ -132,6 +132,17 @@ class ProxyController {
         return null
     }
 
+    /**
+     * Returns an excel template that can be used to populate the bulk activity table
+     */
+    def excelBulkActivityTemplate() {
+
+        String url =  "${grailsApplication.config.ecodata.baseUrl}metadata/excelBulkActivityTemplate"
+
+        webService.proxyPostRequest(response, url, params)
+        return null
+    }
+
     /** Proxies the ALA image service as the development server doesn't support SSL. */
     def getImageInfo(String id) {
         def detailsUrl = "${grailsApplication.config.ala.image.service.url}ws/getImageInfo?id=${id}"
