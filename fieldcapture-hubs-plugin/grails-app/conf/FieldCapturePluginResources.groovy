@@ -158,7 +158,7 @@ modules = {
 
     }
     jQueryFileDownload{
-        resource url: 'js/jquery.fileDownload.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/jQuery.fileDownload.js', plugin: 'fieldcapture-plugin'
     }
 
     attachDocuments {
