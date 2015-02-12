@@ -535,7 +535,7 @@ class FCTagLib {
         def model = attrs.model
         if (!(model instanceof JSONObject) && !(model instanceof JSONArray)) {
             model = model as JSON
-            println model
+
         }
         def json = (model?:attrs.default != null? attrs.default:[:] as JSON)
         def modelJson = json.toString()
