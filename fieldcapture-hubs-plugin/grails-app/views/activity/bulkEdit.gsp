@@ -16,13 +16,12 @@
         },
         here = document.location.href;
   </r:script>
-  <r:require modules="knockout,jqueryValidationEngine,datepicker,slickgrid"/>
+  <r:require modules="knockout,jqueryValidationEngine,datepicker,slickgrid,jQueryFileUpload,jQueryFileDownload"/>
     <style type="text/css">
         input.editor-text {box-sizing:border-box; width: 100%;}
         .slick-column-name { white-space: normal; }
         .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
         .slick-header { background: #DAE0B9; }
-
     </style>
 </head>
 <body>
@@ -43,26 +42,38 @@
         Each row of the table below allows the monthly status report for a single project to be completed.  Not all projects need to be edited at once.  If you would prefer to edit the report for an individual project, click the link in the "Project column".  When you are finished, press the save button.
     </div>
 
+    <div id="load-xlsx-result-placeholder"></div>
+
     <div class="row-fluid">
         <span class="span12">
         <div id="myGrid" class="validationEngineContainer" style="width:100%;"></div>
         </span>
     </div>
 
-    <div class="row-fluid" style="display:none; margin-top:10px;" id="validationError">
-        <div class="span12">
-            <div class="alert alert-error">
-                Please correct the validation errors then press Save again
-            </div>
+    <div class="row-fluid">
+
+        <div class="form-actions" >
+            <span class="span3">
+                <button type="button" id ="bulkUploadTrigger" class="btn btn-small"><i class="icon-upload"></i> Upload data for this table</button>
+                <div id="bulkUpload" style="display:none;">
+                    <div class="text-left" style="margin:5px">
+                        <a target="_blank" id="downloadTemplate" class="btn btn-small">Step 1 - Download template (.xlsx)</a>
+                    </div>
+
+                    <div class="text-left" style="margin:5px">
+                        <span class="btn btn-small fileinput-button">
+                            Step 2 - Upload populated template <input id="fileupload" type="file" name="templateFile">
+                        </span>
+                    </div>
+                </div>
+            </span>
+            <span class="span9"style="text-align:right">
+                <button type="button" id="save" class="btn btn-primary">Save</button>
+                <buttom type="button" id="cancel" class="btn btn">Cancel</buttom>
+            </span>
         </div>
     </div>
 
-    <div class="row-fluid">
-        <div class="form-actions" style="text-align:right">
-            <button type="button" id="save" class="btn btn-primary">Save</button>
-            <button type="button" id="cancel" class="btn">Cancel</button>
-        </div>
-    </div>
 </div>
 <r:script>
 
@@ -73,12 +84,9 @@
             <g:set var="blockId" value="${fc.toSingleWord([name: outputModel.name])}"/>
             <g:set var="model" value="${outputModel.dataModel}"/>
 
-
-
             var viewModelName = "${blockId}ViewModel",
                 viewModelInstance = viewModelName + "Instance";
-
-            // load dynamic models - usually objects in a list
+                //load dynamic models - usually objects in a list
                 <md:jsModelObjects model="${model}" site="${site}" speciesLists="${speciesLists}" edit="true"
                                    viewModelInstance="${blockId}ViewModelInstance"/>
 
@@ -119,8 +127,7 @@
                 return JSON.stringify(self.modelForSaving());
             };
 
-            self.loadData = function (data) {
-                // load dynamic data
+            self.loadData = function (data) {// load dynamic data
                 <md:jsLoadModel model="${model}"/>
 
                 // if there is no data in tables then add an empty row for the user to add data
@@ -135,9 +142,8 @@
             }
             self.dirtyFlag = ko.dirtyFlag(self, false);
         };
-</g:if>
+    </g:if>
 </g:each>
-
 
         var options = {
             editable: true,
@@ -168,7 +174,6 @@
         var outputModels = <fc:modelAsJavascript model="${outputModels}"/>;
 
         var top = this;
-
 
         var activityModels = [];
         var ActivityViewModel = function(activity) {
@@ -283,7 +288,8 @@
 
         columns = [projectColumn].concat(columns, progressColumn);
 
-        var grid = new Slick.Grid("#myGrid", activityModels, columns, options);
+        var dataView = new Slick.Data.DataView();
+        var grid = new Slick.Grid("#myGrid", dataView, columns, options);
 
         // Focus the first editable cell that doesn't contain a popup editor.
         var highlightColumn = 0;
@@ -293,11 +299,23 @@
                 break;
             }
         }
+        // wire up model events to drive the grid
+        dataView.onRowCountChanged.subscribe(function (e, args) {
+          grid.updateRowCount();
+          grid.render();
+        });
+        dataView.onRowsChanged.subscribe(function (e, args) {
+          grid.invalidateRows(args.rows);
+          grid.render();
+        });
+        // Feed the data into the dataview
+        dataView.setItems(activityModels);
+
         $('.slick-cell.r'+highlightColumn)[0].click();
 
         $('#save').click(function() {
-            Slick.GlobalEditorLock.commitCurrentEdit();
 
+            Slick.GlobalEditorLock.commitCurrentEdit();
             var valid = true;
 
             var pendingSaves = [];
@@ -325,9 +343,7 @@
                     });
 
                     pendingSaves.push(promise);
-
                 }
-
             });
             $.when.apply($, pendingSaves).done(function() {
                 if (valid) {
@@ -351,8 +367,64 @@
 
         // Slickgrid / jqueryValidationEngine integration for some amount of user experience consistency.
         $('.validationEngineContainer').validationEngine({scroll:false});
+        $('.helphover').popover({animation: true, trigger:'hover'});
 
-         $('.helphover').popover({animation: true, trigger:'hover'});
+        $('#downloadTemplate').click(function() {
+            var ids = []
+            $.each(activities, function(i, activity) {
+                ids.push(activity.activityId);
+            });
+            //var url = "${createLink(controller: 'proxy', action: 'excelBulkActivityTemplate')}?id=${organisation.organisationId}&type=${type}&ids="+ids.toString();
+            //window.open(url,"_blank");
+            var url = "${createLink(controller: 'proxy', action: 'excelBulkActivityTemplate')}";
+            $.fileDownload(url, { httpMethod : "POST", data: { ids : ids.toString(), type : "${type}" }});
+        });
+
+        // Hacky slickgrid / jqueryValidationEngine integration for some amount of user experience consistency.
+        $('.slick-row').addClass('validationEngineContainer').validationEngine({scroll:false});
+
+        var updateGrid = function(ajaxData){
+            $.each(activityModels, function(i, act){
+                if(ajaxData[i]){
+                    var keys = Object.keys(ajaxData[i]).filter(function(f) {
+	                    return f != "grantId" && f != "projectName"
+                    });
+                    $.each(act.outputModels, function (j, output){
+                        $.each(keys, function(k, key){
+                            if(ajaxData[i][key]){
+                                output.data[key](ajaxData[i][key]);
+                            }
+                        });
+                    });
+                    dataView.updateItem(act.id, act);
+                }
+            });
+
+        };
+
+        var url = "${createLink(controller: 'activity', action: 'ajaxBulkUpload')}";
+        $('#fileupload').fileupload({
+            url: url,
+            dataType: 'json',
+            done: function (e, data) {
+                if(data.result.status == 200) {
+                    updateGrid(data.result.data);
+                    showAlert("Successfully populated the table with xlsx template data.","alert-success","load-xlsx-result-placeholder");
+                }
+                else if(data.result.status == 400) {
+                    showAlert("Error: " + data.result.status.error, "alert-error","load-xlsx-result-placeholder");
+                }
+            },
+            fail: function (e, data) {
+                var message = 'Please contact MERIT support and attach your spreadsheet to help us resolve the problem';
+                showAlert(message, "alert-error","load-xlsx-result-placeholder");
+            },
+            formData: {type:"${type}"}
+        });
+
+        $("#bulkUploadTrigger").click(function(){
+             $("#bulkUpload").toggle();
+        });
     });
 
 </r:script>

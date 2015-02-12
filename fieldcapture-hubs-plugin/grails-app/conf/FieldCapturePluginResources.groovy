@@ -157,6 +157,9 @@ modules = {
         resource url: 'js/fileupload-9.0.0/tmpl.js', plugin: 'fieldcapture-plugin'
 
     }
+    jQueryFileDownload{
+        resource url: 'js/jquery.fileDownload.js', plugin: 'fieldcapture-plugin'
+    }
 
     attachDocuments {
         dependsOn 'jQueryFileUpload'
@@ -233,6 +236,7 @@ modules = {
         resource 'slickgrid/lib/jquery.event.drop-2.2.js'
 
         resource 'slickgrid/slick.core.js'
+        resource 'slickgrid/slick.dataview.js'
         //resource 'slickgrid/plugins/slick.cellcopymanager.js'
         //resource 'slickgrid/plugins/slick.cellrangedecorator.js'
         //resource 'slickgrid/plugins/slick.cellrangeselector.js'

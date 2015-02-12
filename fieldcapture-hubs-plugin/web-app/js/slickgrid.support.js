@@ -333,12 +333,12 @@ var ValidationSupport = function() {
     var findPrompt = function(name) {
 
         var prompt = $('#'+getPromptId(name));
-        console.log(prompt);
+       // console.log(prompt);
         return prompt;
     };
 
     self.addPrompt = function (field, id, fieldName, error) {
-        console.log('Adding: '+fieldName);
+        //console.log('Adding: '+fieldName);
         self.removePrompt(id, fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
@@ -349,7 +349,7 @@ var ValidationSupport = function() {
     };
 
     self.removePrompt = function(id, fieldName) {
-        console.log('Removing: '+fieldName);
+        //console.log('Removing: '+fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
         }
@@ -657,7 +657,7 @@ function validate(grid, activity, outputModels) {
             if (!result.valid) {
                 var columnIdx = columnIndex(result.field, grid.getColumns());
                 var node = grid.getCellNode(activity.row, columnIdx);
-                console.log("Invalid: "+result.field+", message="+result.error);
+                //console.log("Invalid: "+result.field+", message="+result.error);
                 if (node) {
                     validationSupport.addPrompt($(node), activity.activityId, result.field, result.error);
                     activityValid = false;
