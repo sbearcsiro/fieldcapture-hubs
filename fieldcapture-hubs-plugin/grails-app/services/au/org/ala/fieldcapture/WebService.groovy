@@ -26,6 +26,7 @@ import org.codehaus.groovy.grails.web.servlet.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.multipart.MultipartFile
 
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 /**
  * Helper class for invoking ecodata (and other Atlas) web services.
@@ -101,10 +102,52 @@ class WebService {
 
     }
 
+    /**
+     * Proxies a request URL with post data but doesn't assume the response is text based. (Used for proxying requests to
+     * ecodata for excel-based reports)
+     */
+    def proxyPostRequest(HttpServletResponse response, String url, Map postBody, boolean includeUserId = true, boolean includeApiKey = false, Integer timeout = null) {
+
+        def charEncoding = 'utf-8'
+
+        HttpURLConnection conn = configureConnection(url, includeUserId)
+
+        def readTimeout = timeout?:defaultTimeout()
+        conn.setConnectTimeout(grailsApplication.config.webservice.connectTimeout as int)
+        conn.setRequestProperty("Content-Type", "application/json;charset=${charEncoding}");
+        conn.setRequestMethod("POST")
+        conn.setReadTimeout(readTimeout)
+        conn.setDoOutput ( true );
+
+        if (includeApiKey) {
+            conn.setRequestProperty("Authorization", grailsApplication.config.api_key);
+        }
+
+        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), charEncoding)
+        wr.write((postBody as JSON).toString())
+        wr.flush()
+        wr.close()
+
+        def headers = [HttpHeaders.CONTENT_DISPOSITION, HttpHeaders.TRANSFER_ENCODING]
+        response.setContentType(conn.getContentType())
+        response.setContentLength(conn.getContentLength())
+
+        headers.each { header ->
+            response.setHeader(header, conn.getHeaderField(header))
+        }
+        response.status = conn.responseCode
+
+        // to make jqueryFiledownload plugin happy
+        def cookie = new Cookie("filedownload","true")
+        cookie.setPath("/")
+        response.addCookie(cookie)
+
+        response.outputStream << conn.inputStream
+    }
+
     def get(String url) {
         return get(url, true)
     }
-
 
     def getJson(String url, Integer timeout = null) {
         def conn = null
