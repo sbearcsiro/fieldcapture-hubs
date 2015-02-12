@@ -1,11 +1,7 @@
 modules = {
 
     ala2Skin {
-        dependsOn 'app_bootstrap_responsive,jquery_migrate,jquery_ui'
-    }
-
-    jquery_migrate {
-        resource url: 'js/jquery-migrate-1.2.1.min.js'
+        dependsOn 'app_bootstrap_responsive,jquery_ui'
     }
 }
 //    application {
