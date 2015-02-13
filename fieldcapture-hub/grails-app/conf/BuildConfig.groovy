@@ -50,6 +50,7 @@ grails.project.dependency.resolution = {
         mavenLocal()
         grailsCentral()
         mavenCentral()
+        mavenRepo "http://nexus.ala.org.au/content/groups/public/"
         mavenRepo "http://maven.ala.org.au/repository/"
         mavenRepo "http://repo.opengeo.org"
         mavenRepo "http://download.osgeo.org/webdav/geotools/"
