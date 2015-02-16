@@ -55,15 +55,15 @@
                 <div id="pt-sortWidgets" class="row-fluid">
                     <div class="span4">
                         <label for="pt-per-page"><g:message code="g.projects"/>&nbsp;<g:message code="g.perPage"/></label>
-                        <g:select name="pt-per-page" from="${[20,50,100,500]}"/>
+                        <g:select name="pt-per-page" from="[20,50,100,500]"/>
                     </div>
                     <div class="span4">
                         <label for="pt-sort"><g:message code="g.sortBy" /></label>
-                        <g:select name="pt-sort" from="${['name','description','organisationName','status']}"/>
+                        <g:select name="pt-sort" from="['Name','Description','Organisation Name','Status']"  keys="['name','description','organisationName','status']"/>
                     </div>
                     <div class="span4">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
-                        <g:select name="pt-dir" from="${['ascending','descending']}"/>
+                        <g:select name="pt-dir" from="['Ascending','Descending']" keys="[1,-1]"/>
                     </div>
                 </div>
             </div><!--drop downs-->
@@ -124,19 +124,24 @@ $(document).ready(function () {
     }
     var markdown = new Showdown.converter();
     var ProjectVM = function (props) {
-        var pid = props[0];
-        this.projectId = pid;
+        var dl = this.download = {
+            projectId: this.projectId = props[0],
+            name: this.name = props[4],
+            description: props[2],
+            orgName: this.organizationName = props[5],
+            status: this.status = props[6],
+            urlWeb: props[9],
+            urlAndroid: props[7],
+            urlITunes: props[8],
+            urlImage: this.mainImageUrl = props[10]
+        }
         this.coverage = props[1];
-        this.description = markdown.makeHtml(props[2]);
+        this.description = markdown.makeHtml(dl.description);
         this.descriptionTrimmed = moreless(this.description, 100);
         this.editable = props[3];
-        this.name = props[4];
-        this.organisationName = props[5];
-        this.status = props[6];
-        this.links = (props[9]? '<a href="' + props[9] + '">Website</a> ': '')
-                   + (props[7]? '<a href="' + props[7] + '">Android</a> ': '')
-                   + (props[8]? '<a href="' + props[8] + '">ITunes</a>': '');
-        this.mainImageUrl = props[10];
+        this.links = (dl.urlWeb? '<a href="' + dl.urlWeb + '">Website</a> ': '')
+                   + (dl.urlAndroid? '<a href="' + dl.urlAndroid + '">Android</a> ': '')
+                   + (dl.urlITunes? '<a href="' + dl.urlITunes + '">ITunes</a>': '');
         this.searchText = (this.name + ' ' + this.description + ' ' + this.organisationName).toLowerCase();
     }
 
@@ -153,7 +158,7 @@ $(document).ready(function () {
     /* size of current filtered list */
     var total = 0;
 
-    var searchTerm = '', perPage = 20, sortBy = 'name', sortOrder = 'ascending';
+    var searchTerm = '', perPage = 20, sortBy = 'name', sortOrder = 1;
 
     /* the base url of the home server */
     var baseUrl = fcConfig.baseUrl;
@@ -318,10 +323,7 @@ $(document).ready(function () {
             va = a.name.toLowerCase();
             vb = b.name.toLowerCase();
         }
-        if (sortOrder == 'ascending')
-            return (va < vb ? -1 : (va > vb ? 1 : 0));
-        else
-            return (vb < va ? -1 : (vb > va ? 1 : 0));
+        return (va < vb ? -1 : (va > vb ? 1 : 0)) * sortOrder;
     }
 
     $('#pt-per-page').change(function () {
@@ -348,11 +350,16 @@ $(document).ready(function () {
             doSearch();
         }
     });
+    $('#pt-downloadLink').click(function () {
+        $('body').html(JSON.stringify($.map(projects, function(v) {
+            return v.download;
+        })));
+    });
     $('#pt-reset').click(function () {
         projects = allProjects;
         $('#pt-per-page').val(perPage = 20);
         $('#pt-sort').val(sortBy = 'name');
-        $('#pt-dir').val(sortOrder = 'ascending');
+        $('#pt-dir').val(sortOrder = 1);
         offset = 0;
         updateTotal();
         populateTable();
