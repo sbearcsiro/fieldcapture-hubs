@@ -3,7 +3,7 @@
 <head>
     <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload"/>
 </head>
 
 <body>
@@ -62,7 +62,9 @@ $(function(){
     </g:else>
     });
     $('#save').click(function () {
+    console.log("saving...");
         viewModel.save();
+    console.log("saved...");
     });
  });
 </r:script>

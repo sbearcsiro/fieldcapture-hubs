@@ -32,7 +32,7 @@
                               data-bind="value: type"
                               class="span12"
                               name='type'
-                              from="['Works Area','Project Area']"
+                              from="['Works Area','Project Extent']"
                               keys="['worksArea','projectArea']"/>
                 </div>
                 <div class="span3">
@@ -369,7 +369,7 @@ function initSiteViewModel() {
         area : "${site?.area}",
         description : "${site?.description?.encodeAsJavaScript()}",
         notes : "${site?.notes?.encodeAsJavaScript()}",
-        documents : JSON.parse('${documents.encodeAsJavaScript()}'),
+        documents : JSON.parse('${(siteDocuments?:documents).encodeAsJavaScript()}'),
     <g:if test="${project}">
         projects : ['${project.projectId}'],
     </g:if>

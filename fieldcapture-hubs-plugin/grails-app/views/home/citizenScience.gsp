@@ -45,7 +45,7 @@
                     <div class="input-append">
                         <input type="text" name="pt-search" id="pt-search"/>
                         <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
-                        <a href="javascript:void(0);" id="pt-reset"><a href="javascript:reset()" title="Remove all filters and sorting options" class="btn"><g:message code="g.reset" /></a></a>
+                        <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
                     </div>
                 <a href="#" id="pt-downloadLink" class="btn pull-right"
                    title="Download metadata for projects in JSON format">
@@ -55,23 +55,49 @@
                 <div id="pt-sortWidgets" class="row-fluid">
                     <div class="span4">
                         <label for="pt-per-page"><g:message code="g.projects"/>&nbsp;<g:message code="g.perPage"/></label>
-                        <g:select id="pt-per-page" name="pt-per-page" from="${[10,20,50,100,500]}" value="${pageSize ?: 20}"/>
+                        <g:select name="pt-per-page" from="${[20,50,100,500]}"/>
                     </div>
                     <div class="span4">
                         <label for="pt-sort"><g:message code="g.sortBy" /></label>
-                        <g:select id="pt-sort" name="pt-sort" from="${['name','description','organisationName','status']}"/>
+                        <g:select name="pt-sort" from="${['name','description','organisationName','status']}"/>
                     </div>
                     <div class="span4">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
-                        <g:select id="pt-dir" name="pt-dir" from="${['ascending','descending']}"/>
+                        <g:select name="pt-dir" from="${['ascending','descending']}"/>
                     </div>
                 </div>
             </div><!--drop downs-->
         </div>
 
-        <div id="pt-results">
-            <div id="pt-loading"><g:message code="project.table.loading" /> ..</div>
-        </div>
+        <table class="table table-bordered table-hover" id="projectTable">
+            <tbody>
+            </tbody>
+        </table>
+        %{-- template for jQuery DOM injection --}%
+        <table id="projectRowTempl" class="hide">
+            <tr class="clearfix">
+                <td class="td1">
+                    <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
+                        <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
+                    <div class="hide projectInfo" id="proj_$id">
+                        <img style="float:right">
+                        <div class="homeLine">
+                            <i class="icon-home"></i>
+                            <a href="">View project page</a>
+                        </div>
+                        <div class="orgLine">
+                            <i class="icon-user"></i>
+                        </div>
+                        <div class="descLine">
+                        </div>
+                        <div class="linksLine">
+                            <i class="icon-info-sign"></i>
+                        </div>
+                    </div>
+                </td>
+                <td class="td2"><a><i class="icon-edit"></i></a></td>
+            </tr>
+        </table>
 
         <div id="pt-searchNavBar" class="clearfix">
             <div id="pt-navLinks"></div>
@@ -90,9 +116,6 @@ function moreOrLess(dom, more) {
 }
 
 $(document).ready(function () {
-        loadProjectsdTable([
-            <g:each var="p" in="${projects}">${p as JSON},</g:each>
-        ]);
     function moreless(text, maxLength) {
         if (text.length < maxLength) return text;
         return '<div>' + text.substring(0, maxLength - 4)
@@ -102,20 +125,24 @@ $(document).ready(function () {
     var markdown = new Showdown.converter();
     var ProjectVM = function (props) {
         var pid = props[0];
+        this.projectId = pid;
         this.coverage = props[1];
         this.description = markdown.makeHtml(props[2]);
         this.descriptionTrimmed = moreless(this.description, 100);
-        this.editLink = props[3]? '<a href="${createLink(controller: \'project\', action: \'edit\')}/' + pid + '"><i class="icon-edit"></a>': '';
-        this.name = '<a href="${createLink(controller: \'project\', action: \'index\')}/' + pid + '">' + props[4] + '</a>';
+        this.editable = props[3];
+        this.name = props[4];
         this.organisationName = props[5];
         this.status = props[6];
-        this.linkAndroid = props[7]? '<a href="' + props[7] + '">Android</a> ': '';
-        this.linkITunes  = props[8]? '<a href="' + props[8] + '">ITunes</a>': '';
-        this.linkWebsite = props[9]? '<a href="' + props[9] + '">Website</a>': '';
+        this.links = (props[9]? '<a href="' + props[9] + '">Website</a> ': '')
+                   + (props[7]? '<a href="' + props[7] + '">Android</a> ': '')
+                   + (props[8]? '<a href="' + props[8] + '">ITunes</a>': '');
+        this.mainImageUrl = props[10];
         this.searchText = (this.name + ' ' + this.description + ' ' + this.organisationName).toLowerCase();
     }
 
-    var allProjects;
+    var allProjects = [
+    <g:each var="p" in="${projects}">new ProjectVM(${p as JSON}),</g:each>
+    ];
 
     /* holds current filtered list */
     var projects;
@@ -131,18 +158,11 @@ $(document).ready(function () {
     /* the base url of the home server */
     var baseUrl = fcConfig.baseUrl;
 
-    function loadProjectsTable(initial) {
-        /** load projects and show first page **/
-        allProjects = [];
-        for (var i = 0; i < initial.length; )
-            allProjects.push(new ProjectVM(initial[i]));
-        allProjects.sort(comparator); // full list is sorted by name
-        // clear the loading sign
-        $('#pt-loading').remove();
-        projects = allProjects;
-        updateTotal();
-        displayPage();
-    }
+    /** load projects and show first page **/
+    allProjects.sort(comparator); // full list is sorted by name
+    projects = allProjects;
+    updateTotal();
+    populateTable();
 
     /*************************************************\
      *  Filter projects by search term
@@ -152,87 +172,89 @@ $(document).ready(function () {
         if (val == searchTerm) return;
         searchTerm = val;
         projects = [];
-        for (var i = 0; i < allProjects.length; ) {
+        for (var i = 0; i < allProjects.length; i++) {
             var item = allProjects[i];
             if (item && item.searchText.indexOf(searchTerm) >= 0)
-                projects.poush(item);
+                projects.push(item);
         }
         offset = 0;
         updateTotal();
-        displayPage();
+        populateTable();
     }
 
     /*************************************************\
-     *  List display
+     *  Show filtered projects on current page
      \*************************************************/
-    function displayPage() {
-        vat rslt = $('#pt-results');
-        // clear list
-        rslt.html('');
-        // paginate and show list
-        for (var i = offset; i < offset + perPage; i++) {
-            var item = projects[i];
-            // item will be undefined if there are less items than the page size
-            if (item) rslt.append(item.div);
-        }
-        showPaginator();
+    function populateTable() {
+        var editPrefix = "${createLink(controller: 'project', action: 'edit')}/";
+        var max = offset + perPage;
+        if (max > projects.length) max = projects.length;
+        $('#projectTable tbody').empty();
+        $.each(projects.slice(offset, max), function(i, src) {
+            var id = src.projectId;
+            var $tr = $('#projectRowTempl tr').clone(); // template
+            $tr.find('.td1 > a').attr("id", "a_" + id).data("id", id);
+            $tr.find('.td1 .projectTitleName').text(src.name); // projectTitleName
+            $tr.find('.projectInfo').attr("id", "proj_" + id);
+            $tr.find('.homeLine a').attr("href", "${createLink(controller: 'project')}/" + id);
+            $tr.find('a.zoom-in').data("id", id);
+            $tr.find('a.zoom-out').data("id", id);
+            $tr.find('.orgLine').append(src.organisationName);
+            $tr.find('.descLine').append(src.description);
+            if (src.links)
+                $tr.find('.linksLine').append(src.links);
+            else
+                $tr.find('.linksLine').hide();
+            if (src.mainImageUrl)
+                $tr.find('.projectInfo img').attr("src", src.mainImageUrl);
+            else
+                $tr.find('.projectInfo img').hide();
+            if (src.editable)
+                $tr.find('.td2 a').attr("href", editPrefix + id);
+            else
+                $tr.find('.td2 a').hide();
+            $('#projectTable tbody').append($tr);
+        });
     }
 
-    /** append one project to the list **/
-    function appendResource(value) {
-        // create a container inside results
-        var $div = $('<div class="result"></div>');
-
-        // add three 'rows'
-        var $rowA = $('<h4 class="rowA"></h4>').appendTo($div);
-        var $rowB = $('<p class="rowB"></p>').appendTo($div);
-        var $rowC = $('<div class="rowC" style="display:none;">').appendTo($div);  // starts hidden
-
-        // row A
-        $rowA.append('<img title="' + jQuery.i18n.prop('datasets.js.appendproject01') + '" src="' + baseUrl + '/images/skin/ExpandArrow.png"/>');  // twisty
-        $rowA.append('<span class="result-name"><a title="' + jQuery.i18n.prop('datasets.js.appendproject02') + '" href="' + baseUrl + '/public/showDataResource/' + value.uid + '">' + value.name + '</a></span>'); // name
-        $rowA.find('a').tooltip(tooltipOptions);
-        $rowA.find('img').tooltip($.extend({}, tooltipOptions, {position: 'center left'}));
-
-        // row B
-        $rowB.append('<span><strong class="resultsLabelFirst">Type of project: </strong>' + value.projectType + '</span>');  // project type
-        $rowB.append('<span><strong class="resultsLabel">License: </strong>' + (value.licenseType == null ? '' : value.licenseType) + '</span>'); // license type
-        $rowB.append('<span><strong class="resultsLabel">License version: </strong>' + (value.licenseVersion == null ? '' : value.licenseVersion) + '</span>'); // license version
-        if (value.projectType == 'website' && value.websiteUrl) {
-            $rowB.append('<span class="viewWebsite"><a title="' + jQuery.i18n.prop('datasets.js.appendproject04') + '" class="external" target="_blank" href="' + value.websiteUrl + '">Website</a></span>'); // website link
+    var prevFeatureId;
+    $('#projectTable').on("click", ".projectTitle", function(el) {
+        el.preventDefault();
+        var thisEl = this;
+        var fId = $(this).data("id");
+        if (!prevFeatureId) {
+            $("#proj_" + fId).slideToggle();
+            $(thisEl).find(".showHideCaret").html("&#9660;");
+        } else if (prevFeatureId != fId) {
+            if ($("#proj_" + prevFeatureId).is(":visible")) {
+                // hide prev selected, show this
+                $("#proj_" + prevFeatureId).slideUp();
+                $("#a_" + prevFeatureId).find(".showHideCaret").html("&#9658;");
+                $("#proj_" + fId).slideDown();
+                $("#a_" + fId).find(".showHideCaret").html("&#9660;");
+            } else {
+                //show this, hide others
+                $("#proj_" + fId).slideToggle();
+                $(thisEl).find(".showHideCaret").html("&#9660;");
+                $("#proj_" + prevFeatureId).slideUp();
+                $("#a_" + prevFeatureId).find(".showHideCaret").html("&#9658;");
+            }
+        } else {
+            $("#proj_" + fId).slideToggle();
+            if ($("#proj_" + fId).is(':visible')) {
+                $(thisEl).find(".showHideCaret").html("&#9658;");
+            } else {
+                $(thisEl).find(".showHideCaret").html("&#9660;");
+            }
         }
-        $rowB.find('a').tooltip(tooltipOptions);
+        prevFeatureId = fId;
+    });
 
-        // row C
-        var desc = "";
-        if (value.pubDescription != null && value.pubDescription != "") {
-            desc += value.pubDescription;
-        }
-        if (value.techDescription != null && value.techDescription != "") {
-            desc += value.techDescription;
-        }
-        if (desc != "") {
-            $rowC.append('<p>' + desc + '</p>'); // description
-        }
-
-        if (value.contentTypes != null) {
-            $rowC.append('<span><strong class="resultsLabel">Content includes:</strong></span>'); // label for content types
-            var $ul = $('<ul class="contentList"></ul>').appendTo($rowC);
-            var ctList = $.parseJSON(value.contentTypes);
-            $.each(ctList, function (i, v) {
-                $ul.append("<li>" + v + "</li>");
-            });
-        }  // content types
-
-        if ($rowC.children().length == 0) {
-            $rowC.append(jQuery.i18n.prop('datasets.js.appendproject05'));
-        }
-    }
 
     /** display the current size of the filtered list **/
     function updateTotal() {
         total = projects.length;
-        $('#pt-resultsReturned').html("Showing <strong>" + total + "</strong> " + (total == 1 ? 'project.' : 'projects.'));
+        $('#pt-resultsReturned').html("Found <strong>" + total + "</strong> " + (total == 1 ? 'project.' : 'projects.'));
     }
 
     /*************************************************\
@@ -240,13 +262,13 @@ $(document).ready(function () {
      \*************************************************/
     /** build and append the pagination widget **/
     function showPaginator() {
-        if (total <= pageSize()) {
+        if (total <= perPage) {
             // no pagination required
             $('div#navLinks').html("");
             return;
         }
-        var currentPage = Math.floor(offset / pageSize()) + 1;
-        var maxPage = Math.ceil(total / pageSize());
+        var currentPage = Math.floor(offset / perPage) + 1;
+        var maxPage = Math.ceil(total / perPage);
         var $pago = $("<div class='pagination'></div>");
         // add prev
         if (offset > 0)
@@ -260,7 +282,7 @@ $(document).ready(function () {
                 $pago.append('<a href="javascript:gotoPage(' + i + ');">' + i + '</a>');
         }
         // add next
-        if ((offset + pageSize()) < total)
+        if ((offset + perPage) < total)
             $pago.append('<a href="javascript:nextPage();">Next »</a>');
         else
             $pago.append('Next »');
@@ -272,19 +294,19 @@ $(document).ready(function () {
     function gotoPage(pageNum) {
         // calculate new offset
         offset = (pageNum - 1) * perPage;
-        displayPage();
+        populateTable();
     }
 
     /** show the previous page **/
     function prevPage() {
         offset -= perPage;
-        displayPage();
+        populateTable();
     }
 
     /** show the next page **/
     function nextPage() {
         offset += perPage;
-        displayPage();
+        populateTable();
     }
 
     /* comparator for data projects */
@@ -303,19 +325,19 @@ $(document).ready(function () {
     }
 
     $('#pt-per-page').change(function () {
+        perPage = $('#pt-per-page').val();
         offset = 0;
-        displayPage();
+        populateTable();
     });
     $('#pt-sort').change(function () {
         sortBy = $('#pt-sort').val();
-        if (!sortBy) sortBy = 'name';
         projects.sort(comparator);
-        displayPage();
+        populateTable();
     });
     $('#pt-dir').change(function () {
         sortOrder = $('#pt-dir').val();
         projects.sort(comparator);
-        displayPage();
+        populateTable();
     });
     $('#pt-search-link').click(function () {
         doSearch();
@@ -333,7 +355,7 @@ $(document).ready(function () {
         $('#pt-dir').val(sortOrder = 'ascending');
         offset = 0;
         updateTotal();
-        displayPage();
+        populateTable();
     });
 });
 </r:script>

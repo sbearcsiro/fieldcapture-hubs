@@ -51,6 +51,10 @@ class HomeController {
         def userId = user?.userId
         [user: user,
          projects: projectService.list(false, true).collect {
+             def imgUrl;
+             it.documents.each { doc ->
+                 if (doc.isPrimageProjectImage) imgUrl = doc.url
+             }
             // pass array instead of object to reduce size
             [it.projectId,
              it.coverage ?: '',
@@ -61,7 +65,8 @@ class HomeController {
              it.status,
              it.urlAndroid,
              it.urlITunes,
-             it.urlWeb]
+             it.urlWeb,
+             imgUrl]
         }];
     }
 
