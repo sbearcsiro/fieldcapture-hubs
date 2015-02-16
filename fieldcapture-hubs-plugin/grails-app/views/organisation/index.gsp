@@ -147,7 +147,7 @@
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}" title="Enter data for the report">
+                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId+'?returnTo='+fcConfig.organisationViewUrl}" title="Enter data for the report">
                                                             <span data-bind="text:description"></span>
                                                         </a>
                                                     </td>
@@ -201,7 +201,7 @@
                                     <div class="controls">
                                         <button type="button" class="btn btn-success"
                                                 data-bind="enable:type() && project(), click:save">Create</button>
-                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('close')}">Cancel</button>
+                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('hide')}">Cancel</button>
 
 
                                     </div>
@@ -308,7 +308,7 @@
             }
             else if (self.editable) {
                 self.title = 'Click to complete the report';
-                self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId;
+                self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId + '?returnTo='+fcConfig.organisationViewUrl;
             }
         };
 
