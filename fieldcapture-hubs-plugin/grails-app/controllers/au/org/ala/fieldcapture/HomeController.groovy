@@ -53,7 +53,7 @@ class HomeController {
          projects: projectService.list(false, true).collect {
              def imgUrl;
              it.documents.each { doc ->
-                 if (doc.isPrimageProjectImage) imgUrl = doc.url
+                 if (doc.isPrimaryProjectImage) imgUrl = doc.url
              }
             // pass array instead of object to reduce size
             [it.projectId,

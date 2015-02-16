@@ -9,6 +9,7 @@ class ProjectService {
             description: 'pubDescription',
             manager: 'email',
             name: 'name',
+            dataSharingLicense: '', // ignore this property (mapped to dataResource)
             organisation: '', // ignore this property
             projectId: 'uid',
             urlWeb: 'websiteUrl'
@@ -76,6 +77,7 @@ class ProjectService {
             collectoryProps.remove('hiddenJSON')
             collectoryProps.dataProvider = [uid:projectId]
             collectoryProps.institution = [uid:props.organisationId]
+            collectoryProps.licenseType = props.dataSharingLicense
             result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/', collectoryProps)
             props.projectId = projectId
             props.dataResourceId = result?.headers?.location?.first().toString().tokenize('/').last()
@@ -96,6 +98,7 @@ class ProjectService {
         body = getRich(id) as Map
         ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
         webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + id, mapAttributesToCollectory(body))
+        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/' + body.dataResourceId, [licenseType:body.dataSharingLicense])
     }
 
     /**

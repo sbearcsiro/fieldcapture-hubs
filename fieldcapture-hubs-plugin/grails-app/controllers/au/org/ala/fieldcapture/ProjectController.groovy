@@ -133,7 +133,7 @@ class ProjectController {
             if (!id) id = result.resp.projectId
             documents.each { doc ->
                 doc.projectId = id
-                doc.isPrimageProjectImage = doc.role == 'mainImage'
+                doc.isPrimaryProjectImage = doc.role == 'mainImage'
                 documentService.saveStagedImageDocument(doc)
             }
         }

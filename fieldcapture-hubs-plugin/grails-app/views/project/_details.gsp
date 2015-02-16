@@ -198,7 +198,7 @@
             <span class="btn fileinput-button pull-right"
                   data-url="${createLink(controller: 'image', action: 'upload')}"
                   data-role="mainImage"
-                  data-owner-key="projectId"
+                  data-owner-type="projectId"
                   data-owner-id="${project?.projectId}"
                   data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input
                     id="mainImage" type="file" name="files"><span>Attach Image</span></span>
@@ -384,11 +384,12 @@ function initViewModel() {
                     self.selectedActivities([]);
                 }
 
-                self.urlAndroid = fixUrl(self.urlAndroid());
-                self.urlITunes  = fixUrl(self.urlITunes());
-                self.urlWeb = fixUrl(self.urlWeb());
-                self.isDataSharing = self.dataSharing() === 'Enabled';
                 var jsData = ko.mapping.toJS(self, {ignore:['mainImageUrl', 'transients', 'dataSharing']});
+                jsData.urlAndroid = fixUrl(jsData.urlAndroid);
+                jsData.urlITunes  = fixUrl(jsData.urlITunes);
+                jsData.urlWeb = fixUrl(jsData.urlWeb);
+                jsData.isDataSharing = self.dataSharing() === 'Enabled';
+                if (!jsData.dataSharingLicense) jsData.dataSharingLicense = 'other';
                 var json = JSON.stringify(jsData);
                 var id = "${project?.projectId ? '/' + project.projectId : ''}";
                 $.ajax({
@@ -406,7 +407,6 @@ function initViewModel() {
                         }
                     },
                     error: function (data) {
-                        var status = data.status;
                         alert('An unhandled error occurred: ' + data.status);
                     }
                 });
