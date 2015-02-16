@@ -68,8 +68,8 @@
                 </div>
             </span>
             <span class="span9"style="text-align:right">
-                <button type="button" id="save" class="btn btn-primary">Save</button>
-                <buttom type="button" id="cancel" class="btn btn">Cancel</buttom>
+                <button type="button" id="save" class="btn btn-primary" title="Save edits and return to the previous page">Save</button>
+                <buttom type="button" id="cancel" class="btn btn" title="Cancel edits and return to previous page">Cancel</buttom>
             </span>
         </div>
     </div>
@@ -154,7 +154,7 @@
             topPanelHeight: 25
         };
         var activityLinkFormatter = function( row, cell, value, columnDef, dataContext ) {
-            return '<a title="'+value+'" href="'+'${createLink(controller: "activity", action:"enterData")}'+'/'+dataContext.activityId+'">'+value+'</a>';
+            return '<a title="'+dataContext.projectName+'" target="project" href="'+fcConfig.projectViewUrl+dataContext.projectId+'">'+value+'</a>';
         };
 
         var progressFormatter = function( row, cell, value, columnDef, dataContext ) {
