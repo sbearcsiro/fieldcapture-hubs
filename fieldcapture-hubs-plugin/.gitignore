@@ -18,6 +18,7 @@
 /test/reports
 /logs
 
+
 # project release file
 /*.war
 
@@ -34,3 +35,4 @@
 
 # Intellij files
 /*.iml
+/.idea

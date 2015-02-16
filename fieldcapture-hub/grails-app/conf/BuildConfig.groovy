@@ -43,17 +43,8 @@ grails.project.dependency.resolution = {
     legacyResolve true // needs to be true for inline plugin whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
     repositories {
-        inherits true // Whether to inherit repository definitions from plugins
-
-        grailsPlugins()
-        grailsHome()
         mavenLocal()
-        grailsCentral()
-        mavenCentral()
         mavenRepo "http://nexus.ala.org.au/content/groups/public/"
-        mavenRepo "http://maven.ala.org.au/repository/"
-        mavenRepo "http://repo.opengeo.org"
-        mavenRepo "http://download.osgeo.org/webdav/geotools/"
     }
 
     dependencies {

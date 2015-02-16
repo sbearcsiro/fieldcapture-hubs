@@ -336,6 +336,60 @@ class ActivityController {
         return ["Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7", "Stage 8", "Stage 9", "Stage 10"]
     }
 
+    /* Parse the xlsx output data and pass it back to the client. */
+    def ajaxBulkUpload(){
+        if (request.respondsTo('getFile')) {
+            def file = request.getFile('templateFile')
+            if (file) {
+                def activityType = params.type
+                def activityModel = metadataService.activitiesModel().activities.find { it.name == activityType }
+                def outputModels = activityModel.outputs.collect { metadataService.annotatedOutputDataModel(it) }
+
+                int index = 0;
+                def columnMap = [:]
+                columnMap << [(CellReference.convertNumToColString(index++)):"grantId"]
+                columnMap << [(CellReference.convertNumToColString(index++)):"projectName"]
+                outputModels.collectEntries { entry ->
+                    entry.each{
+                        def colString = CellReference.convertNumToColString(index++)
+                        columnMap << [(colString):it.name]
+                    }
+                }
+
+                def config = [
+                    sheet:"${activityModel?.outputs?.first()}",
+                    startRow:1,
+                    columnMap:columnMap
+                ]
+                Workbook workbook = WorkbookFactory.create(file.inputStream)
+                def data = excelImportService.convertColumnMapConfigManyRows(workbook, config)
+                def result
+                if (!data) {
+                    response.status = 400
+                    result = [status:400, error:'No data was found that matched the columns in this table, please check the template you used to upload the data. ']
+                }
+                else {
+                    result = [status: 200, data:data]
+                }
+
+                // This is returned to the browswer as a text response due to workaround the warning
+                // displayed by IE8/9 when JSON is returned from an iframe submit.
+                response.setContentType('text/plain;charset=UTF8')
+                def resultJson = result as JSON
+                render resultJson.toString()
+            }
+        }
+        else {
+            response.status = 400
+            def result = [status: 400, error:'No file attachment found']
+            // This is returned to the browswer as a text response due to workaround the warning
+            // displayed by IE8/9 when JSON is returned from an iframe submit.
+            response.setContentType('text/plain;charset=UTF8')
+            def resultJson = result as JSON
+            render resultJson.toString()
+        }
+
+    }
 
     def ajaxUpload() {
         if (request.respondsTo('getFile')) {

@@ -21,18 +21,8 @@ grails.project.dependency.resolution = {
     checksums true // Whether to verify checksums on resolve
 
     repositories {
-        inherits true // Whether to inherit repository definitions from plugins
-
-        grailsPlugins()
-        grailsHome()
-        grailsCentral()
-
         mavenLocal()
-        mavenCentral()
-
-        mavenRepo "http://maven.ala.org.au/repository/"
-        mavenRepo "http://repo.opengeo.org"
-        mavenRepo "http://download.osgeo.org/webdav/geotools/"
+        mavenRepo "http://nexus.ala.org.au/content/groups/public/"
 
     }
     def tomcatVersion = '7.0.55'
@@ -91,6 +81,7 @@ grails.project.dependency.resolution = {
         build ":tomcat:$tomcatVersion"
 
         compile ':cache:1.1.8'
+        compile ":cache-ehcache:1.0.5-SNAPSHOT"
 
         compile ":google-visualization:0.6.2"
         compile ":mail:1.0.6"
