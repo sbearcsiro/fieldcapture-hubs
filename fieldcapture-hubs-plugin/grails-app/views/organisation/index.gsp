@@ -11,6 +11,7 @@
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             viewProjectUrl: "${createLink(controller:'project', action:'index')}",
+            updateProjectUrl: "${createLink(controller: 'project', action:'ajaxUpdate')}",
             documentUpdateUrl: '${g.createLink(controller:"proxy", action:"documentUpdate")}',
             documentDeleteUrl: '${g.createLink(controller:"proxy", action:"deleteDocument")}',
             organisationDeleteUrl: '${g.createLink(action:"ajaxDelete", id:"${organisation.organisationId}")}',
@@ -25,7 +26,7 @@
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
 
 </head>
 <body>
@@ -61,6 +62,7 @@
 
                 </ul>
             </div>
+            <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
                         <table id="projectList" style="width:100%;">
@@ -147,7 +149,7 @@
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId}" title="Enter data for the report">
+                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId+'?returnTo='+fcConfig.organisationViewUrl}" title="Enter data for the report">
                                                             <span data-bind="text:description"></span>
                                                         </a>
                                                     </td>
@@ -201,7 +203,7 @@
                                     <div class="controls">
                                         <button type="button" class="btn btn-success"
                                                 data-bind="enable:type() && project(), click:save">Create</button>
-                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('close')}">Cancel</button>
+                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('hide')}">Cancel</button>
 
 
                                     </div>
@@ -308,7 +310,7 @@
             }
             else if (self.editable) {
                 self.title = 'Click to complete the report';
-                self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId;
+                self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId + '?returnTo='+fcConfig.organisationViewUrl;
             }
         };
 
@@ -425,30 +427,48 @@
         <g:if test="${organisation.projects && organisation.reports}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
         </g:if>
-        $('#dashboardType').change(function(e) {
-            var $content = $('#dashboard-content');
-            var $loading = $('.loading-message');
-            $content.hide();
-            $loading.show();
+    $('#dashboardType').change(function(e) {
+        var $content = $('#dashboard-content');
+        var $loading = $('.loading-message');
+        $content.hide();
+        $loading.show();
 
-            var reportType = $('#dashboardType').val();
+        var reportType = $('#dashboardType').val();
 
-             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
-                $content.html(data);
-                $loading.hide();
-                $content.show();
-                $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
-            });
+         $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+            $content.html(data);
+            $loading.hide();
+            $content.show();
+            $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+        });
 
-        }).trigger('change');
+    }).trigger('change');
 
-        var projectUrlRenderer = function(data, type, row, meta) {
-            var projectId = projects[meta.row].projectId;
-            return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
+    var projectUrlRenderer = function(data, type, row, meta) {
+        var projectId = projects[meta.row].projectId;
+        return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
         var dateRenderer = function(data) {
             return convertToSimpleDate(data, false);
         };
+        var agreementDateRenderer = function(data, type, row, meta) {
+            var program = projects[meta.row].associatedProgram;
+            if (program && program == 'Green Army') {
+                var cell = '<a class="agreementDate">';
+
+
+                if (!data) {
+                    cell += 'Enter date';
+                }
+                else {
+                    cell += dateRenderer(data);
+                }
+                cell += '</a>';
+                return cell;
+            }
+
+            return 'n/a';
+        }
         var statusRenderer = function(data) {
             var badge = 'badge';
             if (data == 'active') {
@@ -456,17 +476,80 @@
             }
             return '<span class="'+badge+'">'+data+'</span>';
         }
-        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'Agreement Date', render:agreementDateRenderer}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
 
         var projectRows = [];
         $.each(projects, function(i, project) {
-            projectRows.push([project.grantId || '', project.name || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
+            projectRows.push([project.grantId || '', project.name || '', project.serviceProviderAgreementDate || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
         });
 
+
+        /** changes the cell contents to display a date picker and autosaves the agreement date once the date changes */
+        var editAgreementDate = function(e) {
+
+            var api = $('#projectList').dataTable().api();
+            var cell = $(e.target).parents('td');
+            cell.addClass('editing');
+            var apiCell = api.cell('.editing');
+            var value = apiCell.data();
+
+            var current = cell.children();
+            current.hide();
+            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true}).appendTo(cell);
+
+            var currentDate = stringToDate(value);
+            if (currentDate) {
+                var widget = input.data("datepicker");
+                widget.setDate(currentDate);
+            }
+            input.datepicker('show');
+
+            var changeHandler = function() {
+                var project = projects[apiCell.index().row];
+                cell.removeClass('editing');
+                var date = input.datepicker('getDate');
+                input.remove();
+                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
+                cell.append(spinner);
+                current.show();
+                var isoDate = convertToIsoDate(date);
+                $.ajax({
+                         url: fcConfig.updateProjectUrl+'/'+project.projectId,
+                         type: 'POST',
+                         data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
+                         contentType: 'application/json',
+                         success: function (data) {
+                             if (data.error) {
+                                 alert(data.detail + ' \n' + data.error);
+                             } else {
+                                 apiCell.data(isoDate);
+                             }
+                         },
+                         error: function (data) {
+                             if (data.status == 401) {
+                                alert("You do not have permission to edit this project.");
+                             }
+                             else {
+                                alert('An unhandled error occurred: ' + data.status);
+                             }
+                        },
+                        complete: function () {
+                            spinner.remove();
+                        }
+                        });
+            };
+
+            ko.utils.registerEventHandler(input, "changeDate", changeHandler);
+            ko.utils.registerEventHandler(input, "hide", changeHandler);
+
+        };
 
         $('#projectList').dataTable( {
             "data": projectRows,
             "columns": projectListHeader,
+            "initComplete":function(settings) {
+                $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);
+            },
             "footerCallback": function ( tfoot, data, start, end, display ) {
                 var api = this.api();
 
@@ -480,7 +563,7 @@
 
                 // Total over all pages
                 var total = api
-                    .column( 5 )
+                    .column( 6 )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
@@ -488,14 +571,14 @@
 
                 // Total over this page
                 var pageTotal = api
-                    .column( 5, { page: 'current'} )
+                    .column( 6, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
                     }, 0 );
 
                 // Update footer
-                $(api.column(5).footer()).find('span.total').text(
+                $(api.column(6).footer()).find('span.total').text(
                     '$'+pageTotal +' ( $'+ total +' total)'
                 );
             }
