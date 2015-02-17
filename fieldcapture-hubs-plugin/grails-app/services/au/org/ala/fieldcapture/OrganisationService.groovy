@@ -23,13 +23,13 @@ class OrganisationService {
             return projects
         }
 
-        def resp = projectService.search([serviceProviderName:organisation.name])
+        def resp = projectService.search([serviceProviderName:organisation.name, view:'flat'])
 
         if (resp?.resp?.projects) {
             projects.addAll(resp.resp.projects)
         }
 
-        resp = projectService.search([organisationName:organisation.name])
+        resp = projectService.search([organisationName:organisation.name, view:'flat'])
 
         if (resp?.resp?.projects) {
             projects.addAll(resp.resp.projects)
