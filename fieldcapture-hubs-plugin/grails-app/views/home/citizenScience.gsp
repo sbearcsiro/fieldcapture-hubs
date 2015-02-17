@@ -79,8 +79,8 @@
                 <td class="td1">
                     <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
                         <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
-                    <div class="hide projectInfo" id="proj_$id">
-                        <img style="float:right">
+                    <div class="hide projectInfo" id="proj_$id" style="position:relative;margin-left:50px">
+                        <img style="position:absolute; left:-48px; width:40px; height:40px">
                         <div class="homeLine">
                             <i class="icon-home"></i>
                             <a href="">View project page</a>
@@ -128,7 +128,7 @@ $(document).ready(function () {
             projectId: this.projectId = props[0],
             name: this.name = props[4],
             description: props[2],
-            orgName: this.organizationName = props[5],
+            orgName: this.organisationName = props[5],
             status: this.status = props[6],
             urlWeb: props[9],
             urlAndroid: props[7],
