@@ -95,7 +95,7 @@
                         </div>
                     </div>
                 </td>
-                <td class="td2"><a><i class="icon-edit"></i></a></td>
+                <td class="td2" style="width:10px"><a><i class="icon-edit"></i></a></td>
             </tr>
         </table>
 
