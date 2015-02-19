@@ -55,7 +55,7 @@ $(function(){
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
-        document.location.href = "${createLink(controller: 'home', action: 'citizenScience')}";
+        document.location.href = "${createLink(action: 'citizenScience')}";
     </g:if>
     <g:else>
         document.location.href = "${createLink(action: 'index', id: project?.projectId)}";
