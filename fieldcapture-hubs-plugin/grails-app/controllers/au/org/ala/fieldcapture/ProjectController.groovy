@@ -158,6 +158,7 @@ class ProjectController {
             documents.each { doc ->
                 doc.projectId = id
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
+                if (doc.isPrimaryProjectImage) doc.public = true
                 documentService.saveStagedImageDocument(doc)
             }
         }
