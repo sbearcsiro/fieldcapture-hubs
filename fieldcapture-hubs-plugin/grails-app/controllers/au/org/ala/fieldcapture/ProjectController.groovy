@@ -80,6 +80,30 @@ class ProjectController {
         ]
     }
 
+    def citizenScience() {
+        def user = userService.getUser()
+        def userId = user?.userId
+        [user: user,
+         projects: projectService.list(false, true).collect {
+             def imgUrl;
+             it.documents.each { doc ->
+                 if (doc.isPrimaryProjectImage) imgUrl = doc.url
+             }
+             // pass array instead of object to reduce size
+             [it.projectId,
+              it.coverage ?: '',
+              it.description,
+              userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
+              it.name,
+              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.status,
+              it.urlAndroid,
+              it.urlITunes,
+              it.urlWeb,
+              imgUrl]
+         }];
+    }
+
     /**
      * Updates existing or creates new output.
      *
