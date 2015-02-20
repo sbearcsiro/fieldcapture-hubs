@@ -85,6 +85,12 @@ class DateUtils {
      */
     static LinkedHashMap<Interval, List> groupByDateRange(List data, Closure dateAccessor, Period period, DateTime startDate = null, DateTime endDate = null) {
 
+        def results = new LinkedHashMap()
+
+        if ((!startDate || !endDate) && !data) {
+
+            return results
+        }
 
         if (!startDate) {
             def start = dateAccessor(data.min(dateAccessor))
@@ -95,7 +101,7 @@ class DateUtils {
             endDate = parse(end)
         }
 
-        def results = new LinkedHashMap()
+
         Interval interval = new Interval(startDate, period)
         while (interval.isBefore(endDate) || interval.contains(endDate)) {
             def periodData = data.findAll {
