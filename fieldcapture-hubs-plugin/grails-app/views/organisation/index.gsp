@@ -69,7 +69,7 @@
                             <thead></thead>
                             <tbody></tbody>
                             <tfoot>
-                            <tr><td colspan="5"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
+                            <tr><td colspan="6"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
                             </tfoot>
                         </table>
                 </div>

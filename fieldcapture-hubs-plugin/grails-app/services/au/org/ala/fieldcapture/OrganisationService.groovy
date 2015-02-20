@@ -32,7 +32,7 @@ class OrganisationService {
         resp = projectService.search([organisationName:organisation.name, view:'flat'])
 
         if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects)
+            projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
         }
         projects
     }
