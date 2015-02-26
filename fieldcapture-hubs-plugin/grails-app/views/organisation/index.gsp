@@ -495,7 +495,42 @@
 
             var current = cell.children();
             current.hide();
-            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true}).appendTo(cell);
+            var span = $('<span class="input-append"/>').appendTo(cell);
+            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true, clearBtn:true, keyboardNavigation:false}).appendTo(span);
+
+            var saveDate = function(isoDate) {
+                cell.removeClass('editing');
+                span.remove();
+                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
+                cell.append(spinner);
+                current.show();
+                var project = projects[apiCell.index().row];
+                $.ajax({
+                     url: fcConfig.updateProjectUrl+'/'+project.projectId,
+                     type: 'POST',
+                     data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
+                     contentType: 'application/json',
+
+                     success: function (data) {
+                         if (data.error) {
+                             alert(data.detail + ' \n' + data.error);
+                         } else {
+                             apiCell.data(isoDate);
+                         }
+                     },
+                     error: function (data) {
+                         if (data.status == 401) {
+                            alert("You do not have permission to edit this project.");
+                         }
+                         else {
+                            alert('An unhandled error occurred: ' + data.status);
+                         }
+                    },
+                    complete: function () {
+                        spinner.remove();
+                    }
+                    });
+            }
 
             var currentDate = stringToDate(value);
             if (currentDate) {
@@ -505,43 +540,30 @@
             input.datepicker('show');
 
             var changeHandler = function() {
-                var project = projects[apiCell.index().row];
-                cell.removeClass('editing');
-                var date = input.datepicker('getDate');
-                input.remove();
-                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
-                cell.append(spinner);
-                current.show();
-                var isoDate = convertToIsoDate(date);
-                $.ajax({
-                         url: fcConfig.updateProjectUrl+'/'+project.projectId,
-                         type: 'POST',
-                         data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
-                         contentType: 'application/json',
-                         success: function (data) {
-                             if (data.error) {
-                                 alert(data.detail + ' \n' + data.error);
-                             } else {
-                                 apiCell.data(isoDate);
-                             }
-                         },
-                         error: function (data) {
-                             if (data.status == 401) {
-                                alert("You do not have permission to edit this project.");
-                             }
-                             else {
-                                alert('An unhandled error occurred: ' + data.status);
-                             }
-                        },
-                        complete: function () {
-                            spinner.remove();
-                        }
-                        });
+                var dateVal = input.val();
+                var isoDate = '';
+                if (dateVal) {
+                    var date = input.datepicker('getDate');
+                    isoDate = convertToIsoDate(date);
+                }
+
+                if (isoDate != value) {
+                    saveDate(isoDate);
+                }
+                else {
+                    noSave();
+                }
+
             };
 
-            ko.utils.registerEventHandler(input, "changeDate", changeHandler);
-            ko.utils.registerEventHandler(input, "hide", changeHandler);
+            var noSave = function() {
+                cell.removeClass('editing');
+                span.remove();
+                current.show();
+            };
 
+
+            ko.utils.registerEventHandler(input, "hide", changeHandler);
         };
 
         $('#projectList').dataTable( {
