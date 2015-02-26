@@ -65,7 +65,7 @@
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
-                        <table id="projectList" style="width:100%;">
+                        <table id="projectList" class="table table-striped" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
                             <tfoot>
@@ -476,7 +476,7 @@
             }
             return '<span class="'+badge+'">'+data+'</span>';
         }
-        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'Agreement Date', render:agreementDateRenderer}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+        var projectListHeader =  [{title:'Grant ID', width:'10%', render:projectUrlRenderer}, {title:'Name', width:'30%'}, {title:'Agreement Date', width:'10%', render:agreementDateRenderer}, {title:'From Date', width:'10%', render:dateRenderer}, {title:'To Date', width:'10%', render:dateRenderer}, {title:'Status', width:'10%', render:statusRenderer}, {title:'Funding', width:'10%'}, {title:'Programme', width:'10%'}];
 
         var projectRows = [];
         $.each(projects, function(i, project) {
@@ -546,6 +546,7 @@
 
         $('#projectList').dataTable( {
             "data": projectRows,
+            "autoWidth":false,
             "columns": projectListHeader,
             "initComplete":function(settings) {
                 $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);
