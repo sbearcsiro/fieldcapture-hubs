@@ -674,6 +674,7 @@ class ModelTagLib {
     def footer(out, attrs, model) {
 
         def colCount = 0
+        def containsSpecies = model.columns.find{it.type == 'autocomplete'}
         out << INDENT*4 << "<tfoot>\n"
         model.footer?.rows.each { row ->
             colCount = 0
@@ -687,6 +688,7 @@ class ModelTagLib {
                 def colspan = col.colspan ? " colspan='${col.colspan}'" : ''
                 // inject type from data model
                 col.type = col.type ?: getType(attrs, col.source, '')
+
                 // inject computed from data model
                 col.computed = col.computed ?: getComputed(attrs, col.source, '')
                 out << INDENT*5 << "<td${colspan}>" << dataTag(attrs, col, 'data', attrs.edit, attributes) << "</td>" << "\n"
@@ -711,11 +713,14 @@ class ModelTagLib {
 
 
                     </td></tr>\n"""
-                out << """<tr data-bind="visible:${model.source}TableDataUploadVisible"><td colspan="${colCount}">
+                out << """<tr data-bind="visible:${model.source}TableDataUploadVisible"><td colspan="${colCount}">"""
+                if (containsSpecies) {
+                    out << """
                 <div class="text-error text-left">
                     Note: Only valid exact scientific names will be matched and populated from the database (indicated by a green tick). Unmatched species will load, but will be indicated by a green <b>?</b>. Please check your uploaded data and correct as required.
-                </div>
-                <div class="text-left" style="margin:5px">
+                </div>"""
+                }
+                out << """<div class="text-left" style="margin:5px">
                     <a href="${createLink(controller: 'proxy', action: 'excelOutputTemplate')}?type=${
                     attrs.output
                 }&listName=${model.source}" target="${model.source}TemplateDownload" class="btn">Step 1 - Download template (.xlsx)</a>
