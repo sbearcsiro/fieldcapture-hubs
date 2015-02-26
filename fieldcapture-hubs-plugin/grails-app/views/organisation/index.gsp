@@ -65,7 +65,7 @@
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
-                        <table id="projectList" style="width:100%;">
+                        <table id="projectList" class="table table-striped" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
                             <tfoot>
@@ -476,7 +476,7 @@
             }
             return '<span class="'+badge+'">'+data+'</span>';
         }
-        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'Agreement Date', render:agreementDateRenderer}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
+        var projectListHeader =  [{title:'Grant ID', width:'10%', render:projectUrlRenderer}, {title:'Name', width:'30%'}, {title:'Agreement Date', width:'10%', render:agreementDateRenderer}, {title:'From Date', width:'10%', render:dateRenderer}, {title:'To Date', width:'10%', render:dateRenderer}, {title:'Status', width:'10%', render:statusRenderer}, {title:'Funding', width:'10%'}, {title:'Programme', width:'10%'}];
 
         var projectRows = [];
         $.each(projects, function(i, project) {
@@ -495,7 +495,42 @@
 
             var current = cell.children();
             current.hide();
-            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true}).appendTo(cell);
+            var span = $('<span class="input-append"/>').appendTo(cell);
+            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true, clearBtn:true, keyboardNavigation:false}).appendTo(span);
+
+            var saveDate = function(isoDate) {
+                cell.removeClass('editing');
+                span.remove();
+                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
+                cell.append(spinner);
+                current.show();
+                var project = projects[apiCell.index().row];
+                $.ajax({
+                     url: fcConfig.updateProjectUrl+'/'+project.projectId,
+                     type: 'POST',
+                     data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
+                     contentType: 'application/json',
+
+                     success: function (data) {
+                         if (data.error) {
+                             alert(data.detail + ' \n' + data.error);
+                         } else {
+                             apiCell.data(isoDate);
+                         }
+                     },
+                     error: function (data) {
+                         if (data.status == 401) {
+                            alert("You do not have permission to edit this project.");
+                         }
+                         else {
+                            alert('An unhandled error occurred: ' + data.status);
+                         }
+                    },
+                    complete: function () {
+                        spinner.remove();
+                    }
+                    });
+            }
 
             var currentDate = stringToDate(value);
             if (currentDate) {
@@ -505,47 +540,35 @@
             input.datepicker('show');
 
             var changeHandler = function() {
-                var project = projects[apiCell.index().row];
-                cell.removeClass('editing');
-                var date = input.datepicker('getDate');
-                input.remove();
-                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
-                cell.append(spinner);
-                current.show();
-                var isoDate = convertToIsoDate(date);
-                $.ajax({
-                         url: fcConfig.updateProjectUrl+'/'+project.projectId,
-                         type: 'POST',
-                         data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
-                         contentType: 'application/json',
-                         success: function (data) {
-                             if (data.error) {
-                                 alert(data.detail + ' \n' + data.error);
-                             } else {
-                                 apiCell.data(isoDate);
-                             }
-                         },
-                         error: function (data) {
-                             if (data.status == 401) {
-                                alert("You do not have permission to edit this project.");
-                             }
-                             else {
-                                alert('An unhandled error occurred: ' + data.status);
-                             }
-                        },
-                        complete: function () {
-                            spinner.remove();
-                        }
-                        });
+                var dateVal = input.val();
+                var isoDate = '';
+                if (dateVal) {
+                    var date = input.datepicker('getDate');
+                    isoDate = convertToIsoDate(date);
+                }
+
+                if (isoDate != value) {
+                    saveDate(isoDate);
+                }
+                else {
+                    noSave();
+                }
+
             };
 
-            ko.utils.registerEventHandler(input, "changeDate", changeHandler);
-            ko.utils.registerEventHandler(input, "hide", changeHandler);
+            var noSave = function() {
+                cell.removeClass('editing');
+                span.remove();
+                current.show();
+            };
 
+
+            ko.utils.registerEventHandler(input, "hide", changeHandler);
         };
 
         $('#projectList').dataTable( {
             "data": projectRows,
+            "autoWidth":false,
             "columns": projectListHeader,
             "initComplete":function(settings) {
                 $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);

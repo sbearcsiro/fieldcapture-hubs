@@ -123,6 +123,13 @@ modules = {
     jquery_bootstrap_datatable {
         resource url:'js/jquery.dataTables.js', plugin: 'fieldcapture-plugin'
         resource url:'js/jquery.dataTables.bootstrap.js', plugin: 'fieldcapture-plugin'
+        resource url:'css/dataTables.bootstrap.css', plugin: 'fieldcapture-plugin'
+        resource url:'images/sort_asc.png', plugin: 'fieldcapture-plugin'
+        resource url:[dir:'images', file:'sort_asc_disabled.png', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'images', file:'sort_both.png', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'images', file:'sort_desc.png', plugin: 'fieldcapture-plugin']
+        resource url:[dir:'images', file:'sort_desc_disabled.png', plugin: 'fieldcapture-plugin']
+
     }
 
     drawmap {
