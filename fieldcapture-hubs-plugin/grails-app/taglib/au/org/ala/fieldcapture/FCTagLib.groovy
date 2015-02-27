@@ -469,6 +469,12 @@ class FCTagLib {
         }
     }
 
+    def userIsAlaOrFcAdmin = { attrs ->
+        if (userService.userIsAlaOrFcAdmin()) {
+            out << true
+        }
+    }
+
     /**
      * Build HTML for drop down menu "My projects"
      */
