@@ -27,7 +27,7 @@
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
-
+    <g:set var="showReports" value="${organisation.reports && isAdmin}"/>
 </head>
 <body>
 
@@ -41,9 +41,9 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-            <button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
+            <g:if test="${isAdmin}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
             <button class="btn pull-right" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button>
-
+            </g:if>
             <h2 data-bind="text:name"></h2>
 
         </div>
@@ -56,27 +56,28 @@
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
-                    <g:if test="${organisation.reports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="<g:if test="${!organisation.reports}">active </g:if>tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
+                    <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
 
                 </ul>
             </div>
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
-                <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
+                <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
                         <table id="projectList" class="table table-striped" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
                             <tfoot>
-                            <tr><td colspan="6"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
+                            <tr></tr>
+
                             </tfoot>
                         </table>
                 </div>
 
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
-                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${organisation.reports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
+                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${showReports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
                     </div>
                     <div class="loading-message">
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
@@ -87,7 +88,7 @@
 
                 </div>
 
-                <g:if test="${organisation.reports}">
+                <g:if test="${showReports}">
                     <!-- ko stopBinding: true -->
 
                     <div class="tab-pane active" id="reporting">
@@ -270,7 +271,7 @@
         ko.applyBindings(organisationViewModel);
 
 
-        var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
+        <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
 
 
@@ -424,29 +425,41 @@
             self.newReport = new AdHocReportViewModel();
 
         };
-        <g:if test="${organisation.projects && organisation.reports}">
+        <g:if test="${showReports}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
         </g:if>
-    $('#dashboardType').change(function(e) {
-        var $content = $('#dashboard-content');
-        var $loading = $('.loading-message');
-        $content.hide();
-        $loading.show();
+        $('#dashboardType').change(function(e) {
+            var $content = $('#dashboard-content');
+            var $loading = $('.loading-message');
+            $content.hide();
+            $loading.show();
 
-        var reportType = $('#dashboardType').val();
+            var reportType = $('#dashboardType').val();
 
-         $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
-            $content.html(data);
-            $loading.hide();
-            $content.show();
-            $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+                $content.html(data);
+                $loading.hide();
+                $content.show();
+                $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+            });
+
+        }).trigger('change');
+
+        var organisationTabStorageKey = 'organisation-page-tab';
+        $('a[data-toggle="tab"]').on('shown', function (e) {
+            var tab = e.currentTarget.hash;
+            amplify.store(organisationTabStorageKey, tab);
         });
 
-    }).trigger('change');
+        var storedTab = amplify.store(organisationTabStorageKey);
 
-    var projectUrlRenderer = function(data, type, row, meta) {
-        var projectId = projects[meta.row].projectId;
-        return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
+        if (storedTab) {
+            $(storedTab + '-tab').tab('show');
+        }
+
+        var projectUrlRenderer = function(data, type, row, meta) {
+            var projectId = projects[meta.row].projectId;
+            return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
         var dateRenderer = function(data) {
             return convertToSimpleDate(data, false);
@@ -476,13 +489,16 @@
             }
             return '<span class="'+badge+'">'+data+'</span>';
         }
-        var projectListHeader =  [{title:'Grant ID', width:'10%', render:projectUrlRenderer}, {title:'Name', width:'30%'}, {title:'Agreement Date', width:'10%', render:agreementDateRenderer}, {title:'From Date', width:'10%', render:dateRenderer}, {title:'To Date', width:'10%', render:dateRenderer}, {title:'Status', width:'10%', render:statusRenderer}, {title:'Funding', width:'10%'}, {title:'Programme', width:'10%'}];
-
-        var projectRows = [];
-        $.each(projects, function(i, project) {
-            projectRows.push([project.grantId || '', project.name || '', project.serviceProviderAgreementDate || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
-        });
-
+        var projectListHeader =  [
+            {title:'Grant ID', width:'10%', render:projectUrlRenderer, data:'grantId'},
+            <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
+            {title:'Name', width:'25%', data:'name'},
+            <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
+            {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
+            {title:'Status', width:'8%', render:statusRenderer, data:'status'},
+            {title:'Funding', width:'8%', data:'funding'},
+            {title:'Programme', width:'13%', data:'associatedProgram'}];
 
         /** changes the cell contents to display a date picker and autosaves the agreement date once the date changes */
         var editAgreementDate = function(e) {
@@ -567,7 +583,7 @@
         };
 
         $('#projectList').dataTable( {
-            "data": projectRows,
+            "data": projects,
             "autoWidth":false,
             "columns": projectListHeader,
             "initComplete":function(settings) {
@@ -584,9 +600,15 @@
                             i : 0;
                 };
 
+                <g:if test="${showReports}">
+                    var fundingColumn = 7;
+                </g:if>
+                <g:else>
+                    var fundingColumn = 5;
+                </g:else>
                 // Total over all pages
                 var total = api
-                    .column( 6 )
+                    .column( fundingColumn )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
@@ -594,16 +616,24 @@
 
                 // Total over this page
                 var pageTotal = api
-                    .column( 6, { page: 'current'} )
+                    .column( fundingColumn, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
                     }, 0 );
 
                 // Update footer
-                $(api.column(6).footer()).find('span.total').text(
-                    '$'+pageTotal +' ( $'+ total +' total)'
-                );
+                var footerRow = $(api.table().footer()).find('tr');
+                var col = footerRow.find('td.fundingTotal');
+                if (!col.length) {
+                    footerRow.append('<td colspan="'+fundingColumn+'"></td>');
+                    footerRow.append('<td class="fundingTotal">$'+pageTotal + ' ($'+total + ' total)'+'</td>');
+
+                }
+                else {
+                    col.text('$'+pageTotal + ' ($'+total + ' total)');
+                }
+
             }
         });
     });
