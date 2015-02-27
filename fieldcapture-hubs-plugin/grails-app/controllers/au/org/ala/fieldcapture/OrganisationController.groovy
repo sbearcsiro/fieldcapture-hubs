@@ -24,7 +24,7 @@ class OrganisationController {
             // Get dashboard information for the response.
             def dashboard = searchService.dashboardReport([fq: 'organisationFacet:' + organisation.name])
 
-            [organisation: organisation, dashboard: dashboard]
+            [organisation: organisation, dashboard: dashboard, isAdmin:organisationService.isUserAdminForOrganisation(id)]
         }
     }
 
