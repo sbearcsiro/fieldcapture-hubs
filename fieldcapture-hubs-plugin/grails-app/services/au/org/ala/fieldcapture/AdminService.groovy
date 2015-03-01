@@ -76,8 +76,10 @@ class AdminService {
                                         String filename = photo.name
                                         if (filename == null || filename  == 'null' && photo.id) {
                                             def imageDetailsUrl = "${grailsApplication.config.ala.image.service.url}ws/getImageInfo?id=${photo.id}"
-                                            def result = webService.getJson(imageDetailsUrl) as JSON
-                                            println result
+                                            def result = webService.getJson(imageDetailsUrl)
+                                            if (result.originalFileName) {
+                                                filename = result.originalFileName
+                                            }
                                         }
                                         String ext = ''
                                         int extensionLoc = filename.lastIndexOf('.')
