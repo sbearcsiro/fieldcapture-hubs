@@ -652,6 +652,49 @@ ko.dirtyFlag = function(root, isInitiallyDirty) {
     return result;
 };
 
+/**
+ * A simple dirty flag that will detect the first change to a model, then afterwards always return true (meaning
+ * dirty).  This is to prevent the full model being re-serialized to JSON on every change, which can cause
+ * performance issues for large models.
+ * From: http://www.knockmeout.net/2011/05/creating-smart-dirty-flag-in-knockoutjs.html
+ * @param root the model.
+ * @returns true if the model has changed since this function was added.
+ */
+ko.simpleDirtyFlag = function(root) {
+    var _initialized = ko.observable(false);
+
+    // this allows for models that do not have a modelAsJSON method
+    var getRepresentation = function () {
+        return (typeof root.modelAsJSON === 'function') ? root.modelAsJSON() : ko.toJSON(root);
+    };
+
+    var result = function() {};
+
+    //one-time dirty flag that gives up its dependencies on first change
+    result.isDirty = ko.computed(function () {
+        if (!_initialized()) {
+
+            //just for subscriptions
+            getRepresentation();
+
+            //next time return true and avoid ko.toJS
+            _initialized(true);
+
+            //on initialization this flag is not dirty
+            return false;
+        }
+
+        //on subsequent changes, flag is now dirty
+        return true;
+    });
+    result.reset = function() {
+        _initialized(false);
+    }
+
+    return result;
+};
+
+
 
 /**
  * A vetoableObservable is an observable that provides a mechanism to prevent changes to its value under certain
@@ -962,4 +1005,28 @@ ko.bindingHandlers.activityProgress = {
 function activityProgressClass(progress) {
     return ACTIVITY_PROGRESS_CLASSES[progress];
 }
+
+ko.bindingHandlers.numeric = {
+    init: function (element, valueAccessor) {
+        $(element).on("keydown", function (event) {
+            // Allow: backspace, delete, tab, escape, and enter
+            if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
+                    // Allow: Ctrl+A
+                (event.keyCode == 65 && event.ctrlKey === true) ||
+                    // Allow: . ,
+                (event.keyCode == 190 || event.keyCode == 110) ||
+                    // Allow: home, end, left, right
+                (event.keyCode >= 35 && event.keyCode <= 39)) {
+                // let it happen, don't do anything
+                return;
+            }
+            else {
+                // Ensure that it is a number and stop the keypress
+                if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105)) {
+                    event.preventDefault();
+                }
+            }
+        });
+    }
+};
 
