@@ -5,11 +5,3 @@
     <p>Your data has been saved on this computer but you may need to login again before the data can be sent to the server.</p>
     <a href="${url}">Click here to refresh your login and reload this page.</a>
 </div>
-
-<div id="unsavedChangesMessage" class="hide">
-
-    <span class='label label-important'>Important</span><h4>You have unsaved changes.</h4>
-    <p>Press OK to navigate away from the page anyway.</p>
-    <p>Press Cancel to continue editing your ${unsavedData}.</p>
-
-</div>

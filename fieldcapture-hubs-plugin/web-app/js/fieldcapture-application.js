@@ -213,3 +213,95 @@ function confirmOnPageExit(e) {
     // For Chrome, Safari, IE8+ and Opera 12+
     return message;
 };
+
+/**
+ * Attaches a simple dirty flag (one shot change detection) to the supplied model, then once the model changes,
+ * auto-saves the model using the supplied key every autoSaveIntervalInSeconds seconds.
+ * @param viewModel the model to autosave.
+ * @param key the (localStorage) key to use when saving the model.
+ * @param autoSaveIntervalInSeconds [optional, default=60] how often to autosave the edited model.
+ */
+function autoSaveModel(viewModel, saveUrl, options) {
+
+    var defaults = {
+        storageKey:window.location.href+'.autosaveData',
+        autoSaveIntervalInSeconds:60,
+        restoredDataWarningSelector:"#restoredData",
+        resultsMessageId:"save-result-placeholder",
+        timeoutMessageSelector:"#timeoutMessage",
+        errorMessage:"Failed to save your data: ",
+        successMessage:"Save successful!",
+        errorCallback:undefined,
+        successCallback:undefined
+    };
+
+    var config = $.extend(defaults, options);
+
+    var serializeModel = function() {
+        return (typeof viewModel.modelAsJSON === 'function') ? viewModel.modelAsJSON() : ko.toJSON(viewModel);
+    };
+    var autoSaveModel = function() {
+        amplify.store(config.storageKey, serializeModel());
+        if (viewModel.dirtyFlag.isDirty()) {
+            window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
+        }
+    }
+
+    viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
+    viewModel.dirtyFlag.isDirty.subscribe(
+        function() {
+            if (viewModel.dirtyFlag.isDirty()) {
+                autoSaveModel();
+            }
+        }
+    );
+
+    viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
+        $(config.restoredDataWarningSelector).hide();
+        var json = serializeModel();
+        // Store data locally in case the save fails.plan
+        amplify.store(config.storageKey, json);
+
+        $.ajax({
+            url: saveUrl,
+            type: 'POST',
+            data: json,
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.error) {
+                    showAlert(config.errorMessage + data.detail + ' \n' + data.error,
+                        "alert-error",config.resultsMessageId);
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(data);
+                    }
+                    if (typeof config.errorCallback === 'function') {
+                        config.errorCallback(data);
+                    }
+
+                } else {
+                    showAlert(config.successMessage,"alert-success",config.resultsMessageId);
+                    amplify.store(config.storageKey, null);
+                    viewModel.dirtyFlag.reset();
+                    if (typeof successCallback === 'function') {
+                        successCallback(data);
+                    }
+                    if (typeof config.successCallback === 'function') {
+                        config.successCallback(data);
+                    }
+                }
+            },
+            error: function (data) {
+                bootbox.alert($(config.timeoutMessageSelector).html());
+                if (typeof errorCallback === 'function') {
+                    errorCallback(data);
+                }
+                if (typeof config.errorCallback === 'function') {
+                    config.errorCallback(data);
+                }
+            }
+        });
+    }
+
+}
+
+
