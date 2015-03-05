@@ -82,6 +82,18 @@ class ActivityService {
         list
     }
 
+    def submitActivitiesForPublication(activityIds) {
+        updatePublicationStatus(activityIds, 'pendingApproval')
+    }
+
+    def approveActivitiesForPublication(activityIds) {
+        updatePublicationStatus(activityIds, 'published')
+    }
+
+    def rejectActivitiesForPublication(activityIds) {
+        updatePublicationStatus(activityIds, 'unpublished')
+    }
+
     /**
      * Updates the publicationStatus field of a set of Activities.
      * @param activityIds a List of the activity ids.  Identifies which activities to update.
