@@ -79,8 +79,9 @@
                 <td class="td1">
                     <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
                         <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
-                    <div class="hide projectInfo" id="proj_$id" style="position:relative;margin-left:50px">
-                        <img style="position:absolute; left:-48px; width:40px; height:40px">
+                    <div class="projectInfo" id="proj_$id" style="position:relative;margin-left:130px">
+                        <img style="position:absolute; left:-128px; width:120px; height:120px">
+                        <div style="float:left;width:1px;height:120px"></div>
                         <div class="homeLine">
                             <i class="icon-home"></i>
                             <a href="">View project page</a>
@@ -227,6 +228,7 @@ $(document).ready(function () {
         el.preventDefault();
         var thisEl = this;
         var fId = $(this).data("id");
+        prevFeatureId = fId; // always toggle - no previous feature
         if (!prevFeatureId) {
             $("#proj_" + fId).slideToggle();
             $(thisEl).find(".showHideCaret").html("&#9660;");
