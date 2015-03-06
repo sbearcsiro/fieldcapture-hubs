@@ -109,6 +109,12 @@ class UserService {
         return results?.userIsAdmin
     }
 
+    def isUserGrantManagerForOrganisation(userId, organisationId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserGrantManagerForOrganisation?organisationId=${organisationId}&userId=${userId}"
+        def results = webService.getJson(url)
+        return results?.userIsGrantManager
+    }
+
     def checkEmailExists(String email) {
         def user = authService.getUserForEmailAddress(email)
         return user?.userId
