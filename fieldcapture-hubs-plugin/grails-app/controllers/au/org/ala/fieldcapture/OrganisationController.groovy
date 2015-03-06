@@ -7,7 +7,7 @@ import grails.converters.JSON
  */
 class OrganisationController {
 
-    def organisationService, searchService, documentService
+    def organisationService, searchService, documentService, userService
 
     def list() {
         def organisations = organisationService.list()
@@ -23,8 +23,12 @@ class OrganisationController {
         else {
             // Get dashboard information for the response.
             def dashboard = searchService.dashboardReport([fq: 'organisationFacet:' + organisation.name])
+            def members = organisationService.getMembersOfOrganisation(id)
+            def userId = userService.getCurrentUserId()
 
-            [organisation: organisation, dashboard: dashboard]
+            def orgRole = members.find{it.userId == userId}
+
+            [organisation: organisation, dashboard: dashboard, isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE, isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
         }
     }
 

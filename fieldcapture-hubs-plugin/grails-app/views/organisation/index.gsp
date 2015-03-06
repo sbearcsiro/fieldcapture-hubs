@@ -23,11 +23,14 @@
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
+            submitReportUrl: '${g.createLink( action:'ajaxSubmitReport', id:"${organisation.organisationId}")}',
+            approveReportUrl: '${g.createLink( action:'ajaxApproveReport', id:"${organisation.organisationId}")}',
+            rejectReportUrl: '${g.createLink( action:'ajaxRejectReport', id:"${organisation.organisationId}")}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
-
+    <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager)}"/>
 </head>
 <body>
 
@@ -41,9 +44,9 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-            <button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
+            <g:if test="${isAdmin}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
             <button class="btn pull-right" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button>
-
+            </g:if>
             <h2 data-bind="text:name"></h2>
 
         </div>
@@ -56,27 +59,28 @@
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
-                    <g:if test="${organisation.reports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="<g:if test="${!organisation.reports}">active </g:if>tab"><a id="project-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
+                    <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
 
                 </ul>
             </div>
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
-                <div class="<g:if test="${!organisation.reports}">active </g:if>tab-pane" id="projects">
-                        <table id="projectList" style="width:100%;">
+                <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
+                        <table id="projectList" class="table table-striped" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
                             <tfoot>
-                            <tr><td colspan="5"></td><td><strong><span class="total"></span></strong></td><td></td></tr>
+                            <tr></tr>
+
                             </tfoot>
                         </table>
                 </div>
 
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
-                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${organisation.reports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
+                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${showReports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
                     </div>
                     <div class="loading-message">
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
@@ -87,7 +91,7 @@
 
                 </div>
 
-                <g:if test="${organisation.reports}">
+                <g:if test="${showReports}">
                     <!-- ko stopBinding: true -->
 
                     <div class="tab-pane active" id="reporting">
@@ -129,7 +133,11 @@
                                         <div class="progress-label"> <span data-bind="text:'Reporting completed for '+finishedCount+' of '+count+' projects'"></span></div>
 
                                     </td>
-                                    <td><span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span></td>
+                                    <td data-bind="template:approvalTemplate()">
+
+                                        <span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span>
+
+                                    </td>
 
                                 <tr data-bind="visible:report.activitiesVisible()">
                                     <td colspan="6">
@@ -213,7 +221,28 @@
                         </div>
                     </div>
                     </div>
-
+                    <script id="notReportable" type="text/html">
+                        <span class="badge badge-warning">Report not submitted</span><br/>
+                    </script>
+                    <script id="notApproved" type="text/html">
+                        <span class="badge badge-warning">Report not submitted</span><br/>
+                        <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport">Submit report</button>
+                        </g:if>
+                    </script>
+                    <script id="approved" type="text/html">
+                        <span class="badge badge-success">Report approved</span>
+                        <g:if test="${fc.userIsAlaOrFcAdmin()}"><br/><button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Withdraw approval</button></g:if>
+                    </script>
+                    <script id="submitted" type="text/html">
+                        <span class="badge badge-info">Report submitted</span>
+                        <g:if test="${isGrantManager || fc.userIsAlaOrFcAdmin()}"><br/>
+                        <span class="btn-group">
+                            <button type="button" data-bind="click:approveReport" class="btn btn-success"><i class="icon-ok icon-white"></i> Approve</button>
+                            <button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Reject</button>
+                        </span>
+                        </g:if>
+                    </script>
                     <!-- /ko -->
                 </g:if>
 
@@ -259,6 +288,7 @@
 
     </span>
 </script>
+<g:render template="/shared/declaration"/>
 
 <r:script>
 
@@ -270,7 +300,7 @@
         ko.applyBindings(organisationViewModel);
 
 
-        var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
+        <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
 
 
@@ -312,6 +342,70 @@
                 self.title = 'Click to complete the report';
                 self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId + '?returnTo='+fcConfig.organisationViewUrl;
             }
+            self.isReportable = function() {
+                return (report.plannedEndDate < new Date().toISOStringNoMillis());
+            };
+            self.complete = (report.finishedCount == report.count);
+            self.approvalTemplate = function() {
+                if (!self.isReportable()) {
+                    return 'notReportable';
+                }
+                switch (report.publicationStatus) {
+                    case 'unpublished':
+                        return 'notApproved';
+                    case 'pendingApproval':
+                        return 'submitted';
+                    case 'published':
+                        return 'approved';
+                    default:
+                        return 'notApproved';
+                }
+            };
+
+            self.changeReportStatus = function(url, action, blockingMessage, successMessage) {
+                blockUIWithMessage(blockingMessage);
+                var activityIds = $.map(self.activities, function(activity) {return activity.activityId;});
+                var json = JSON.stringify({activityIds:activityIds});
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: json,
+                    contentType: 'application/json',
+                    success:function() {
+                        blockUIWithMessage(successMessage);
+                        window.location.reload();
+                    },
+                    error:function(data) {
+                        $.unblockUI();
+
+                        if (data.status == 401) {
+                            bootbox.alert("You do not have permission to "+action+" this report.");
+                        }
+                        else {
+                            bootbox.alert('An unhandled error occurred: ' + data.status);
+                        }
+                    }
+                });
+            }
+            self.approveReport = function() {
+                self.changeReportStatus(fcConfig.approveReportUrl, 'approve', 'Approving report...', 'Report approved.');
+            };
+            self.submitReport = function() {
+                var declaration = $('#declaration')[0];
+                var declarationViewModel = {
+                    termsAccepted : ko.observable(false),
+                    submitReport : function() {
+
+                        self.changeReportStatus(fcConfig.submitReportUrl, 'submit', 'Submitting report...', 'Report submitted.');
+                    }
+                };
+                ko.applyBindings(declarationViewModel, declaration);
+                $(declaration).modal({ backdrop: 'static', keyboard: true, show: true }).on('hidden', function() {ko.cleanNode(declaration);});
+
+            };
+            self.rejectReport = function() {
+                self.changeReportStatus(fcConfig.rejectReportUrl, 'reject', 'Rejecting report...', 'Report rejected.');
+            };
         };
 
         var ReportsViewModel = function(reports, projects) {
@@ -424,29 +518,41 @@
             self.newReport = new AdHocReportViewModel();
 
         };
-        <g:if test="${organisation.projects && organisation.reports}">
+        <g:if test="${showReports}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
         </g:if>
-    $('#dashboardType').change(function(e) {
-        var $content = $('#dashboard-content');
-        var $loading = $('.loading-message');
-        $content.hide();
-        $loading.show();
+        $('#dashboardType').change(function(e) {
+            var $content = $('#dashboard-content');
+            var $loading = $('.loading-message');
+            $content.hide();
+            $loading.show();
 
-        var reportType = $('#dashboardType').val();
+            var reportType = $('#dashboardType').val();
 
-         $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
-            $content.html(data);
-            $loading.hide();
-            $content.show();
-            $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+                $content.html(data);
+                $loading.hide();
+                $content.show();
+                $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+            });
+
+        }).trigger('change');
+
+        var organisationTabStorageKey = 'organisation-page-tab';
+        $('a[data-toggle="tab"]').on('shown', function (e) {
+            var tab = e.currentTarget.hash;
+            amplify.store(organisationTabStorageKey, tab);
         });
 
-    }).trigger('change');
+        var storedTab = amplify.store(organisationTabStorageKey);
 
-    var projectUrlRenderer = function(data, type, row, meta) {
-        var projectId = projects[meta.row].projectId;
-        return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
+        if (storedTab) {
+            $(storedTab + '-tab').tab('show');
+        }
+
+        var projectUrlRenderer = function(data, type, row, meta) {
+            var projectId = projects[meta.row].projectId;
+            return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
         var dateRenderer = function(data) {
             return convertToSimpleDate(data, false);
@@ -476,13 +582,16 @@
             }
             return '<span class="'+badge+'">'+data+'</span>';
         }
-        var projectListHeader =  [{sTitle:'Grant ID', render:projectUrlRenderer}, {sTitle:'Name'}, {sTitle:'Agreement Date', render:agreementDateRenderer}, {sTitle:'From Date', render:dateRenderer}, {sTitle:'To Date', render:dateRenderer}, {sTitle:'Status', render:statusRenderer}, {sTitle:'Funding'}, {sTitle:'Programme'}];
-
-        var projectRows = [];
-        $.each(projects, function(i, project) {
-            projectRows.push([project.grantId || '', project.name || '', project.serviceProviderAgreementDate || '', project.plannedStartDate || '', project.plannedEndDate || '', project.status || '', project.funding || '', project.associatedProgram || '']);
-        });
-
+        var projectListHeader =  [
+            {title:'Grant ID', width:'10%', render:projectUrlRenderer, data:'grantId'},
+            <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
+            {title:'Name', width:'25%', data:'name'},
+            <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
+            {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
+            {title:'Status', width:'8%', render:statusRenderer, data:'status'},
+            {title:'Funding', width:'8%', data:'funding'},
+            {title:'Programme', width:'13%', data:'associatedProgram'}];
 
         /** changes the cell contents to display a date picker and autosaves the agreement date once the date changes */
         var editAgreementDate = function(e) {
@@ -495,7 +604,42 @@
 
             var current = cell.children();
             current.hide();
-            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true}).appendTo(cell);
+            var span = $('<span class="input-append"/>').appendTo(cell);
+            var input = $('<input name="agreementDate" class="input-small">').datepicker({format: 'dd-mm-yyyy', autoclose: true, clearBtn:true, keyboardNavigation:false}).appendTo(span);
+
+            var saveDate = function(isoDate) {
+                cell.removeClass('editing');
+                span.remove();
+                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
+                cell.append(spinner);
+                current.show();
+                var project = projects[apiCell.index().row];
+                $.ajax({
+                     url: fcConfig.updateProjectUrl+'/'+project.projectId,
+                     type: 'POST',
+                     data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
+                     contentType: 'application/json',
+
+                     success: function (data) {
+                         if (data.error) {
+                             alert(data.detail + ' \n' + data.error);
+                         } else {
+                             apiCell.data(isoDate);
+                         }
+                     },
+                     error: function (data) {
+                         if (data.status == 401) {
+                            alert("You do not have permission to edit this project.");
+                         }
+                         else {
+                            alert('An unhandled error occurred: ' + data.status);
+                         }
+                    },
+                    complete: function () {
+                        spinner.remove();
+                    }
+                    });
+            }
 
             var currentDate = stringToDate(value);
             if (currentDate) {
@@ -505,47 +649,35 @@
             input.datepicker('show');
 
             var changeHandler = function() {
-                var project = projects[apiCell.index().row];
-                cell.removeClass('editing');
-                var date = input.datepicker('getDate');
-                input.remove();
-                var spinner = $('<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>').css('margin-left', '10px');
-                cell.append(spinner);
-                current.show();
-                var isoDate = convertToIsoDate(date);
-                $.ajax({
-                         url: fcConfig.updateProjectUrl+'/'+project.projectId,
-                         type: 'POST',
-                         data: '{"serviceProviderAgreementDate":"'+isoDate+'"}',
-                         contentType: 'application/json',
-                         success: function (data) {
-                             if (data.error) {
-                                 alert(data.detail + ' \n' + data.error);
-                             } else {
-                                 apiCell.data(isoDate);
-                             }
-                         },
-                         error: function (data) {
-                             if (data.status == 401) {
-                                alert("You do not have permission to edit this project.");
-                             }
-                             else {
-                                alert('An unhandled error occurred: ' + data.status);
-                             }
-                        },
-                        complete: function () {
-                            spinner.remove();
-                        }
-                        });
+                var dateVal = input.val();
+                var isoDate = '';
+                if (dateVal) {
+                    var date = input.datepicker('getDate');
+                    isoDate = convertToIsoDate(date);
+                }
+
+                if (isoDate != value) {
+                    saveDate(isoDate);
+                }
+                else {
+                    noSave();
+                }
+
             };
 
-            ko.utils.registerEventHandler(input, "changeDate", changeHandler);
-            ko.utils.registerEventHandler(input, "hide", changeHandler);
+            var noSave = function() {
+                cell.removeClass('editing');
+                span.remove();
+                current.show();
+            };
 
+
+            ko.utils.registerEventHandler(input, "hide", changeHandler);
         };
 
         $('#projectList').dataTable( {
-            "data": projectRows,
+            "data": projects,
+            "autoWidth":false,
             "columns": projectListHeader,
             "initComplete":function(settings) {
                 $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);
@@ -561,9 +693,15 @@
                             i : 0;
                 };
 
+                <g:if test="${showReports}">
+                    var fundingColumn = 7;
+                </g:if>
+                <g:else>
+                    var fundingColumn = 5;
+                </g:else>
                 // Total over all pages
                 var total = api
-                    .column( 6 )
+                    .column( fundingColumn )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
@@ -571,16 +709,24 @@
 
                 // Total over this page
                 var pageTotal = api
-                    .column( 6, { page: 'current'} )
+                    .column( fundingColumn, { page: 'current'} )
                     .data()
                     .reduce( function (a, b) {
                         return intVal(a) + intVal(b);
                     }, 0 );
 
                 // Update footer
-                $(api.column(6).footer()).find('span.total').text(
-                    '$'+pageTotal +' ( $'+ total +' total)'
-                );
+                var footerRow = $(api.table().footer()).find('tr');
+                var col = footerRow.find('td.fundingTotal');
+                if (!col.length) {
+                    footerRow.append('<td colspan="'+fundingColumn+'"></td>');
+                    footerRow.append('<td class="fundingTotal">$'+pageTotal + ' ($'+total + ' total)'+'</td>');
+
+                }
+                else {
+                    col.text('$'+pageTotal + ' ($'+total + ' total)');
+                }
+
             }
         });
     });

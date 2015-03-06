@@ -439,9 +439,13 @@ class AdminController {
 
     @PreAuthorise(accessLevel = 'alaAdmin', redirectController = "admin")
     def migratePhotoPoints() {
-        def output = outputService.get('966f6787-14d5-4395-80a2-431cabde729a')
-        adminService.migratePhotoPoints([output])
-        //adminService.migratePhotoPoints()
+        if (params.outputId) {
+            def output = outputService.get(params.outputId)
+            adminService.migratePhotoPoints([output])
+        }
+        else {
+            adminService.migratePhotoPoints()
+        }
         render text:'ok'
     }
 

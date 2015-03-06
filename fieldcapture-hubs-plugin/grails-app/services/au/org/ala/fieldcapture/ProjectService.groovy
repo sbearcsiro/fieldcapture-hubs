@@ -67,29 +67,38 @@ class ProjectService {
      */
     def create(props) {
 
-
         def activities = props.remove('selectedActivities')
 
         def collectoryProps = mapAttributesToCollectory(props)
         def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/', collectoryProps)
-        def projectId = result?.headers?.location?.first().toString().tokenize('/').last()
-        if (projectId) {
+        def dataProviderId = extractCollectoryIdFromHttpHeaders(result?.headers)
+        if (dataProviderId) {
+            props.dataProviderId = dataProviderId
             collectoryProps.remove('hiddenJSON')
-            collectoryProps.dataProvider = [uid:projectId]
-            collectoryProps.institution = [uid:props.organisationId]
+            collectoryProps.dataProvider = [uid: dataProviderId]
+            if (props.organisationId) {
+                collectoryProps.institution = [uid: props.organisationId]
+            }
             collectoryProps.licenseType = props.dataSharingLicense
             result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/', collectoryProps)
-            props.projectId = projectId
-            props.dataResourceId = result?.headers?.location?.first().toString().tokenize('/').last()
-            result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
+            props.dataResourceId = extractCollectoryIdFromHttpHeaders(result?.headers)
+        }
+
+        result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
+        if (result?.resp?.projectId) {
+            def projectId = result.resp.projectId
             // Add the user who created the project as an admin of the project
             userService.addUserAsRoleToProject(userService.getUser().userId, projectId, RoleService.PROJECT_ADMIN_ROLE)
             if (activities) {
-                settingService.updateProjectSettings(projectId, [allowedActivities:activities] )
+                settingService.updateProjectSettings(projectId, [allowedActivities: activities])
             }
         }
 
         result
+    }
+
+    private def extractCollectoryIdFromHttpHeaders(headers) {
+        return headers?.location?.first().toString().tokenize('/').last()
     }
 
     def update(id, body) {
@@ -97,7 +106,7 @@ class ProjectService {
         // recreate 'hiddenJSON' in collectory every time (minus some attributes)
         body = getRich(id) as Map
         ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
-        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + id, mapAttributesToCollectory(body))
+        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + body.dataProviderId, mapAttributesToCollectory(body))
         webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/' + body.dataResourceId, [licenseType:body.dataSharingLicense])
     }
 
@@ -166,7 +175,7 @@ class ProjectService {
     def isUserAdminForProject(userId, projectId) {
         def userIsAdmin
 
-        if (isOfficerOrHigher()) {
+        if (userService.userIsSiteAdmin()) {
             userIsAdmin = true
         } else {
             def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserAdminForProject?projectId=${projectId}&userId=${userId}"
@@ -200,7 +209,7 @@ class ProjectService {
     def canUserEditProject(userId, projectId) {
         def userCanEdit
 
-        if (isOfficerOrHigher()) {
+        if (userService.userIsSiteAdmin()) {
             userCanEdit = true
         } else {
             def url = grailsApplication.config.ecodata.baseUrl + "permissions/canUserEditProject?projectId=${projectId}&userId=${userId}"
@@ -226,17 +235,13 @@ class ProjectService {
     def canUserViewProject(userId, projectId) {
 
         def userCanView
-        if (isOfficerOrHigher() || authService.userInRole(grailsApplication.config.security.cas.readOnlyOfficerRole)) {
+        if (userService.userIsSiteAdmin() || userService.userHasReadOnlyAccess()) {
             userCanView = true
         }
         else {
             userCanView = canUserEditProject(userId, projectId)
         }
         userCanView
-    }
-
-    def isOfficerOrHigher() {
-        (authService.userInRole(grailsApplication.config.security.cas.officerRole) || authService.userInRole(grailsApplication.config.security.cas.adminRole) || authService.userInRole(grailsApplication.config.security.cas.alaAdminRole))
     }
 
     /**

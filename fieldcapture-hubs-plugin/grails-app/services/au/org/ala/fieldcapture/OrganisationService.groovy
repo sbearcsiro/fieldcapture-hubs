@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class OrganisationService {
 
-    def grailsApplication, webService, projectService
+    def grailsApplication, webService, projectService, userService
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
@@ -32,7 +32,7 @@ class OrganisationService {
         resp = projectService.search([organisationName:organisation.name, view:'flat'])
 
         if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects)
+            projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
         }
         projects
     }
@@ -47,4 +47,45 @@ class OrganisationService {
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
         webService.doPost(url, organisation)
     }
+
+    def isUserAdminForOrganisation(organisationId) {
+        def userIsAdmin
+
+        if (!userService.user) {
+            return false
+        }
+        if (userService.userIsSiteAdmin()) {
+            userIsAdmin = true
+        } else {
+            userIsAdmin = userService.isUserAdminForOrganisation(userService.user.userId, organisationId)
+        }
+
+        userIsAdmin
+    }
+
+    def isUserGrantManagerForOrganisation(organisationId) {
+        def userIsAdmin
+
+        if (!userService.user) {
+            return false
+        }
+        if (userService.userIsSiteAdmin()) {
+            userIsAdmin = true
+        } else {
+            userIsAdmin = userService.isUserGrantManagerForOrganisation(userService.user.userId, organisationId)
+        }
+
+        userIsAdmin
+    }
+
+    /**
+     * Get the list of users (members) who have any level of permission for the requested organisationId
+     *
+     * @param organisationId the organisationId of interest.
+     */
+    def getMembersOfOrganisation(organisationId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/getMembersForOrganisation/${organisationId}"
+        webService.getJson(url)
+    }
+
 }

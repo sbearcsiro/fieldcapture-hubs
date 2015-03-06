@@ -42,6 +42,10 @@ class UserService {
         authService.userInRole(grailsApplication.config.security.cas.adminRole) || authService.userInRole(grailsApplication.config.security.cas.alaAdminRole)
     }
 
+    def userHasReadOnlyAccess() {
+        authService.userInRole(grailsApplication.config.security.cas.readOnlyOfficerRole)
+    }
+
     def getRecentEditsForUserId(userId) {
         def url = auditBaseUrl + "/getRecentEditsForUserId/${userId}"
         webService.getJson(url)
@@ -97,6 +101,18 @@ class UserService {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserCaseManagerForProject?projectId=${projectId}&userId=${userId}"
         def results = webService.getJson(url)
         return results?.userIsCaseManager
+    }
+
+    def isUserAdminForOrganisation(userId, organisationId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserAdminForOrganisation?organisationId=${organisationId}&userId=${userId}"
+        def results = webService.getJson(url)
+        return results?.userIsAdmin
+    }
+
+    def isUserGrantManagerForOrganisation(userId, organisationId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserGrantManagerForOrganisation?organisationId=${organisationId}&userId=${userId}"
+        def results = webService.getJson(url)
+        return results?.userIsGrantManager
     }
 
     def checkEmailExists(String email) {

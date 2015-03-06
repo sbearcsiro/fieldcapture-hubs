@@ -7,8 +7,8 @@
         <span data-bind="text:message"></span>
     </div>
 </div>
-<div class="row-fluid">
-    <div class="span10">
+<div class="row-fluid space-after well well-small">
+
         <h4>Update project "${header}"</h4>
         <div id="${attributeName}-button-bar" style="width:100%;background-color: white;"></div>
         <div style="padding-right:12px;">
@@ -16,15 +16,10 @@
                         cols="120" style="width:100%;margin:0;"></g:textArea>
         </div>
         <div class="hide"><input type="text" name="${attributeName}Output" id="${attributeName}Output" class="hide"></div>
-
-    </div>
 </div>
 <div class="row-fluid">
-    <div class="span5">
         <h4>Preview</h4>
         <div id="${attributeName}-preview" class="well well-small"></div>
-    </div>
-
 </div>
 <div class="row-fluid">
     <span class="span3">
