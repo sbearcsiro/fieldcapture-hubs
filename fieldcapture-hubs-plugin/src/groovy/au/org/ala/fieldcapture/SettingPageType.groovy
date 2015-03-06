@@ -36,7 +36,13 @@ enum SettingPageType {
     REPORT_REJECTED_EMAIL('reportRejected', 'Report has been rejected email body text', 'fielddata.reportRejected.emailText'),
     REPORT_SUBMITTED_EMAIL_SUBJECT_LINE('reportSubmittedSubject', 'Subject line for the \'Report has been submitted\' email', 'fielddata.reportSubmitted.emailSubject'),
     REPORT_APPROVED_EMAIL_SUBJECT_LINE('reportApprovedSubject', 'Subject line for the \'Report has been approved\' email', 'fielddata.reportApproved.emailSubject'),
-    REPORT_REJECTED_EMAIL_SUBJECT_LINE('reportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.reportRejected.emailSubject')
+    REPORT_REJECTED_EMAIL_SUBJECT_LINE('reportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.reportRejected.emailSubject'),
+    GREEN_ARMY_REPORT_SUBMITTED_EMAIL('greenArmyReportSubmitted', 'Report has been submitted email body text', 'fielddata.greenArmyReportSubmitted.emailText'),
+    GREEN_ARMY_REPORT_APPROVED_EMAIL('greenArmyReportApproved', 'Report has been approved email body text', 'fielddata.greenArmyReportApproved.emailText'),
+    GREEN_ARMY_REPORT_REJECTED_EMAIL('greenArmyReportRejected', 'Report has been rejected email body text', 'fielddata.greenArmyReportRejected.emailText'),
+    GREEN_ARMY_REPORT_SUBMITTED_EMAIL_SUBJECT_LINE('greenArmyReportSubmittedSubject', 'Subject line for the \'Report has been submitted\' email', 'fielddata.greenArmyReportSubmitted.emailSubject'),
+    GREEN_ARMY_REPORT_APPROVED_EMAIL_SUBJECT_LINE('greenArmyReportApprovedSubject', 'Subject line for the \'Report has been approved\' email', 'fielddata.greenArmyReportApproved.emailSubject'),
+    GREEN_ARMY_REPORT_REJECTED_EMAIL_SUBJECT_LINE('greenArmyReportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.greenArmyReportRejected.emailSubject')
     String name
     String title
     String key

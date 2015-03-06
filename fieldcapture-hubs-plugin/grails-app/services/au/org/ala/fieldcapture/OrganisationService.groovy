@@ -63,4 +63,29 @@ class OrganisationService {
         userIsAdmin
     }
 
+    def isUserGrantManagerForOrganisation(organisationId) {
+        def userIsAdmin
+
+        if (!userService.user) {
+            return false
+        }
+        if (userService.userIsSiteAdmin()) {
+            userIsAdmin = true
+        } else {
+            userIsAdmin = userService.isUserGrantManagerForOrganisation(userService.user.userId, organisationId)
+        }
+
+        userIsAdmin
+    }
+
+    /**
+     * Get the list of users (members) who have any level of permission for the requested organisationId
+     *
+     * @param organisationId the organisationId of interest.
+     */
+    def getMembersOfOrganisation(organisationId) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/getMembersForOrganisation/${organisationId}"
+        webService.getJson(url)
+    }
+
 }

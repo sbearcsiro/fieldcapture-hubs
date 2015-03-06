@@ -23,11 +23,14 @@
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
+            submitReportUrl: '${g.createLink( action:'ajaxSubmitReport', id:"${organisation.organisationId}")}',
+            approveReportUrl: '${g.createLink( action:'ajaxApproveReport', id:"${organisation.organisationId}")}',
+            rejectReportUrl: '${g.createLink( action:'ajaxRejectReport', id:"${organisation.organisationId}")}',
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
-    <g:set var="showReports" value="${organisation.reports && isAdmin}"/>
+    <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager)}"/>
 </head>
 <body>
 
@@ -130,7 +133,11 @@
                                         <div class="progress-label"> <span data-bind="text:'Reporting completed for '+finishedCount+' of '+count+' projects'"></span></div>
 
                                     </td>
-                                    <td><span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span></td>
+                                    <td data-bind="template:approvalTemplate()">
+
+                                        <span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span>
+
+                                    </td>
 
                                 <tr data-bind="visible:report.activitiesVisible()">
                                     <td colspan="6">
@@ -214,7 +221,28 @@
                         </div>
                     </div>
                     </div>
-
+                    <script id="notReportable" type="text/html">
+                        <span class="badge badge-warning">Report not submitted</span><br/>
+                    </script>
+                    <script id="notApproved" type="text/html">
+                        <span class="badge badge-warning">Report not submitted</span><br/>
+                        <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport">Submit report</button>
+                        </g:if>
+                    </script>
+                    <script id="approved" type="text/html">
+                        <span class="badge badge-success">Report approved</span>
+                        <g:if test="${fc.userIsAlaOrFcAdmin()}"><br/><button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Withdraw approval</button></g:if>
+                    </script>
+                    <script id="submitted" type="text/html">
+                        <span class="badge badge-info">Report submitted</span>
+                        <g:if test="${isGrantManager || fc.userIsAlaOrFcAdmin()}"><br/>
+                        <span class="btn-group">
+                            <button type="button" data-bind="click:approveReport" class="btn btn-success"><i class="icon-ok icon-white"></i> Approve</button>
+                            <button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Reject</button>
+                        </span>
+                        </g:if>
+                    </script>
                     <!-- /ko -->
                 </g:if>
 
@@ -260,6 +288,7 @@
 
     </span>
 </script>
+<g:render template="/shared/declaration"/>
 
 <r:script>
 
@@ -313,6 +342,70 @@
                 self.title = 'Click to complete the report';
                 self.editUrl = fcConfig.activityEditUrl + '/' + self.activities[0].activityId + '?returnTo='+fcConfig.organisationViewUrl;
             }
+            self.isReportable = function() {
+                return (report.plannedEndDate < new Date().toISOStringNoMillis());
+            };
+            self.complete = (report.finishedCount == report.count);
+            self.approvalTemplate = function() {
+                if (!self.isReportable()) {
+                    return 'notReportable';
+                }
+                switch (report.publicationStatus) {
+                    case 'unpublished':
+                        return 'notApproved';
+                    case 'pendingApproval':
+                        return 'submitted';
+                    case 'published':
+                        return 'approved';
+                    default:
+                        return 'notApproved';
+                }
+            };
+
+            self.changeReportStatus = function(url, action, blockingMessage, successMessage) {
+                blockUIWithMessage(blockingMessage);
+                var activityIds = $.map(self.activities, function(activity) {return activity.activityId;});
+                var json = JSON.stringify({activityIds:activityIds});
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: json,
+                    contentType: 'application/json',
+                    success:function() {
+                        blockUIWithMessage(successMessage);
+                        window.location.reload();
+                    },
+                    error:function(data) {
+                        $.unblockUI();
+
+                        if (data.status == 401) {
+                            bootbox.alert("You do not have permission to "+action+" this report.");
+                        }
+                        else {
+                            bootbox.alert('An unhandled error occurred: ' + data.status);
+                        }
+                    }
+                });
+            }
+            self.approveReport = function() {
+                self.changeReportStatus(fcConfig.approveReportUrl, 'approve', 'Approving report...', 'Report approved.');
+            };
+            self.submitReport = function() {
+                var declaration = $('#declaration')[0];
+                var declarationViewModel = {
+                    termsAccepted : ko.observable(false),
+                    submitReport : function() {
+
+                        self.changeReportStatus(fcConfig.submitReportUrl, 'submit', 'Submitting report...', 'Report submitted.');
+                    }
+                };
+                ko.applyBindings(declarationViewModel, declaration);
+                $(declaration).modal({ backdrop: 'static', keyboard: true, show: true }).on('hidden', function() {ko.cleanNode(declaration);});
+
+            };
+            self.rejectReport = function() {
+                self.changeReportStatus(fcConfig.rejectReportUrl, 'reject', 'Rejecting report...', 'Report rejected.');
+            };
         };
 
         var ReportsViewModel = function(reports, projects) {
