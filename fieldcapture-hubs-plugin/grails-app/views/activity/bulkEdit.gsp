@@ -16,13 +16,15 @@
         },
         here = document.location.href;
   </r:script>
-  <r:require modules="knockout,jqueryValidationEngine,datepicker,slickgrid,jQueryFileUpload,jQueryFileDownload"/>
+  <r:require modules="knockout,jqueryValidationEngine,datepicker,slickgrid,jQueryFileUpload,jQueryFileDownload,amplify"/>
     <style type="text/css">
         input.editor-text {box-sizing:border-box; width: 100%;}
         .slick-column-name { white-space: normal; }
         .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
         .slick-header { background: #DAE0B9; }
     </style>
+    <g:set var="thisPage" value="${g.createLink(absolute: true, action:'report', params:params)}"/>
+    <g:set var="loginUrl" value="${grailsApplication.config.security.cas.loginUrl ?: 'https://auth.ala.org.au/cas/login'}?service=${thisPage.encodeAsURL()}"/>
 </head>
 <body>
 
@@ -43,12 +45,16 @@
     </div>
 
     <div id="load-xlsx-result-placeholder"></div>
+    <g:render template="/shared/restoredData" model="[id:'restoredData', cancelButton:'Cancel']"/>
+    <div id="save-result-placeholder"></div>
+
 
     <div class="row-fluid">
         <span class="span12">
         <div id="myGrid" class="validationEngineContainer" style="width:100%;"></div>
         </span>
     </div>
+
 
     <div class="row-fluid">
 
@@ -75,6 +81,9 @@
     </div>
 
 </div>
+
+<g:render template="/shared/timeoutMessage" model="${[url:loginUrl]}"/>
+
 <r:script>
 
     $(function () {
@@ -182,21 +191,37 @@
             $.extend(self, activity);
             self.outputModels = [];
             self.progress = ko.observable(activity.progress);
+            var savedData = amplify.store('activity-'+activity.activityId);
 
             $.each(outputModels, function(i, outputModel) {
 
                 var viewModelName = outputModel.name.replace(/ /g , '_')+'ViewModel';
 
-                if (activity.outputs) {
-                    var output = {};
+                // Check for locally saved data for this output - this will happen in the event of a session timeout
+                // for example.
+                var savedOutput = null;
+                if (savedData) {
+                    $('#restoredData').show();
+                    var outputData = $.parseJSON(savedData);
+                    $.each(outputData.outputs, function(i, tmpOutput) {
+                        if (tmpOutput.name === outputModel.name) {
+                            savedOutput = tmpOutput;
+                        }
+                    });
+                }
+
+                // If there is no locally saved data, use server supplied data.
+                if (!savedOutput && activity.outputs) {
+
                     var result = $.grep(activity.outputs, function(output) {
                         return output.name == outputModel.name;
                     });
                     if (result && result[0]) {
-                        output = result[0];
+                        savedOutput = result[0];
                     }
-                    self.outputModels.push(new top[viewModelName](output));
                 }
+                self.outputModels.push(new top[viewModelName](savedOutput || {}));
+
             });
 
             self.isDirty = ko.computed(function() {
@@ -204,6 +229,11 @@
                 $.each(self.outputModels, function(i, outputModel) {
                     if (outputModel.dirtyFlag.isDirty()) {
                         dirty = true;
+                        window.addEventListener("beforeunload", function (e) {
+                            var confirmationMessage = "You have unsaved data.";
+                            (e || window.event).returnValue = confirmationMessage;
+                            return confirmationMessage;
+                        });
                         return false;
                     }
                 });
@@ -234,11 +264,19 @@
 
                 });
                 return activityForSaving;
-            }
+            };
+
+            self.modelAsJSON = function() {
+                return JSON.stringify(self.modelForSaving());
+            };
+
         };
 
         $.each(activities, function(i, activity) {
-            activityModels.push(new ActivityViewModel(activity));
+            var model = new ActivityViewModel(activity);
+            var url = fcConfig.saveUrl+'/'+activity.activityId;
+            autoSaveModel(model, url, {storageKey:'activity-'+activity.activityId});
+            activityModels.push(model);
         });
 
         var helpHover = function(helpText) {
@@ -320,8 +358,6 @@
 
             var pendingSaves = [];
             $.each(activityModels, function(i, activity) {
-                var url = fcConfig.saveUrl+'/'+activity.activityId;
-
                 if (activity.isDirty()) {
 
                     activity.row = i;
@@ -330,9 +366,9 @@
                     activity.saving(true);
                     grid.invalidateRow(i);
                     grid.render();
-                    var data = JSON.stringify(activity.modelForSaving());
-
-                    var promise = $.ajax(url, {type:'POST', data:data, dataType:'json', contentType:'application/json'}).done(
+                    var data = activity.modelAsJSON();
+                    var promise = activity.saveWithErrorDetection();
+                    promise.done(
                         function(data) {
                             activity.progress('finished');
                         }
