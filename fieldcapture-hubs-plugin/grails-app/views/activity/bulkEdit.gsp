@@ -225,15 +225,14 @@
             });
 
             self.isDirty = ko.computed(function() {
+                if (savedData) {
+                    return true;
+                }
                 var dirty = false;
                 $.each(self.outputModels, function(i, outputModel) {
                     if (outputModel.dirtyFlag.isDirty()) {
                         dirty = true;
-                        window.addEventListener("beforeunload", function (e) {
-                            var confirmationMessage = "You have unsaved data.";
-                            (e || window.event).returnValue = confirmationMessage;
-                            return confirmationMessage;
-                        });
+
                         return false;
                     }
                 });
@@ -319,6 +318,22 @@
                 columns.push(column);
             });
         });
+        var cancelled = false;
+        window.addEventListener("beforeunload", function (e) {
+            var dirty = false;
+            $.each(activityModels, function(i, model) {
+                if (model.isDirty()) {
+                    dirty = true;
+                    return;
+                }
+            });
+            if (!cancelled & dirty) {
+                var confirmationMessage = "You have unsaved edits";
+
+                (e || window.event).returnValue = confirmationMessage;
+                return confirmationMessage;
+            }
+        });
 
         // Add the project columns
         var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter, minWidth:100};
@@ -398,6 +413,10 @@
         });
 
         $('#cancel').click(function() {
+            cancelled = true; // Disable the before unload event handler.
+            $.each(activityModels, function(i, model) {
+                amplify.store('activity-'+model.activityId, null);
+            });
             window.location = fcConfig.returnTo;
         });
 
