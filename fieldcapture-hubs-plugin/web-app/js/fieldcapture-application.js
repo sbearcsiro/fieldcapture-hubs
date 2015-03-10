@@ -247,7 +247,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
         }
     }
 
-    viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
+    if (typeof viewModel.dirtyFlag === 'undefined') {
+        viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
+    }
     viewModel.dirtyFlag.isDirty.subscribe(
         function() {
             if (viewModel.dirtyFlag.isDirty()) {
@@ -262,7 +264,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         // Store data locally in case the save fails.plan
         amplify.store(config.storageKey, json);
 
-        $.ajax({
+        return $.ajax({
             url: saveUrl,
             type: 'POST',
             data: json,
