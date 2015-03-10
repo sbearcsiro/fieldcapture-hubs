@@ -30,7 +30,7 @@
             };
     </r:script>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
-    <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager)}"/>
+    <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
 <body>
 
@@ -52,6 +52,8 @@
         </div>
     </div>
     <div class="container-fluid">
+
+        <g:render template="/shared/flashScopeMessage"/>
 
         <div class="row-fluid" data-bind="template:detailsTemplate"></div>
 
@@ -157,7 +159,7 @@
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a data-bind="attr:{'href':fcConfig.activityEditUrl+'/'+activityId+'?returnTo='+fcConfig.organisationViewUrl}" title="Enter data for the report">
+                                                        <a data-bind="attr:{'href':activityDetailsUrl, 'title':activityUrlTitle}">
                                                             <span data-bind="text:description"></span>
                                                         </a>
                                                     </td>
@@ -307,7 +309,13 @@
         var ActivityViewModel = function(activity) {
             var self = this;
             $.extend(self, activity);
-            self.publicationStatus = activity.publicationStatus ? activity.publicationStatus : 'not approved';
+
+            self.publicationStatus = activity.publicationStatus ? activity.publicationStatus : 'unpublished';
+            self.editable = (self.publicationStatus == 'unpublished');
+            self.activityDetailsUrl = self.editable ? fcConfig.activityEditUrl+'/'+activity.activityId+'?returnTo='+fcConfig.organisationViewUrl :
+                                                      fcConfig.activityViewUrl+'/'+activity.activityId+'?returnTo='+fcConfig.organisationViewUrl;
+
+            self.activityUrlTitle = self.editable ? 'Enter data for this report' : 'View this report';
         };
 
         var ReportViewModel = function(report) {
@@ -332,7 +340,8 @@
             $.each(report.activities, function(i, activity) {
                 self.activities.push(new ActivityViewModel(activity));
             });
-            self.editable = report.bulkEditable || self.activities.length == 1;
+            self.editable = (report.bulkEditable || self.activities.length == 1) && (report.publicationStatus != 'published' && report.publicationStatus != 'pendingApproval');
+
             self.title = 'Expand the activity list to complete the reports';
             if (report.bulkEditable) {
                 self.title = 'Click to complete the reports in a spreadsheet format';
