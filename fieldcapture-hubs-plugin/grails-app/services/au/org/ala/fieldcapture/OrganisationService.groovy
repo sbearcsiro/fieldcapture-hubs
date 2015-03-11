@@ -23,13 +23,13 @@ class OrganisationService {
             return projects
         }
 
-        def resp = projectService.search([serviceProviderName:organisation.name, view:'flat'])
+        def resp = projectService.search([serviceProviderName:organisation.name, view:'enhanced'])
 
         if (resp?.resp?.projects) {
             projects.addAll(resp.resp.projects)
         }
 
-        resp = projectService.search([organisationName:organisation.name, view:'flat'])
+        resp = projectService.search([organisationName:organisation.name, view:'enhanced'])
 
         if (resp?.resp?.projects) {
             projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
