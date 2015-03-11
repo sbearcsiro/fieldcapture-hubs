@@ -333,12 +333,10 @@ var ValidationSupport = function() {
     var findPrompt = function(name) {
 
         var prompt = $('#'+getPromptId(name));
-       // console.log(prompt);
         return prompt;
     };
 
     self.addPrompt = function (field, id, fieldName, error) {
-        //console.log('Adding: '+fieldName);
         self.removePrompt(id, fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
@@ -349,7 +347,6 @@ var ValidationSupport = function() {
     };
 
     self.removePrompt = function(id, fieldName) {
-        //console.log('Removing: '+fieldName);
         if (!invalid[id]) {
             invalid[id] = {};
         }
@@ -612,6 +609,141 @@ function LongTextEditor(args) {
     this.init();
 }
 
+function CheckboxEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+        $select = $("<INPUT type=checkbox value='true' class='editor-checkbox' hideFocus>");
+        $select.appendTo(args.container);
+        $select.focus();
+    };
+
+    this.destroy = function () {
+        $select.remove();
+    };
+
+    this.focus = function () {
+        $select.focus();
+    };
+
+    this.loadValue = function (item) {
+        defaultValue = args.grid.getOptions().dataItemColumnValueExtractor(item, args.column);
+        if (defaultValue) {
+            $select.prop('checked', true);
+        } else {
+            $select.prop('checked', false);
+        }
+    };
+
+    this.serializeValue = function () {
+        return $select.prop('checked');
+    };
+
+    this.applyValue = function (item, state) {
+        outputValueEditor(item, args.column, state);
+    };
+
+    this.isValueChanged = function () {
+        return (this.serializeValue() !== defaultValue);
+    };
+
+    this.validate = function () {
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+
+    this.init();
+}
+
+function ProgressEditor(args) {
+    var $select, $progressLabel;
+    var defaultValue;
+    var currentButtonClass;
+    var scope = this;
+
+    this.init = function () {
+        $select = $("<INPUT type=checkbox value='true' class='progress-checkbox' hideFocus>");
+        $select.appendTo(args.container);
+        $progressLabel = $('<span class="label"/>');
+        $progressLabel.appendTo(args.container);
+        $select.change(scope.changeProgress);
+        $select.focus();
+    };
+
+    this.destroy = function () {
+        $select.remove();
+    };
+
+    this.focus = function () {
+        $select.focus();
+    };
+
+    this.loadValue = function (item) {
+
+        defaultValue = item.progress();
+
+        if (defaultValue == 'finished') {
+            $select.prop('checked', true);
+        } else {
+            $select.prop('checked', false);
+        }
+        $select.change();
+
+    };
+
+    this.changeProgress = function() {
+        var progress = $select.prop('checked') == true ? 'finished' : 'started';
+        var newClass = activityProgressClass(progress);
+
+        $progressLabel.removeClass(currentButtonClass).addClass(newClass).text(progress);
+        currentButtonClass = newClass;
+    };
+
+    this.serializeValue = function () {
+        return $select.prop('checked');
+    };
+
+    this.applyValue = function (item, state) {
+        var progress = state == true ? 'finished' : 'started';
+        item.progress(progress);
+    };
+
+    this.isValueChanged = function () {
+        return (this.serializeValue() !== defaultValue);
+    };
+
+    this.validate = function () {
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+
+    this.init();
+}
+
+progressFormatter = function( row, cell, value, columnDef, dataContext ) {
+
+    var saving = dataContext.saving();
+
+    var progress = ko.utils.unwrapObservable(value);
+    var result = '<input type="checkbox" class="progress-checkbox" value="progress"';
+
+    if (progress === 'finished') {
+        result += " checked=checked";
+    }
+
+    result +=  "><span class=\"label "+activityProgressClass(progress)+"\">"+progress+"</span>"
+    if (saving) {
+        result += '<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>'
+    }
+    return result;
+};
+
 
 function findOutput(activity, name) {
     if (!name) {
@@ -657,7 +789,6 @@ function validate(grid, activity, outputModels) {
             if (!result.valid) {
                 var columnIdx = columnIndex(result.field, grid.getColumns());
                 var node = grid.getCellNode(activity.row, columnIdx);
-                //console.log("Invalid: "+result.field+", message="+result.error);
                 if (node) {
                     validationSupport.addPrompt($(node), activity.activityId, result.field, result.error);
                     activityValid = false;

@@ -229,7 +229,7 @@
                     <script id="notApproved" type="text/html">
                         <span class="badge badge-warning">Report not submitted</span><br/>
                         <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport">Submit report</button>
+                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport" title="All project reports must be complete and marked as 'finished' before you can submit this report.">Submit report</button>
                         </g:if>
                     </script>
                     <script id="approved" type="text/html">

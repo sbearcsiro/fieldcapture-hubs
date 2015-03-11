@@ -22,6 +22,8 @@
         .slick-column-name { white-space: normal; }
         .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
         .slick-header { background: #DAE0B9; }
+        input[type=checkbox].progress-checkbox { margin-left: 10px; margin-right: 10px;}
+
     </style>
     <g:set var="thisPage" value="${g.createLink(absolute: true, action:'report', params:params)}"/>
     <g:set var="loginUrl" value="${grailsApplication.config.security.cas.loginUrl ?: 'https://auth.ala.org.au/cas/login'}?service=${thisPage.encodeAsURL()}"/>
@@ -166,19 +168,6 @@
             return '<a title="'+dataContext.projectName+'" target="project" href="'+fcConfig.projectViewUrl+dataContext.projectId+'">'+value+'</a>';
         };
 
-        var progressFormatter = function( row, cell, value, columnDef, dataContext ) {
-
-            var saving = dataContext.saving();
-
-            var progress = ko.utils.unwrapObservable(value);
-            var result =  "<span class=\"label "+activityProgressClass(progress)+"\">"+progress+"</span>"
-            if (saving) {
-                result += '<r:img dir="images" file="ajax-saver.gif" alt="saving icon"/>'
-            }
-            return result;
-        };
-
-
         var activities = <fc:modelAsJavascript model="${activities}"/>;
         var outputModels = <fc:modelAsJavascript model="${outputModels}"/>;
 
@@ -225,7 +214,7 @@
             });
 
             self.isDirty = ko.computed(function() {
-                if (savedData) {
+                if (savedData || self.progress() != activity.progress) {
                     return true;
                 }
                 var dirty = false;
@@ -241,7 +230,7 @@
 
             self.isDirty.subscribe(function(dirty) {
 
-                if (activity.progress == 'planned') {
+                if (self.progress() == 'planned') {
                     if (dirty) {
                         self.progress('started');
                     }
@@ -255,7 +244,7 @@
 
             self.modelForSaving = function() {
                 var outputData = [];
-                var activityForSaving = {outputs:outputData, progress:'finished', activityId:activity.activityId};
+                var activityForSaving = {outputs:outputData, progress:self.progress(), activityId:activity.activityId};
                 $.each(self.outputModels, function(i, outputModel) {
                     if (outputModel.dirtyFlag.isDirty()) {
                         outputData.push(outputModel.modelForSaving());
@@ -302,6 +291,9 @@
                 else if (dataItem.viewType == 'textarea') {
                     editor = LongTextEditor;
                 }
+                else if (dataItem.type == 'boolean') {
+                    editor = CheckBoxEditor;
+                }
 
                 var column = {
                     id: dataItem.name,
@@ -318,7 +310,7 @@
                 columns.push(column);
             });
         });
-        var cancelled = false;
+        var disableNavigationHook = false;
         window.addEventListener("beforeunload", function (e) {
             var dirty = false;
             $.each(activityModels, function(i, model) {
@@ -327,7 +319,7 @@
                     return;
                 }
             });
-            if (!cancelled & dirty) {
+            if (!disableNavigationHook & dirty) {
                 var confirmationMessage = "You have unsaved edits";
 
                 (e || window.event).returnValue = confirmationMessage;
@@ -337,7 +329,7 @@
 
         // Add the project columns
         var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter, minWidth:100};
-        var progressColumn = {name:'Progress', id:'progress', field:'progress', formatter:progressFormatter};
+        var progressColumn = {name:'Finished?', id:'progress', field:'progress', formatter:progressFormatter, editor:ProgressEditor};
 
         columns = [projectColumn].concat(columns, progressColumn);
 
@@ -352,6 +344,16 @@
                 break;
             }
         }
+
+        // Allow single click changes to progress values.
+        grid.onClick.subscribe (function (e, args) {
+            if ($(e.target).is('.progress-checkbox')) {
+                var progress = activityModels[args.row].progress();
+                var newProgress = progress != 'finished' ? 'finished' : 'started';
+                activityModels[args.row].progress(newProgress);
+            }
+        });
+
         // wire up model events to drive the grid
         dataView.onRowCountChanged.subscribe(function (e, args) {
           grid.updateRowCount();
@@ -381,13 +383,9 @@
                     activity.saving(true);
                     grid.invalidateRow(i);
                     grid.render();
-                    var data = activity.modelAsJSON();
+
                     var promise = activity.saveWithErrorDetection();
-                    promise.done(
-                        function(data) {
-                            activity.progress('finished');
-                        }
-                    ).always(function() {
+                    promise.always(function() {
                         activity.saving(false);
                         grid.invalidateRow(i);
                         grid.render();
@@ -403,6 +401,7 @@
                         alert('Nothing to save.');
                     }
                     else {
+                        disableNavigationHook = true;
                         document.location.href = fcConfig.returnTo;
                     }
                 }
@@ -413,7 +412,7 @@
         });
 
         $('#cancel').click(function() {
-            cancelled = true; // Disable the before unload event handler.
+            disableNavigationHook = true; // Disable the before unload event handler.
             $.each(activityModels, function(i, model) {
                 amplify.store('activity-'+model.activityId, null);
             });
