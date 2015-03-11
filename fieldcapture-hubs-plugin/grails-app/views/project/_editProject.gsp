@@ -47,6 +47,13 @@
             <g:textField class="" name="grantId" data-bind="value:grantId"/>
         </div>
     </div>
+    <div class="control-group span4">
+        <label class="control-label" for="workOrderId">Work order id</label>
+        <div class="controls">
+            <g:textField class="" name="workOrderId" data-bind="value:workOrderId"/>
+        </div>
+    </div>
+
 </div>
 
 <div class="row-fluid">
@@ -94,6 +101,19 @@
         <div class="input-append">
             <fc:datePicker targetField="plannedEndDate.date" name="endDate" data-validation-engine="validate[future[startDate]]" printable="${printView}" size="input-large"/>
         </div>
+
+    </div>
+    <div class="span1">
+        OR
+    </div>
+    <div class="span3">
+        <label for="duration">Duration (weeks)
+        <fc:iconHelp title="Duration">The number of weeks the project will run for.</fc:iconHelp>
+        </label>
+        <div class="input-append">
+            <g:textField class="" name="duration" data-bind="value:transients.duration" data-validation-engine="validate[custom[number]]"/>
+        </div>
+
     </div>
 </div>
 
