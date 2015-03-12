@@ -186,7 +186,7 @@ function showAlert(message, alerttype, target) {
 }
 
 function blockUIWithMessage(message) {
-    $.blockUI({ message: message,
+    $.blockUI({ message: message, fadeIn:0,
         css: {
             border: 'none',
             padding: '15px',
