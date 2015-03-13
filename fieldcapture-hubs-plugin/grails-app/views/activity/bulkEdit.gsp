@@ -50,7 +50,6 @@
 
     <div id="load-xlsx-result-placeholder"></div>
     <g:render template="/shared/restoredData" model="[id:'restoredData', cancelButton:'Cancel']"/>
-    <div id="save-result-placeholder"></div>
 
 
     <div class="row-fluid">
@@ -369,16 +368,17 @@
         });
 
         var $finishAll = $('<input type="checkbox" class="progress-checkbox" name="finishAll">');
-        $finishAll.change(function() {
+        $finishAll.change(function(event) {
             Slick.GlobalEditorLock.commitCurrentEdit();
             var changedRows = [];
+            var finish = $(event.target).is(':checked');
             $.each(activityModels, function(i, activity) {
 
-                if (activity.progress() == 'started') {
+                if (finish && activity.progress() == 'started') {
                     activity.progress('finished');
                     changedRows.push(i);
                 }
-                else if (activity.progress() == 'finished') {
+                else if (!finish && activity.progress() == 'finished') {
                     activity.progress('started');
                     changedRows.push(i);
                 }
@@ -424,7 +424,8 @@
 
             Slick.GlobalEditorLock.commitCurrentEdit();
             var valid = true;
-
+            var unblock = true;
+            blockUIWithMessage("Saving report...");
             var pendingSaves = [];
             $.each(activityModels, function(i, activity) {
                 if (activity.isDirty()) {
@@ -454,11 +455,17 @@
                     }
                     else {
                         disableNavigationHook = true;
+                        unblock = false;
                         document.location.href = fcConfig.returnTo;
                     }
                 }
                 else {
                     $('#validationError').show();
+                }
+
+            }).always(function() {
+                if (unblock) {
+                    $.unblockUI();
                 }
             });
         });
