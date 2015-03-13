@@ -23,6 +23,8 @@
         .slick-header-column.ui-state-default { background: #DAE0B9; height: 100%; font-weight: bold;}
         .slick-header { background: #DAE0B9; }
         input[type=checkbox].progress-checkbox { margin-left: 10px; margin-right: 10px;}
+        .finish-all-container { position:absolute; font-weight: normal; bottom: 0; padding-top: 5px; padding-bottom: 5px; border-top: 1px solid silver}
+        .finish-all-container input[type='checkbox'] { margin-bottom:5px; }
 
     </style>
     <g:set var="thisPage" value="${g.createLink(absolute: true, action:'report', params:params)}"/>
@@ -89,7 +91,10 @@
 <r:script>
 
     $(function () {
-
+    // Override the behaviour of the default to prevent spurious focus events from triggering change dection (as the value changes from 0 to "0")
+    function orZero(val) {
+        return val || "0";
+    }
     <g:each in="${outputModels}" var="outputModel">
         <g:if test="${outputModel.name != 'Photo Points'}">
             <g:set var="blockId" value="${fc.toSingleWord([name: outputModel.name])}"/>
@@ -156,14 +161,6 @@
     </g:if>
 </g:each>
 
-        var options = {
-            editable: true,
-            enableCellNavigation: true,
-            dataItemColumnValueExtractor: outputValueExtractor,
-            forceFitColumns: true,
-            autoHeight:true,
-            topPanelHeight: 25
-        };
         var activityLinkFormatter = function( row, cell, value, columnDef, dataContext ) {
             return '<a title="'+dataContext.projectName+'" target="project" href="'+fcConfig.projectViewUrl+dataContext.projectId+'">'+value+'</a>';
         };
@@ -176,11 +173,18 @@
         var activityModels = [];
         var ActivityViewModel = function(activity) {
             var self = this;
+            var savedData = amplify.store('activity-'+activity.activityId);
+            if (savedData) {
+                savedData = $.parseJSON(savedData);
+            }
 
             $.extend(self, activity);
             self.outputModels = [];
-            self.progress = ko.observable(activity.progress);
-            var savedData = amplify.store('activity-'+activity.activityId);
+            var progress = activity.progress;
+            if (savedData) {
+                progress = savedData.progress;
+            }
+            self.progress = ko.observable(progress);
 
             $.each(outputModels, function(i, outputModel) {
 
@@ -191,8 +195,8 @@
                 var savedOutput = null;
                 if (savedData) {
                     $('#restoredData').show();
-                    var outputData = $.parseJSON(savedData);
-                    $.each(outputData.outputs, function(i, tmpOutput) {
+
+                    $.each(savedData.outputs, function(i, tmpOutput) {
                         if (tmpOutput.name === outputModel.name) {
                             savedOutput = tmpOutput;
                         }
@@ -209,7 +213,7 @@
                         savedOutput = result[0];
                     }
                 }
-                self.outputModels.push(new top[viewModelName](savedOutput || {}));
+                self.outputModels.push(new top[viewModelName](savedOutput || {data:{}}));
 
             });
 
@@ -249,7 +253,6 @@
                     if (outputModel.dirtyFlag.isDirty()) {
                         outputData.push(outputModel.modelForSaving());
                     }
-
                 });
                 return activityForSaving;
             };
@@ -327,14 +330,25 @@
             }
         });
 
+
+        var slickGridOptions = {
+            editable: true,
+            enableCellNavigation: true,
+            dataItemColumnValueExtractor: outputValueExtractor,
+            forceFitColumns: true,
+            autoHeight:true,
+            topPanelHeight: 25,
+            explicitInitialization:true
+        };
+
         // Add the project columns
         var projectColumn = {name:'Project', id:'projectName', field:'grantId', formatter:activityLinkFormatter, minWidth:100};
-        var progressColumn = {name:'Finished?', id:'progress', field:'progress', formatter:progressFormatter, editor:ProgressEditor};
+        var progressColumn = {name:'Finished?:'+helpHover('Check the checkbox when you have finished entering data for this project'), id:'progress', field:'progress', formatter:progressFormatter, editor:ProgressEditor};
 
         columns = [projectColumn].concat(columns, progressColumn);
 
         var dataView = new Slick.Data.DataView();
-        var grid = new Slick.Grid("#myGrid", dataView, columns, options);
+        var grid = new Slick.Grid("#myGrid", dataView, columns, slickGridOptions);
 
         // Focus the first editable cell that doesn't contain a popup editor.
         var highlightColumn = 0;
@@ -354,6 +368,42 @@
             }
         });
 
+        var $finishAll = $('<input type="checkbox" class="progress-checkbox" name="finishAll">');
+        $finishAll.change(function() {
+            Slick.GlobalEditorLock.commitCurrentEdit();
+            var changedRows = [];
+            $.each(activityModels, function(i, activity) {
+
+                if (activity.progress() == 'started') {
+                    activity.progress('finished');
+                    changedRows.push(i);
+                }
+                else if (activity.progress() == 'finished') {
+                    activity.progress('started');
+                    changedRows.push(i);
+                }
+            });
+            grid.invalidateRows(changedRows);
+            grid.render();
+        });
+
+        grid.onHeaderCellRendered.subscribe(function(e, args) {
+
+            var column = args.column;
+            if (column.id == 'progress') {
+                var header = args.node;
+                var rowHeight = $(header).parent().height();
+                var containerHeight =$(header).outerHeight();
+                var $container = $("<div></div>").height(rowHeight-containerHeight);
+                var $inputContainer = $('<span class="finish-all-container"></span>');
+                $container.appendTo(header);
+                $container.css('position', 'relative');
+                $inputContainer.append($finishAll).append($('<span>Finish '+helpHover('Finish all started project reports')+'</span>'));
+                $inputContainer.appendTo($container);
+            }
+
+        });
+
         // wire up model events to drive the grid
         dataView.onRowCountChanged.subscribe(function (e, args) {
           grid.updateRowCount();
@@ -365,6 +415,8 @@
         });
         // Feed the data into the dataview
         dataView.setItems(activityModels);
+
+        grid.init();
 
         $('.slick-cell.r'+highlightColumn)[0].click();
 
