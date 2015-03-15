@@ -29,6 +29,11 @@
             returnTo: '${g.createLink(action:'index', id:"${organisation.organisationId}")}'
             };
     </r:script>
+    <style type="text/css">
+        #projectList th {
+            white-space: normal;
+        }
+    </style>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
     <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
@@ -44,7 +49,7 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-            <g:if test="${isAdmin}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
+            <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
             <button class="btn pull-right" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button>
             </g:if>
             <h2 data-bind="text:name"></h2>
@@ -229,7 +234,7 @@
                     <script id="notApproved" type="text/html">
                         <span class="badge badge-warning">Report not submitted</span><br/>
                         <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport">Submit report</button>
+                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport" title="All project reports must be complete and marked as 'finished' before you can submit this report.">Submit report</button>
                         </g:if>
                     </script>
                     <script id="approved" type="text/html">
@@ -596,9 +601,13 @@
             <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
             {title:'Name', width:'25%', data:'name'},
             <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
-            {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
-            {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
-            {title:'Status', width:'8%', render:statusRenderer, data:'status'},
+            {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'Contracted Project Length (weeks)', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
+            {title:'From Date', width:'8%', render:dateRenderer, data:'actualStartDate'},
+            {title:'To Date', width:'8%', render:dateRenderer, data:'actualEndDate'},
+            {title:'Actual duration', width:'4%', data:'actualDurationInWeeks', defaultContent:''},
+
+            {title:'Status', width:'4%', render:statusRenderer, data:'status'},
             {title:'Funding', width:'8%', data:'funding'},
             {title:'Programme', width:'13%', data:'associatedProgram'}];
 
