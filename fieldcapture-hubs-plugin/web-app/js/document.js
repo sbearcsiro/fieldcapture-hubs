@@ -16,7 +16,8 @@ function DocumentViewModel (doc, owner, settings) {
     var defaults = {
         roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
         stages:[],
-        showSettings: true
+        showSettings: true,
+        thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText'
     }
     this.settings = $.extend({}, defaults, settings);
 
@@ -62,7 +63,40 @@ function DocumentViewModel (doc, owner, settings) {
         }
     };
     this.isPrimaryProjectImage = ko.observable(doc.isPrimaryProjectImage);
+    this.thirdPartyConsentDeclarationMade = ko.observable(doc.thirdPartyConsentDeclarationMade);
+    this.thirdPartyConsentDeclarationText = null;
 
+    this.thirdPartyConsentDeclarationMade.subscribe(function(declarationMade) {
+        // Record the text that the user agreed to (as it is an editable setting).
+        if (declarationMade) {
+            self.thirdPartyConsentDeclarationText = $(self.settings.thirdPartyDeclarationTextSelector).text();
+        }
+        else {
+            self.thirdPartyConsentDeclarationText = null;
+        }
+    });
+    this.thirdPartyConsentDeclarationRequired = ko.computed(function() {
+        return self.type() == 'image' && self.public();
+    });
+    this.fileReady = ko.computed(function() {
+        return self.filename() && self.progress() === 0 && !self.error();
+    });
+    this.saveEnabled = ko.computed(function() {
+
+        if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
+            return false;
+        }
+        return self.fileReady();
+    });
+    this.saveHelp = ko.computed(function() {
+        if (!self.fileReady()) {
+            return 'Attach a file using the "+ Attach file" button';
+        }
+        else if (!self.saveEnabled()) {
+            return 'You must accept the Privacy Declaration before an image can be made viewable by everyone';
+        }
+        return '';
+    });
     // make this support both the old key/value syntax and any set of props so we can define more than
     // one owner attribute
     if (owner !== undefined) {
@@ -160,7 +194,7 @@ function DocumentViewModel (doc, owner, settings) {
     }
 
     this.modelForSaving = function() {
-        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings']});
+        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
     }
 }
 
