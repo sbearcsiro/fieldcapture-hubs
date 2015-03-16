@@ -38,7 +38,7 @@
 					<div class="control-group" >
                         <label class="control-label" for="documentStage">Associate to Stage</label>
                         <div class="controls">
-                            <select style="width: 35%;" data-bind="options:stages, optionsCaption: 'Please select', value:stage"></select>
+                            <select id="documentStage" style="width: 35%;" data-bind="options:stages, optionsCaption: 'Please select', value:stage"></select>
                         </div>
                     </div>
 
@@ -62,6 +62,27 @@
 
                     </div>
 
+                    <div class="control-group"  data-bind="visible:settings.showSettings">
+                        <label class="control-label" for="documentFile">Image settings</label>
+                        <div class="controls">
+                            <label class="checkbox" for="documentRole">
+                                <input id="documentRole" type="checkbox" data-bind="enable:type() == 'image' && public() && role() =='information', checked: isPrimaryProjectImage"/>
+                                use as the main project image
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="control-group" data-bind="visible:thirdPartyConsentDeclarationRequired">
+                        <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
+                        <div id="thirdPartyConsentDeclarationMade" class="controls">
+                            <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
+                                <input type="checkbox" name="thirdPartyConsentDeclarationMade" data-bind="checked:thirdPartyConsentDeclarationMade">
+                                <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
+                            </label>
+                        </div>
+
+                    </div>
+
                     <div class="control-group">
                         <label class="control-label" for="documentFile">File</label>
 
@@ -75,16 +96,6 @@
                         </div>
                     </div>
 
-                    <div class="control-group"  data-bind="visible:settings.showSettings">
-                        <label class="control-label" for="documentFile">Image settings</label>
-                        <div class="controls">
-                            <label class="checkbox" for="documentRole">
-                                <input id="documentRole" type="checkbox" data-bind="enable:type() == 'image' && public() && role() =='information', checked: isPrimaryProjectImage"/>
-                                use as the main project image
-                            </label>
-                        </div>
-                    </div>
-                    
                     <div class="control-group">
                         <label class="control-label" for="fileLabel"></label>
 
@@ -123,11 +134,12 @@
                     </div>
 
                 </form>
+
             </div>
             <div class="modal-footer control-group">
                 <div class="controls">
                     <button type="button" class="btn btn-success"
-                            data-bind="enable:filename() && progress() === 0 && !error(), click:save, visible:!complete()">Save</button>
+                            data-bind="enable:saveEnabled, click:save, visible:!complete(), attr:{'title':saveHelp}">Save</button>
                     <button class="btn" data-bind="click:cancel, visible:!complete()">Cancel</button>
                     <button class="btn" data-bind="click:close, visible:complete()">Close</button>
 

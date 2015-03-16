@@ -48,7 +48,8 @@ enum SettingPageType {
     GREEN_ARMY_REPORT_REJECTED_EMAIL('greenArmyReportRejected', 'Report has been rejected email body text', 'fielddata.greenArmyReportRejected.emailText'),
     GREEN_ARMY_REPORT_SUBMITTED_EMAIL_SUBJECT_LINE('greenArmyReportSubmittedSubject', 'Subject line for the \'Report has been submitted\' email', 'fielddata.greenArmyReportSubmitted.emailSubject'),
     GREEN_ARMY_REPORT_APPROVED_EMAIL_SUBJECT_LINE('greenArmyReportApprovedSubject', 'Subject line for the \'Report has been approved\' email', 'fielddata.greenArmyReportApproved.emailSubject'),
-    GREEN_ARMY_REPORT_REJECTED_EMAIL_SUBJECT_LINE('greenArmyReportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.greenArmyReportRejected.emailSubject')
+    GREEN_ARMY_REPORT_REJECTED_EMAIL_SUBJECT_LINE('greenArmyReportRejectedSubject', 'Subject line for the \'Report has been rejected\' email', 'fielddata.greenArmyReportRejected.emailSubject'),
+    THIRD_PARTY_PHOTO_CONSENT_DECLARATION('thirdPartyPhotoConsent', 'Declaration text for consent from third parties who appear in images', 'fielddata.thirdPartyConsent.text')
     String name
     String title
     String key
