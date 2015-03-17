@@ -27,7 +27,7 @@ class HomeController {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
-        if(!userService.userIsAlaOrFcAdmin()) {
+        if(!userService.userIsAlaOrFcAdmin() && !userService.userHasReadOnlyAccess()) {
             def adminFacetList = SettingService.getHubConfig().adminFacets
             facetsList?.removeAll(adminFacetList)
             mapFacets?.removeAll(adminFacetList)
