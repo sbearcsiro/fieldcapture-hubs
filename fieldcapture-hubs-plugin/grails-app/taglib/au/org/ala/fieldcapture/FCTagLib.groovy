@@ -442,6 +442,11 @@ class FCTagLib {
         out << output
     }
 
+    def loginInNewWindow = { attr, body ->
+        def casLoginUrl = grailsApplication.config.security.cas.loginUrl ?: "https://auth.ala.org.au/cas/login"
+        out << "<a href=\"${casLoginUrl}?service=${createLink(absolute: true, controller: 'home', action:'close')}\" target=\"fieldcapture-login\">${body}</a>"
+    }
+
     def userIsLoggedIn = { attr ->
         if (AuthenticationCookieUtils.cookieExists(request, AuthenticationCookieUtils.ALA_AUTH_COOKIE)) {
             out << true
