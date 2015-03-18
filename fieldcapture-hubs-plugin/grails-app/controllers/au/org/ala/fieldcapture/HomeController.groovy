@@ -131,6 +131,11 @@ class HomeController {
         renderStaticPage(SettingPageType.CONTACTS, false)
     }
 
+    def close() {
+        response.setContentType("text/html")
+        render """<html><head><script type="text/javascript">window.close();</script></head><body/></html>"""
+    }
+
     def staticPage(String id) {
         def settingType = SettingPageType.getForName(id)
         if (settingType) {
