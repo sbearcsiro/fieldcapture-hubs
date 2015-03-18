@@ -74,9 +74,15 @@ function DocumentViewModel (doc, owner, settings) {
         else {
             self.thirdPartyConsentDeclarationText = null;
         }
+        $("#thirdPartyConsentCheckbox").closest('form').validationEngine("updatePromptsPosition")
     });
     this.thirdPartyConsentDeclarationRequired = ko.computed(function() {
         return self.type() == 'image' && self.public();
+    });
+    this.thirdPartyConsentDeclarationRequired.subscribe(function(newValue) {
+        if (newValue) {
+            setTimeout(function() {$("#thirdPartyConsentCheckbox").validationEngine('validate');}, 100);
+        }
     });
     this.fileReady = ko.computed(function() {
         return self.filename() && self.progress() === 0 && !self.error();
@@ -263,6 +269,8 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
         documentViewModel.fileUploadFailed(data.errorThrown);
     });
 
+
+
     // We are keeping the reference to the helper here rather than the view model as it doesn't serialize correctly
     // (i.e. calls to toJSON fail).
     documentViewModel.save = function() {
@@ -335,6 +343,11 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
 
     // Do the binding from the model to the view?  Or assume done already?
     $modal.modal({backdrop:'static'});
+    $modal.on('shown', function() {
+        $modal.find('form').validationEngine({'custom_error_messages': {
+            'required': {'message':'The privacy declaration is required for images viewable by everyone'}
+        }, 'autoPositionUpdate':true, promptPosition:'inline'});
+    });
 
     return result;
 }
