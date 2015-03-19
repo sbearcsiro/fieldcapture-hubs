@@ -103,9 +103,9 @@
 
                     <div class="tab-pane active" id="reporting">
 
-                        <div class="control-group" style="margin-bottom: 5px;">
-                            <span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>
-                        </div>
+                        %{--<div class="control-group" style="margin-bottom: 5px;">--}%
+                            %{--<span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>--}%
+                        %{--</div>--}%
 
                         <table class="table table-striped" style="width:100%;">
                             <thead>
