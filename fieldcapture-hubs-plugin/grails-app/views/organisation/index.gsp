@@ -587,7 +587,7 @@
                     cell += 'Enter date';
                 }
                 else {
-                    cell += dateRenderer(data);
+                    cell += dateRenderer(data, type, row);
                 }
                 cell += '</a>';
                 return cell;
