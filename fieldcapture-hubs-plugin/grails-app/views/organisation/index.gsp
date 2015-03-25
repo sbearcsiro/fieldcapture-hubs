@@ -309,6 +309,9 @@
 
         <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
+        $.each(projects, function(i, project) {
+            project.startDate = project.workOrderStartDate || project.plannedStartDate;
+        });
 
 
         var ActivityViewModel = function(activity) {
@@ -568,8 +571,11 @@
             var projectId = projects[meta.row].projectId;
             return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
-        var dateRenderer = function(data) {
-            return convertToSimpleDate(data, false);
+        var dateRenderer = function(data, type, row) {
+            if (type == 'display' || type == 'filter') {
+                return convertToSimpleDate(data, false);
+            }
+            return data;
         };
         var agreementDateRenderer = function(data, type, row, meta) {
             var program = projects[meta.row].associatedProgram;
@@ -581,7 +587,7 @@
                     cell += 'Enter date';
                 }
                 else {
-                    cell += dateRenderer(data);
+                    cell += dateRenderer(data, type, row);
                 }
                 cell += '</a>';
                 return cell;
@@ -601,7 +607,7 @@
             <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
             {title:'Name', width:'25%', data:'name'},
             <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
-            {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'startDate'},
             {title:'Contracted Project Length (weeks)', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
             {title:'From Date', width:'8%', render:dateRenderer, data:'actualStartDate'},
             {title:'To Date', width:'8%', render:dateRenderer, data:'actualEndDate'},
