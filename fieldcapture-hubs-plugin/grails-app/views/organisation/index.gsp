@@ -609,9 +609,9 @@
             <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
             {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'startDate'},
             {title:'Contracted Project Length (weeks)', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
-            {title:'From Date', width:'8%', render:dateRenderer, data:'actualStartDate'},
-            {title:'To Date', width:'8%', render:dateRenderer, data:'actualEndDate'},
-            {title:'Actual duration', width:'4%', data:'actualDurationInWeeks', defaultContent:''},
+            {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
+            {title:'Actual duration', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
 
             {title:'Status', width:'4%', render:statusRenderer, data:'status'},
             {title:'Funding', width:'8%', data:'funding'},
