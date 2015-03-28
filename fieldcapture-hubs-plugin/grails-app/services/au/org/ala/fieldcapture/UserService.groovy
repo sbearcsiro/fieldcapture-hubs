@@ -91,6 +91,16 @@ class UserService {
         webService.getJson(url)
     }
 
+    def addUserAsRoleToOrganisation(String userId, String organisationId, String role) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/addUserAsRoleToOrganisation?userId=${userId}&organisationId=${organisationId}&role=${role}"
+        webService.getJson(url)
+    }
+
+    def removeUserWithRoleFromOrganisation(organisationId, userId, role) {
+        def url = grailsApplication.config.ecodata.baseUrl + "permissions/removeUserWithRoleFromOrganisation?organisationId=${organisationId}&userId=${userId}&role=${role}"
+        webService.getJson(url)
+    }
+
     def isUserAdminForProject(userId, projectId) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/isUserAdminForProject?projectId=${projectId}&userId=${userId}"
         def results = webService.getJson(url)
