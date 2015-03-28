@@ -6,6 +6,7 @@
     <title>${organisation.name.encodeAsHTML()} | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    <g:set var="loadPermissionsUrl" value="${createLink(controller: 'organisation', action: 'getMembersForOrganisation', id:organisation.organisationId)}"/>
 
     <r:script disposition="head">
         var fcConfig = {
@@ -18,6 +19,7 @@
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
+            organisationMembersUrl: "${loadPermissionsUrl}",
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
             dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
@@ -33,8 +35,11 @@
         #projectList th {
             white-space: normal;
         }
+        .admin-action {
+            width:7em;
+        }
     </style>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine"/>
     <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
 <body>
@@ -49,9 +54,7 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-            <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
-            <button class="btn pull-right" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button>
-            </g:if>
+
             <h2 data-bind="text:name"></h2>
 
         </div>
@@ -69,6 +72,9 @@
                     <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
                     <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+                    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                    <li class="tab"><a id="admin-tab" data-toggle="tab" href="#admin">Admin</a></li>
+                    </g:if>
 
                 </ul>
             </div>
@@ -251,6 +257,18 @@
                         </g:if>
                     </script>
                     <!-- /ko -->
+                </g:if>
+                <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                <div class="tab-pane" id="admin">
+                    <h4>Administrator actions</h4>
+                    <div class="row-fluid">
+                    <p><button class="btn btn-small admin-action" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button> Edit the organisation details and content</p>
+                    <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteOrganisation"><i class="icon-remove icon-white"></i> Delete</button> Delete this organisation from the system. <strong>This cannot be undone</strong></p></g:if>
+                    </div>
+
+                    <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToOrganisation'), entityType:'au.org.ala.ecodata.Organisation', entityId:organisation.organisationId]"/>
+                    <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:loadPermissionsUrl, removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromOrganisation'), entityId:organisation.organisationId, user:user]"/>
+                </div>
                 </g:if>
 
             </div>
@@ -753,6 +771,7 @@
 
             }
         });
+        populatePermissionsTable(fcConfig.organisationMembersUrl);
     });
 
 </r:script>

@@ -6,7 +6,7 @@ import grails.converters.JSON
  * Controller to display User page (My Profile) as well as some webservices
  */
 class UserController {
-    def userService, authService, projectService
+    def userService, authService, projectService, organisationService
 
     /**
      * Default view for user controller - show user dashboard page.
@@ -59,7 +59,7 @@ class UserController {
      */
     def addUserAsRoleToProject() {
         String userId = params.userId
-        String projectId = params.projectId
+        String projectId = params.entityId
         String role = params.role
         def adminUser = authService.userDetails()
 
@@ -76,15 +76,34 @@ class UserController {
         }
     }
 
+    def addUserAsRoleToOrganisation() {
+        String userId = params.userId
+        String organisationId = params.entityId
+        String role = params.role
+        def adminUser = authService.userDetails()
+
+        if (adminUser && userId && organisationId && role) {
+            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
+                render status:403, text: 'Permission denied - ADMIN role required'
+            } else if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render userService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, role, projectId'
+        }
+    }
+
     /**
      * Remove userId with role from requested projectId
      *
      * @return
      */
-    def removeUserWithRole() {
+    def removeUserWithRoleFromProject() {
         String userId = params.userId
         String role = params.role
-        String projectId = params.projectId
+        String projectId = params.entityId
         def adminUser = authService.userDetails()
 
         if (adminUser && projectId && role && userId) {
@@ -95,6 +114,28 @@ class UserController {
             }
         } else {
             render status:400, text: 'Required params not provided: userId, projectId, role'
+        }
+    }
+
+    /**
+     * Remove userId with role from requested organisationId
+     *
+     * @return
+     */
+    def removeUserWithRoleFromOrganisation() {
+        String userId = params.userId
+        String role = params.role
+        String organisationId = params.entityId
+        def adminUser = authService.userDetails()
+
+        if (adminUser && organisationId && role && userId) {
+            if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render userService.removeUserWithRoleFromOrganisation(organisationId, userId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, organisationId, role'
         }
     }
 

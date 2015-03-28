@@ -13,8 +13,8 @@
             <g:render id="addUserRole" template="/admin/userRolesSelect" model="[roles:roles, includeEmptyOption: true]"/>
         </div>
     </div>
-    <g:if test="${projectId}">
-        <input type='hidden' id='projectId' value='${projectId}'/>
+    <g:if test="${entityId}">
+        <input type='hidden' id='projectId' value='${entityId}'>
     </g:if>
     <g:elseif test="${projects}">
         <div class="control-group">
@@ -65,7 +65,7 @@
                     // first check email address is a valid user
                     $.get("${g.createLink(controller:'user',action:'checkEmailExists')}?email=" + email, function(data) {
                         if (data && /^\d+$/.test(data)) {
-                            addUserWithRole(data, role, projectId);
+                            addUserWithRole( data, role, projectId);
                         } else {
                             var $clone = $('.bbAlert1').clone();
                             bootbox.alert($clone.show());
@@ -85,12 +85,12 @@
      * @param role
      * @param projectId
      */
-    function addUserWithRole(userId, role, projectId) {
+    function addUserWithRole(userId, role, id) {
         //console.log("addUserWithRole",userId, role, projectId);
         if (userId && role) {
             $.ajax({
-                url: "${createLink(controller: 'user', action: 'addUserAsRoleToProject')}",
-                data: { userId: userId, role: role, projectId: projectId }
+                url: '${addUserUrl}',
+                data: { userId: userId, role: role, entityId: id }
             })
             .done(function(result) { updateStatusMessage("user was added with role " + decodeCamelCase(role)); })
             .fail(function(jqXHR, textStatus, errorThrown) { alert(jqXHR.responseText); })
@@ -126,8 +126,8 @@
             $("#projectId").data('combobox').toggle(); // reset combobox
         }
         // project page - trigger user table refresh
-        if (typeof(loadProjectMembers) != "undefined") {
-            loadProjectMembers();
+        if (typeof(populatePermissionsTable) != "undefined") {
+            populatePermissionsTable();
         }
 
     }
