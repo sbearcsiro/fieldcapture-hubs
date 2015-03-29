@@ -96,7 +96,7 @@ class UserService {
         webService.getJson(url)
     }
 
-    def removeUserWithRoleFromOrganisation(organisationId, userId, role) {
+    def removeUserWithRoleFromOrganisation(String userId, String organisationId, String role) {
         def url = grailsApplication.config.ecodata.baseUrl + "permissions/removeUserWithRoleFromOrganisation?organisationId=${organisationId}&userId=${userId}&role=${role}"
         webService.getJson(url)
     }

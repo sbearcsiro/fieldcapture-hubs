@@ -1,5 +1,5 @@
 <r:require modules="bootstrap_combo"/>
-<h4>Add Permissions</h4>
+
 <form class="form-horizontal" id="userAccessForm">
     <div class="control-group">
         <label class="control-label" for="emailAddress">User's email address</label>
@@ -14,7 +14,7 @@
         </div>
     </div>
     <g:if test="${entityId}">
-        <input type='hidden' id='projectId' value='${entityId}'>
+        <input type='hidden' id='entityId' value='${entityId}'>
     </g:if>
     <g:elseif test="${projects}">
         <div class="control-group">
@@ -56,7 +56,7 @@
             e.preventDefault();
             var email = $('#emailAddress').val();
             var role = $('#addUserRole').val();
-            var projectId = $('#projectId').val();
+            var entityId = $('#entityId').val();
 
             if ($('#userAccessForm').validationEngine('validate')) {
                 $("#spinner1").show();
@@ -65,7 +65,7 @@
                     // first check email address is a valid user
                     $.get("${g.createLink(controller:'user',action:'checkEmailExists')}?email=" + email, function(data) {
                         if (data && /^\d+$/.test(data)) {
-                            addUserWithRole( data, role, projectId);
+                            addUserWithRole( data, role, entityId);
                         } else {
                             var $clone = $('.bbAlert1').clone();
                             bootbox.alert($clone.show());
