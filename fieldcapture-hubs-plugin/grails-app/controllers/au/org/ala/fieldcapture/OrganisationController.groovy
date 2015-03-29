@@ -102,6 +102,42 @@ class OrganisationController {
         }
     }
 
+    def addUserAsRoleToOrganisation() {
+        String userId = params.userId
+        String organisationId = params.entityId
+        String role = params.role
+        def adminUser = userService.getUser()
+
+        if (adminUser && userId && organisationId && role) {
+            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
+                render status:403, text: 'Permission denied - ADMIN role required'
+            } else if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, role, projectId'
+        }
+    }
+
+    def removeUserWithRoleFromOrganisation() {
+        String userId = params.userId
+        String role = params.role
+        String organisationId = params.entityId
+        def adminUser = userService.getUser()
+
+        if (adminUser && organisationId && role && userId) {
+            if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render organisationService.removeUserWithRoleFromOrganisation(userId, organisationId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, organisationId, role'
+        }
+    }
+
     /**
      * Redirects to the home page with an error message in flash scope.
      * @param response the response that triggered this method call.

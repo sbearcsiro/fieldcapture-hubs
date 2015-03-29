@@ -88,4 +88,37 @@ class OrganisationService {
         webService.getJson(url)
     }
 
+    /**
+     * Adds a user with the supplied role to the identified organisation.
+     * Adds the same user with the same role to all of the organisation's projects.
+     *
+     * @param userId the id of the user to add permissions for.
+     * @param organisationId the organisation to add permissions for.
+     * @param role the role to assign to the user.
+     */
+    def addUserAsRoleToOrganisation(String userId, String organisationId, String role) {
+
+        def organisation = get(organisationId, 'flat')
+        userService.addUserAsRoleToOrganisation(userId, organisationId, role)
+        organisation.projects.each {
+            userService.addUserAsRoleToProject(userId, it.projectId, role)
+        }
+    }
+
+    /**
+     * Removes the user access with the supplied role from the identified organisation.
+     * Removes the same user from all of the organisation's projects.
+     *
+     * @param userId the id of the user to remove permissions for.
+     * @param organisationId the organisation to remove permissions for.
+
+     */
+    def removeUserWithRoleFromOrganisation(String userId, String organisationId, String role) {
+        def organisation = get(organisationId, 'flat')
+        userService.removeUserWithRoleFromOrganisation(userId, organisationId, role)
+        organisation.projects.each {
+            userService.removeUserWithRole(it.projectId, userId, role)
+        }
+    }
+
 }
