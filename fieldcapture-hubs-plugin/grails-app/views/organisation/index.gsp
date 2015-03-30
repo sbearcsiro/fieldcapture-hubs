@@ -740,12 +740,17 @@
                             i : 0;
                 };
 
-                <g:if test="${showReports}">
-                    var fundingColumn = 7;
-                </g:if>
-                <g:else>
-                    var fundingColumn = 5;
-                </g:else>
+                var fundingColumn = -1;
+                $.each(projectListHeader, function(i, column) {
+                    if (column.data == 'funding') {
+                        fundingColumn = i;
+                        return false;
+                    }
+                });
+
+                if (fundingColumn < 0) {
+                    return;
+                }
                 // Total over all pages
                 var total = api
                     .column( fundingColumn )
