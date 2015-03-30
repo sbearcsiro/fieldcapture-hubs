@@ -333,7 +333,8 @@
         <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
         $.each(projects, function(i, project) {
-            project.startDate = project.workOrderStartDate || project.plannedStartDate;
+            project.startDate = project.contractStartDate || project.plannedStartDate;
+            project.duration = project.contractDurationInWeeks || project.plannedDurationInWeeks;
         });
 
 
@@ -631,7 +632,7 @@
             {title:'Name', width:'25%', data:'name'},
             <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
             {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'startDate'},
-            {title:'Contracted Project Length (weeks)', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
+            {title:'Contracted Project Length (weeks)', width:'4%', data:'duration', defaultContent:''},
             {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
             {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
             {title:'Actual duration', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
