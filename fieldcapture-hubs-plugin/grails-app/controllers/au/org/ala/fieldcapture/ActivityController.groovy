@@ -78,7 +78,7 @@ class ActivityController {
             if (!projectService.canUserEditProject(userId, activity.projectId)) {
 
                 if (projectService.canUserViewProject(userId, activity.projectId)) {
-                   chain(action:'index', id:id, model:[editInMerit:true])
+                    chain(action:'index', id:id, model:[editInMerit:true])
                     return
                 }
 
@@ -86,7 +86,12 @@ class ActivityController {
                 redirect(controller:'project', action:'index', id: activity.projectId)
                 return
             }
-            def model = activityModel(activity, activity.projectId)
+            else if (activity.publicationStatus == 'published' || activity.publicationStatus == 'pendingApproval') {
+                chain(action:'index', id:id)
+                return
+            }
+            def model = activityModel(activity, activity.projectId, true)
+
             model.activityTypes = metadataService.activityTypesList()
             model.hasPhotopointData = activity.documents?.find {it.poiId}
             model
@@ -113,6 +118,10 @@ class ActivityController {
 
                 flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${activity.projectId}"
                 redirect(controller:'project', action:'index', id: activity.projectId)
+            }
+            else if (activity.publicationStatus == 'published' || activity.publicationStatus == 'pendingApproval') {
+                chain(action:'index', id:id)
+                return
             }
             // pass the activity
             if (params.progress) {
@@ -357,9 +366,9 @@ class ActivityController {
                 }
 
                 def config = [
-                    sheet:"${activityModel?.outputs?.first()}",
-                    startRow:1,
-                    columnMap:columnMap
+                        sheet:"${activityModel?.outputs?.first()}",
+                        startRow:1,
+                        columnMap:columnMap
                 ]
                 Workbook workbook = WorkbookFactory.create(file.inputStream)
                 def data = excelImportService.convertColumnMapConfigManyRows(workbook, config)
