@@ -1,4 +1,4 @@
-<%@ page import="grails.converters.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
+<%@ page import="au.org.ala.fieldcapture.DateUtils; grails.converters.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,6 +14,8 @@
         here = document.location.href;
     </r:script>
     <r:require modules="knockout,jqueryValidationEngine,datepicker"/>
+    <g:set var="formattedStartDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedStartDate)}"/>
+    <g:set var="formattedEndDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedEndDate)}"/>
 </head>
 <body>
 <div class="container-fluid validationEngineContainer" id="validation-container">
@@ -92,7 +94,7 @@
                     <fc:iconHelp title="Planned start date" printable="${printView}">Date the activity is intended to start.</fc:iconHelp>
                     </label>
                     <div class="input-append">
-                        <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate" data-validation-engine="validate[required]" printable="${printView}"/>
+                        <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate" data-validation-engine="validate[required,future[${formattedStartDate}]]" printable="${printView}"/>
                     </div>
                 </div>
                 <div class="span6">
@@ -100,7 +102,7 @@
                     <fc:iconHelp title="Planned end date" printable="${printView}">Date the activity is intended to finish.</fc:iconHelp>
                     </label>
                     <div class="input-append">
-                        <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate" data-validation-engine="validate[future[plannedStartDate],required]" printable="${printView}" />
+                        <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate" data-validation-engine="validate[future[plannedStartDate],past[${formattedEndDate}],required]" printable="${printView}" />
                     </div>
                 </div>
             </div>
@@ -111,29 +113,6 @@
             </div>
         </bs:form>
 
-        <g:if env="devfhrtelopment">
-            <div class="expandable-debug">
-                <hr />
-                <h3>Debug</h3>
-                <div>
-                    <h4>KO model</h4>
-                    <pre data-bind="text:ko.toJSON($root,null,2)"></pre>
-                    <h4>Activity</h4>
-                    <pre>${activity}</pre>
-                    <h4>Activity types</h4>
-                    <pre>${activityTypes}</pre>
-                    <h4>Site</h4>
-                    <pre>${site?.encodeAsHTML()}</pre>
-                    <h4>Sites</h4>
-                    <pre>${(sites as JSON).toString()}</pre>
-                    <h4>Project</h4>
-                    <pre>${project.encodeAsHTML()}</pre>
-                    <h4>Projects</h4>
-                    <pre>${(projects as JSON).toString()}</pre>
-                    %{--<pre>Map features : ${mapFeatures}</pre>--}%
-                </div>
-            </div>
-        </g:if>
     </div>
 </div>
 
@@ -145,7 +124,14 @@
 
     $(function(){
 
-        $('#validation-container').validationEngine('attach', {scroll: false});
+        $('#validation-container').validationEngine('attach', {scroll: false, 'custom_error_messages': {
+            '#plannedStartDate':{
+                'future': {'message':'Activities cannot start before the project start date - ${formattedStartDate}'}
+            },
+            '#plannedEndDate':{
+                'past': {'message':'Activities cannot end after the project end date - ${formattedEndDate}'}
+            }
+        }});
 
         $('.helphover').popover({animation: true, trigger:'hover'});
 

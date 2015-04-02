@@ -24,6 +24,8 @@
         here = document.location.href;
     </r:script>
     <r:require modules="knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,mapWithFeatures"/>
+    <g:set var="formattedStartDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedStartDate)}"/>
+    <g:set var="formattedEndDate" value="${au.org.ala.fieldcapture.DateUtils.isoToDisplayFormat(project.plannedEndDate)}"/>
 </head>
 <body>
 <div class="container-fluid validationEngineContainer" id="validation-container">
@@ -105,7 +107,7 @@
                         <fc:iconHelp title="Planned start date" printable="${printView}">Date the activity is intended to start.</fc:iconHelp>
                         </label>
                         <div class="input-append">
-                            <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate" data-validation-engine="validate[required]" printable="${printView}"/>
+                            <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate" data-validation-engine="validate[required,future[${formattedStartDate}]]" printable="${printView}"/>
                         </div>
                     </div>
                     <div class="span6">
@@ -113,7 +115,7 @@
                         <fc:iconHelp title="Planned end date" printable="${printView}">Date the activity is intended to finish.</fc:iconHelp>
                         </label>
                         <div class="input-append">
-                            <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate" data-validation-engine="validate[future[plannedStartDate], required]" printable="${printView}" />
+                            <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate" data-validation-engine="validate[future[plannedStartDate],past[${formattedEndDate}],required]" printable="${printView}" />
                         </div>
                     </div>
                 </div>
@@ -259,7 +261,14 @@
 
     $(function(){
 
-        $('#validation-container').validationEngine('attach', {scroll: false});
+        $('#validation-container').validationEngine('attach', {scroll: false, 'custom_error_messages': {
+            '#plannedStartDate':{
+                'future': {'message':'Activities cannot start before the project start date - ${formattedStartDate}'}
+            },
+            '#plannedEndDate':{
+                'past': {'message':'Activities cannot end after the project end date - ${formattedEndDate}'}
+            }
+        }});
 
         $('.helphover').popover({animation: true, trigger:'hover'});
 
