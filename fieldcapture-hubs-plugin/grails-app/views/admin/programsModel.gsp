@@ -4,7 +4,7 @@
 <head>
     <meta name="layout" content="adminLayout"/>
     <title>Programs model - Admin - Data capture - Atlas of Living Australia</title>
-    <r:require modules="knockout,jquery_ui,knockout_sortable,jqueryValidationEngine"/>
+    <r:require modules="knockout,jquery_ui,knockout_sortable,jqueryValidationEngine,datepicker"/>
 </head>
 
 <body>
@@ -34,6 +34,8 @@
                     <div><label for="isMeritProgramme">Reports via MERIT <input id="isMeritProgramme" type="checkbox" data-bind="checked:isMeritProgramme"></label></div>
                     <div><label for="reportingPeriod">Reporting period (months) <input id="reportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
                     <div><label for="isMeritProgramme">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
+                    <div><label for="projectDatesContracted">Projects must start and end on contract dates <input id="projectDatesContracted" type="checkbox" data-bind="checked:projectDatesContracted"></label></div>
+
                     <div><label data-toggle="collapse" data-bind="attr:{'data-target':'#activities-'+$index()}">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
                     <div class="program-activities collapse" data-bind="attr:{id:'activities-'+$index()}">
                         <div data-bind="foreach:{data: $root.transients.activityTypes}">
@@ -56,6 +58,8 @@
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>
                     <span class="pull-right" data-bind="visible:isSelected"><i data-bind="click:$parent.removeSubprogram" class="icon-remove"></i></span>
                 </div>
+                <div>Start Date <fc:datePicker class="input-small" targetField="startDate.date" name="startDate"/></div>
+                <div>End Date <fc:datePicker class="input-small" targetField="endDate.date" name="endDate"/></div>
             </li>
         </ul>
         <span data-bind="click:addSubprogram, visible:transients.selectedProgram()" class="clickable"><i class="icon-plus"></i> Add another</span>
@@ -105,6 +109,7 @@
             this.isMeritProgramme = ko.observable(prg.isMeritProgramme);
             this.reportingPeriod = ko.observable(prg.reportingPeriod);
             this.reportingPeriodAlignedToCalendar = ko.observable(prg.reportingPeriodAlignedToCalendar);
+            this.projectDatesContracted = ko.observable(prg.contractDatesFixed);
             this.activities = ko.observableArray(prg.activities?prg.activities:[]);
             this.activities.subscribe(function(e){ console.log(e);});
             this.select = function () {
@@ -124,6 +129,8 @@
         var SubprogramModel = function (prg, model) {
             var self = this;
             this.name = ko.observable(prg.name);
+            this.startDate = ko.observable(prg.startDate).extend({simpleDate:false});
+            this.endDate = ko.observable(prg.endDate).extend({simpleDate:false});
 
             this.themes = ko.observableArray($.map(prg.themes, function (obj) {
                 return new ThemeModel(obj, model);
