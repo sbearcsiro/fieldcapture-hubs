@@ -102,12 +102,16 @@ class ProjectService {
     }
 
     def update(id, body) {
-        webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
-        // recreate 'hiddenJSON' in collectory every time (minus some attributes)
-        body = getRich(id) as Map
-        ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
-        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + body.dataProviderId, mapAttributesToCollectory(body))
-        webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/' + body.dataResourceId, [licenseType:body.dataSharingLicense])
+        def resp = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/' + id, body)
+
+        if (body.dataProviderId) {
+            // recreate 'hiddenJSON' in collectory every time (minus some attributes)
+            body = getRich(id) as Map
+            ['id','dateCreated','documents','lastUpdated','organisationName','projectId','sites'].each { body.remove(it) }
+            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/' + body.dataProviderId, mapAttributesToCollectory(body))
+            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/' + body.dataResourceId, [licenseType:body.dataSharingLicense])
+        }
+        resp
     }
 
     /**

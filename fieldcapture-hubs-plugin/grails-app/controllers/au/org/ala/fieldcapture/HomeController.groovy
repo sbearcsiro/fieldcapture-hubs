@@ -27,7 +27,7 @@ class HomeController {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
-        if(!userService.userIsAlaOrFcAdmin()) {
+        if(!userService.userIsAlaOrFcAdmin() && !userService.userHasReadOnlyAccess()) {
             def adminFacetList = SettingService.getHubConfig().adminFacets
             facetsList?.removeAll(adminFacetList)
             mapFacets?.removeAll(adminFacetList)
@@ -114,6 +114,11 @@ class HomeController {
 
     def contacts() {
         renderStaticPage(SettingPageType.CONTACTS, false)
+    }
+
+    def close() {
+        response.setContentType("text/html")
+        render """<html><head><script type="text/javascript">window.close();</script></head><body/></html>"""
     }
 
     def staticPage(String id) {

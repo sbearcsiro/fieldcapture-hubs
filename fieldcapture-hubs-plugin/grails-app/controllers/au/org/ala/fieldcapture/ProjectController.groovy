@@ -247,7 +247,7 @@ class ProjectController {
                 render status:403, text: 'Permission denied'
             }
         } else if (adminUserId) {
-            render status:400, text: 'Required params not provided: projectId'
+            render status:400, text: 'Required params not provided: id'
         } else if (projectId) {
             render status:403, text: 'User not logged-in or does not have permission'
         } else {

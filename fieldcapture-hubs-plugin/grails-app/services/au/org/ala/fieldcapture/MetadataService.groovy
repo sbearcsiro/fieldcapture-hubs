@@ -168,7 +168,7 @@ class MetadataService {
                 }
                 if (matchedOutput && matchedOutput.scores) {
                     matchedOutput.scores.each {
-                        if (it.isOutputTarget && (it.aggregationType == 'SUM' || it.aggregationType == 'AVERAGE')) {
+                        if (it.isOutputTarget && (it.aggregationType in ['SUM', 'AVERAGE', 'COUNT'])) {
                             scores << it
                         }
                     }

@@ -431,7 +431,7 @@ class FCTagLib {
 
         def username = userService.currentUserDisplayName
         if (username) {
-            output = "<a href='${logoutUrl}" +
+            output = "<a id='logout-btn' href='${logoutUrl}" +
                     "?casUrl=${casLogoutUrl}" +
                     "&appUrl=${logoutReturnToUrl}' " +
                     "class='${cssClass}'><i class='icon-off ${(cssClass.contains("btn-login")) ? "icon-white" : ""}'></i> Logout</a>"
@@ -440,6 +440,11 @@ class FCTagLib {
             output =  "<a href='${casLoginUrl}?service=${loginReturnToUrl}' class='${cssClass}'><span><i class='icon-off ${(cssClass.contains("btn-login")) ? "icon-white" : ""}'></i> Log in</span></a>"
         }
         out << output
+    }
+
+    def loginInNewWindow = { attr, body ->
+        def casLoginUrl = grailsApplication.config.security.cas.loginUrl ?: "https://auth.ala.org.au/cas/login"
+        out << "<a href=\"${casLoginUrl}?service=${createLink(absolute: true, controller: 'home', action:'close')}\" target=\"fieldcapture-login\">${body}</a>"
     }
 
     def userIsLoggedIn = { attr ->

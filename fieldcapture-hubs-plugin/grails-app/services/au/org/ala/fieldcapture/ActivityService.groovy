@@ -125,6 +125,11 @@ class ActivityService {
         webService.doPost(grailsApplication.config.ecodata.baseUrl+'activity/search/', modifiedCriteria)
     }
 
+    def isReport(activity) {
+        def model = metadataService.getActivityModel(activity.type)
+        return model.type == 'Report'
+    }
+
     /**
      * Creates a description for the supplied activity based on the activity type and dates.
      */

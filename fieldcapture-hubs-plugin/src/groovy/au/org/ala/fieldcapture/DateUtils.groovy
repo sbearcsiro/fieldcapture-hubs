@@ -72,6 +72,10 @@ class DateUtils {
         return DISPLAY_DATE_FORMATTER.print(date)
     }
 
+    static String isoToDisplayFormat(String isoDate) {
+        return displayFormat(parse(isoDate))
+    }
+
     /**
      * Groups the supplied data into time intervals defined by the supplied start date and period.
      * If no start date is supplied, it will be set to the earliest date in the supplied data.

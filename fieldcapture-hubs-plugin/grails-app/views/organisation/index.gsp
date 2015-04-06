@@ -6,6 +6,7 @@
     <title>${organisation.name.encodeAsHTML()} | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    <g:set var="loadPermissionsUrl" value="${createLink(controller: 'organisation', action: 'getMembersForOrganisation', id:organisation.organisationId)}"/>
 
     <r:script disposition="head">
         var fcConfig = {
@@ -18,6 +19,7 @@
             organisationEditUrl: '${g.createLink(action:"edit", id:"${organisation.organisationId}")}',
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
+            organisationMembersUrl: "${loadPermissionsUrl}",
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
             dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
@@ -33,8 +35,11 @@
         #projectList th {
             white-space: normal;
         }
+        .admin-action {
+            width:7em;
+        }
     </style>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine"/>
     <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
 <body>
@@ -49,9 +54,7 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-            <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}"><button class="btn pull-right btn-warn" data-bind="click:deleteOrganisation"><i class="icon-remove"></i> Delete</button>
-            <button class="btn pull-right" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button>
-            </g:if>
+
             <h2 data-bind="text:name"></h2>
 
         </div>
@@ -69,6 +72,9 @@
                     <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
                     <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
                     <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+                    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                    <li class="tab"><a id="admin-tab" data-toggle="tab" href="#admin">Admin</a></li>
+                    </g:if>
 
                 </ul>
             </div>
@@ -103,9 +109,9 @@
 
                     <div class="tab-pane active" id="reporting">
 
-                        <div class="control-group" style="margin-bottom: 5px;">
-                            <span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>
-                        </div>
+                        %{--<div class="control-group" style="margin-bottom: 5px;">--}%
+                            %{--<span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>--}%
+                        %{--</div>--}%
 
                         <table class="table table-striped" style="width:100%;">
                             <thead>
@@ -252,6 +258,23 @@
                     </script>
                     <!-- /ko -->
                 </g:if>
+                <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+                <div class="tab-pane" id="admin">
+                    <h4>Administrator actions</h4>
+                    <div class="row-fluid">
+                    <p><button class="btn btn-small admin-action" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button> Edit the organisation details and content</p>
+                    <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteOrganisation"><i class="icon-remove icon-white"></i> Delete</button> Delete this organisation from the system. <strong>This cannot be undone</strong></p></g:if>
+                    </div>
+                    <h4>Add Permissions</h4>
+                    <div class="row-fluid">
+                        <div class="span6 alert alert-info">
+                            Any user access assigned to this organisation will automatically be applied to all projects managed by this organisation.
+                        </div>
+                    </div>
+                    <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'organisation', action:'addUserAsRoleToOrganisation'), entityType:'au.org.ala.ecodata.Organisation', entityId:organisation.organisationId]"/>
+                    <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:loadPermissionsUrl, removeUserUrl:g.createLink(controller:'organisation', action:'removeUserWithRoleFromOrganisation'), entityId:organisation.organisationId, user:user]"/>
+                </div>
+                </g:if>
 
             </div>
 
@@ -309,6 +332,10 @@
 
         <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
+        $.each(projects, function(i, project) {
+            project.startDate = project.contractStartDate || project.plannedStartDate;
+            project.duration = project.contractDurationInWeeks || project.plannedDurationInWeeks;
+        });
 
 
         var ActivityViewModel = function(activity) {
@@ -568,8 +595,11 @@
             var projectId = projects[meta.row].projectId;
             return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
-        var dateRenderer = function(data) {
-            return convertToSimpleDate(data, false);
+        var dateRenderer = function(data, type, row) {
+            if (type == 'display' || type == 'filter') {
+                return convertToSimpleDate(data, false);
+            }
+            return data;
         };
         var agreementDateRenderer = function(data, type, row, meta) {
             var program = projects[meta.row].associatedProgram;
@@ -581,7 +611,7 @@
                     cell += 'Enter date';
                 }
                 else {
-                    cell += dateRenderer(data);
+                    cell += dateRenderer(data, type, row);
                 }
                 cell += '</a>';
                 return cell;
@@ -601,11 +631,11 @@
             <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
             {title:'Name', width:'25%', data:'name'},
             <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
-            {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
-            {title:'Contracted Project Length (weeks)', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
-            {title:'From Date', width:'8%', render:dateRenderer, data:'actualStartDate'},
-            {title:'To Date', width:'8%', render:dateRenderer, data:'actualEndDate'},
-            {title:'Actual duration', width:'4%', data:'actualDurationInWeeks', defaultContent:''},
+            {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'startDate'},
+            {title:'Contracted Project Length (weeks)', width:'4%', data:'duration', defaultContent:''},
+            {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
+            {title:'To Date', width:'8%', render:dateRenderer, data:'plannedEndDate'},
+            {title:'Actual duration', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
 
             {title:'Status', width:'4%', render:statusRenderer, data:'status'},
             {title:'Funding', width:'8%', data:'funding'},
@@ -711,12 +741,17 @@
                             i : 0;
                 };
 
-                <g:if test="${showReports}">
-                    var fundingColumn = 7;
-                </g:if>
-                <g:else>
-                    var fundingColumn = 5;
-                </g:else>
+                var fundingColumn = -1;
+                $.each(projectListHeader, function(i, column) {
+                    if (column.data == 'funding') {
+                        fundingColumn = i;
+                        return false;
+                    }
+                });
+
+                if (fundingColumn < 0) {
+                    return;
+                }
                 // Total over all pages
                 var total = api
                     .column( fundingColumn )
@@ -747,6 +782,7 @@
 
             }
         });
+        populatePermissionsTable(fcConfig.organisationMembersUrl);
     });
 
 </r:script>

@@ -7,7 +7,7 @@ import grails.converters.JSON
  */
 class OrganisationController {
 
-    def organisationService, searchService, documentService, userService
+    def organisationService, searchService, documentService, userService, roleService
 
     def list() {
         def organisations = organisationService.list()
@@ -21,14 +21,21 @@ class OrganisationController {
             organisationNotFound(id, organisation)
         }
         else {
+            def roles = roleService.getRoles()
             // Get dashboard information for the response.
             def dashboard = searchService.dashboardReport([fq: 'organisationFacet:' + organisation.name])
             def members = organisationService.getMembersOfOrganisation(id)
-            def userId = userService.getCurrentUserId()
+            def user = userService.getUser()
+            def userId = user?.userId
 
             def orgRole = members.find{it.userId == userId}
 
-            [organisation: organisation, dashboard: dashboard, isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE, isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
+            [organisation: organisation,
+             dashboard: dashboard,
+             roles:roles,
+             user:user,
+             isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
+             isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
         }
     }
 
@@ -74,6 +81,60 @@ class OrganisationController {
             render result as JSON
         } else {
             render result.resp as JSON
+        }
+    }
+
+    def getMembersForOrganisation(String id) {
+        def adminUserId = userService.getCurrentUserId()
+
+        if (id && adminUserId) {
+            if (organisationService.isUserAdminForOrganisation(id) || organisationService.isUserGrantManagerForOrganisation(id)) {
+                render organisationService.getMembersOfOrganisation(id) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else if (adminUserId) {
+            render status:400, text: 'Required params not provided: id'
+        } else if (id) {
+            render status:403, text: 'User not logged-in or does not have permission'
+        } else {
+            render status:500, text: 'Unexpected error'
+        }
+    }
+
+    def addUserAsRoleToOrganisation() {
+        String userId = params.userId
+        String organisationId = params.entityId
+        String role = params.role
+        def adminUser = userService.getUser()
+
+        if (adminUser && userId && organisationId && role) {
+            if (role == 'caseManager' && !userService.userIsSiteAdmin()) {
+                render status:403, text: 'Permission denied - ADMIN role required'
+            } else if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render organisationService.addUserAsRoleToOrganisation(userId, organisationId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, role, projectId'
+        }
+    }
+
+    def removeUserWithRoleFromOrganisation() {
+        String userId = params.userId
+        String role = params.role
+        String organisationId = params.entityId
+        def adminUser = userService.getUser()
+
+        if (adminUser && organisationId && role && userId) {
+            if (organisationService.isUserAdminForOrganisation(organisationId)) {
+                render organisationService.removeUserWithRoleFromOrganisation(userId, organisationId, role) as JSON
+            } else {
+                render status:403, text: 'Permission denied'
+            }
+        } else {
+            render status:400, text: 'Required params not provided: userId, organisationId, role'
         }
     }
 
