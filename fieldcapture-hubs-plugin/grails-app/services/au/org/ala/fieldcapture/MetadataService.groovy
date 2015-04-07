@@ -26,21 +26,28 @@ class MetadataService {
     }
 
     def programsModel() {
-        def allPrograms = new HashMap(cacheService.get('programs-model',{
+        def allPrograms = cacheService.get('programs-model',{
             webService.getJson(grailsApplication.config.ecodata.baseUrl +
                 'metadata/programsModel')
-        }))
+        })
 
+        def programs = allPrograms
         def hubPrograms = SettingService.getHubConfig().supportedPrograms?:allPrograms.programs.findAll { !it.isMeritProgramme }.collect { it.name }
 
         if (hubPrograms) {
+            programs = [programs:[]]
             allPrograms.programs.each { program ->
-               if (!(program.name in hubPrograms)) {
-                    program.readOnly = true
+                if (!(program.name in hubPrograms)) {
+                    def newProgram = new HashMap(program)
+                    newProgram.readOnly = true
+                    programs.programs << newProgram
+                }
+                else {
+                    programs.programs << program
                 }
             }
         }
-        allPrograms
+        programs
 
     }
 
