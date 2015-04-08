@@ -111,7 +111,39 @@
         <fc:iconHelp title="Duration">The number of weeks the project will run for.</fc:iconHelp>
         </label>
         <div class="input-append">
-            <g:textField class="" name="duration" data-bind="value:transients.duration" data-validation-engine="validate[custom[number]]"/>
+            <g:textField class="" name="duration" data-bind="value:transients.plannedDuration" data-validation-engine="validate[custom[number]]"/>
+        </div>
+
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span4">
+        <label for="contractStartDate">Contract start date
+        <fc:iconHelp title="Contract Start date">Contracted start date.</fc:iconHelp>
+        </label>
+        <div class="input-append">
+            <fc:datePicker targetField="contractStartDate.date" name="contractStartDate" data-validation-engine="validate[required]" printable="${printView}" size="input-large"/>
+        </div>
+    </div>
+    <div class="span4">
+        <label for="endDate">Contract end date
+        <fc:iconHelp title="Contract End date">Date the project is contracted to finish.</fc:iconHelp>
+        </label>
+        <div class="input-append">
+            <fc:datePicker targetField="contractEndDate.date" name="contractEndDate" data-validation-engine="validate[future[contractStartDate]]" printable="${printView}" size="input-large"/>
+        </div>
+
+    </div>
+    <div class="span1">
+        OR
+    </div>
+    <div class="span3">
+        <label for="duration">Duration (weeks)
+        <fc:iconHelp title="Duration">The number of weeks the project will run for.</fc:iconHelp>
+        </label>
+        <div class="input-append">
+            <g:textField class="" name="duration" data-bind="value:transients.contractDuration" data-validation-engine="validate[custom[number]]"/>
         </div>
 
     </div>

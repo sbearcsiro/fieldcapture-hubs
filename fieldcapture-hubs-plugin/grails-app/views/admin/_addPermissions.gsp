@@ -41,7 +41,7 @@
     The email address did not match a registered user. This may because:
     <ul>
         <li>the email address is incorrect</li>
-        <li>the user is not registered - see the <a href='http://auth.ala.org.au/emmet/selfRegister.html'
+        <li>the user is not registered - see the <a href="${grailsApplication.config.user.registration.url}"
                 target='_blank' style='text-decoration: underline;'>sign-up page</a>.
         </li>
     </ul>
