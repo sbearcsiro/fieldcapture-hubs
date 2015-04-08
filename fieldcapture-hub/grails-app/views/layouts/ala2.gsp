@@ -99,7 +99,7 @@
                         <g:if test="${fc.currentUserDisplayName()}">
                             <div class="btn-group">
                                 <button class="btn btn-small btn-fc btnProfile" title="profile page">
-                                    <i class="icon-user icon-white"></i><span class="">&nbsp;<fc:currentUserDisplayName /></span>
+                                    <i class="icon-user"></i><span class="">&nbsp;<fc:currentUserDisplayName /></span>
                                 </button>
                                 <button class="btn btn-small btn-fc dropdown-toggle" data-toggle="dropdown">
                                     <!--<i class="icon-star icon-white"></i>--> My projects&nbsp;&nbsp;<span class="caret"></span>
@@ -108,7 +108,7 @@
                                     <fc:userProjectList />
                                 </div>
                                 <button class="btn btn-small btn-fc btnNewProject" title="new project">
-                                    <i class="icon-plus icon-white"></i><span class="">&nbsp; New Project</span>
+                                    <i class="icon-plus"></i><span class="">&nbsp; New Project</span>
                                 </button>
                             </div>
                             <g:if test="${fc.userIsSiteAdmin()}">
