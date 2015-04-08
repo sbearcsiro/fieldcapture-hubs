@@ -1,9 +1,9 @@
 <%@ page import="net.sf.json.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
+    <meta name="layout" content="${hubConfig.skin}"/>
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap,jQueryFileUpload"/>
 </head>
 
 <body>
