@@ -1030,3 +1030,12 @@ ko.bindingHandlers.numeric = {
     }
 };
 
+/** Allows a subscription to an observable that passes both the old and new value to the callback */
+ko.subscribable.fn.subscribeChanged = function (callback) {
+    var savedValue = this.peek();
+    return this.subscribe(function (latestValue) {
+        var oldValue = savedValue;
+        savedValue = latestValue;
+        callback(latestValue, oldValue);
+    });
+};
