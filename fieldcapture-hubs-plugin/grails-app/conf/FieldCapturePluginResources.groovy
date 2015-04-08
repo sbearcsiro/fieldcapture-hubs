@@ -138,7 +138,7 @@ modules = {
     }
 
     jQueryFileUpload {
-        dependsOn 'jquery_ui,bootstrap'
+        dependsOn 'jquery_ui'
         resource url: 'css/jquery.fileupload-ui.css', plugin: 'fieldcapture-plugin', disposition: 'head'
 
         resource url: 'js/fileupload-9.0.0/load-image.min.js', plugin: 'fieldcapture-plugin'
@@ -213,14 +213,14 @@ modules = {
     }
 
     fuelux {
-        dependsOn 'bootstrap'
+        dependsOn 'app_bootstrap_responsive'
         resource 'fuelux/js/fuelux.min.js'
         resource 'fuelux/css/fuelux.min.css'
 
     }
 
     wizard {
-        dependsOn 'bootstrap'
+        dependsOn 'app_bootstrap_responsive'
         resource 'fuelux/js/wizard.js'
         resource 'fuelux/css/fuelux.min.css'
     }
