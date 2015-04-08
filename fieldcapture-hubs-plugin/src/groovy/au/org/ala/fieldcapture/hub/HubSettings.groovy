@@ -32,7 +32,7 @@ class HubSettings {
     /** Home page map facets */
     List<String> availableMapFacets
 
-    String skin = "ala2"
+    String skin = "nrm"
 
     /**
      * Allows the property to be set using a JSONArray which has an implementation of join which is
