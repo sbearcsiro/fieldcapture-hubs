@@ -109,7 +109,7 @@
             this.isMeritProgramme = ko.observable(prg.isMeritProgramme);
             this.reportingPeriod = ko.observable(prg.reportingPeriod);
             this.reportingPeriodAlignedToCalendar = ko.observable(prg.reportingPeriodAlignedToCalendar);
-            this.projectDatesContracted = ko.observable(prg.contractDatesFixed);
+            this.projectDatesContracted = ko.observable(prg.projectDatesContracted);
             this.activities = ko.observableArray(prg.activities?prg.activities:[]);
             this.activities.subscribe(function(e){ console.log(e);});
             this.select = function () {
