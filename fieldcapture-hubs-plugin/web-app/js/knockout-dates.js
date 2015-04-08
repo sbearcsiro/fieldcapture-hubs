@@ -1047,7 +1047,7 @@ ko.extenders.numericString = function(target, precision) {
         write: function(newValue) {
             var val = newValue;
             if (typeof val === 'string') {
-                val = newValue.replace(/,/g, '');
+                val = newValue.replace(/,|\$/g, '');
             }
             var current = target(),
                 roundingMultiplier = Math.pow(10, precision),
@@ -1055,7 +1055,7 @@ ko.extenders.numericString = function(target, precision) {
                 valueToWrite = Math.round(newValueAsNum * roundingMultiplier) / roundingMultiplier;
 
             //only write if it changed
-            if (valueToWrite.toString() !== current) {
+            if (valueToWrite.toString() !== current || isNaN(val)) {
                 target(isNaN(val) ? newValue : valueToWrite.toString());
             }
             else {
