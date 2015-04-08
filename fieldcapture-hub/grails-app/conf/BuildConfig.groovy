@@ -57,7 +57,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.54"
+        build ":tomcat:7.0.55"
 
         // plugins for the compile step
         //compile ":scaffolding:2.0.3"
@@ -65,13 +65,11 @@ grails.project.dependency.resolution = {
 
         // plugins needed at runtime but not for compilation
         runtime ":jquery:1.11.1"
-        //compile ':asset-pipeline:1.8.3'
-        compile ":resources:1.2.8"
 
-        runtime ":lesscss-resources:1.3.3"
+        runtime ":ala-bootstrap2:2.2"
 
         if (Environment.current != Environment.DEVELOPMENT || !inlinePluginAvailable) {
-            compile ":fieldcapture-plugin:1.0-SNAPSHOT"
+            compile ":fieldcapture-plugin:1.1-SNAPSHOT"
         }
 
         build ":release:3.0.1"
