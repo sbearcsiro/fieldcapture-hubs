@@ -42,3 +42,7 @@ footer {
 footer img {
     max-width: inherit;
 }
+
+.map-box {
+    height:540px;
+}

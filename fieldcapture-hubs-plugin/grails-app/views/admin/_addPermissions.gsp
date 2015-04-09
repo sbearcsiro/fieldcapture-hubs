@@ -41,7 +41,7 @@
     The email address did not match a registered user. This may because:
     <ul>
         <li>the email address is incorrect</li>
-        <li>the user is not registered - see the <a href='http://auth.ala.org.au/emmet/selfRegister.html'
+        <li>the user is not registered - see the <a href="${grailsApplication.config.user.registration.url}"
                 target='_blank' style='text-decoration: underline;'>sign-up page</a>.
         </li>
     </ul>
@@ -99,19 +99,6 @@
             alert("Required fields are: userId and role.");
             $('.spinner').hide();
         }
-    }
-
-    /**
-    * Roles have camelCase names and this is a work-around for printing them from AJAX
-    * responses.
-    * TODO implement i18n encoding with JS
-    *
-    * @param text
-    * @returns {string}
-    */
-    function decodeCamelCase(text) {
-        var result = text.replace( /([A-Z])/g, " $1" );
-        return result.charAt(0).toUpperCase() + result.slice(1); // capitalize the first letter - as an example.
     }
 
     function updateStatusMessage(msg) {

@@ -185,7 +185,9 @@ if(!app.view.nocache){
 if(!merit.support.email) {
     merit.support.email = 'MERIT@environment.gov.au'
 }
-
+if (!user.registration.url) {
+    user.registration.url = 'https://auth.ala.org.au/userdetails/registration/createAccount'
+}
 // Markdown configuration to match behaviour of the JavaScript editor.
 markdown.hardwraps = true
 
