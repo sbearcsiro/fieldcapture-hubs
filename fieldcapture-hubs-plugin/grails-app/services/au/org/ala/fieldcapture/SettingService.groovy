@@ -3,6 +3,7 @@ package au.org.ala.fieldcapture
 import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
 import groovy.text.GStringTemplateEngine
+import org.codehaus.groovy.grails.web.servlet.GrailsFlashScope
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.web.context.request.RequestAttributes
 
@@ -11,6 +12,7 @@ class SettingService {
     private static def ThreadLocal localHubConfig = new ThreadLocal()
     private static final String HUB_CONFIG_KEY_SUFFIX = '.hub.configuration'
     public static final String HUB_CONFIG_ATTRIBUTE_NAME = 'hubConfig'
+    public static final String LAST_ACCESSED_HUB = 'recentHub'
 
     public static void setHubConfig(HubSettings hubSettings) {
         localHubConfig.set(hubSettings)
@@ -19,7 +21,6 @@ class SettingService {
 
     public static void clearHubConfig() {
         localHubConfig.remove()
-        GrailsWebRequest.lookup()?.setAttribute(HUB_CONFIG_ATTRIBUTE_NAME, null, RequestAttributes.SCOPE_REQUEST)
     }
 
     public static HubSettings getHubConfig() {
@@ -31,19 +32,23 @@ class SettingService {
 
     /**
      * Checks if there is a configuration defined for the specified hub.
-     * Side effect:  if the supplied hub is invalid, the default hub will be loaded.  This is done as
-     * the URL mappings validation is done in a servlet filter and if the validation returns false the
-     * 404 page will be rendered without our hub filter being invoked.
      */
     boolean isValidHub(hub) {
         def result = (getHubSettings(hub) != null)
-        if (!result) {
-            loadHubConfig(null) // Load the default hub so the 404 page has access to theme information
-        }
         result
     }
 
     def loadHubConfig(hub) {
+
+        if (!hub) {
+            hub = grailsApplication.config.app.default.hub?:'default'
+        }
+        else {
+            // Store the most recently accessed hub in flash scope so that 404 errors can be presented with the
+            // correct skin.
+            GrailsWebRequest.lookup()?.getFlashScope().put(LAST_ACCESSED_HUB, hub)
+        }
+
         def settings = getHubSettings(hub)
         if (!settings) {
             log.warn("no settings returned for hub ${hub}!")
@@ -58,19 +63,6 @@ class SettingService {
         }
 
         SettingService.setHubConfig(settings)
-
-
-        // Lookup portal from database?  Or simply parse the URL?  Or access request?
-//        def hubConfig = [
-//                bannerUrl            : 'http://www.greateasternranges.org.au/templates/rt_chapelco/images/main/bg-header-mt.png',
-//                logoUrl              : 'http://www.greateasternranges.org.au/wp-content/themes/ger/images/ger-logo-205x150px.png',
-//                title                : 'Great Eastern Ranges',
-//                settingsPageKeyPrefix: 'ger.',
-//                availableFacets      : "organisationFacet,gerSubRegionFacet,associatedProgramFacet,mainThemeFacet,stateFacet,lgaFacet,mvgFacet",
-//                defaultFacetQuery    : ['otherFacet:Great Eastern Ranges Initiative']
-//        ]
-
-
     }
 
     def getSettingText(SettingPageType type) {
@@ -139,7 +131,7 @@ class SettingService {
     }
 
     HubSettings getHubSettings(hub) {
-        if (!hub) { hub = grailsApplication.config.app.default.hub?:'default' }
+
         def json = getJson(hubSettingsKey(hub))
 
         json.id ? new HubSettings(new HashMap(json)) : null
