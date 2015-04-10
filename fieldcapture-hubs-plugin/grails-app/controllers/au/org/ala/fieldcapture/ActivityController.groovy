@@ -90,7 +90,7 @@ class ActivityController {
                 chain(action:'index', id:id)
                 return
             }
-            def model = activityModel(activity, activity.projectId, true)
+            def model = activityModel(activity, activity.projectId)
 
             model.activityTypes = metadataService.activityTypesList()
             model.hasPhotopointData = activity.documents?.find {it.poiId}
