@@ -2,9 +2,10 @@ package au.org.ala.fieldcapture
 
 class ErrorController {
 
-    def settingService
+    def settingService, cookieService
     def response404() {
-        def hub = flash[SettingService.LAST_ACCESSED_HUB]
+
+        def hub = cookieService.getCookie(SettingService.LAST_ACCESSED_HUB)
         settingService.loadHubConfig(hub)
         render view:'/404'
     }

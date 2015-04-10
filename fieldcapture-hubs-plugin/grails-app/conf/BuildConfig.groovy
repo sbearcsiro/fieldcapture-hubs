@@ -96,6 +96,7 @@ grails.project.dependency.resolution = {
         compile (":images-client-plugin:0.2.3") {
             exclude "ala-web-theme"
         }
+        compile ':cookie:1.4'
 
         test ":geb:0.9.3"
         test (":spock:0.7") {
