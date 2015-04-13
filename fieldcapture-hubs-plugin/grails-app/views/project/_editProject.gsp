@@ -123,7 +123,7 @@
         <fc:iconHelp title="Contract Start date">Contracted start date.</fc:iconHelp>
         </label>
         <div class="input-append">
-            <fc:datePicker targetField="contractStartDate.date" name="contractStartDate" data-validation-engine="validate[required]" printable="${printView}" size="input-large"/>
+            <fc:datePicker targetField="contractStartDate.date" name="contractStartDate" printable="${printView}" size="input-large"/>
         </div>
     </div>
     <div class="span4">
