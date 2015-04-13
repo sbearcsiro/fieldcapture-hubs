@@ -261,3 +261,153 @@ function isValid(p, a) {
 	 return p;
 }
 
+function ProjectViewModel(project, newsAndEvents, projectStories, activities, isUserEditor) {
+    var self = this;
+    self.name = ko.observable(project.name);
+    self.description = ko.observable(project.description);
+    self.externalId = ko.observable(project.externalId);
+    self.grantId = ko.observable(project.grantId);
+    self.manager = ko.observable(project.manager);
+    self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate: false});
+    self.plannedEndDate = ko.observable(project.plannedEndDate).extend({simpleDate: false});
+    self.funding = ko.observable(project.funding).extend({currency:{}});
+
+    self.regenerateProjectTimeline = ko.observable(false);
+    self.projectDatesChanged = ko.computed(function() {
+        return project.plannedStartDate != self.plannedStartDate() ||
+            project.plannedEndDate != self.plannedEndDate();
+    });
+    var projectDefault = "active";
+    if(project.status){
+        projectDefault = project.status;
+    }
+    self.status = ko.observable(projectDefault.toLowerCase());
+    self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
+
+    self.organisationId = ko.observable(project.organisationId || organisationsRMap[project.organisationName]);
+    self.organisationName = ko.computed(function() {
+        return organisationsMap[self.organisationId()] || "";
+    });
+    self.serviceProviderName = ko.observable(project.serviceProviderName);
+    self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
+    self.associatedSubProgram = ko.observable(project.associatedSubProgram);
+    self.newsAndEvents = ko.observable(newsAndEvents);
+    self.projectStories = ko.observable(projectStories);
+
+    self.transients = {};
+    self.transients.organisations = organisations;
+    self.transients.programs = [];
+    self.transients.subprograms = {};
+    self.transients.subprogramsToDisplay = ko.computed(function () {
+        return self.transients.subprograms[self.associatedProgram()];
+    });
+
+    self.loadPrograms = function (programsModel) {
+        $.each(programsModel.programs, function (i, program) {
+            if (program.readOnly) {
+                return;
+            }
+            self.transients.programs.push(program.name);
+            self.transients.subprograms[program.name] = $.map(program.subprograms,function (obj, i){return obj.name});
+        });
+        self.associatedProgram(project.associatedProgram); // to trigger the computation of sub-programs
+    };
+    self.removeTransients = function (jsData) {
+        delete jsData.transients;
+        return jsData;
+    };
+
+    // settings
+    self.saveSettings = function () {
+        if ($('#settings-validation').validationEngine('validate')) {
+
+            // only collect those fields that can be edited in the settings pane
+            var jsData = {
+                name: self.name(),
+                description: self.description(),
+                externalId: self.externalId(),
+                grantId: self.grantId(),
+                manager: self.manager(),
+                plannedStartDate: self.plannedStartDate(),
+                plannedEndDate: self.plannedEndDate(),
+                organisationId: self.organisationId(),
+                organisationName: self.organisationName(),
+                serviceProviderName: self.serviceProviderName(),
+                associatedProgram: self.associatedProgram(),
+                associatedSubProgram: self.associatedSubProgram(),
+                funding: new Number(self.funding())
+            };
+            if (self.regenerateProjectTimeline()) {
+                var dates = {
+                    plannedStartDate: self.plannedStartDate(),
+                    plannedEndDate: self.plannedEndDate()
+                };
+                addTimelineBasedOnStartDate(dates);
+                jsData.timeline = dates.timeline;
+            }
+            // this call to stringify will make sure that undefined values are propagated to
+            // the update call - otherwise it is impossible to erase fields
+            var json = JSON.stringify(jsData, function (key, value) {
+                return value === undefined ? "" : value;
+            });
+            var id = "${project?.projectId}";
+            $.ajax({
+                url: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+                type: 'POST',
+                data: json,
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.error) {
+                        showAlert("Failed to save settings: " + data.detail + ' \n' + data.error,
+                            "alert-error","save-result-placeholder");
+                    } else {
+                        showAlert("Project settings saved","alert-success","save-result-placeholder");
+                    }
+                },
+                error: function (data) {
+                    var status = data.status;
+                    alert('An unhandled error occurred: ' + data.status);
+                }
+            });
+        }
+    };
+
+    // documents
+    self.documents = ko.observableArray();
+    self.addDocument = function(doc) {
+        // check permissions
+        if ((isUserEditor && doc.role !== 'approval') ||  doc.public) {
+            self.documents.push(new DocumentViewModel(doc));
+        }
+    };
+    self.attachDocument = function() {
+
+        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information'},{key:'projectId', value:project.projectId}), '#attachDocument')
+            .done(function(result){self.documents.push(new DocumentViewModel(result))});
+    };
+    self.editDocumentMetadata = function(document) {
+        var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
+        showDocumentAttachInModal( url, document, '#attachDocument')
+            .done(function(result){
+                window.location.href = here; // The display doesn't update properly otherwise.
+            });
+    };
+    self.deleteDocument = function(document) {
+        var url = fcConfig.documentDeleteUrl+'/'+document.documentId;
+        $.post(url, {}, function() {self.documents.remove(document);});
+
+    };
+    // this supports display of the project's primary images
+    this.primaryImages = ko.computed(function () {
+        var pi = $.grep(self.documents(), function (doc) {
+            return ko.utils.unwrapObservable(doc.isPrimaryProjectImage);
+        });
+        return pi.length > 0 ? pi : null;
+    });
+
+    $.each(project.documents, function(i, doc) {
+        self.addDocument(doc);
+    });
+
+};
+

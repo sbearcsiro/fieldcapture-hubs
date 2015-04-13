@@ -52,7 +52,7 @@ modules = {
     }
 
     knockout {
-        resource url:'js/knockout-2.2.1.debug.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/knockout-3.3.0.min.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
@@ -186,6 +186,7 @@ modules = {
         defaultBundle false
         dependsOn 'knockout'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
         resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
