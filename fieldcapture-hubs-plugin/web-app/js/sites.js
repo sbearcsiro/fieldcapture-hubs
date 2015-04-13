@@ -104,7 +104,6 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
         self.sitesFilter("");
     };
-    self.map = ko.observable();
 
     this.highlight = function () {
         map.highlightFeatureById(this.name());
@@ -161,9 +160,6 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
         document.location.href = fcConfig.siteUploadUrl;
     };
     self.triggerGeocoding = function () {
-        if (!map) {
-            return;
-        }
         ko.utils.arrayForEach(self.sites, function (site) {
             map.getAddressById(site.name(), site.setAddress);
         });

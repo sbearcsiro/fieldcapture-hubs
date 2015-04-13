@@ -405,7 +405,6 @@
                         },
                         mapOptions
                     );
-                    console.log("blern");
                     var mapFeatures = $.parseJSON('${mapFeatures?.encodeAsJavaScript()}');
                     var sitesViewModel = new SitesViewModel(project.sites, map, mapFeatures, ${user?.isEditor?:false});
                     ko.applyBindings(sitesViewModel, document.getElementById('sitesList'));
