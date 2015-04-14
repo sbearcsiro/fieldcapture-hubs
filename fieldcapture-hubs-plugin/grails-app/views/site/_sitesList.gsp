@@ -90,3 +90,31 @@
         </div>
     </div>
 </div>
+
+<r:script>
+   function initialiseSites(sites) {
+        var mapOptions = {
+            zoomToBounds:true,
+            zoomLimit:16,
+            highlightOnHover:true,
+            features:[],
+            featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+            wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
+        };
+
+        map = init_map_with_features({
+                mapContainer: "map",
+                scrollwheel: false,
+                featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+                wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
+            },
+            mapOptions
+        );
+        var mapFeatures = $.parseJSON('${mapFeatures?.encodeAsJavaScript()}');
+        var sitesViewModel = new SitesViewModel(sites, map, mapFeatures, ${user?.isEditor ?: false});
+        ko.applyBindings(sitesViewModel, document.getElementById('sitesList'));
+
+
+
+    };
+</r:script>

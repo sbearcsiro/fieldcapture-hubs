@@ -164,4 +164,8 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
             map.getAddressById(site.name(), site.setAddress);
         });
     };
+
+    // set trigger for site reverse geocoding
+    self.triggerGeocoding();
+    self.displaySites();
 };

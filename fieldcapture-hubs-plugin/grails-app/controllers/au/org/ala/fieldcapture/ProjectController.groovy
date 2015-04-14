@@ -54,7 +54,7 @@ class ProjectController {
     }
 
     private String projectView(project) {
-        return project.isCitizenScience?'citizenScienceProjectTemplate':'index'
+        return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
     }
 
     @PreAuthorise

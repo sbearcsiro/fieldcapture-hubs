@@ -261,10 +261,10 @@ function isValid(p, a) {
 	 return p;
 }
 
-function ProjectViewModel(project, newsAndEvents, projectStories, isUserEditor) {
-    var self = this;
+function ProjectViewModel(project, isUserEditor) {
+    var self = $.extend(this, new Documents());
     self.name = ko.observable(project.name);
-    self.description = ko.observable(project.description);
+    self.description = ko.observable(project.description).extend({markdown:true});;
     self.externalId = ko.observable(project.externalId);
     self.grantId = ko.observable(project.grantId);
     self.manager = ko.observable(project.manager);
@@ -291,8 +291,8 @@ function ProjectViewModel(project, newsAndEvents, projectStories, isUserEditor) 
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
-    self.newsAndEvents = ko.observable(newsAndEvents);
-    self.projectStories = ko.observable(projectStories);
+    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});;
+    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});;
 
     self.transients = {};
     self.transients.programs = [];
@@ -372,7 +372,7 @@ function ProjectViewModel(project, newsAndEvents, projectStories, isUserEditor) 
     };
 
     // documents
-    self.documents = ko.observableArray();
+
     self.addDocument = function(doc) {
         // check permissions
         if ((isUserEditor && doc.role !== 'approval') ||  doc.public) {

@@ -354,19 +354,19 @@ function Documents() {
     });
 
     self.removeBannerImage = function() {
-        self.deleteDocument('banner');
+        self.deleteDocumentRole('banner');
     };
 
     self.removeLogoImage = function() {
-        self.deleteDocument('logo');
+        self.deleteDocumentByRole('logo');
     };
 
     self.removeMainImage = function() {
-        self.deleteDocument('mainImage');
+        self.deleteDocumentByRole('mainImage');
     };
 
 
-    self.deleteDocument = function(role) {
+    self.deleteDocumentByRole = function(role) {
         var doc = self.findDocumentByRole(self.documents(), role);
         if (doc) {
             if (doc.documentId) {
