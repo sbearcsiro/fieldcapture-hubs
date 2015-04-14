@@ -261,7 +261,7 @@ function isValid(p, a) {
 	 return p;
 }
 
-function ProjectViewModel(project, newsAndEvents, projectStories, activities, isUserEditor) {
+function ProjectViewModel(project, newsAndEvents, projectStories, isUserEditor) {
     var self = this;
     self.name = ko.observable(project.name);
     self.description = ko.observable(project.description);
@@ -284,9 +284,9 @@ function ProjectViewModel(project, newsAndEvents, projectStories, activities, is
     self.status = ko.observable(projectDefault.toLowerCase());
     self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
 
-    self.organisationId = ko.observable(project.organisationId || organisationsRMap[project.organisationName]);
+    self.organisationId = ko.observable(project.organisationId);
     self.organisationName = ko.computed(function() {
-        return organisationsMap[self.organisationId()] || "";
+        return project.organisationName || organisationsMap[self.organisationId()] || "";
     });
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
@@ -295,7 +295,6 @@ function ProjectViewModel(project, newsAndEvents, projectStories, activities, is
     self.projectStories = ko.observable(projectStories);
 
     self.transients = {};
-    self.transients.organisations = organisations;
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
