@@ -865,7 +865,7 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     margin-left: 10px;
 }
 
-.organisation-header {
+.organisation-header, .project-header {
 
     margin-top: -10px;
     margin-bottom: 10px;
@@ -873,8 +873,9 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     border-bottom: 1px solid #ddd;
 }
 
-.organisation-banner {
+.organisation-banner,.project-banner {
     background-repeat: no-repeat;
     background-position: right;
     background-color: #f0f0e8;
 }
+

@@ -81,7 +81,7 @@
 
             this.allOrganisations = ko.observableArray();
             $.each(organisations, function(i, org) {
-                self.allOrganisations.push(new OrganisationViewModel(org));
+                self.allOrganisations.push(createOrganisationViewModel(org));
             });
             this.pageNum = ko.observable(1);
             this.organisationsPerPage = 10;

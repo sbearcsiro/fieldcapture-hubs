@@ -319,5 +319,67 @@ function decodeCamelCase(text) {
     return result.charAt(0).toUpperCase() + result.slice(1); // capitalize the first letter - as an example.
 }
 
+//
+if (typeof Object.create !== 'function') {
+    Object.create = function (o) {
+        function F() {}
+        F.prototype = o;
+        return new F();
+    };
+}
+
+/** A function that works with documents.  Intended for inheritance by ViewModels */
+function Documents() {
+    var self = this;
+    self.documents = ko.observableArray();
+    self.findDocumentByRole = function(documents, role) {
+        for (var i=0; i<documents.length; i++) {
+            if (documents[i].role === role && documents[i].status !== 'deleted') {
+                return documents[i];
+            }
+        }
+        return null;
+    };
+    self.logoUrl = ko.computed(function() {
+        var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
+        return logoDocument ? logoDocument.url : null;
+    });
+    self.bannerUrl = ko.computed(function() {
+        var bannerDocument = self.findDocumentByRole(self.documents(), 'banner');
+        return bannerDocument ? 'url('+bannerDocument.url+')' : null;
+    });
+    self.mainImageUrl = ko.computed(function() {
+        var mainImageDocument = self.findDocumentByRole(self.documents(), 'mainImage');
+        return mainImageDocument ? mainImageDocument.url : null;
+    });
+
+    self.removeBannerImage = function() {
+        self.deleteDocumentRole('banner');
+    };
+
+    self.removeLogoImage = function() {
+        self.deleteDocumentByRole('logo');
+    };
+
+    self.removeMainImage = function() {
+        self.deleteDocumentByRole('mainImage');
+    };
+
+
+    self.deleteDocumentByRole = function(role) {
+        var doc = self.findDocumentByRole(self.documents(), role);
+        if (doc) {
+            if (doc.documentId) {
+                doc.status = 'deleted';
+                self.documents.valueHasMutated(); // observableArrays don't fire events when contained objects are mutated.
+            }
+            else {
+                self.documents.remove(doc);
+            }
+        }
+    };
+
+};
+
 
 

@@ -325,7 +325,7 @@
     $(function () {
 
         var organisation =<fc:modelAsJavascript model="${organisation}"/>;
-        var organisationViewModel = new OrganisationViewModel(organisation);
+        var organisationViewModel = createOrganisationViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);
 

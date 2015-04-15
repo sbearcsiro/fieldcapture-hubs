@@ -1,5 +1,6 @@
 package au.org.ala.fieldcapture
 import grails.converters.JSON
+import org.joda.time.DateTime
 
 class ProjectController {
 
@@ -31,13 +32,8 @@ class ProjectController {
                 user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
                 user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
-            //log.debug activityService.activitiesForProject(id)
-            //todo: ensure there are no control chars (\r\n etc) in the json as
-            //todo:     this will break the client-side parser
-			TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
-			def now = new Date()
 
-            [project: project,
+            def model = [project: project,
              activities: activityService.activitiesForProject(id),
              mapFeatures: commonService.getMapFeatures(project),
              isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
@@ -49,10 +45,16 @@ class ProjectController {
              outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
              institutions: metadataService.institutionList(),
              programs: projectService.programsModel(),
-             today:now.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+             today:DateUtils.format(new DateTime()),
              themes:metadataService.getThemesForProject(project)
             ]
+
+            render view:projectView(project), model:model
         }
+    }
+
+    private String projectView(project) {
+        return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
     }
 
     @PreAuthorise
