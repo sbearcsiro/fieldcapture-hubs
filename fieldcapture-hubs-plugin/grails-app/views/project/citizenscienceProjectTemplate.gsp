@@ -40,6 +40,16 @@
 
     </r:script>
 
+    <style type="text/css">
+        .well-title {
+            border-bottom: 1px solid lightgrey;
+            font-weight: bold;
+            padding-bottom:5px;
+            margin-bottom:10px;
+            font-size:larger;
+        }
+    </style>
+
     <!--[if gte IE 8]>
         <style>
            .thumbnail > img {
@@ -88,11 +98,12 @@
             <div class="row-fluid" data-bind="template:detailsTemplate"></div>
         </div>
         <div class="pill-pane" id="records">
-            Records
+            <g:render template="/shared/activitiesList"
+                      model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>
         </div>
         <div class="pill-pane" id="locations">
             <!-- ko stopBinding:true -->
-            <g:render template="/site/sitesList"/>
+            <g:render template="/site/sitesList" model="[wordForSite:'location']"/>
             <!-- /ko -->
         </div>
         <div class="pill-pane" id="documents">
@@ -123,14 +134,27 @@
 </span>
 </script>
 <script id="noMainImageTemplate" type="text/html">
-<span class="span9">
-    <h4>Description</h4>
+<span class="span6">
+
     <div class="well" data-bind="html:description.markdownToHtml()"></div>
 
 </span>
+<g:if test="${!user}">
 <span class="span3">
-    <h4>News and events</h4>
-    <div class="well" data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'">
+    <div class="well">
+        <div class="well-title">Get Involved!</div>
+        <button class="btn btn-primary">Sign in</button> OR
+        <button class="btn btn-primary">Register</button>
+        <div>to start contributing to this project!</div>
+    </div>
+</span>
+</g:if>
+<span class="span3">
+
+    <div class="well">
+        <div class="well-title">News and events</div>
+
+        <div data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"/>
 
     </div>
 

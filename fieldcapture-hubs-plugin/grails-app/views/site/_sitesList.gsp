@@ -1,12 +1,12 @@
-
+<g:set var="wordForSite" value="${wordForSite?:'site'}"/>
 <div id="sitesList">
     <div data-bind="visible: sites.length == 0">
-        <p>No sites are currently associated with this project.</p>
+        <p>No ${wordForSite}s are currently associated with this project.</p>
         <g:if test="${user?.isEditor}">
             <div class="btn-group btn-group-horizontal ">
-                <button data-bind="click: $root.addSite" type="button" class="btn">Add new site</button>
-                <button data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing site</button>
-                <button data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload sites from shapefile</button>
+                <button data-bind="click: $root.addSite" type="button" class="btn">Add new ${wordForSite}</button>
+                <button data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</button>
+                <button data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</button>
             </div>
         </g:if>
     </div>
@@ -36,9 +36,9 @@
                         <li data-bind="event: {mouseover: $root.highlight, mouseout: $root.unhighlight}">
                             <g:if test="${user?.isEditor}">
                                 <span>
-                                    <button type="button" data-bind="click:$root.editSite" class="btn btn-container"><i class="icon-edit" title="Edit Site"></i></button>
-                                    <button type="button" data-bind="click:$root.viewSite" class="btn btn-container"><i class="icon-eye-open" title="View Site"></i></button>
-                                    <button type="button" data-bind="click:$root.deleteSite" class="btn btn-container"><i class="icon-remove" title="Delete Site"></i></button>
+                                    <button type="button" data-bind="click:$root.editSite" class="btn btn-container"><i class="icon-edit" title="Edit ${wordForSite.capitalize()}"></i></button>
+                                    <button type="button" data-bind="click:$root.viewSite" class="btn btn-container"><i class="icon-eye-open" title="View ${wordForSite.capitalize()}"></i></button>
+                                    <button type="button" data-bind="click:$root.deleteSite" class="btn btn-container"><i class="icon-remove" title="Delete ${wordForSite.capitalize()}"></i></button>
                                 </span>
 
                                 <a style="margin-left:10px;" data-bind="text:name, attr: {href:'${createLink(controller: "site", action: "index")}' + '/' + siteId}"></a>
@@ -76,10 +76,10 @@
                 <div class="row-fluid">
                     <div class="span3">
                         <div class="btn-group btn-group-vertical pull-right">
-                            <a data-bind="click: $root.addSite" type="button" class="btn ">Add new site</a>
-                            <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing site</a>
-                            <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload sites from shapefile</a>
-                            <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all sites</a>
+                            <a data-bind="click: $root.addSite" type="button" class="btn ">Add new ${wordForSite}</a>
+                            <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</a>
+                            <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</a>
+                            <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all ${wordForSite}s</a>
                         </div>
                     </div>
                 </div>
