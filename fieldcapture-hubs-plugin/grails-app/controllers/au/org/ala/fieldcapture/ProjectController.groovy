@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 class ProjectController {
 
-    def projectService, metadataService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
@@ -32,7 +32,6 @@ class ProjectController {
                 user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
                 user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
-
             def model = [project: project,
              activities: activityService.activitiesForProject(id),
              mapFeatures: commonService.getMapFeatures(project),
@@ -43,7 +42,7 @@ class ProjectController {
              activityTypes: projectService.activityTypesList(),
              metrics: projectService.summary(id),
              outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-             institutions: metadataService.institutionList(),
+             organisations: organisationService.list().list,
              programs: projectService.programsModel(),
              today:DateUtils.format(new DateTime()),
              themes:metadataService.getThemesForProject(project)
@@ -60,12 +59,14 @@ class ProjectController {
     @PreAuthorise
     def edit(String id) {
         def project = projectService.get(id) as Map
+
+        def organisations = organisationService.list()
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
              siteDocuments: siteInfo.documents?:'[]',
              site: siteInfo.site,
-             institutions: metadataService.institutionList(),
+             organisations: organisations.list,
              programs: metadataService.programsModel()]
         } else {
             forward(action: 'list', model: [error: 'no such id'])
@@ -76,7 +77,7 @@ class ProjectController {
         [
                 citizenScience: params.citizenScience,
                 siteDocuments: '[]',
-                institutions: metadataService.institutionList(),
+                organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
                 activityTypes: metadataService.activityTypesList()
         ]

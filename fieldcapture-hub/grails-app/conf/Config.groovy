@@ -92,7 +92,7 @@ if (!ala.baseURL) {
     ala.baseURL = "http://www.ala.org.au"
 }
 if (!collectory.baseURL) {
-    collectory.baseURL = "http://collections.ala.org.au/"
+    collectory.baseURL = "http://collections-dev.ala.org.au/"
 }
 // spatial services
 if(!spatial.baseUrl){

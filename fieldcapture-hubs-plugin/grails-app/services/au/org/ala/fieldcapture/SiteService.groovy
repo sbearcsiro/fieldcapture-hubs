@@ -103,7 +103,7 @@ class SiteService {
 
     def getRaw(id) {
         def site = get(id, [raw:'true'])
-        if (!site) return [:]
+        if (!site || site.error) return [:]
 
         if (site.shapePid && !(site.shapePid instanceof JSONArray)) {
             log.debug "converting to array"
