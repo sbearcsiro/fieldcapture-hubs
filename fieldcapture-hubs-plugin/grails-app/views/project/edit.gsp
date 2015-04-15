@@ -3,6 +3,14 @@
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
+    <r:script disposition="head">
+    var fcConfig = {
+        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
+        },
+        here = window.location.href;
+
+    </r:script>
     <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload"/>
 </head>
 
