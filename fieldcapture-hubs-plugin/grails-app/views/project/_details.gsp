@@ -292,10 +292,10 @@
 </div>
 <r:script>
 function initViewModel() {
-    var organisations = ${institutions}, organisationsMap = {}, organisationsRMap = {};
+    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>, organisationsMap = {}, organisationsRMap = {};
     organisations.map(function(org) {
-        organisationsMap[org.uid] = org.name;
-        organisationsRMap[org.name] = org.uid;
+        organisationsMap[org.organisationId] = org.name;
+        organisationsRMap[org.name] = org.organisationId;
     })
     function ViewModel (data, activityTypes) {
         var self = this;

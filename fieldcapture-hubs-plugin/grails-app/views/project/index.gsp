@@ -328,7 +328,7 @@
     </g:if>
 </div>
     <r:script>
-        var organisations = ${institutions}, organisationsMap = {}, organisationsRMap = {};
+        var organisations = <fc:modelAsJavascript model="${organisations}"/>, organisationsMap = {}, organisationsRMap = {};
         organisations.map(function(org) {
             organisationsMap[org.uid] = org.name;
             organisationsRMap[org.name] = org.uid;
