@@ -301,7 +301,7 @@ function initViewModel() {
         self.orgIdGrantee = ko.observable(data.orgIdGrantee);
         self.orgIdSponsor = ko.observable(data.orgIdSponsor);
         self.orgIdSvcProvider = ko.observable(data.orgIdSvcProvider);
-
+        self.selectedActivities = ko.observableArray();
         self.transients.activitySource = ko.observable('program');
         self.transients.activityTypes = activityTypes;
         self.transients.subprogramsToDisplay = ko.computed(function () {

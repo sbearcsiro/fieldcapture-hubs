@@ -87,6 +87,7 @@
             <li class="active">
                 <a href="#about" data-toggle="pill">About</a>
             </li>
+            <li><a href="#news" data-toggle="pill">News</a></li>
             <li><a href="#records" data-toggle="pill">Records</a></li>
             <li><a href="#locations" data-toggle="pill">Locations</a></li>
             <li><a href="#documents" data-toggle="pill">Documents</a></li>
@@ -96,6 +97,23 @@
     <div class="pill-content">
         <div class="pill-pane active" id="about">
             <div class="row-fluid" data-bind="template:detailsTemplate"></div>
+        </div>
+        <div class="pill-pane" id="news">
+            <div class="row-fluid">
+                <span class="span6">
+                    <div class="well">
+                        <div class="well-title">News and events</div>
+                        <div data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"></div>
+
+                    </div>
+                </span>
+                <span class="span6">
+                    <div class="well">
+                        <div class="well-title">Project stories</div>
+                        <div data-bind="html:projectStories()?projectStories.markdownToHtml():'Nothing at this time'"></div>
+                    </div>
+                </span>
+            </div>
         </div>
         <div class="pill-pane" id="records">
             <g:render template="/shared/activitiesList"
@@ -127,45 +145,61 @@
     <div class="well" data-bind="html:description.markdownToHtml()"></div>
     <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
 </span>
-<span class="span3">
-    <h4>News and events</h4>
-    <div class="well" data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"></div>
 
-</span>
 </script>
 <script id="noMainImageTemplate" type="text/html">
+<span class="span3">
+    <div class="well">
+
+
+        <div class="row-fluid" data-bind="visible:urlWeb">
+            <div class="span6">
+                <label>Project web site:</label>
+            </div>
+            <div class="span6">
+                <span data-bind="text:urlWeb"></span>
+            </div>
+        </div>
+        <div class="row-fluid" data-bind="visible:urlAndroid">
+            <div class="span6">
+                <label>Android app:</label>
+            </div>
+            <div class="span6">
+                <span data-bind="text:urlWeb"></span>
+            </div>
+        </div>
+        <div class="row-fluid" data-bind="visible:urlITunes">
+            <div class="span6">
+                <label>iTunes app:</label>
+            </div>
+            <div class="span6">
+                <span data-bind="text:urlITunes"></span>
+            </div>
+        </div>
+    </div>
+</span>
+
 <span class="span6">
 
     <div class="well" data-bind="html:description.markdownToHtml()"></div>
 
 </span>
-<g:if test="${!user}">
 <span class="span3">
     <div class="well">
         <div class="well-title">Get Involved!</div>
+        <div data-bind="visible:getInvolved(), text:getInvolved"></div>
+        <hr/>
         <button class="btn btn-primary">Sign in</button> OR
         <button class="btn btn-primary">Register</button>
         <div>to start contributing to this project!</div>
     </div>
 </span>
-</g:if>
-<span class="span3">
 
-    <div class="well">
-        <div class="well-title">News and events</div>
-
-        <div data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"/>
-
-    </div>
-
-</span>
 </script>
 <r:script>
     $(function() {
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
-        var newsAndEventsMarkdown = '${(project.newsAndEvents?:"").markdownToHtml().encodeAsJavaScript()}';
-        var projectStoriesMarkdown = '${(project.projectStories?:"").markdownToHtml().encodeAsJavaScript()}';
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
         var ViewModel = function() {
