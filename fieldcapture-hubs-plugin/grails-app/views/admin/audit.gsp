@@ -7,6 +7,7 @@
 		</style>
 	</head>
 	<body>
+        <r:require modules="jquery_bootstrap_datatable"/>
         <h3>Audit</h3>
         <form class="form-inline">
             Search for a project:
@@ -14,12 +15,11 @@
             <button class="btn" id="btnProjectSearch"><i class="icon-search"></i></button>
         </form>
         <g:if test="${results}">
-        <div>
-            <table class="table table-condensed table-striped table-bordered">
+        <div class="well well-small">
+            <table style="width: 95%;" class="table table-striped table-bordered table-hover" id="project-list">
                 <thead>
                     <th>Name</th>
                     <th>Description</th>
-                    <th></th>
                 </thead>
                 <tbody>
                     <g:each in="${results.hits?.hits}" var="hit">
@@ -41,6 +41,15 @@
 <r:script>
 
     $(document).ready(function() {
+
+        $('#project-list').DataTable({
+            "bSort": false,
+            "oLanguage": {
+             "sSearch": "Filter by: "
+            }
+        });
+        $('.dataTables_filter input').attr("placeholder", "Name or Description");
+
         $("#btnProjectSearch").click(function(e) {
             e.preventDefault();
             doAuditProjectSearch()
@@ -53,6 +62,7 @@
             window.location = "${createLink(controller:'admin', action:'auditProjectSearch')}?searchTerm=" + searchTerm;
         }
     }
+
 
 </r:script>
 

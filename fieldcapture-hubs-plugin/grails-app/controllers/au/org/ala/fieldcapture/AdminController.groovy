@@ -389,10 +389,12 @@ class AdminController {
     def auditMessageDetails() {
         def results = auditService.getAuditMessage(params.id as String)
         def userDetails = [:]
+        def compare
         if (results?.message) {
             userDetails = auditService.getUserDetails(results?.message?.userId)
+            compare = auditService.getAuditMessage(params.compareId as String)
         }
-        [message: results?.message, userDetails: userDetails.user]
+        [message: results?.message, compare: compare?.message, userDetails: userDetails.user]
     }
 
     def reloadSiteMetadata() {

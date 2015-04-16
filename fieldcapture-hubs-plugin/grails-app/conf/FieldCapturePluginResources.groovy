@@ -262,4 +262,10 @@ modules = {
 
     }
 
+    pretty_text_diff{
+        resource url: 'js/prettytextdiff/jquery.pretty-text-diff.min.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/diff_match_patch.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/pretty_text_diff_basic.css', plugin: 'fieldcapture-plugin'
+    }
+
 }
