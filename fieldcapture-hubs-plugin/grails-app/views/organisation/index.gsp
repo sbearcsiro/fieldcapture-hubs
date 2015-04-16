@@ -93,7 +93,13 @@
 
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
-                        <span class="span12"><h4>Report: </h4><select id="dashboardType" name="dashboardType"><g:if test="${showReports}"><option value="greenArmy">Green Army</option></g:if><option value="outputs">Activity Outputs</option></select></span>
+                        <span class="span12"><h4>Report: </h4>
+                            <select id="dashboardType" name="dashboardType">
+                                <g:if test="${showReports}"><option value="greenArmy">Green Army</option></g:if>
+                                <option value="outputs">Activity Outputs</option>
+                                <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}"><option value="announcements">Announcements</option></g:if>
+                            </select>
+                        </span>
                     </div>
                     <div class="loading-message">
                         <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...

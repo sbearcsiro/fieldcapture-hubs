@@ -261,8 +261,15 @@ function isValid(p, a) {
 	 return p;
 }
 
-function ProjectViewModel(project, isUserEditor) {
+function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
+
+    var organisationsMap = {}, organisationsRMap = {};
+    $.map(organisations, function(org) {
+        organisationsMap[org.organisationId] = org.name;
+        organisationsRMap[org.name] = org.organisationId;
+    });
+
     self.name = ko.observable(project.name);
     self.description = ko.observable(project.description).extend({markdown:true});;
     self.externalId = ko.observable(project.externalId);
@@ -294,12 +301,33 @@ function ProjectViewModel(project, isUserEditor) {
     self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});;
     self.projectStories = ko.observable(project.projectStories).extend({markdown:true});;
 
+    self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
+    self.dataSharingLicense = ko.observable(project.dataSharingLicense);
+    self.getInvolved = ko.observable(project.getInvolved);
+    self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.keywords = ko.observable(project.keywords);
+    self.projectPrivacy = ko.observable(project.projectPrivacy);
+    self.projectSiteId = project.projectSiteId;
+    self.projectType = ko.observable(project.projectType || "works");
+    self.scienceType = ko.observable(project.scienceType);
+    self.urlAndroid = ko.observable(project.urlAndroid);
+    self.urlITunes = ko.observable(project.urlITunes);
+    self.urlWeb = ko.observable(project.urlWeb);
+    self.isExternal = ko.observable(project.isExternal);
+
     self.transients = {};
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
         return self.transients.subprograms[self.associatedProgram()];
     });
+    self.transients.dataSharingLicenses = [
+            {lic:'CC BY', name:'Creative Commons Attribution'},
+            {lic:'CC BY-NC', name:'Creative Commons Attribution-NonCommercial'},
+            {lic:'CC BY-SA', name:'Creative Commons Attribution-ShareAlike'},
+            {lic:'CC BY-NC-SA', name:'Creative Commons Attribution-NonCommercial-ShareAlike'}
+        ];
+    self.transients.organisations = organisations;
 
     self.loadPrograms = function (programsModel) {
         $.each(programsModel.programs, function (i, program) {

@@ -81,9 +81,9 @@
         var siteViewModel = initSiteViewModel();
         $('#cancel').click(function () {
             if(siteViewModel.saved()){
-                document.location.href = SERVER_CONF.sitePageUrl;
+                document.location.href = SERVERURL_CONF.sitePageUrl;
             } else {
-                document.location.href = SERVER_CONF.homePageUrl;
+                document.location.href = SERVERURL_CONF.homePageUrl;
             }
         });
 

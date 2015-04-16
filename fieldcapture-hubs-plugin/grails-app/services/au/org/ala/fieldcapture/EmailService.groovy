@@ -7,6 +7,7 @@ class EmailService {
     def projectService, userService, mailService, settingService, grailsApplication, organisationService
 
     def createAndSend(mailSubjectTemplate, mailTemplate, model, recipient, sender, ccList) {
+        def systemEmailAddress = grailsApplication.config.fieldcapture.system.email.address
         try {
             def subjectLine = settingService.getSettingText(mailSubjectTemplate, model)
             def body = settingService.getSettingText(mailTemplate, model).markdownToHtml()
@@ -34,7 +35,8 @@ class EmailService {
             mailService.sendMail {
                 to recipient
                 if (ccList) {cc ccList}
-                from sender
+                from systemEmailAddress
+                replyTo sender
                 subject subjectLine
                 html body
 
