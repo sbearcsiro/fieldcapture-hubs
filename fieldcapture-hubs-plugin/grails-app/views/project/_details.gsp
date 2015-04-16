@@ -292,90 +292,21 @@
 </div>
 <r:script>
 function initViewModel() {
-    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>, organisationsMap = {}, organisationsRMap = {};
-    organisations.map(function(org) {
-        organisationsMap[org.organisationId] = org.name;
-        organisationsRMap[org.name] = org.organisationId;
-    })
-    function ViewModel (data, activityTypes) {
+
+    function ViewModel (data, activityTypes, organisations) {
         var self = this;
+        $.extend(self, new ProjectViewModel(data, true, organisations));
         self.actualEndDate = ko.observable(data.actualEndDate).extend({simpleDate: false});
         self.actualStartDate = ko.observable(data.actualStartDate).extend({simpleDate: false});
-        self.aim = ko.observable(data.aim);
-        self.associatedProgram = ko.observable(); // don't initialise yet
-        self.associatedSubProgram = ko.observable(data.associatedSubProgram);
-        self.dataSharing = ko.observable(data.isDataSharing? "Enabled": "Disabled");
-        self.dataSharingLicense = ko.observable(data.dataSharingLicense);
-        self.description = ko.observable(data.description);
-        self.externalId = ko.observable(data.externalId);
-        self.funding = ko.observable(data.funding).extend({currency:{}});
-        self.getInvolved = ko.observable(data.getInvolved);
-        self.grantId = ko.observable(data.grantId);
-        self.isCitizenScience = ko.observable(data.isCitizenScience);
-        self.keywords = ko.observable(data.keywords);
-        self.manager = ko.observable(data.manager);
-        self.name = ko.observable(data.name);
-        self.organisationId = ko.observable(data.organisationId || organisationsRMap[data.organisationName]);
-        self.organisationName = ko.computed(function() {
-            return organisationsMap[self.organisationId()] || "";
-        });
         self.orgIdGrantee = ko.observable(data.orgIdGrantee);
         self.orgIdSponsor = ko.observable(data.orgIdSponsor);
         self.orgIdSvcProvider = ko.observable(data.orgIdSvcProvider);
-        self.plannedEndDate = ko.observable(data.plannedEndDate).extend({simpleDate: false});
-        self.plannedStartDate = ko.observable(data.plannedStartDate).extend({simpleDate: false});
-        self.projectPrivacy = ko.observable(data.projectPrivacy);
-        self.projectSiteId = data.projectSiteId;
-        self.projectType = ko.observable(data.projectType || "works");
-        self.scienceType = ko.observable(data.scienceType);
-        self.selectedActivities = ko.observableArray();
-        self.urlAndroid = ko.observable(data.urlAndroid);
-        self.urlITunes = ko.observable(data.urlITunes);
-        self.urlWeb = ko.observable(data.urlWeb);
 
-        self.documents = ko.observableArray();
-        var imageDocument = findDocumentByRole(data.documents, 'mainImage');
-        if (imageDocument) self.documents.push(imageDocument);
-        this.mainImageUrl = ko.computed(function() {
-            var mainImageDocument = findDocumentByRole(self.documents(), 'mainImage');
-            return mainImageDocument ? mainImageDocument.url : null;
-        });
-        self.removeMainImage = function() {
-            var doc = findDocumentByRole(self.documents(), 'mainImage');
-            if (doc) {
-                if (doc.documentId) {
-                    doc.status = 'deleted';
-                    self.documents.valueHasMutated(); // observableArrays don't fire events when contained objects are mutated.
-                }
-                else {
-                    self.documents.remove(doc);
-                }
-            }
-        };
-
-        self.transients = {
-            dataSharingLicenses: [
-                {lic:'CC BY', name:'Creative Commons Attribution'},
-                {lic:'CC BY-NC', name:'Creative Commons Attribution-NonCommercial'},
-                {lic:'CC BY-SA', name:'Creative Commons Attribution-ShareAlike'},
-                {lic:'CC BY-NC-SA', name:'Creative Commons Attribution-NonCommercial-ShareAlike'}
-            ]
-        };
-        self.transients.organisations = organisations;
         self.transients.activitySource = ko.observable('program');
         self.transients.activityTypes = activityTypes;
-        self.transients.programs = [];
-        self.transients.subprograms = {};
         self.transients.subprogramsToDisplay = ko.computed(function () {
             return self.transients.subprograms[self.associatedProgram()];
         });
-
-        var programsModel = <fc:modelAsJavascript model="${programs}"/>;
-        $.each(programsModel.programs, function (i, program) {
-            self.transients.programs.push(program.name);
-            self.transients.subprograms[program.name] = $.map(program.subprograms,function (obj, i){return obj.name});
-        });
-        self.associatedProgram(data.associatedProgram); // to trigger the computation of sub-programs
 
         self.save = function () {
             if ($('#validation-container').validationEngine('validate')) {
@@ -417,14 +348,11 @@ function initViewModel() {
         return typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
     }
 
-    function findDocumentByRole(documents, role) {
-        for (var i=documents? documents.length: 0; --i >= 0;) {
-            if (documents[i].role === role && documents[i].status !== 'deleted')
-                return documents[i];
-        }
-    }
-
+    var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-    return new ViewModel(${project ?: [:]}, activityTypes);
+    var viewModel =  new ViewModel(${project ?: [:]}, activityTypes, organisations);
+    viewModel.loadPrograms(programsModel);
+    return viewModel;
 }
 </r:script>

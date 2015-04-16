@@ -11,7 +11,7 @@
         here = window.location.href;
 
     </r:script>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects"/>
 </head>
 
 <body>

@@ -328,12 +328,6 @@
     </g:if>
 </div>
     <r:script>
-        var organisations = <fc:modelAsJavascript model="${organisations}"/>, organisationsMap = {}, organisationsRMap = {};
-        organisations.map(function(org) {
-            organisationsMap[org.uid] = org.name;
-            organisationsRMap[org.name] = org.uid;
-        })
-
         $(window).load(function () {
             var map;
             // setup 'read more' for long text
@@ -363,16 +357,11 @@
                 document.location.href = "${createLink(action: 'index', id: project.projectId)}";
             });
 
-
+            var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
             var project = <fc:modelAsJavascript model="${project}"/>;
             var newsAndEventsMarkdown = '${(project.newsAndEvents?:"").markdownToHtml().encodeAsJavaScript()}';
             var projectStoriesMarkdown = '${(project.projectStories?:"").markdownToHtml().encodeAsJavaScript()}';
-            var viewModel = new ProjectViewModel(
-                project,
-                newsAndEventsMarkdown,
-                projectStoriesMarkdown,
-                ${activities ?: []},
-                ${user?.isEditor?:false});
+            var viewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
             viewModel.loadPrograms(<fc:modelAsJavascript model="${programs}"/>);
             ko.applyBindings(viewModel);

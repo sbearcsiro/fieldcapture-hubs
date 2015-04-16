@@ -162,10 +162,11 @@
 </script>
 <r:script>
     $(function() {
+        var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
         var newsAndEventsMarkdown = '${(project.newsAndEvents?:"").markdownToHtml().encodeAsJavaScript()}';
         var projectStoriesMarkdown = '${(project.projectStories?:"").markdownToHtml().encodeAsJavaScript()}';
-        var projectViewModel = new ProjectViewModel(project, newsAndEventsMarkdown, projectStoriesMarkdown, ${user?.isEditor?:false});
+        var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
         var ViewModel = function() {
             var self = this;

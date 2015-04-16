@@ -184,7 +184,7 @@ modules = {
 
     projects {
         defaultBundle false
-        dependsOn 'knockout'
+        dependsOn 'knockout','attachDocuments','wmd'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
         resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
         resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
