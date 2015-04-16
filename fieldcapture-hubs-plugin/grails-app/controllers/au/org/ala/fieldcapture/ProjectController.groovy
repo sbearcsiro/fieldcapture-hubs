@@ -53,6 +53,11 @@ class ProjectController {
     }
 
     private String projectView(project) {
+        if (project.isExternal) {
+            if (project.isCitizenScience) {
+                return 'externalCitizenScienceProjectTemplate'
+            }
+        }
         return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
     }
 

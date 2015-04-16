@@ -189,9 +189,10 @@
         <div class="well-title">Get Involved!</div>
         <div data-bind="visible:getInvolved(), text:getInvolved"></div>
         <hr/>
+        <div style="padding-bottom:5px;">To start contributing:</div>
         <button class="btn btn-primary">Sign in</button> OR
         <button class="btn btn-primary">Register</button>
-        <div>to start contributing to this project!</div>
+
     </div>
 </span>
 

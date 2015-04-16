@@ -432,9 +432,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return pi.length > 0 ? pi : null;
     });
 
-    $.each(project.documents, function(i, doc) {
-        self.addDocument(doc);
-    });
-
+    if (project.documents) {
+        $.each(project.documents, function(i, doc) {
+            self.addDocument(doc);
+        });
+    }
 };
 
