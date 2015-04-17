@@ -63,7 +63,7 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
-        def project = projectService.get(id) as Map
+        def project = projectService.get(id, 'all')
 
         def organisations = organisationService.list()
         if (project) {

@@ -54,23 +54,23 @@
                       data-role="banner"
                       data-owner-type="organisationId"
                       data-owner-id="${organisation.organisationId}"
-                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
+                      data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input id="banner" type="file" name="files"><span>Attach Banner Image</span></span>
             </div>
         </div>
 
-        %{--<div class="control-group">--}%
-            %{--<label class="control-label" for="logo">Logo</label>--}%
-            %{--<div class="controls">--}%
-                %{--<img data-bind="visible:logoUrl(), attr:{src:logoUrl}">--}%
-                %{--<span class="btn fileinput-button pull-right"--}%
-                      %{--data-url="${createLink(controller: 'image', action:'upload')}"--}%
-                      %{--data-role="logo"--}%
-                      %{--data-owner-type="organisationId"--}%
-                      %{--data-owner-id="${organisation.organisationId}"--}%
-                      %{--data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Logo</span></span>--}%
+        <div class="control-group">
+            <label class="control-label" for="logo">Logo</label>
+            <div class="controls">
+                <img data-bind="visible:logoUrl(), attr:{src:logoUrl}">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action:'upload')}"
+                      data-role="logo"
+                      data-owner-type="organisationId"
+                      data-owner-id="${organisation.organisationId}"
+                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input id="logo" type="file" name="files"><span>Attach Logo</span></span>
 
-            %{--</div>--}%
-        %{--</div>--}%
+            </div>
+        </div>
 
         <div class="control-group">
             <label class="control-label" for="mainImage">Organisation Image</label>
