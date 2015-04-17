@@ -1,14 +1,17 @@
 <div class="row-fluid">
     <div class="span6">
-        <h4 class="header"><g:message code="project.details.tell"/></h4>
 
         <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
             <h4>
-                Recipient:
-                <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
-                <span data-bind="visible:organisationName(),text:organisationName"></span>
+                Organisation:
+                <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}">
+                    <span data-bind="visible:organisationName(),text:organisationName"></span>
+                </a>
             </h4>
         </div>
+        <h4 class="header"><g:message code="project.details.tell"/></h4>
+
+
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
@@ -136,7 +139,49 @@
             </div>
         </div>
     </div>
+    <div class="row-fluid">
+        <div class="span6">
+            <h4 class="header"><g:message code="project.details.find"/>:</h4>
+
+            <div class="control-group">
+                <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
+
+                <div class="controls span9">
+                    <g:textField class="span12" tye="url" name="urlWeb" data-bind="value:urlWeb"/>
+                </div>
+            </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
+
+                <div class="controls span9">
+                    <g:textField class="span12" tye="url" name="urlAndroid" data-bind="value:urlAndroid"/>
+                </div>
+            </div>
+
+            <div class="clearfix control-group">
+                <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
+
+                <div class="controls span9">
+                    <g:textField class="span12" tye="url" name="urlITunes" data-bind="value:urlITunes"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="span6">
+            <h4 class="header">&nbsp;</h4>
+
+            <div class="control-group">
+                <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
+
+                <div class="controls span9">
+                    <g:textArea class="span12" name="keywords" data-bind="value:keywords" rows="2"/>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <div class="row-fluid">
     <div class="span6">
@@ -163,27 +208,6 @@
         </div>
     </div>
 
-    <div class="span6">
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="actualStartDate"><g:message code="g.project.actualStartDate"/>:
-            <fc:iconHelp><g:message code="g.project.actualStartDate.help"/></fc:iconHelp>
-            </label>
-
-            <div class="controls span9">
-                <fc:datePicker targetField="actualStartDate.date" name="actualStartDate" id="actualStartDate"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="actualEndDate"><g:message code="g.project.actualEndDate"/>:
-            <fc:iconHelp><g:message code="g.project.actualEndDate.help"/></fc:iconHelp>
-            </label>
-
-            <div class="controls span9">
-                <fc:datePicker targetField="actualEndDate.date" name="actualEndDate" id="actualEndDate"/>
-            </div>
-        </div>
-    </div>
 </div>
 
 <hr class="clearfix"/>
@@ -249,47 +273,7 @@
 <g:render template="/site/map" model="${pageScope.variables}"/>
 <hr class="clearfix"/>
 
-<div class="row-fluid">
-    <div class="span6">
-        <h4 class="header"><g:message code="project.details.find"/>:</h4>
 
-        <div class="control-group">
-            <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
-
-            <div class="controls span9">
-                <g:textField class="span12" tye="url" name="urlWeb" data-bind="value:urlWeb"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
-
-            <div class="controls span9">
-                <g:textField class="span12" tye="url" name="urlAndroid" data-bind="value:urlAndroid"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
-
-            <div class="controls span9">
-                <g:textField class="span12" tye="url" name="urlITunes" data-bind="value:urlITunes"/>
-            </div>
-        </div>
-    </div>
-
-    <div class="span6">
-        <h4 class="header">&nbsp;</h4>
-
-        <div class="control-group">
-            <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
-
-            <div class="controls span9">
-                <g:textArea class="span12" name="keywords" data-bind="value:keywords" rows="2"/>
-            </div>
-        </div>
-    </div>
-</div>
 <r:script>
 function initViewModel() {
 
