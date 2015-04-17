@@ -79,7 +79,7 @@
     Edit the page content inline below.  When you are finished, use the save button at the bottom of the page.
 </div>
 
-<div class="container-fluid organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':bannerUrl}">
+<div class="container-fluid organisation-header organisation-banner image-box" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
 
     <div class="row-fluid">
         <ul class="breadcrumb demphasise">

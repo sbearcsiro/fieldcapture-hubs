@@ -332,29 +332,36 @@ if (typeof Object.create !== 'function') {
 function Documents() {
     var self = this;
     self.documents = ko.observableArray();
-    self.findDocumentByRole = function(documents, role) {
+    self.findDocumentByRole = function(documents, roleToFind) {
         for (var i=0; i<documents.length; i++) {
-            if (documents[i].role === role && documents[i].status !== 'deleted') {
+            var role = ko.utils.unwrapObservable(documents[i].role);
+            var status = ko.utils.unwrapObservable(documents[i].status);
+            if (role === roleToFind && status !== 'deleted') {
                 return documents[i];
             }
         }
         return null;
     };
-    self.logoUrl = ko.computed(function() {
+    self.logoUrl = ko.pureComputed(function() {
         var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
         return logoDocument ? logoDocument.url : null;
     });
-    self.bannerUrl = ko.computed(function() {
+    self.bannerUrl = ko.pureComputed(function() {
         var bannerDocument = self.findDocumentByRole(self.documents(), 'banner');
-        return bannerDocument ? 'url('+bannerDocument.url+')' : null;
+        return bannerDocument ? bannerDocument.url : null;
     });
-    self.mainImageUrl = ko.computed(function() {
+
+    self.asBackgroundImage = function(url) {
+        return url ? 'url('+url+')' : null;
+    };
+
+    self.mainImageUrl = ko.pureComputed(function() {
         var mainImageDocument = self.findDocumentByRole(self.documents(), 'mainImage');
         return mainImageDocument ? mainImageDocument.url : null;
     });
 
     self.removeBannerImage = function() {
-        self.deleteDocumentRole('banner');
+        self.deleteDocumentByRole('banner');
     };
 
     self.removeLogoImage = function() {

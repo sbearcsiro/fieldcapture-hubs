@@ -25,7 +25,8 @@
     <li class="active"><g:message code="g.edit"/></li>
 </ul>
 <form id="projectDetails" class="form-horizontal">
-<g:render template="details" model="${pageScope.variables}"/>
+    <g:set var="template" value="${project.isCitizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
+    <g:render template="${template}" model="${pageScope.variables}"/>
 </form>
 <div class="form-actions">
     <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>

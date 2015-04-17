@@ -1,4 +1,4 @@
-<div class="container-fluid project-header project-banner" data-bind="style:{'backgroundImage':bannerUrl}">
+<div class="container-fluid project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
     <div class="row-fluid">
         <ul class="breadcrumb">
             <li>

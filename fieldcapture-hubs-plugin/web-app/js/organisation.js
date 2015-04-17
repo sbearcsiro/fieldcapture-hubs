@@ -3,25 +3,26 @@
  * @param props JSON/javascript representation of the organisation.
  * @constructor
  */
-createOrganisationViewModel = function (props) {
-    var orgModel = new Documents();
-    orgModel.organisationId = props.organisationId;
-    orgModel.name = ko.observable(props.name);
-    orgModel.description = ko.observable(props.description).extend({markdown:true});
-    orgModel.url = ko.observable(props.url);
-    orgModel.newsAndEvents = ko.observable(props.newsAndEvents).extend({markdown:true});;
+OrganisationViewModel = function (props) {
+    var self = $.extend(this, new Documents());
+    
+    self.organisationId = props.organisationId;
+    self.name = ko.observable(props.name);
+    self.description = ko.observable(props.description).extend({markdown:true});
+    self.url = ko.observable(props.url);
+    self.newsAndEvents = ko.observable(props.newsAndEvents).extend({markdown:true});;
 
-    orgModel.breadcrumbName = ko.computed(function() {
-        return orgModel.name()?orgModel.name():'New Organisation';
+    self.breadcrumbName = ko.computed(function() {
+        return self.name()?self.name():'New Organisation';
     });
 
-    orgModel.detailsTemplate = ko.computed(function() {
-        return orgModel.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
+    self.detailsTemplate = ko.computed(function() {
+        return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
     });
 
-    orgModel.projects = props.projects;
+    self.projects = props.projects;
 
-    orgModel.deleteOrganisation = function() {
+    self.deleteOrganisation = function() {
         if (window.confirm("Delete this organisation?  Are you sure?")) {
             $.post(fcConfig.organisationDeleteUrl).complete(function() {
                     window.location = fcConfig.organisationListUrl;
@@ -30,29 +31,27 @@ createOrganisationViewModel = function (props) {
         };
     };
 
-    orgModel.editOrganisation = function() {
+    self.editOrganisation = function() {
        window.location = fcConfig.organisationEditUrl;
-
     };
 
-    orgModel.toJS = function() {
-        return ko.mapping.toJS(orgModel,
+    self.toJS = function() {
+        return ko.mapping.toJS(self,
             {ignore:['breadcrumbName', 'mainImageUrl', 'bannerUrl', 'logoUrl', 'detailsTemplate']}
         );
-
     };
 
-    orgModel.save = function() {
+    self.save = function() {
         if ($('.validationEngineContainer').validationEngine('validate')) {
 
-            var orgJs = orgModel.toJS();
+            var orgJs = self.toJS();
             var orgData = JSON.stringify(orgJs);
             $.ajax(fcConfig.organisationSaveUrl, {type:'POST', data:orgData, contentType:'application/json'}).done( function(data) {
                 if (data.errors) {
 
                 }
                 else {
-                    var orgId = orgModel.organisationId?orgModel.organisationId:data.organisationId;
+                    var orgId = self.organisationId?self.organisationId:data.organisationId;
                     window.location = fcConfig.organisationViewUrl+'/'+orgId;
                 }
 
@@ -64,13 +63,13 @@ createOrganisationViewModel = function (props) {
 
     if (props.documents !== undefined && props.documents.length > 0) {
         $.each(['logo', 'banner', 'mainImage'], function(i, role){
-            var document = orgModel.findDocumentByRole(props.documents, role);
+            var document = self.findDocumentByRole(props.documents, role);
             if (document) {
-                orgModel.documents.push(document);
+                self.documents.push(document);
             }
         });
     }
 
-    return orgModel;
+    return self;
 
 }
