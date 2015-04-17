@@ -340,21 +340,26 @@ function Documents() {
         }
         return null;
     };
-    self.logoUrl = ko.computed(function() {
+    self.logoUrl = ko.pureComputed(function() {
         var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
         return logoDocument ? logoDocument.url : null;
     });
-    self.bannerUrl = ko.computed(function() {
+    self.bannerUrl = ko.pureComputed(function() {
         var bannerDocument = self.findDocumentByRole(self.documents(), 'banner');
-        return bannerDocument ? 'url('+bannerDocument.url+')' : null;
+        return bannerDocument ? bannerDocument.url : null;
     });
-    self.mainImageUrl = ko.computed(function() {
+
+    self.asBackgroundImage = function(url) {
+        return url ? 'url('+url+')' : null;
+    };
+
+    self.mainImageUrl = ko.pureComputed(function() {
         var mainImageDocument = self.findDocumentByRole(self.documents(), 'mainImage');
         return mainImageDocument ? mainImageDocument.url : null;
     });
 
     self.removeBannerImage = function() {
-        self.deleteDocumentRole('banner');
+        self.deleteDocumentByRole('banner');
     };
 
     self.removeLogoImage = function() {
