@@ -9,8 +9,18 @@
 	</head>
 	<body>
         <r:require modules="jquery_bootstrap_datatable"/>
-        <h3>Project Audit - ${project.name}</h3>
-        <div class="well well-small">
+
+        <div class="row">
+            <a href="${createLink(action:'audit')}" class="btn"><i class="icon-backward"></i> Back</a>
+        </div>
+
+        <div class="row">
+             <h3>Project Audit - ${project.name}</h3>
+             <h4>Grant Id : ${project.grantId}</h4>
+             <h4>External Id : ${project.externalId}</h4>
+        </div>
+
+        <div class="row well well-small">
             <g:if test="${messages}">
                 <table style="width: 95%;" class="table table-striped table-bordered table-hover" id="project-list">
                     <thead>
@@ -45,11 +55,7 @@
             </g:else>
         </div>
 
-        <div class="row-fluid">
-            <div class="span12">
-                <a href="${createLink(action:'audit')}" class="btn">Back</a>
-            </div>
-        </div>
+
     </body>
 </html>
 
