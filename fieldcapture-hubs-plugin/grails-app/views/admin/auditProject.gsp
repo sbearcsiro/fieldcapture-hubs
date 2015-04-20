@@ -70,7 +70,7 @@
             "order": [[ 0, "desc" ]],
             "aoColumnDefs": [{ "sType": "date-uk", "aTargets": [0] }],
             "oLanguage": {
-                "sSearch": "Filter by: "
+                "sSearch": "Search: "
             }
         });
         $('.dataTables_filter input').attr("placeholder", "Date, Action, Type, Name, User");

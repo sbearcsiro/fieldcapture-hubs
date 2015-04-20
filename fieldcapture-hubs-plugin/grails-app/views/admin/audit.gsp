@@ -46,7 +46,7 @@
         $('#project-list').DataTable({
             "bSort": false,
             "oLanguage": {
-             "sSearch": "Filter by: "
+             "sSearch": "Search: "
             }
         });
         $('.dataTables_filter input').attr("placeholder", "Name or Description");
