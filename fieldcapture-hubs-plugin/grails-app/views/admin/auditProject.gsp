@@ -9,16 +9,20 @@
 	</head>
 	<body>
         <r:require modules="jquery_bootstrap_datatable"/>
-
-        <div class="row">
-            <a href="${createLink(action:'audit')}" class="btn"><i class="icon-backward"></i> Back</a>
-        </div>
+        <g:set var="searchTerm" value="${params.searchTerm}"/>
 
         <div class="row">
              <h3>Project Audit - ${project.name}</h3>
              <h4>Grant Id : ${project.grantId}</h4>
              <h4>External Id : ${project.externalId}</h4>
         </div>
+
+        <div class="row">
+            <div class="span12 text-right">
+                <a href="${createLink(action:'auditProjectSearch',params:[searchTerm: searchTerm])}" class="btn btn-default btn-small"><i class="icon-backward"></i> Back</a>
+            </div>
+        </div>
+
 
         <div class="row well well-small">
             <g:if test="${messages}">
@@ -32,6 +36,7 @@
                         <th></th>
                     </thead>
                     <tbody>
+                        <g:set var="project" value="${project}"/>
                         <g:each in="${messages}" var="message">
                             <tr>
                                 <td>${DateUtils.displayFormatWithTime(message?.date)}</td>
@@ -40,7 +45,7 @@
                                 <td>${message.entity?.name} ${message.entity?.type} <small>(${message.entityId})</small></td>
                                 <g:set var="displayName" value="${userMap[message.userId] ?: message.userId }" />
                                 <td><g:encodeAs codec="HTML">${displayName}</g:encodeAs></td>
-                                <td><a class="btn btn-small" href="${createLink(action:'auditMessageDetails', params:[id:message.id, compareId: message.entity.compareId])}">
+                                <td><a class="btn btn-small" href="${createLink(action:'auditMessageDetails', params:[projectId: project.projectId, id:message.id, compareId: message.entity.compareId, searchTerm: searchTerm])}">
                                         <i class="icon-search"></i>
                                     </a>
                                 </td>
