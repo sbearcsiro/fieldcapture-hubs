@@ -15,6 +15,7 @@
             <button class="btn" id="btnProjectSearch"><i class="icon-search"></i></button>
         </form>
         <g:if test="${results}">
+        <g:set var="searchTerm" value="${params.searchTerm}"/>
         <div class="well well-small">
             <table style="width: 95%;" class="table table-striped table-bordered table-hover" id="project-list">
                 <thead>
@@ -25,7 +26,7 @@
                     <g:each in="${results.hits?.hits}" var="hit">
                         <tr>
                             <td>
-                                <a href="${createLink(action:'auditProject', id:hit._source?.projectId)}">${hit._source?.name}</a>
+                                <a href="${createLink(action:'auditProject', params:[id:hit._source?.projectId, searchTerm:searchTerm])}">${hit._source?.name}</a>
                             </td>
                             <td>${hit._source?.description}</td>
                         </tr>
@@ -45,7 +46,7 @@
         $('#project-list').DataTable({
             "bSort": false,
             "oLanguage": {
-             "sSearch": "Filter by: "
+             "sSearch": "Search: "
             }
         });
         $('.dataTables_filter input').attr("placeholder", "Name or Description");

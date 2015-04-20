@@ -10,12 +10,12 @@
 	<body>
         <r:require modules="pretty_text_diff"/>
         <h4>Audit ${message.entityType?.substring(message.entityType?.lastIndexOf('.')+1)}: ${message?.entity?.name} ${message?.entity?.type} </h4>
-
-
+        <g:set var="projectId" value="${params.projectId}"/>
+        <g:set var="searchTerm" value="${params.searchTerm}"/>
 
     <div class="row-fluid">
         <div class="span6">
-            <h4>${userDetails?.displayName} <g:encodeAs codec="HTML">${message.userId ?: '<anon>'}</g:encodeAs> </h4>
+            <h4>Edited by: ${userDetails?.displayName} <g:encodeAs codec="HTML">${message.userId ?: '<anon>'}</g:encodeAs> </h4>
             <h5><small>${message?.eventType} : ${DateUtils.displayFormatWithTime(message?.date)}</small></h5>
         </div>
         <div class="span6 text-right">
@@ -29,6 +29,11 @@
                     <small><g:encodeAs codec="HTML">${message?.entityId}</g:encodeAs></small>
                 </h6>
             </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span12 text-right">
+            <a href="${createLink(action:'auditProject', params:[id: projectId,searchTerm:searchTerm])}" class="btn btn-default btn-small"><i class="icon-backward"></i> Back</a>
         </div>
     </div>
 
@@ -60,8 +65,6 @@
             </tbody>
         </table>
     </div>
-
-
 
     </body>
 </html>
