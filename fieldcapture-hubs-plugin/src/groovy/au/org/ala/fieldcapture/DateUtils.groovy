@@ -21,6 +21,7 @@ class DateUtils {
     private static DateTimeFormatter DATE_FORMATTER = ISODateTimeFormat.dateTimeNoMillis() //DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withZoneUTC()
     private static DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormat.forPattern("dd-MM-yyyy").withZone(DateTimeZone.default)
     private static DateTimeFormatter DISPLAY_DATE_FORMATTER_WITH_TIME = DateTimeFormat.forPattern("dd-MM-yyyy h:mm:ss aa").withZone(DateTimeZone.default)
+    private static DateTimeFormatter DISPLAY_DATE_FORMATTER_WITH_TIME_NOSPACE = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZone(DateTimeZone.default)
     private static DateTimeFormatter MONTH_ONLY_FORMATTER = DateTimeFormat.forPattern('MMMMM yyyy')
 
     /**
@@ -76,6 +77,10 @@ class DateUtils {
     static String displayFormatWithTime(String isoDate) {
         return DISPLAY_DATE_FORMATTER_WITH_TIME.print(parse(isoDate))
     }
+    static String displayFormatWithTimeNoSpace(String isoDate) {
+        return DISPLAY_DATE_FORMATTER_WITH_TIME_NOSPACE.print(parse(isoDate))
+    }
+
 
     static String isoToDisplayFormat(String isoDate) {
         return displayFormat(parse(isoDate))

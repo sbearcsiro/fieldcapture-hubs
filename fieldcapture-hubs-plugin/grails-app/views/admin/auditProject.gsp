@@ -39,7 +39,7 @@
                         <g:set var="project" value="${project}"/>
                         <g:each in="${messages}" var="message">
                             <tr>
-                                <td>${DateUtils.displayFormatWithTime(message?.date)}</td>
+                                <td><!-- ${DateUtils.displayFormatWithTimeNoSpace(message?.date)} --> ${DateUtils.displayFormatWithTime(message?.date)}</td>
                                 <td>${message.eventType}</td>
                                 <td>${message.entityType?.substring(message.entityType?.lastIndexOf('.')+1)}</td>
                                 <td>${message.entity?.name} ${message.entity?.type} <small>(${message.entityId})</small></td>
@@ -67,7 +67,8 @@
 <r:script type="text/javascript">
     $(document).ready(function() {
         $('#project-list').DataTable({
-            "bSort": false,
+            "order": [[ 0, "desc" ]],
+            "aoColumnDefs": [{ "sType": "date-uk", "aTargets": [0] }],
             "oLanguage": {
                 "sSearch": "Filter by: "
             }
