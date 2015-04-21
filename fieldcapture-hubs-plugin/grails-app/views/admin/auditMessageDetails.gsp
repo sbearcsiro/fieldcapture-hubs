@@ -37,34 +37,76 @@
         </div>
     </div>
 
-
-    <div class="well well-small" id="wrapper">
-        <div class="pull-right">
-            <table>
-                <tr>
-                    <td style="background: #c6ffc6;"></td><td>Inserted</td>
-                    <td style="background: #ffc6c6;"></td><td>Deleted</td>
-                </tr>
-            </table>
-        </div>
-        <table class="table table-striped table-bordered table-hover">
-            <thead>
+    <div class="row pull-right">
+        <table>
             <tr>
-                <th width="30%"><h4>Before</h4></th>
-                <th width="30%"><h4>After</h4></th>
-                <th width="40%"><h4>What's changed? </h4>
-                </th>
+                <td style="background: #c6ffc6;"></td><td>Inserted</td>
+                <td style="background: #ffc6c6;"></td><td>Deleted</td>
             </tr>
-            </thead>
-            <tbody>
-            <tr>
-                    <td class="original"><fc:renderJsonObject object="${compare?.entity}" /></td>
-                    <td class="changed"><fc:renderJsonObject object="${message?.entity}" /></td>
-                    <td style="line-height:1;" class="diff1"></td>
-                </tr>
-            </tbody>
         </table>
     </div>
+
+
+    <div class="well well-small">
+
+        <div id="content">
+            <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+                <li class="active"><a href="#minimal" data-toggle="tab">Overview</a></li>
+                <li><a href="#detailed" data-toggle="tab">Detailed</a></li>
+            </ul>
+            <div id="my-tab-content" class="tab-content">
+                <div class="tab-pane active" id="minimal">
+                    <table id="formatedJSON" class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th><h4>Fields</h4></th>
+                            <th><h4>What's changed?</h4></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <g:each var="obj" in="${message?.entity}">
+                            <tr>
+                                <td>${obj.key}</td>
+                                <td wrap class="diff1"></td>
+                                <td style="display:none" class="original">${compare?.entity[obj.key]}</td>
+                                <td style="display:none" class="changed">${obj.value}</td>
+
+                            </tr>
+                        </g:each>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane" id="detailed">
+                    <table id="wrapper" class="table table-striped table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th width="30%"><h4>Before</h4></th>
+                            <th width="30%"><h4>After</h4></th>
+                            <th width="40%"><h4>What's changed? </h4>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr>
+                            <td class="original"><fc:renderJsonObject object="${compare?.entity}" /></td>
+                            <td class="changed"><fc:renderJsonObject object="${message?.entity}" /></td>
+                            <td style="line-height:1;" class="diff1"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+    </div>
+
+
 
     </body>
 </html>
@@ -76,8 +118,15 @@
             cleanup: true,
             diffContainer: ".diff1"
         });
+        $("#formatedJSON tr").prettyTextDiff({
+            cleanup: true,
+            diffContainer: ".diff1"
+        });
+
         $( "#toggle-ids" ).click(function() {
             $( "#ids" ).toggle();
         });
+
+
     });
 </r:script>
