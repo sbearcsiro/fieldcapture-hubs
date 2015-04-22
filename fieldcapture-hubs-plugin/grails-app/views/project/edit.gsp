@@ -3,7 +3,15 @@
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload"/>
+    <r:script disposition="head">
+    var fcConfig = {
+        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
+        },
+        here = window.location.href;
+
+    </r:script>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects"/>
 </head>
 
 <body>
@@ -17,7 +25,8 @@
     <li class="active"><g:message code="g.edit"/></li>
 </ul>
 <form id="projectDetails" class="form-horizontal">
-<g:render template="details" model="${pageScope.variables}"/>
+    <g:set var="template" value="${project.isCitizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
+    <g:render template="${template}" model="${pageScope.variables}"/>
 </form>
 <div class="form-actions">
     <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>

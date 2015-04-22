@@ -27,7 +27,7 @@ class SettingService {
         return localHubConfig.get()
     }
 
-    def webService, cacheService
+    def webService, cacheService, cookieService
     def grailsApplication
 
     /**
@@ -44,9 +44,9 @@ class SettingService {
             hub = grailsApplication.config.app.default.hub?:'default'
         }
         else {
-            // Store the most recently accessed hub in flash scope so that 404 errors can be presented with the
+            // Store the most recently accessed hub in a cookie so that 404 errors can be presented with the
             // correct skin.
-            GrailsWebRequest.lookup()?.getFlashScope().put(LAST_ACCESSED_HUB, hub)
+            cookieService.setCookie(LAST_ACCESSED_HUB, hub, -1 /* -1 means the cookie expires when the browser is closed */)
         }
 
         def settings = getHubSettings(hub)

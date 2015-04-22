@@ -45,7 +45,7 @@
 <body>
 
 
-    <div class="container-fluid organisation-header organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
+    <div class="container-fluid organisation-header organisation-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
         <div class="row-fluid">
             <ul class="breadcrumb">
                 <li>

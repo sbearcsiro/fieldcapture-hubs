@@ -1,16 +1,17 @@
+<g:set var="wordForActivity" value="${wordForActivity?:'activity'}"/>
 <r:require module="datepicker"/>
 <!-- This section is bound to a secondary KO viewModel. The following line prevents binding
          to the main viewModel. -->
 <!-- ko stopBinding: true -->
 <div class="row-fluid space-after" id="activityListContainer">
-    <g:if test="${user.isEditor}">
+    <g:if test="${user?.isEditor}">
         <div class="pull-right space-after">
-            <button data-bind="click:newActivity" type="button" class="btn">Add new activity</button>
+            <button data-bind="click:newActivity" type="button" class="btn">Add new ${wordForActivity}</button>
         </div>
     </g:if>
-    <p data-bind="visible: activities().length > 0">Click column titles to sort. Click <i class="icon-edit no-pointer"></i> edit button to enter activity data.</p>
+    <p data-bind="visible: activities().length > 0">Click column titles to sort. Click <i class="icon-edit no-pointer"></i> edit button to enter ${wordForActivity} data.</p>
     <p data-bind="visible: activities().length == 0">
-        This project currently has no activities listed.
+        This project currently has no ${wordForActivity}s listed.
     </p>
     <table class="table table-condensed" id="activities">
         <thead>

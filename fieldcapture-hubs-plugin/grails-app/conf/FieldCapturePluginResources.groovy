@@ -52,7 +52,7 @@ modules = {
     }
 
     knockout {
-        resource url:'js/knockout-2.2.1.debug.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/knockout-3.3.0.min.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
@@ -184,8 +184,9 @@ modules = {
 
     projects {
         defaultBundle false
-        dependsOn 'knockout'
+        dependsOn 'knockout','attachDocuments','wmd'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
         resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
@@ -259,6 +260,12 @@ modules = {
         resource url:'slickgrid/images/header-columns-over-bg.gif', plugin:'fieldcapture-plugin'
 
 
+    }
+
+    pretty_text_diff{
+        resource url: 'js/prettytextdiff/jquery.pretty-text-diff.min.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/diff_match_patch.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/pretty_text_diff_basic.css', plugin: 'fieldcapture-plugin'
     }
 
 }

@@ -78,7 +78,7 @@
             <p>A search on the internet <a href="">such as this</a> will find several helpful tips on taking
             sharp macro natural photos.</p>
             <br/>
-            <h3>Help ne identify my sighting</h3>
+            <h3>Help me identify my sighting</h3>
             It can often be difficult to accurately identify a sighting out in the field and identifying organisms
             to species level can be challenging even for experts in some groups of organisms.
             <br/>
