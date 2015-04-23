@@ -81,6 +81,8 @@ class ProjectController {
     def create() {
         [
                 citizenScience: params.citizenScience,
+                organisationId: params.organisationId,
+                allowAdHocOrgNameOnCreate: false, // set true for MERIT
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
@@ -108,7 +110,9 @@ class ProjectController {
               it.urlAndroid,
               it.urlITunes,
               it.urlWeb,
-              imgUrl]
+              imgUrl,
+              it.organisationId
+             ]
          }];
     }
 

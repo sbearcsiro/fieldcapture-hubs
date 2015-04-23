@@ -11,7 +11,10 @@ class OrganisationController {
 
     def list() {
         def organisations = organisationService.list()
-        [organisations:organisations.list?:[]]
+        [organisations:organisations.list?:[],
+         user:userService.getUser(),
+         citizenScience: params.citizenScience
+        ]
     }
 
     def index(String id) {
@@ -34,6 +37,7 @@ class OrganisationController {
              dashboard: dashboard,
              roles:roles,
              user:user,
+             citizenScience: params.citizenScience,
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
              isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
         }

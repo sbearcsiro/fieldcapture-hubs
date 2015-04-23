@@ -29,7 +29,9 @@
     <div>
         <h2 style="display:inline">Registered Organisations</h2>
 
-        <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
+        <g:if test="${user}">
+            <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
+        </g:if>
     </div>
 
     <div class="row-fluid">

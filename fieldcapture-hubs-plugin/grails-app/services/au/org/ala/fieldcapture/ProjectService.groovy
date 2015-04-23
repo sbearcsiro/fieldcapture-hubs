@@ -69,21 +69,24 @@ class ProjectService {
 
         def activities = props.remove('selectedActivities')
 
+        // create a dataProvider in collectory to hold project meta data
         def collectoryProps = mapAttributesToCollectory(props)
         def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataProvider/', collectoryProps)
         def dataProviderId = extractCollectoryIdFromHttpHeaders(result?.headers)
         if (dataProviderId) {
+            // create a dataResource in collectory to hold project outputs
             props.dataProviderId = dataProviderId
             collectoryProps.remove('hiddenJSON')
             collectoryProps.dataProvider = [uid: dataProviderId]
-            if (props.organisationId) {
-                collectoryProps.institution = [uid: props.organisationId]
+            if (props.institutionId) {
+                collectoryProps.institution = [uid: props.institutionId]
             }
             collectoryProps.licenseType = props.dataSharingLicense
             result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/dataResource/', collectoryProps)
             props.dataResourceId = extractCollectoryIdFromHttpHeaders(result?.headers)
         }
 
+        // create a project in ecodata
         result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
         if (result?.resp?.projectId) {
             def projectId = result.resp.projectId

@@ -5,7 +5,7 @@
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
     <r:script disposition="head">
     var fcConfig = {
-        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;
@@ -38,6 +38,12 @@
                 <h3><g:message code="project.create.type.heading"/>:</h3>
 
                 <div class="control-group span12">
+                    <h4>
+                        Recipient:
+                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                        <span data-bind="visible:!organisationName()">Please select a valid organisation before creating a project.</span>
+                        <span data-bind="visible:!organisationId(),text:organisationName"></span>
+                    </h4>
                     <label class="control-label"
                            for="organisationId"><g:message code="project.details.org"/>:</label>
                     <select id="organisationId"
@@ -99,7 +105,7 @@
 
     <div class="form-actions" style="clear:both;">
         <button class="btn btn-default btn-prev"><span class="glyphicon glyphicon-arrow-left"></span><g:message code="g.prev"/></button>
-        <button class="btn btn-default btn-next" data-last="Save"><g:message code="g.next"/><span
+        <button class="btn btn-default btn-next" data-bind="visible:organisationName()" data-last="Save"><g:message code="g.next"/><span
                 class="glyphicon glyphicon-arrow-right"></span></button>
     </div>
 </div>
@@ -135,6 +141,9 @@ $(function(){
     });
 
     var viewModel = initViewModel();
+<g:if test="${organisationId}">
+    viewModel.organisationId("${organisationId}");
+</g:if>
 <g:if test="${citizenScience}">
     $("#isCitizenScience").prop("disabled", true);
     viewModel.isCitizenScience(true);

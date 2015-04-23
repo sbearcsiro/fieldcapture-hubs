@@ -4,9 +4,13 @@
         <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
             <h4>
                 Organisation:
-                <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}">
-                    <span data-bind="visible:organisationName(),text:organisationName"></span>
-                </a>
+                <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                <g:if test="${allowAdHocOrgNameOnCreate}">
+                    <g:textField class="span8" name="adHocOrgName" data-bind="visible:!organisationId(),value:adHocOrgName"/>
+                </g:if>
+                <g:else>
+                    <span data-bind="visible:!organisationId(),text:organisationName"></span>>
+                </g:else>
             </h4>
         </div>
         <h4 class="header"><g:message code="project.details.tell"/></h4>
