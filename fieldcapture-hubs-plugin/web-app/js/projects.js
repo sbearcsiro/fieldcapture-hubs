@@ -292,13 +292,13 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
 
     self.organisationId = ko.observable(project.organisationId);
-    self.institutionId = ko.computed(function() {
-        return self.organisationId()? organisationsMap[self.organisationId()].institutionId: "";
+    self.collectoryInstitutionId = ko.computed(function() {
+        return self.organisationId()? organisationsMap[self.organisationId()].collectoryInstitutionId: "";
     });
     self.adHocOrgName = ko.observable("");
     self.organisationName = ko.computed(function() {
         return self.organisationId()? organisationsMap[self.organisationId()].name
-          : (project.organisationName || self.adHocOrgName() || "");
+          : (project.organisationName || self.adHocOrgName());
     });
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents

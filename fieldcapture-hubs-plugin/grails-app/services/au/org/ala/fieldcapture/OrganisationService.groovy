@@ -6,6 +6,36 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 class OrganisationService {
 
     def grailsApplication, webService, projectService, userService
+
+
+    private def mapAttributesToCollectory(props) {
+        def mapKeyEcoDataToCollectory = [
+                description: 'pubDescription',
+                name: 'name',
+                mainImageDocument: '', // ignore this property
+                projects: '', // ignore this property
+                uploadConfig: '', // ignore this property
+                organisationId: 'uid',
+                url: 'websiteUrl'
+        ]
+        def collectoryProps = [
+                api_key: grailsApplication.config.api_key
+        ]
+        def hiddenJSON = [:]
+        props.each { k, v ->
+            if (v != null) {
+                def keyCollectory = mapKeyEcoDataToCollectory[k]
+                if (keyCollectory == null) // not mapped to first class collectory property
+                    hiddenJSON[k] = v
+                else if (keyCollectory != '') // not to be ignored
+                    collectoryProps[keyCollectory] = v
+            }
+        }
+//        collectoryProps.hiddenJSON = hiddenJSON
+//        println("collectory institution hiddenJSON = " + hiddenJSON)
+        collectoryProps
+    }
+
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
@@ -44,8 +74,24 @@ class OrganisationService {
     }
 
     def update(id, organisation) {
+
+        if (!id) { // create a institution in collectory to hold organisation meta data
+            def collectoryProps = mapAttributesToCollectory(organisation)
+            def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/insitution/', collectoryProps)
+            organisation.collectoryInstitutionId = webService.extractCollectoryIdFromHttpHeaders(result?.headers)
+        }
+
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
-        webService.doPost(url, organisation)
+        def result = webService.doPost(url, organisation)
+
+        if (id) { // update existing institution in collectory to hold organisation meta data
+            organisation = getRich(id) as Map
+            ['id','dateCreated','documents','lastUpdated','organisationId','projects','mainImageDocument','uploadConfig'].each { organisation.remove(it) }
+            def collectoryProps = mapAttributesToCollectory(organisation)
+            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/insitution/' + organisation.collectoryInstitutionId, collectoryProps)
+        }
+
+        result
     }
 
     def isUserAdminForOrganisation(organisationId) {

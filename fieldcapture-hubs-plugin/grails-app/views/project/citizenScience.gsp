@@ -31,7 +31,7 @@
             <div class="pull-right space-after">
                 <button data-bind="click:newPortal" type="button" class="btn"><g:message
                         code="project.citizenScience.portalLink"/></button>
-                <a href="${createLink(action: 'create', params: [citizenScience: true])}"
+                <a href="${createLink(controller:'organisation', action: 'list', params: [citizenScience: true])}"
                    class="btn btn-small">
                     <i class="icon-file"></i>&nbsp;<g:message code="project.citizenScience.registerLink"/></a>
             </div>

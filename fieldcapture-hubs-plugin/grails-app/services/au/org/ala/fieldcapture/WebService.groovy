@@ -40,6 +40,10 @@ class WebService {
     
     def grailsApplication
 
+    def extractCollectoryIdFromHttpHeaders(headers) {
+        return headers?.location?.first().toString().tokenize('/').last()
+    }
+
     def get(String url, boolean includeUserId) {
         def conn = null
         try {

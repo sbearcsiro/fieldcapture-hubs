@@ -39,16 +39,12 @@
 
                 <div class="control-group span12">
                     <h4>
-                        Recipient:
+                        Organisation:
                         <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
-                        <span data-bind="visible:!organisationName()">Please select a valid organisation before creating a project.</span>
-                        <span data-bind="visible:!organisationId(),text:organisationName"></span>
+                        <g:if test="${allowAdHocOrgNameOnCreate}">
+                            <g:textField class="span8" name="adHocOrgName" data-bind="visible:!organisationId(),value:adHocOrgName" data-validation-engine="validate[required]"/>
+                        </g:if>
                     </h4>
-                    <label class="control-label"
-                           for="organisationId"><g:message code="project.details.org"/>:</label>
-                    <select id="organisationId"
-                            data-validation-engine="validate[required]"
-                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:organisationId, optionsCaption: 'Choose...'"></select>
                 </div>
 
                 <div class="clearfix control-group span12">
@@ -105,7 +101,7 @@
 
     <div class="form-actions" style="clear:both;">
         <button class="btn btn-default btn-prev"><span class="glyphicon glyphicon-arrow-left"></span><g:message code="g.prev"/></button>
-        <button class="btn btn-default btn-next" data-bind="visible:organisationName()" data-last="Save"><g:message code="g.next"/><span
+        <button class="btn btn-default btn-next" data-last="Save"><g:message code="g.next"/><span
                 class="glyphicon glyphicon-arrow-right"></span></button>
     </div>
 </div>

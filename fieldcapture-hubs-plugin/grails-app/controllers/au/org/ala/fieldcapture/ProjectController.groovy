@@ -79,10 +79,14 @@ class ProjectController {
     }
 
     def create() {
+        boolean allowAdHocOrgNameOnCreate = true; // set true for MERIT
+        if (!allowAdHocOrgNameOnCreate && !params.organisationId)
+            render status: 400, text: 'Either an organisation id or ad hoc organisation name must be active'
+
         [
                 citizenScience: params.citizenScience,
                 organisationId: params.organisationId,
-                allowAdHocOrgNameOnCreate: false, // set true for MERIT
+                allowAdHocOrgNameOnCreate: allowAdHocOrgNameOnCreate,
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),

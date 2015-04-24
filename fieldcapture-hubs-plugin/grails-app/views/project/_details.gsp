@@ -5,12 +5,7 @@
             <h4>
                 Organisation:
                 <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
-                <g:if test="${allowAdHocOrgNameOnCreate}">
-                    <g:textField class="span8" name="adHocOrgName" data-bind="visible:!organisationId(),value:adHocOrgName"/>
-                </g:if>
-                <g:else>
-                    <span data-bind="visible:!organisationId(),text:organisationName"></span>>
-                </g:else>
+                <span data-bind="visible:!organisationId(),text:organisationName"></span>
             </h4>
         </div>
         <h4 class="header"><g:message code="project.details.tell"/></h4>
