@@ -70,7 +70,26 @@ class OrganisationService {
 
     def list() {
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
-        webService.getJson(url)
+        def organisations = webService.getJson(url)
+        def institutions = webService.getJson("${grailsApplication.config.collectory.baseURL}ws/institution/")
+        if (institutions instanceof List) {
+            // create any institutions in collectory which are not yet in ecodata as an organisation
+            def organisationsMap = [:]
+            organisations.list.each {
+                if (it.collectoryInstitutionId) organisationsMap.put(it.collectoryInstitutionId, it)
+            }
+            institutions.each({it ->
+                if (!organisationsMap[it.uid]) {
+                    def result = webService.doPost(url, [collectoryInstitutionId: it.uid,
+                                                        name: it.name,
+                                                        description: it.pubDescription?:"",
+                                                        url: it.websiteUrl])
+                    def orgId = result.resp?.organisationId
+                    if (orgId) organisations.list.push(webService.getJson(url + orgId))
+                }
+            })
+        }
+        organisations
     }
 
     def update(id, organisation) {
