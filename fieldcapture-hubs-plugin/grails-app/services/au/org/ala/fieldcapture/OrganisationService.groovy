@@ -75,9 +75,9 @@ class OrganisationService {
 
     def update(id, organisation) {
 
-        if (!id) { // create a institution in collectory to hold organisation meta data
+        if (!id) { // create an institution in collectory to hold organisation meta data
             def collectoryProps = mapAttributesToCollectory(organisation)
-            def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/insitution/', collectoryProps)
+            def result = webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/institution/', collectoryProps)
             organisation.collectoryInstitutionId = webService.extractCollectoryIdFromHttpHeaders(result?.headers)
         }
 
@@ -85,10 +85,11 @@ class OrganisationService {
         def result = webService.doPost(url, organisation)
 
         if (id) { // update existing institution in collectory to hold organisation meta data
-            organisation = getRich(id) as Map
+            url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
+            organisation = webService.getJson(url)
             ['id','dateCreated','documents','lastUpdated','organisationId','projects','mainImageDocument','uploadConfig'].each { organisation.remove(it) }
             def collectoryProps = mapAttributesToCollectory(organisation)
-            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/insitution/' + organisation.collectoryInstitutionId, collectoryProps)
+            webService.doPost(grailsApplication.config.collectory.baseURL + 'ws/institution/' + organisation.collectoryInstitutionId, collectoryProps)
         }
 
         result
