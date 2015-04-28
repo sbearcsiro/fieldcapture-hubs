@@ -63,6 +63,10 @@
 
         <g:render template="/shared/flashScopeMessage"/>
 
+        <div class="row-fluid" data-bind="visible:orgType() != ''">
+            <h4>Type</h4>
+            <span data-bind="text:orgType"></span>
+        </div>
         <div class="row-fluid" data-bind="template:detailsTemplate"></div>
 
         <g:if test="${organisation.projects}">

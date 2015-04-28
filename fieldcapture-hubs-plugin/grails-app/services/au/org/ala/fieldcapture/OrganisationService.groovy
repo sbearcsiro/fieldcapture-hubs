@@ -10,6 +10,7 @@ class OrganisationService {
 
     private def mapAttributesToCollectory(props) {
         def mapKeyEcoDataToCollectory = [
+                orgType: 'institutionType',
                 description: 'pubDescription',
                 name: 'name',
                 mainImageDocument: '', // ignore this property
