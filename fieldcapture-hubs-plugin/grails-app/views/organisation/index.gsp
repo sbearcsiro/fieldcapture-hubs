@@ -56,6 +56,11 @@
             </ul>
 
             <h2 data-bind="text:name"></h2>
+    <g:if test="${user}">
+            <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId, citizenScience: '${citizenScience}' == 'true'])}"
+               class="btn btn-small pull-right">
+                <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
+    </g:if>
 
         </div>
     </div>
@@ -85,9 +90,6 @@
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
-                        <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId, citizenScience: '${citizenScience}' == 'true'])}"
-                        class="btn btn-small">
-                            <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
                         <table id="projectList" class="table table-striped" style="width:100%;">
                             <thead></thead>
                             <tbody></tbody>
