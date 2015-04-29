@@ -1,9 +1,17 @@
 <%@ page import="net.sf.json.JSON; org.codehaus.groovy.grails.web.json.JSONArray" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta name="layout" content="${grailsApplication.config.layout.skin ?: 'main'}"/>
+    <meta name="layout" content="${hubConfig.skin}"/>
     <title><g:message code="g.new"/> | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap"/>
+    <r:script disposition="head">
+    var fcConfig = {
+        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
+        },
+        here = window.location.href;
+
+    </r:script>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,wizard,amplify,drawmap,jQueryFileUpload,projects"/>
 </head>
 
 <body>
@@ -34,7 +42,7 @@
                            for="organisationId"><g:message code="project.details.org"/>:</label>
                     <select id="organisationId"
                             data-validation-engine="validate[required]"
-                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisationId, optionsCaption: 'Choose...'"></select>
+                            data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:organisationId, optionsCaption: 'Choose...'"></select>
                 </div>
 
                 <div class="clearfix control-group span12">

@@ -1,10 +1,11 @@
 package au.org.ala.fieldcapture
 import grails.converters.JSON
+import org.joda.time.DateTime
 
 class ProjectController {
 
-    def projectService, metadataService, commonService, activityService, userService, webService, roleService, grailsApplication
-    def siteService
+    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
 
@@ -31,13 +32,7 @@ class ProjectController {
                 user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
                 user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
-            //log.debug activityService.activitiesForProject(id)
-            //todo: ensure there are no control chars (\r\n etc) in the json as
-            //todo:     this will break the client-side parser
-			TimeZone.setDefault(TimeZone.getTimeZone('UTC'))
-			def now = new Date()
-
-            [project: project,
+            def model = [project: project,
              activities: activityService.activitiesForProject(id),
              mapFeatures: commonService.getMapFeatures(project),
              isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
@@ -47,23 +42,36 @@ class ProjectController {
              activityTypes: projectService.activityTypesList(),
              metrics: projectService.summary(id),
              outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-             institutions: metadataService.institutionList(),
+             organisations: organisationService.list().list,
              programs: projectService.programsModel(),
-             today:now.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+             today:DateUtils.format(new DateTime()),
              themes:metadataService.getThemesForProject(project)
             ]
+
+            render view:projectView(project), model:model
         }
+    }
+
+    private String projectView(project) {
+        if (project.isExternal) {
+            if (project.isCitizenScience) {
+                return 'externalCitizenScienceProjectTemplate'
+            }
+        }
+        return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
     }
 
     @PreAuthorise
     def edit(String id) {
-        def project = projectService.get(id) as Map
+        def project = projectService.get(id, 'all')
+
+        def organisations = organisationService.list()
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
-             documents: siteInfo.documents?:'[]',
+             siteDocuments: siteInfo.documents?:'[]',
              site: siteInfo.site,
-             institutions: metadataService.institutionList(),
+             organisations: organisations.list,
              programs: metadataService.programsModel()]
         } else {
             forward(action: 'list', model: [error: 'no such id'])
@@ -73,11 +81,35 @@ class ProjectController {
     def create() {
         [
                 citizenScience: params.citizenScience,
-                documents: [],
-                institutions: metadataService.institutionList(),
+                siteDocuments: '[]',
+                organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
                 activityTypes: metadataService.activityTypesList()
         ]
+    }
+
+    def citizenScience() {
+        def user = userService.getUser()
+        def userId = user?.userId
+        [user: user,
+         projects: projectService.list(false, true).collect {
+             def imgUrl;
+             it.documents.each { doc ->
+                 if (doc.isPrimaryProjectImage) imgUrl = doc.url
+             }
+             // pass array instead of object to reduce size
+             [it.projectId,
+              it.coverage ?: '',
+              it.description,
+              userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
+              it.name,
+              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.status,
+              it.urlAndroid,
+              it.urlITunes,
+              it.urlWeb,
+              imgUrl]
+         }];
     }
 
     /**
@@ -125,10 +157,19 @@ class ProjectController {
 
         log.debug "json=" + (values as JSON).toString()
         log.debug "id=${id} class=${id?.getClass()}"
-        def projectSite = values.projectSite
-        values.remove("projectSite")
+        def projectSite = values.remove("projectSite")
+        def documents = values.remove('documents')
         def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
+        if (documents && !result.error) {
+            if (!id) id = result.resp.projectId
+            documents.each { doc ->
+                doc.projectId = id
+                doc.isPrimaryProjectImage = doc.role == 'mainImage'
+                if (doc.isPrimaryProjectImage) doc.public = true
+                documentService.saveStagedImageDocument(doc)
+            }
+        }
         if (projectSite && !result.error) {
             if (!id) id = result.resp.projectId
             if (!projectSite.projects)

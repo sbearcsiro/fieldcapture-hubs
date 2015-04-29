@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Grails Runtime Exception</title>
-		<meta name="layout" content="nrm">
+		<title>An error has occurred</title>
+		<meta name="layout" content="${hubConfig.skin}">
 		<link rel="stylesheet" href="${resource(dir: 'css', file: 'errors.css')}" type="text/css">
 	</head>
 	<body>

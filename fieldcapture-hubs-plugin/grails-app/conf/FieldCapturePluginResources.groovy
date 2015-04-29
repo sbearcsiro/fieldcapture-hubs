@@ -11,18 +11,13 @@ modules = {
         resource url: 'js/jquery.blockUI.js', plugin: 'fieldcapture-plugin'
     }
 
-    bootstrap {
-        // override declaration in ala-web-theme plugin, so BS code (CSS, JS) is not duplicated as app already has its own version
-        dependsOn 'app_bootstrap_responsive'
-    }
-
     defaultSkin {
         dependsOn 'application'
         resource url: 'css/default.skin.css', plugin: 'fieldcapture-plugin'
     }
 
     nrmSkin {
-        dependsOn 'application,bootstrap'
+        dependsOn 'application,app_bootstrap_responsive'
         resource url: [dir:'css/nrm/css', file:'screen.css', plugin: 'fieldcapture-plugin'], plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         resource url: [dir:'css/', file:'capture.css', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
         resource url: [dir:'css/nrm/images/', file:'AustGovt_inline_white_on_transparent.png', plugin: 'fieldcapture-plugin'],  plugin: 'fieldcapture-plugin'
@@ -57,7 +52,7 @@ modules = {
     }
 
     knockout {
-        resource url:'js/knockout-2.2.1.debug.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/knockout-3.3.0.min.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
@@ -82,8 +77,9 @@ modules = {
     app_bootstrap {
         dependsOn 'application'
         resource url: 'bootstrap/js/bootstrap.min.js', plugin: 'fieldcapture-plugin'
-        //resource url: 'bootstrap/css/bootstrap.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
-        resource url: 'bootstrap/less/bootstrap.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
+        // The less css resources plugin (1.3.3, resources plugin 1.2.14) is unable to resolve less files in a plugin so apps that use this plugin must supply their own bootstrap styles.
+        // However, commenting this section
+        resource url: [dir:'bootstrap/less/', file:'bootstrap.less', plugin: 'fieldcapture-plugin'],attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap'
         resource url: 'bootstrap/img/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
         resource url: 'bootstrap/img/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
         resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?
@@ -91,7 +87,6 @@ modules = {
 
     app_bootstrap_responsive {
         dependsOn 'app_bootstrap'
-        //resource url: '/bootstrap/css/bootstrap-responsive.min.css', plugin: 'fieldcapture-plugin', attrs:[media:'screen,print']
         resource url: 'bootstrap/less/responsive.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap_responsive'
         resource url: 'css/empty.css', plugin: 'fieldcapture-plugin' // needed for less-resources plugin ?
     }
@@ -114,6 +109,7 @@ modules = {
     }
 
     jquery_ui {
+        dependsOn 'jquery'
         resource url:'js/jquery-ui-1.9.2.custom.min.js', plugin: 'fieldcapture-plugin'
         resource url:'css/smoothness/jquery-ui-1.9.2.custom.min.css', plugin: 'fieldcapture-plugin'
         resource url:'css/jquery-autocomplete.css', plugin: 'fieldcapture-plugin'
@@ -142,7 +138,7 @@ modules = {
     }
 
     jQueryFileUpload {
-        dependsOn 'jquery_ui,bootstrap'
+        dependsOn 'jquery_ui'
         resource url: 'css/jquery.fileupload-ui.css', plugin: 'fieldcapture-plugin', disposition: 'head'
 
         resource url: 'js/fileupload-9.0.0/load-image.min.js', plugin: 'fieldcapture-plugin'
@@ -188,8 +184,9 @@ modules = {
 
     projects {
         defaultBundle false
-        dependsOn 'knockout'
+        dependsOn 'knockout','attachDocuments','wmd'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
         resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
@@ -217,14 +214,14 @@ modules = {
     }
 
     fuelux {
-        dependsOn 'bootstrap'
+        dependsOn 'app_bootstrap_responsive'
         resource 'fuelux/js/fuelux.min.js'
         resource 'fuelux/css/fuelux.min.css'
 
     }
 
     wizard {
-        dependsOn 'bootstrap'
+        dependsOn 'app_bootstrap_responsive'
         resource 'fuelux/js/wizard.js'
         resource 'fuelux/css/fuelux.min.css'
     }
@@ -263,6 +260,12 @@ modules = {
         resource url:'slickgrid/images/header-columns-over-bg.gif', plugin:'fieldcapture-plugin'
 
 
+    }
+
+    pretty_text_diff{
+        resource url: 'js/prettytextdiff/jquery.pretty-text-diff.min.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/diff_match_patch.js', plugin: 'fieldcapture-plugin'
+        resource url: 'js/prettytextdiff/pretty_text_diff_basic.css', plugin: 'fieldcapture-plugin'
     }
 
 }

@@ -261,3 +261,181 @@ function isValid(p, a) {
 	 return p;
 }
 
+function ProjectViewModel(project, isUserEditor, organisations) {
+    var self = $.extend(this, new Documents());
+
+    var organisationsMap = {}, organisationsRMap = {};
+    $.map(organisations, function(org) {
+        organisationsMap[org.organisationId] = org.name;
+        organisationsRMap[org.name] = org.organisationId;
+    });
+
+    self.name = ko.observable(project.name);
+    self.description = ko.observable(project.description).extend({markdown:true});;
+    self.externalId = ko.observable(project.externalId);
+    self.grantId = ko.observable(project.grantId);
+    self.manager = ko.observable(project.manager);
+    self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate: false});
+    self.plannedEndDate = ko.observable(project.plannedEndDate).extend({simpleDate: false});
+    self.funding = ko.observable(project.funding).extend({currency:{}});
+
+    self.regenerateProjectTimeline = ko.observable(false);
+    self.projectDatesChanged = ko.computed(function() {
+        return project.plannedStartDate != self.plannedStartDate() ||
+            project.plannedEndDate != self.plannedEndDate();
+    });
+    var projectDefault = "active";
+    if(project.status){
+        projectDefault = project.status;
+    }
+    self.status = ko.observable(projectDefault.toLowerCase());
+    self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
+
+    self.organisationId = ko.observable(project.organisationId);
+    self.organisationName = ko.computed(function() {
+        return project.organisationName || organisationsMap[self.organisationId()] || "";
+    });
+    self.serviceProviderName = ko.observable(project.serviceProviderName);
+    self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
+    self.associatedSubProgram = ko.observable(project.associatedSubProgram);
+    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});;
+    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});;
+
+    self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
+    self.dataSharingLicense = ko.observable(project.dataSharingLicense);
+    self.getInvolved = ko.observable(project.getInvolved);
+    self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.keywords = ko.observable(project.keywords);
+    self.projectPrivacy = ko.observable(project.projectPrivacy);
+    self.projectSiteId = project.projectSiteId;
+    self.projectType = ko.observable(project.projectType || "works");
+    self.scienceType = ko.observable(project.scienceType);
+    self.urlAndroid = ko.observable(project.urlAndroid);
+    self.urlITunes = ko.observable(project.urlITunes);
+    self.urlWeb = ko.observable(project.urlWeb);
+    self.isExternal = ko.observable(project.isExternal);
+
+    self.transients = {};
+    self.transients.programs = [];
+    self.transients.subprograms = {};
+    self.transients.subprogramsToDisplay = ko.computed(function () {
+        return self.transients.subprograms[self.associatedProgram()];
+    });
+    self.transients.dataSharingLicenses = [
+            {lic:'CC BY', name:'Creative Commons Attribution'},
+            {lic:'CC BY-NC', name:'Creative Commons Attribution-NonCommercial'},
+            {lic:'CC BY-SA', name:'Creative Commons Attribution-ShareAlike'},
+            {lic:'CC BY-NC-SA', name:'Creative Commons Attribution-NonCommercial-ShareAlike'}
+        ];
+    self.transients.organisations = organisations;
+
+    self.loadPrograms = function (programsModel) {
+        $.each(programsModel.programs, function (i, program) {
+            if (program.readOnly) {
+                return;
+            }
+            self.transients.programs.push(program.name);
+            self.transients.subprograms[program.name] = $.map(program.subprograms,function (obj, i){return obj.name});
+        });
+        self.associatedProgram(project.associatedProgram); // to trigger the computation of sub-programs
+    };
+    self.removeTransients = function (jsData) {
+        delete jsData.transients;
+        return jsData;
+    };
+
+    // settings
+    self.saveSettings = function () {
+        if ($('#settings-validation').validationEngine('validate')) {
+
+            // only collect those fields that can be edited in the settings pane
+            var jsData = {
+                name: self.name(),
+                description: self.description(),
+                externalId: self.externalId(),
+                grantId: self.grantId(),
+                manager: self.manager(),
+                plannedStartDate: self.plannedStartDate(),
+                plannedEndDate: self.plannedEndDate(),
+                organisationId: self.organisationId(),
+                organisationName: self.organisationName(),
+                serviceProviderName: self.serviceProviderName(),
+                associatedProgram: self.associatedProgram(),
+                associatedSubProgram: self.associatedSubProgram(),
+                funding: new Number(self.funding())
+            };
+            if (self.regenerateProjectTimeline()) {
+                var dates = {
+                    plannedStartDate: self.plannedStartDate(),
+                    plannedEndDate: self.plannedEndDate()
+                };
+                addTimelineBasedOnStartDate(dates);
+                jsData.timeline = dates.timeline;
+            }
+            // this call to stringify will make sure that undefined values are propagated to
+            // the update call - otherwise it is impossible to erase fields
+            var json = JSON.stringify(jsData, function (key, value) {
+                return value === undefined ? "" : value;
+            });
+            var id = "${project?.projectId}";
+            $.ajax({
+                url: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+                type: 'POST',
+                data: json,
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.error) {
+                        showAlert("Failed to save settings: " + data.detail + ' \n' + data.error,
+                            "alert-error","save-result-placeholder");
+                    } else {
+                        showAlert("Project settings saved","alert-success","save-result-placeholder");
+                    }
+                },
+                error: function (data) {
+                    var status = data.status;
+                    alert('An unhandled error occurred: ' + data.status);
+                }
+            });
+        }
+    };
+
+    // documents
+
+    self.addDocument = function(doc) {
+        // check permissions
+        if ((isUserEditor && doc.role !== 'approval') ||  doc.public) {
+            self.documents.push(new DocumentViewModel(doc));
+        }
+    };
+    self.attachDocument = function() {
+
+        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information'},{key:'projectId', value:project.projectId}), '#attachDocument')
+            .done(function(result){self.documents.push(new DocumentViewModel(result))});
+    };
+    self.editDocumentMetadata = function(document) {
+        var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
+        showDocumentAttachInModal( url, document, '#attachDocument')
+            .done(function(result){
+                window.location.href = here; // The display doesn't update properly otherwise.
+            });
+    };
+    self.deleteDocument = function(document) {
+        var url = fcConfig.documentDeleteUrl+'/'+document.documentId;
+        $.post(url, {}, function() {self.documents.remove(document);});
+
+    };
+    // this supports display of the project's primary images
+    this.primaryImages = ko.computed(function () {
+        var pi = $.grep(self.documents(), function (doc) {
+            return ko.utils.unwrapObservable(doc.isPrimaryProjectImage);
+        });
+        return pi.length > 0 ? pi : null;
+    });
+
+    if (project.documents) {
+        $.each(project.documents, function(i, doc) {
+            self.addDocument(doc);
+        });
+    }
+};
+
