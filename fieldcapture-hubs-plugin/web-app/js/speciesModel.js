@@ -89,7 +89,7 @@ var SpeciesViewModel = function(data, speciesLists) {
 
             var profileUrl = fcConfig.bieUrl + '/species/' + self.guid();
             $.ajax({
-                url: fcConfig.speciesProfileUrl+'/' + self.guid() + '.json',
+                url: fcConfig.speciesProfileUrl+'/' + self.guid(),
                 dataType: 'json',
                 success: function (data) {
                     var profileInfo = '<a href="'+profileUrl+'" target="_blank">';
