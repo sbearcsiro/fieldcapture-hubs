@@ -96,7 +96,7 @@
     </div>
     <div class="pill-content">
         <div class="pill-pane active" id="about">
-            <div class="row-fluid" data-bind="template:detailsTemplate"></div>
+            <g:render template="aboutCitizenScienceProject"/>
         </div>
         <div class="pill-pane" id="news">
             <div class="row-fluid">
@@ -135,68 +135,6 @@
     </div>
 
 </div>
-<script id="hasMainImageTemplate" type="text/html">
-<span class="span3">
-    <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-</span>
-
-<span class="span6">
-    <h4>Description</h4>
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-    <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-</span>
-
-</script>
-<script id="noMainImageTemplate" type="text/html">
-<span class="span3">
-    <div class="well">
-
-
-        <div class="row-fluid" data-bind="visible:urlWeb">
-            <div class="span6">
-                <label>Project web site:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlAndroid">
-            <div class="span6">
-                <label>Android app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlITunes">
-            <div class="span6">
-                <label>iTunes app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlITunes"></span>
-            </div>
-        </div>
-    </div>
-</span>
-
-<span class="span6">
-
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-
-</span>
-<span class="span3">
-    <div class="well">
-        <div class="well-title">Get Involved!</div>
-        <div data-bind="visible:getInvolved(), text:getInvolved"></div>
-        <hr/>
-        <div style="padding-bottom:5px;">To start contributing:</div>
-        <button class="btn btn-primary">Sign in</button> OR
-        <button class="btn btn-primary">Register</button>
-
-    </div>
-</span>
-
-</script>
 <r:script>
     $(function() {
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;

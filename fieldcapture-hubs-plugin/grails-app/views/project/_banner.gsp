@@ -1,11 +1,14 @@
 <style type="text/css">
     .logo {
         height:75px;
-        margin-right:10px;
+
+        margin-left:10px;
+        margin-bottom:10px;
         float:left;
     }
     .header-text {
         float:left;
+        margin-left:10px;
     }
     .header-text h2,.header-text h4 {
         margin-top: 0;
@@ -15,9 +18,10 @@
         font-weight: 300;
         margin-left: 5px;
     }
+
 </style>
-<div class="container-fluid project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
-    <div class="row-fluid">
+<div class="project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
+    <div class="row-fluid" style="margin-left:10px;">
         <ul class="breadcrumb">
             <li>
                 <g:link controller="home">Home</g:link> <span class="divider">/</span>
@@ -26,7 +30,7 @@
             <li class="active" data-bind="text:name"/>
         </ul>
     </div>
-    <div class="row-fluid">
+    <div class="row-fluid ">
         <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
         <div class="header-text">
             <h2 data-bind="text:name"></h2>
