@@ -50,7 +50,7 @@ grails.mime.types = [
 ]
 grails.resources.resourceLocatorEnabled = true
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
-grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/bootstrap/**', '/bootstrap-datepicker/**', '/fancybox/**', '/fuelux/**', '/slickgrid/**']
+grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/bootstrap/**', '/bootstrap-datepicker/**', '/fancybox/**', '/fuelux/**', '/slickgrid/**', '/slider-pro-master/**']
 
 // URL Mapping Cache Max Size, defaults to 5000
 //grails.urlmapping.cache.maxsize = 1000
