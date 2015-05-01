@@ -41,7 +41,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
 </head>
 <body>
 
@@ -63,81 +63,90 @@
         </div>
     </div>
 
-    <div class="row-fluid" data-bind="template:detailsTemplate"></div>
+    <div id="carousel" class="row-fluid slider-pro" data-bind="visible:mainImageUrl()">
+        <div class="sp-slides">
 
-</div>
-<script id="hasMainImageTemplate" type="text/html">
-<span class="span3">
-    <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-</span>
+            <div class="sp-slide">
+                <img class="sp-image" data-bind="attr:{'data-src':mainImageUrl}"/>
 
-<span class="span6">
-    <h4>Description</h4>
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-    <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-</span>
+                <p class="sp-layer sp-white sp-padding"
+                   data-position="topLeft" data-width="100%"
+                   data-show-transition="down" data-show-delay="100" data-hide-transition="up">
+                    <strong>Get involved!</strong> Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a>
+                </p>
 
-</script>
-<script id="noMainImageTemplate" type="text/html">
-
-
-<span class="span6">
-
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-
-</span>
-<span class="span3">
-    <div class="well">
-        <div class="well-title">Get Involved!</div>
-        <div data-bind="visible:getInvolved(), text:getInvolved"></div>
-        <hr/>
-        <div style="padding-bottom:5px;">Visit the project website to get started!</div>
-        <div class="row-fluid" data-bind="visible:urlWeb">
-            <div class="span6">
-                <label>Project web site:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
             </div>
         </div>
-        <div class="row-fluid" data-bind="visible:urlAndroid">
-            <div class="span6">
-                <label>Android app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlITunes">
-            <div class="span6">
-                <label>iTunes app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlITunes"></span>
-            </div>
-        </div>
-
     </div>
-</span>
 
-</script>
+    <div id="weburl" data-bind="visible:!mainImageUrl()">
+        <div data-bind="visible:urlWeb()"><strong>Get involved!</strong> Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></div>
+    </div>
+
+    <hr/>
+    <div class="row-fluid">
+        <span class="span6">
+            <div class="well">
+                <div class="well-title">About us</div>
+                <span data-bind="html:description.markdownToHtml()"></span>
+            </div>
+        </span>
+        <span class="span6">
+            <div class="well">
+                <div class="well-title">Get Involved!</div>
+                <div data-bind="visible:getInvolved(), text:getInvolved"></div>
+                <hr/>
+                <div style="padding-bottom:5px;">Visit the project website to get started!</div>
+                <div class="row-fluid" data-bind="visible:urlWeb">
+                    <div class="span6">
+                        <label>Project web site:</label>
+                    </div>
+                    <div class="span6">
+                        <span data-bind="text:urlWeb"></span>
+                    </div>
+                </div>
+                <div class="row-fluid" data-bind="visible:urlAndroid">
+                    <div class="span6">
+                        <label>Android app:</label>
+                    </div>
+                    <div class="span6">
+                        <span data-bind="text:urlWeb"></span>
+                    </div>
+                </div>
+                <div class="row-fluid" data-bind="visible:urlITunes">
+                    <div class="span6">
+                        <label>iTunes app:</label>
+                    </div>
+                    <div class="span6">
+                        <span data-bind="text:urlITunes"></span>
+                    </div>
+                </div>
+
+            </div>
+        </span>
+    </div>
+</div>
+
 <r:script>
     $(function() {
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
-        var ViewModel = function() {
-            var self = this;
-            $.extend(this, projectViewModel);
+        ko.applyBindings(projectViewModel);
 
-            this.detailsTemplate = ko.computed(function() {
-                return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
+        if (projectViewModel.mainImageUrl()) {
+            $( '#carousel' ).sliderPro({
+                width: '100%',
+                height: 500,
+                arrows: false,
+                buttons: false,
+                waitForLayers: true,
+                fade: true,
+                autoplay: false,
+                autoScaleLayers: false
             });
         }
-        ko.applyBindings(new ViewModel());
-
-        initialiseSites(project.sites);
     });
 </r:script>
 </body>
