@@ -8,7 +8,8 @@
     <r:script disposition="head">
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
-        projectUpdateUrl: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+        projectAjaxUpdateUrl:"${createLink(action:'ajaxUpdate', id:project.projectId)}",
+        projectEditUrl:"${createLink(action:'edit', id:project.projectId)}",
         sitesDeleteUrl: "${createLink(controller: 'site', action: 'ajaxDeleteSitesFromProject', id:project.projectId)}",
         siteDeleteUrl: "${createLink(controller: 'site', action: 'ajaxDeleteSiteFromProject', id:project.projectId)}",
         siteViewUrl: "${createLink(controller: 'site', action: 'index')}",
@@ -60,7 +61,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
 </head>
 <body>
 
@@ -88,7 +89,7 @@
                 <a href="#about" data-toggle="pill">About</a>
             </li>
             <li><a href="#news" data-toggle="pill">News</a></li>
-            <li><a href="#records" data-toggle="pill">Records</a></li>
+            <li><a href="#surveys" data-toggle="pill">Surveys</a></li>
             <li><a href="#locations" data-toggle="pill">Locations</a></li>
             <li><a href="#documents" data-toggle="pill">Documents</a></li>
             <li><a href="#admin" data-toggle="pill">Admin</a></li>
@@ -96,7 +97,7 @@
     </div>
     <div class="pill-content">
         <div class="pill-pane active" id="about">
-            <div class="row-fluid" data-bind="template:detailsTemplate"></div>
+            <g:render template="aboutCitizenScienceProject"/>
         </div>
         <div class="pill-pane" id="news">
             <div class="row-fluid">
@@ -115,7 +116,7 @@
                 </span>
             </div>
         </div>
-        <div class="pill-pane" id="records">
+        <div class="pill-pane" id="surveys">
             <g:render template="/shared/activitiesList"
                       model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>
         </div>
@@ -128,75 +129,23 @@
             Documents
         </div>
         <div class="pill-pane" id="admin">
-            Admin
+            <h4>Administrator actions</h4>
+            <div class="row-fluid">
+                <p><button class="btn btn-small admin-action" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button> Edit the project details and content</p>
+                <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteProject"><i class="icon-remove icon-white"></i> Delete</button> Delete this project. <strong>This cannot be undone</strong></p></g:if>
+            </div>
+
+            <h3>Project Access</h3>
+            <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToProject'), entityId:project.projectId]"/>
+            <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:g.createLink(controller:'project', action:'getMembersForProjectId', id:project.projectId), removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromProject'), entityId:project.projectId, user:user]"/>
+
+
         </div>
 
 
     </div>
 
 </div>
-<script id="hasMainImageTemplate" type="text/html">
-<span class="span3">
-    <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-</span>
-
-<span class="span6">
-    <h4>Description</h4>
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-    <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-</span>
-
-</script>
-<script id="noMainImageTemplate" type="text/html">
-<span class="span3">
-    <div class="well">
-
-
-        <div class="row-fluid" data-bind="visible:urlWeb">
-            <div class="span6">
-                <label>Project web site:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlAndroid">
-            <div class="span6">
-                <label>Android app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlITunes">
-            <div class="span6">
-                <label>iTunes app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlITunes"></span>
-            </div>
-        </div>
-    </div>
-</span>
-
-<span class="span6">
-
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-
-</span>
-<span class="span3">
-    <div class="well">
-        <div class="well-title">Get Involved!</div>
-        <div data-bind="visible:getInvolved(), text:getInvolved"></div>
-        <hr/>
-        <div style="padding-bottom:5px;">To start contributing:</div>
-        <button class="btn btn-primary">Sign in</button> OR
-        <button class="btn btn-primary">Register</button>
-
-    </div>
-</span>
-
-</script>
 <r:script>
     $(function() {
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
@@ -207,13 +156,38 @@
             var self = this;
             $.extend(this, projectViewModel);
 
-            this.detailsTemplate = ko.computed(function() {
-                return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
-            });
+            self.editProject = function() {
+                window.location.href = fcConfig.projectEditUrl;
+            };
+            self.deleteProject = function() {
+                var message = "<span class='label label-important'>Important</span><p><b>This cannot be undone</b></p><p>Are you sure you want to delete this project?</p>";
+                bootbox.confirm(message, function(result) {
+                    if (result) {
+                        console.log("not implemented!");
+                    }
+                });
+            };
+
         }
         ko.applyBindings(new ViewModel());
+        if (projectViewModel.mainImageUrl()) {
+            $( '#carousel' ).sliderPro({
+                width: '100%',
+                height: 400,
+                arrows: false, // at the moment we only support 1 image
+                buttons: false,
+                waitForLayers: true,
+                fade: true,
+                autoplay: false,
+                autoScaleLayers: false,
+                touchSwipe:false // at the moment we only support 1 image
+            });
+        }
 
         initialiseSites(project.sites);
+    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+        populatePermissionsTable();
+    </g:if>
     });
 </r:script>
 </body>
