@@ -11,8 +11,11 @@ class OrganisationController {
 
     def list() {
         def organisations = organisationService.list()
+        def user = userService.getUser()
+        def userOrgIds = user? userService.getOrganisationIdsForUserId(user.userId): []
         [organisations:organisations.list?:[],
-         user:userService.getUser(),
+         user:user,
+         userOrgIds: userOrgIds,
          citizenScience: params.citizenScience
         ]
     }

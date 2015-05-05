@@ -78,8 +78,17 @@
     $(function () {
 
 
-        var OrganisationsViewModel = function(organisations) {
-            var self = this;
+        var OrganisationsViewModel = function(organisations, userOrgIds) {
+            var self = this, userOrgIdsMap = {}, userOrgs = [], otherOrgs = [];
+            $.each(userOrgIds, function(i, id) {
+                userOrgIdsMap[id] = true;
+            });
+            $.each(organisations, function(i, org) {
+                if (userOrgIdsMap[org.organisationId])
+                    userOrgs.push(new OrganisationViewModel(org));
+                else
+                    otherOrgs.push(new OrganisationViewModel(org));
+            });
 
             this.allOrganisations = ko.observableArray();
             $.each(organisations, function(i, org) {
@@ -91,12 +100,8 @@
 
             this.totalPages = ko.computed(function() {
                 var count = self.allOrganisations().length;
-                console.log(count);
                 var pageCount = Math.floor(count / self.organisationsPerPage);
-                console.log(pageCount);
-
                 return count % self.organisationsPerPage > 0 ? pageCount + 1 : pageCount;
-
             });
 
             this.currentPage = ko.computed(function() {
@@ -140,7 +145,8 @@
         };
 
         var organisations = <fc:modelAsJavascript model="${organisations}" default="${[]}"/>;
-        var organisationsViewModel = new OrganisationsViewModel(organisations);
+        var userOrgIds = <fc:modelAsJavascript model="${userOrgIds}" default="${[]}"/>;
+        var organisationsViewModel = new OrganisationsViewModel(organisations, userOrgIds);
 
         ko.applyBindings(organisationsViewModel);
 

@@ -40,10 +40,6 @@ class WebService {
     
     def grailsApplication
 
-    def extractCollectoryIdFromHttpHeaders(headers) {
-        return headers?.location?.first().toString().tokenize('/').last()
-    }
-
     def get(String url, boolean includeUserId) {
         def conn = null
         try {
@@ -258,7 +254,7 @@ class WebService {
             wr.flush()
             def resp = conn.inputStream.text
             wr.close()
-            return [resp: JSON.parse(resp?:"{}"), headers: conn.getHeaderFields()] // fail over to empty json object if empty response string otherwise JSON.parse fails
+            return [resp: JSON.parse(resp?:"{}"), statusCode: conn.responseCode] // fail over to empty json object if empty response string otherwise JSON.parse fails
         } catch (SocketTimeoutException e) {
             def error = [error: "Timed out calling web service. URL= ${url}."]
             log.error(error, e)

@@ -109,7 +109,7 @@ class ProjectController {
               it.description,
               userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
               it.name,
-              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.organisationName?:metadataService.getOrganisationName(it.organisationId),
               it.status,
               it.urlAndroid,
               it.urlITunes,
