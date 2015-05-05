@@ -531,6 +531,7 @@ function initSiteViewModel() {
             //TODO load this from config
             self.layers = ko.observable([
                 {id:'cl916', name:'NRM'},
+                {id:'cl2012', name:'NSW LLS Regions'},
                 {id:'cl1048', name:'IBRA 7 Regions'},
                 {id:'cl1049', name:'IBRA 7 Subregions'},
                 {id:'cl22',name:'Australian states'},
