@@ -6,6 +6,13 @@
     <r:script disposition="head">
     var fcConfig = {
         organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        spatialService: '${createLink(controller:'proxy',action:'feature')}',
+        intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
+        featuresService: "${createLink(controller: 'proxy', action: 'features')}",
+        featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+        spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
+        geocodeUrl: "${grailsApplication.config.google.geocode.url}",
+        siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;

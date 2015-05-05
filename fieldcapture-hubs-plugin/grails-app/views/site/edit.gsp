@@ -19,7 +19,34 @@
     }
     .no-border { border-top: none !important; }
   </style>
-  <r:require modules="knockout, jqueryValidationEngine, amplify, drawmap"/>
+    <r:script disposition="head">
+    var fcConfig = {
+        spatialService: '${createLink(controller:'proxy',action:'feature')}',
+        intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
+        featuresService: "${createLink(controller: 'proxy', action: 'features')}",
+        featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+        spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
+        geocodeUrl: "${grailsApplication.config.google.geocode.url}",
+        siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
+        <g:if test="${project}">
+            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'createForProject', params:[projectId:project.projectId,checkForState:true])}",
+            projectUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'project', action:'index', id:project.projectId)}",
+        </g:if>
+        <g:elseif test="${site}">
+            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'edit', id: site?.siteId, params:[checkForState:true])}",
+        </g:elseif>
+        <g:else>
+            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'create', params:[checkForState:true])}",
+        </g:else>
+        sitePageUrl : "${createLink(action: 'index', id: site?.siteId)}",
+        homePageUrl : "${createLink(controller: 'home', action: 'index')}",
+        ajaxUpdateUrl: "${createLink(action: 'ajaxUpdate', id: site?.siteId)}",
+        returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
+        },
+        here = window.location.href;
+
+    </r:script>
+  <r:require modules="knockout, jqueryValidationEngine, amplify, drawmap, projects"/>
 </head>
 <body>
     <div class="container-fluid validationEngineContainer" id="validation-container">
@@ -81,46 +108,30 @@
         var siteViewModel = initSiteViewModel();
         $('#cancel').click(function () {
             if(siteViewModel.saved()){
-                document.location.href = SERVERURL_CONF.sitePageUrl;
+                document.location.href = fcConfig.sitePageUrl;
             } else {
-                document.location.href = SERVERURL_CONF.homePageUrl;
+                document.location.href = fcConfig.homePageUrl;
             }
         });
-
-        var SERVERURL_CONF = {
-        <g:if test="${project}">
-            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'createForProject', params:[projectId:project.projectId,checkForState:true])}",
-            projectUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'project', action:'index', id:project.projectId)}",
-        </g:if>
-        <g:elseif test="${site}">
-            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'edit', id: site?.siteId, params:[checkForState:true])}",
-        </g:elseif>
-        <g:else>
-            pageUrl : "${grailsApplication.config.grails.serverName}${createLink(controller:'site', action:'create', params:[checkForState:true])}",
-        </g:else>
-            sitePageUrl : "${createLink(action: 'index', id: site?.siteId)}",
-            homePageUrl : "${createLink(controller: 'home', action: 'index')}",
-            ajaxUpdateUrl: "${createLink(action: 'ajaxUpdate', id: site?.siteId)}"
-        };
 
         $('#save').click(function () {
             if ($('#validation-container').validationEngine('validate')) {
                 var json = ko.toJSON(siteViewModel);
                 $.ajax({
-                    url: SERVERURL_CONF.ajaxUpdateUrl,
+                    url: fcConfig.ajaxUpdateUrl,
                     type: 'POST',
                     data: json,
                     contentType: 'application/json',
                     success: function (data) {
                         if(data.status == 'created'){
                         <g:if test="${project}">
-                            document.location.href = SERVERURL_CONF.projectUrl;
+                            document.location.href = fcConfig.projectUrl;
                         </g:if>
                         <g:else>
-                            document.location.href = SERVERURL_CONF.sitePageUrl + '/' + data.id;
+                            document.location.href = fcConfig.sitePageUrl + '/' + data.id;
                         </g:else>
                         } else {
-                            document.location.href = SERVERURL_CONF.sitePageUrl;
+                            document.location.href = fcConfig.sitePageUrl;
                         }
                     },
                     error: function (data) {

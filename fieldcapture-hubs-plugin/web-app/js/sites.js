@@ -1,18 +1,431 @@
 
-var Site = function (site, feature) {
-    var self = this;
-    this.name = ko.observable(site.name);
-    this.siteId = site.siteId;
-    this.state = ko.observable('');
-    this.nrm = ko.observable('');
-    this.address = ko.observable("");
-    this.feature = feature;
-    this.setAddress = function (address) {
+var SiteViewModel = function (site, feature) {
+    var self = $.extend(this, new Documents());
+
+    self.siteId = site.siteId;
+    self.name = ko.observable(site.name);
+    self.externalId = ko.observable(site.externalId);
+    self.context = ko.observable(site.context);
+    self.type = ko.observable(site.type);
+    self.area = ko.observable(site.area);
+    self.description = ko.observable(site.description);
+    self.notes = ko.observable(site.notes);
+    self.extent = ko.observable(new EmptyLocation());
+    self.state = ko.observable('');
+    self.nrm = ko.observable('');
+    self.address = ko.observable("");
+    self.feature = feature;
+    self.projects = site.projects || [];
+
+    self.setAddress = function (address) {
         if (address.indexOf(', Australia') === address.length - 11) {
             address = address.substr(0, address.length - 11);
         }
         self.address(address);
     };
+    self.poi = ko.observableArray(site.poi || []);
+
+    self.addPOI = function(poi) {
+        self.poi.push(poi);
+
+    };
+    self.removePOI = function(poi){
+        if (poi.hasPhotoPointDocuments) {
+            return;
+        }
+        self.poi.remove(poi);
+    };
+    self.toJSON = function(){
+        var js = ko.toJS(self);
+        delete js.drawnShape;
+        delete js.projectList;
+        return js;
+    };
+    /** Check if the supplied POI has any photos attached to it */
+    self.hasPhotoPointDocuments = function(poi) {
+        var hasDoc = false;
+        $.each(self.documents, function(i, doc) {
+            if (doc.poiId === poi.poiId) {
+                hasDoc = true;
+                return false;
+            }
+        });
+        return hasDoc;
+    };
+    self.saved = function(){
+        return self.siteId();
+    };
+    self.loadPOI = function (pois) {
+        if (!pois) {
+            return;
+        }
+        $.each(pois, function (i, poi) {
+            self.poi.push(new POI(poi, self.hasDocuments(poi)));
+        });
+    };
+    self.loadExtent = function(){
+        console.log('Loading the extent.....');
+        var geometry;
+        if(site && site.extent) {
+            var extent = site.extent;
+            console.log('Loading the extent source.....' + extent.source);
+            console.log(extent.geometry);
+            switch (extent.source) {
+                case 'point':   self.extent(new PointLocation(extent.geometry)); break;
+                case 'pid':     self.extent(new PidLocation(extent.geometry)); break;
+                case 'upload':  self.extent(new UploadLocation()); break;
+                case 'drawn':   self.extent(new DrawnLocation(extent.geometry)); break;
+            }
+            console.log('Setting the extent .....' + extent);
+        } else {
+            console.log('Initialising dummy extent....');
+            self.extent(new EmptyLocation());
+        }
+    };
+
+    self.updateExtent = function(event){
+        console.log('Updating the extent: ' + self.extent().source());
+        switch (self.extent().source()) {
+            case 'point':
+                if(site && site.extent) {
+                    self.extent(new PointLocation(site.extent.geometry));
+                } else {
+                    self.extent(new PointLocation({}));
+                }
+                break;
+            case 'pid':
+                if(site && site.extent) {
+                    self.extent(new PidLocation(site.extent.geometry));
+                } else {
+                    self.extent(new PidLocation({}));
+                }
+                break;
+            case 'upload': self.extent(new UploadLocation({})); break;
+            case 'drawn':
+                //breaks the edits....
+                self.extent(new DrawnLocation({}));
+                console.log(self.extent());
+                break;
+            default: self.extent(new EmptyLocation());
+        }
+        return self.extent().source();
+    };
+
+    self.refreshGazInfo = function() {
+
+        var geom = self.extent().geometry();
+        var lat, lng;
+        if (geom.type === 'Point') {
+            lat = self.extent().geometry().decimalLatitude();
+            lng = self.extent().geometry().decimalLongitude();
+        }
+        else if (geom.centre !== undefined) {
+            lat = self.extent().geometry().centre()[1];
+            lng = self.extent().geometry().centre()[0];
+        }
+        else {
+            // No coordinates we can use for the lookup.
+            return;
+        }
+
+        $.ajax({
+            url: fcConfig.siteMetaDataUrl + "?lat=" + lat + "&lon=" + lng,
+            dataType: "json",
+            async: false
+        })
+            .done(function (data) {
+                var geom = self.extent().geometry();
+                for (var name in data) {
+                    if (data.hasOwnProperty(name) && geom.hasOwnProperty(name)) {
+                        geom[name](data[name]);
+                    }
+                }
+            });
+
+        //do the google geocode lookup
+        $.ajax({
+            url: fcConfig.geocodeUrl + lat + "," + lng,
+            async: false
+        }).done(function (data) {
+            if (data.results.length > 0) {
+                console.log('Setting locality - ' + data.results[0].formatted_address);
+                self.extent().geometry().locality(data.results[0].formatted_address);
+            }
+        });
+    }
+
+};
+
+var POI = function (l, hasDocuments) {
+    var self = this;
+    self.poiId = ko.observable(exists(l, 'poiId'));
+    self.name = ko.observable(exists(l,'name'));
+    self.type = ko.observable(exists(l,'type'));
+    self.hasDocuments = hasDocuments;
+    var storedGeom;
+    if(l !== undefined){
+        storedGeom = l.geometry;
+    }
+    self.dragEvent = function(lat,lng){
+        console.log("New lat lng " + lat + ", " + lng);
+        self.geometry().decimalLatitude(lat);
+        self.geometry().decimalLongitude(lng);
+    }
+    self.description = ko.observable(exists(l,'description'));
+    self.geometry = ko.observable({
+        type: "Point",
+        decimalLatitude: ko.observable(exists(storedGeom,'decimalLatitude')),
+        decimalLongitude: ko.observable(exists(storedGeom,'decimalLongitude')),
+        uncertainty: ko.observable(exists(storedGeom,'uncertainty')),
+        precision: ko.observable(exists(storedGeom,'precision')),
+        datum: ko.observable(exists(storedGeom,'datum')),
+        bearing: ko.observable(exists(storedGeom,'bearing'))
+    });
+    self.hasCoordinate = function () {
+        var hasCoordinate = self.geometry().decimalLatitude() !== undefined
+            && self.geometry().decimalLatitude() !== ''
+            && self.geometry().decimalLongitude() !== undefined
+            && self.geometry().decimalLongitude() !== '';
+        if(hasCoordinate){
+            //removeMarkers();
+            siteViewModel.renderPOIs();
+        }
+        return hasCoordinate;
+    }
+    self.toJSON = function(){
+        var js = ko.toJS(self);
+        delete js.hasDocuments;
+        if(js.geometry.decimalLatitude !== undefined
+            && js.geometry.decimalLatitude !== ''
+            && js.geometry.decimalLongitude !== undefined
+            && js.geometry.decimalLongitude !== ''){
+            js.geometry.coordinates = [js.geometry.decimalLongitude, js.geometry.decimalLatitude]
+        }
+        return js;
+    }
+};
+
+var EmptyLocation = function () {
+    this.source = ko.observable('none');
+    this.geometry = ko.observable({type:'empty'});
+    self.renderMap = function(){}
+};
+var PointLocation = function (l) {
+    var self = this;
+    self.source = ko.observable('point');
+    self.geometry = ko.observable({
+        type: "Point",
+        decimalLatitude: ko.observable(exists(l,'decimalLatitude')),
+        decimalLongitude: ko.observable(exists(l,'decimalLongitude')),
+        uncertainty: ko.observable(exists(l,'uncertainty')),
+        precision: ko.observable(exists(l,'precision')),
+        datum: ko.observable('WGS84'), // only supporting WGS84 at the moment.
+        nrm: ko.observable(exists(l,'nrm')),
+        state: ko.observable(exists(l,'state')),
+        lga: ko.observable(exists(l,'lga')),
+        locality: ko.observable(exists(l,'locality')),
+        mvg: ko.observable(exists(l,'mvg')),
+        mvs: ko.observable(exists(l,'mvs'))
+    });
+    self.hasCoordinate = function () {
+        var hasCoordinate = self.geometry().decimalLatitude() !== undefined
+            && self.geometry().decimalLatitude() !== ''
+            && self.geometry().decimalLongitude() !== undefined
+            && self.geometry().decimalLongitude() !== '';
+        return hasCoordinate;
+    }
+
+    /**
+     * This is called only from a map drag event so we clear uncertaintly, precision and intercept data.
+     * The intercept data will be updated once the drag event ends
+     */
+    self.updateGeometry = function(latlng) {
+        var geom = self.geometry();
+        geom.decimalLatitude(latlng.lat());
+        geom.decimalLongitude(latlng.lng());
+        geom.uncertainty('');
+        geom.precision('');
+        self.clearGazInfo();
+    }
+    self.clearGazInfo = function() {
+        var geom = self.geometry();
+        geom.nrm('');
+        geom.state('');
+        geom.lga('');
+        geom.locality('');
+        geom.mvg('');
+        geom.mvs('');
+    }
+    self.renderMap = function(){
+        if(self.hasCoordinate()){
+            console.log('Rendering the point');
+            //addMarker(self.geometry().decimalLatitude(), self.geometry().decimalLongitude(), 'Extent of site');
+            showOnMap('point', self.geometry().decimalLatitude(), self.geometry().decimalLongitude(),'Extent of site');
+            zoomToShapeBounds();
+            showSatellite();
+
+        }
+    }
+
+    self.toJSON = function(){
+        var js = ko.toJS(self);
+        if(js.geometry.decimalLatitude !== undefined
+            && js.geometry.decimalLatitude !== ''
+            && js.geometry.decimalLongitude !== undefined
+            && js.geometry.decimalLongitude !== ''){
+            js.geometry.centre = [js.geometry.decimalLongitude, js.geometry.decimalLatitude]
+            js.geometry.coordinates = [js.geometry.decimalLongitude, js.geometry.decimalLatitude]
+        }
+        return js;
+    }
+};
+
+var DrawnLocation = function (l) {
+    var self = this;
+    self.source = ko.observable('drawn');
+    self.geometry = ko.observable({
+        type: ko.observable(exists(l,'type')),
+        centre: ko.observable(exists(l,'centre')),
+        radius: ko.observable(exists(l,'radius')),
+        lga: ko.observable(exists(l,'lga')),
+        state: ko.observable(exists(l,'state')),
+        locality: ko.observable(exists(l,'locality')),
+        nrm: ko.observable(exists(l,'nrm')),
+        mvg: ko.observable(exists(l,'mvg')),
+        mvs: ko.observable(exists(l,'mvs')),
+        areaKmSq: ko.observable(exists(l,'areaKmSq')),
+        coordinates: ko.observable(exists(l,'coordinates'))
+    });
+    self.updateGeom = function(l){
+        self.geometry().type(exists(l,'type'));
+        self.geometry().centre(exists(l,'centre'));
+        self.geometry().lga(exists(l,'lga'));
+        self.geometry().nrm(exists(l,'nrm'));
+        self.geometry().radius(exists(l,'radius'));
+        self.geometry().state(exists(l,'state'));
+        self.geometry().locality(exists(l,'locality'));
+        self.geometry().mvg(exists(l,'mvg'));
+        self.geometry().mvs(exists(l,'mvs'));
+        self.geometry().areaKmSq(exists(l,'areaKmSq'));
+        self.geometry().coordinates(exists(l,'coordinates'));
+    };
+    self.renderMap = function(elements){
+        console.log('Rendering map called...');
+        clearObjects();
+        var $drawLocationDiv = $(elements[1]);
+        if(self.geometry() != null && self.geometry().centre !== undefined){
+            $drawLocationDiv.find('.propertyGroup').css('display','none');
+            //clone the object to avoid side affects with mapping
+            switch (self.geometry().type) {
+                case 'Polygon': $drawLocationDiv.find('.polygonProperties').css('display','block'); break;
+                case 'Circle': $drawLocationDiv.find('.circleProperties').css('display','block'); break;
+                case 'Rectangle': $drawLocationDiv.find('.rectangleProperties').css('display','block'); break;
+            }
+        }
+    }
+};
+
+var PidLocation = function (l) {
+    var self = this;
+    self.source = ko.observable('pid');
+    self.geometry = ko.observable({
+        type : "pid",
+        pid : ko.observable(exists(l,'pid')),
+        name : ko.observable(exists(l,'name')),
+        fid : ko.observable(exists(l,'fid')),
+        layerName : ko.observable(exists(l,'layerName')),
+        area : ko.observable(exists(l,'area')),
+        nrm: ko.observable(exists(l,'nrm')),
+        state: ko.observable(exists(l,'state')),
+        lga: ko.observable(exists(l,'lga')),
+        locality: ko.observable(exists(l,'locality')),
+        centre:[]
+    });
+    self.refreshObjectList = function(){
+        console.log('Refreshing the layer object list for ' + self.chosenLayer());
+        self.layerObjects([]);
+        if(self.chosenLayer() !== undefined){
+            $.ajax({
+                url: fcConfig.featuresService + '?layerId=' +this.chosenLayer(),
+                dataType:'json'
+            }).done(function(data) {
+                self.layerObjects(data);
+                console.log('Refresh complete. Objects:' + data.length);
+            });
+        } else {
+            console.log('Refreshing the layer object list - no layer currently selected...');
+        }
+    }
+    //TODO load this from config
+    self.layers = ko.observable([
+        {id:'cl916', name:'NRM'},
+        {id:'cl1048', name:'IBRA 7 Regions'},
+        {id:'cl1049', name:'IBRA 7 Subregions'},
+        {id:'cl22',name:'Australian states'},
+        {id:'cl959', name:'Local Gov. Areas'}
+    ]);
+    self.chosenLayer = ko.observable(exists(l,'fid'));
+    self.layerObjects = ko.observable([]);
+    self.layerObject = ko.observable(exists(l,'pid'));
+    self.updateGeom = function(l){
+        //to be added
+    };
+    self.renderMap = function(){
+        console.log("Render map on PidLocation called...with PID id:" + self.geometry().pid())
+        if(self.geometry().pid() != null && self.geometry().pid() != '' ){
+            console.log("Rendering PID: " + self.geometry().pid());
+            clearObjectsAndShapes();
+            showObjectOnMap(self.geometry().pid());
+        }
+    }
+    self.setCurrentPID = function(){
+        self.refreshObjectList();
+        console.log('Refreshing the layer object list for ' + self.chosenLayer());
+        self.layerObjects([]);
+        if(self.chosenLayer() !== undefined){
+            $.ajax({
+                url: fcConfig.featuresService + '?layerId=' + this.chosenLayer(),
+                dataType:'json'
+            }).done(function(data) {
+                self.layerObjects(data);
+                console.log('Refresh complete. Objects:' + data.length);
+                self.layerObject(self.geometry().pid())
+            });
+        } else {
+            console.log('Refreshing the layer object list - no layer currently selected...');
+        }
+    }
+    self.updateSelectedPid = function(elements){
+        if(self.layerObject() !== undefined){
+            self.geometry().pid(self.layerObject())
+            self.geometry().fid(self.chosenLayer())
+
+            //additional metadata required from service layer
+            $.ajax({
+                url: fcConfig.featureService + '?featureId=' + self.layerObject(),
+                dataType:'json'
+            }).done(function(data) {
+                console.log('Retrieving details of ' + self.layerObject());
+                self.layerObject(self.geometry().pid())
+                self.geometry().name(data.name)
+                self.geometry().layerName(data.fieldname)
+                if(data.area_km !== undefined){
+                    console.log("Selected shape area: " + data.area_km);
+                    self.geometry().area(data.area_km)
+                }
+                self.renderMap();
+            });
+        }
+    }
+    self.toJSON = function(){
+        var js = ko.toJS(self);
+        delete js.layers;
+        delete js.layerObjects;
+        delete js.layerObject;
+        delete js.chosenLayer;
+        delete js.type;
+        return js;
+    }
 };
 
 var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
@@ -24,7 +437,7 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
         features = mapFeatures.features;
     }
     self.sites = $.map(sites, function (obj, i) {
-        return new Site(obj, features[i])
+        return new SiteViewModel(obj, features[i])
     });
     self.sitesFilter = ko.observable("");
     self.throttledFilter = ko.computed(self.sitesFilter).extend({throttle: 400});
@@ -169,3 +582,67 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     self.triggerGeocoding();
     self.displaySites();
 };
+
+function geoJsonToPath(geojson){
+    var coords = geojson.coordinates[0];
+    return coordArrayToPath(geojson.coordinates[0]);
+}
+
+function coordArrayToPath(coords){
+    var path = [];
+    for(var i = 0; i<coords.length; i++){
+        console.log(coords[i][1]+" : "+ coords[i][0]);
+        path.push(new google.maps.LatLng(coords[i][1],coords[i][0]));
+    }
+    return path;
+}
+
+/**
+ * Returns a GeoJson coordinate array for the polygon
+ */
+function polygonToGeoJson(path){
+    var firstPoint = path.getAt(0),
+        points = [];
+    path.forEach(function (obj, i) {
+        points.push([obj.lng(),obj.lat()]);
+    });
+    // a polygon array from the drawingManager will not have a closing point
+    // but one that has been drawn from a wkt will have - so only add closing
+    // point if the first and last don't match
+    if (!firstPoint.equals(path.getAt(path.length -1))) {
+        // add first points at end
+        points.push([firstPoint.lng(),firstPoint.lat()]);
+    }
+    var coordinates =  [points];
+    console.log(coordinates);
+    return coordinates;
+}
+
+function round(number, places) {
+    var p = places || 4;
+    return places === 0 ? number.toFixed() : number.toFixed(p);
+}
+
+function representsRectangle(path) {
+    // must have 5 points
+    if (path.getLength() !== 5) {
+        return false;
+    }
+    var arr = path.getArray();
+    if ($.isArray(arr[0])) {
+        return false;
+    }  // must be multipolygon (array of arrays)
+    if (arr[0].lng() != arr[1].lng()) {
+        return false;
+    }
+    if (arr[2].lng() != arr[3].lng()) {
+        return false;
+    }
+    if (arr[0].lat() != arr[3].lat()) {
+        return false;
+    }
+    if (arr[1].lat() != arr[2].lat()) {
+        return false;
+    }
+    return true
+}
