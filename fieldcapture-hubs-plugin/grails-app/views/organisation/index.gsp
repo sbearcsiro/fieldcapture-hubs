@@ -42,7 +42,7 @@
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine"/>
     <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
-<body>
+<g:if>
 
 
     <div class="container-fluid organisation-header organisation-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
@@ -797,7 +797,9 @@
 
             }
         });
+        <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable(fcConfig.organisationMembersUrl);
+        </g:if>
     });
 
 </r:script>

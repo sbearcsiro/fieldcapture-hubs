@@ -31,113 +31,84 @@
     }
     </style>
 
-    <!--[if gte IE 8]>
-        <style>
-           .thumbnail > img {
-                max-width: 400px;
-            }
-            .thumbnail {
-                max-width: 410px;
-            }
-        </style>
-    <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
 </head>
-<body>
-
 <g:render template="banner"/>
-<div class="container-fluid">
+
+<div class="row-fluid">
     <div class="row-fluid">
-        <div class="row-fluid">
-            <div class="clearfix">
-                <g:if test="${flash.errorMessage || flash.message}">
-                    <div class="span5">
-                        <div class="alert alert-error">
-                            <button class="close" onclick="$('.alert').fadeOut();" href="#">×</button>
-                            ${flash.errorMessage?:flash.message}
-                        </div>
+        <div class="clearfix">
+            <g:if test="${flash.errorMessage || flash.message}">
+                <div class="span5">
+                    <div class="alert alert-error">
+                        <button class="close" onclick="$('.alert').fadeOut();" href="#">×</button>
+                        ${flash.errorMessage?:flash.message}
                     </div>
-                </g:if>
+                </div>
+            </g:if>
 
-            </div>
         </div>
     </div>
-
-    <div class="row-fluid" data-bind="template:detailsTemplate"></div>
-
 </div>
-<script id="hasMainImageTemplate" type="text/html">
-<span class="span3">
-    <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-</span>
-
-<span class="span6">
-    <h4>Description</h4>
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-    <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-</span>
-
-</script>
-<script id="noMainImageTemplate" type="text/html">
-
-
-<span class="span6">
-
-    <div class="well" data-bind="html:description.markdownToHtml()"></div>
-
-</span>
-<span class="span3">
-    <div class="well">
-        <div class="well-title">Get Involved!</div>
-        <div data-bind="visible:getInvolved(), text:getInvolved"></div>
-        <hr/>
-        <div style="padding-bottom:5px;">Visit the project website to get started!</div>
-        <div class="row-fluid" data-bind="visible:urlWeb">
-            <div class="span6">
-                <label>Project web site:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
+<g:if test="${user?.isAdmin}">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <!-- content  -->
+            <ul class="nav nav-pills">
+                <li class="active">
+                    <a href="#about" data-toggle="pill">About</a>
+                </li>
+                <li><a href="#admin" data-toggle="pill">Admin</a></li>
+            </ul>
         </div>
-        <div class="row-fluid" data-bind="visible:urlAndroid">
-            <div class="span6">
-                <label>Android app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlWeb"></span>
-            </div>
-        </div>
-        <div class="row-fluid" data-bind="visible:urlITunes">
-            <div class="span6">
-                <label>iTunes app:</label>
-            </div>
-            <div class="span6">
-                <span data-bind="text:urlITunes"></span>
-            </div>
-        </div>
-
     </div>
-</span>
+    <div class="pill-content">
+        <div class="pill-pane active" id="about">
 
-</script>
+            <g:render template="aboutCitizenScienceProject"/>
+        </div>
+        <div class="pill-pane" id="admin">
+            <h4>Administrator actions</h4>
+            <div class="row-fluid">
+                <p><button class="btn btn-small admin-action" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button> Edit the project details and content</p>
+                <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteProject"><i class="icon-remove icon-white"></i> Delete</button> Delete this project. <strong>This cannot be undone</strong></p></g:if>
+            </div>
+
+            <h3>Project Access</h3>
+            <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToProject'), entityId:project.projectId]"/>
+            <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:g.createLink(controller:'project', action:'getMembersForProjectId', id:project.projectId), removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromProject'), entityId:project.projectId, user:user]"/>
+
+        </div>
+    </div>
+</g:if>
+<g:else>
+    <g:render template="aboutCitizenScienceProject"/>
+</g:else>
+
 <r:script>
     $(function() {
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
-        var ViewModel = function() {
-            var self = this;
-            $.extend(this, projectViewModel);
+        ko.applyBindings(projectViewModel);
 
-            this.detailsTemplate = ko.computed(function() {
-                return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
+        if (projectViewModel.mainImageUrl()) {
+            $( '#carousel' ).sliderPro({
+                width: '100%',
+                height: 400,
+                arrows: false, // at the moment we only support 1 image
+                buttons: false,
+                waitForLayers: true,
+                fade: true,
+                autoplay: false,
+                autoScaleLayers: false,
+                touchSwipe:false // at the moment we only support 1 image
             });
         }
-        ko.applyBindings(new ViewModel());
-
-        initialiseSites(project.sites);
+    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+        populatePermissionsTable();
+    </g:if>
     });
 </r:script>
 </body>

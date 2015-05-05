@@ -268,4 +268,12 @@ modules = {
         resource url: 'js/prettytextdiff/pretty_text_diff_basic.css', plugin: 'fieldcapture-plugin'
     }
 
+    sliderpro {
+        dependsOn 'jquery'
+        resource url: 'slider-pro-master/js/jquery.sliderPro.min.js', plugin: 'fieldcapture-plugin'
+        resource url: 'slider-pro-master/css/slider-pro.min.css', plugin: 'fieldcapture-plugin'
+        resource url: 'slider-pro-master/css/images/blank.gif', plugin: 'fieldcapture-plugin'
+
+    }
+
 }
