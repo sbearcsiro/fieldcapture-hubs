@@ -1,4 +1,4 @@
-var imageLocation = "${imageUrl}";
+
 /**
  * A view model to capture metadata about a document and manage progress / feedback as a file is uploaded.
  *
@@ -17,8 +17,9 @@ function DocumentViewModel (doc, owner, settings) {
         roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
         stages:[],
         showSettings: true,
-        thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText'
-    }
+        thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText',
+        imageLocation: fcConfig.imageLocation
+    };
     this.settings = $.extend({}, defaults, settings);
 
     //Associate project document to stages.
@@ -36,9 +37,9 @@ function DocumentViewModel (doc, owner, settings) {
     // the notes field can be used as a pseudo-document (eg a deferral reason) or just for additional metadata
     this.notes = ko.observable(doc.notes);
     this.filetypeImg = function () {
-        return imageLocation + "/" + iconnameFromFilename(self.filename());
+        return self.settings.imageLocation + "/" + iconnameFromFilename(self.filename());
     };
-    
+    this.status = ko.observable(doc.status || 'active');
     this.attribution = ko.observable(doc ? doc.attribution : '');
     this.license = ko.observable(doc ? doc.license : '');
     this.type = ko.observable(doc.type);
@@ -354,7 +355,10 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
 
 function findDocumentByRole(documents, role) {
     for (var i=0; i<documents.length; i++) {
-        if (documents[i].role === role && documents[i].status !== 'deleted') {
+        var docRole = ko.utils.unwrapObservable(documents[i].role);
+        var status = ko.utils.unwrapObservable(documents[i].status);
+
+        if (docRole === role && status !== 'deleted') {
             return documents[i];
         }
     }
@@ -364,7 +368,9 @@ function findDocumentByRole(documents, role) {
 function findDocumentById(documents, id) {
     if (documents) {
         for (var i=0; i<documents.length; i++) {
-            if (documents[i].documentId === id && documents[i].status !== 'deleted') {
+            var docId = ko.utils.unwrapObservable(documents[i].documentId);
+            var status = ko.utils.unwrapObservable(documents[i].status);
+            if (docId === id && status !== 'deleted') {
                 return documents[i];
             }
         }
