@@ -78,7 +78,7 @@
 
                         <div>
                             <h4>Define extent using:
-                            <g:select class="input-medium" data-bind="value: extent().source"
+                            <g:select class="input-medium" data-bind="value: extentSource"
                                       name='extentSource'
                                       from="['choose type','point','known shape','draw a shape']"
                                       keys="['none','point','pid','drawn']"/>
@@ -137,7 +137,7 @@
                             </ul>
                          </div>
 
-                         <div style="padding-top:10px;" data-bind="template: { name: updateExtent(), data: extent(), afterRender: extent().renderMap}"></div>
+                         <div style="padding-top:10px;" data-bind="template: { name: extent().source, data: extent, afterRender: extent().renderMap}"></div>
                         </div>
 
                     <div class="well well-small">
@@ -150,7 +150,7 @@
                             <div class="span12" data-bind="foreach: poi">
                                 <div>
                                     <div data-bind="template: { name: 'poi'}" ></div>
-                                    <button type="button" class="btn btn-danger" style="margin-bottom:20px;" data-bind="click: $parent.removePOI, visible:!hasDocuments">Remove</button>
+                                    <button type="button" class="btn btn-danger" style="margin-bottom:20px;" data-bind="click: $parent.removePOI, visible:!hasPhotoPointDocuments">Remove</button>
                                 </div>
                                 <hr/>
                             </div>
@@ -207,7 +207,7 @@
     <script type="text/html" id="poi">
     <div class="drawLocationDiv row-fluid">
         <div class="span12">
-            <div class="row-fluid alert" style="box-sizing:border-box;" data-bind="visible:hasDocuments">
+            <div class="row-fluid alert" style="box-sizing:border-box;" data-bind="visible:hasPhotoPointDocuments">
                 This point of interest has documents attached and cannot be removed.
             </div>
             <div class="row-fluid controls-row">
@@ -338,19 +338,10 @@
 <r:script>
 function initSiteViewModel() {
     var siteViewModel;
-    var DRAW_TOOL = {
-        drawnShape : null
-    };
+
     // server side generated paths & properties
     var SERVER_CONF = {
-    <g:if test="${project}">
-        projectList : ['${project.projectId}'],
-    </g:if>
-    <g:else>
-        projectList : ${projectList?:'[]'},
-    </g:else>
         siteData: ${site?:[] as grails.converters.JSON},
-        checkForState: ${params.checkForState?:'false'},
         spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
         featuresService: "${createLink(controller: 'proxy', action: 'features')}",
@@ -359,7 +350,7 @@ function initSiteViewModel() {
     };
 
     var savedSiteData = {
-        id: "${site?.id}",
+        siteId: "${site?.siteId}",
         name : "${site?.name?.encodeAsJavaScript()}",
         externalId : "${site?.externalId}",
         context : "${site?.context}",
@@ -381,12 +372,9 @@ function initSiteViewModel() {
 
     (function(){
 
-        function SiteViewModel2 (siteData) {
+        function SiteViewModelWithMapIntegration (siteData) {
             var self = $.extend(this, new SiteViewModel(siteData));
 
-            self.projectList = SERVER_CONF.projectList;
-            self.id = ko.observable(siteData.id);
-            self.projects = ko.observableArray(siteData.projects);
             self.renderPOIs = function(){
                // console.log('Rendering the POIs now');
                 removeMarkers();
@@ -399,17 +387,197 @@ function initSiteViewModel() {
                 //get the center of the map
                 var lngLat = getMapCentre();
                 var randomBit = (self.poi().length + 1) /1000;
-                self.addPOI(new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}, false));
-                self.renderPOIs();
+                var poi = new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}, false);
+                self.addPOI(poi);
+                self.watchPOIGeometryChanges(poi);
+
             };
             self.notImplemented = function () {
                 alert("Not implemented yet.")
             };
-        }
+
+            self.watchPOIGeometryChanges = function(poi) {
+                poi.geometry().decimalLatitude.subscribe(self.renderPOIs);
+                poi.geometry().decimalLongitude.subscribe(self.renderPOIs);
+            };
+            self.poi.subscribe(self.renderPOIs);
+            $.each(self.poi(), function(i, poi) {
+                self.watchPOIGeometryChanges(poi);
+            });
+
+            self.renderSavedShape = function(){
+                var currentDrawnShape = ko.toJS(self.extent().geometry);
+                //retrieve the current shape if exists
+                if(currentDrawnShape !== undefined){
+                    if(currentDrawnShape.type == 'Polygon'){
+                        showOnMap('polygon', geoJsonToPath(currentDrawnShape));
+                        zoomToShapeBounds();
+                    } else if(currentDrawnShape.type == 'Circle'){
+                        console.log('Redrawing circle');
+                        showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
+                        zoomToShapeBounds();
+                    } else if(currentDrawnShape.type == 'Rectangle'){
+                        console.log('Redrawing rectangle');
+                        var shapeBounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
+                            new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
+                        );
+                        //render on the map
+                        showOnMap('rectangle', shapeBounds);
+                        zoomToShapeBounds();
+                    } else if(currentDrawnShape.type == 'pid'){
+                        console.log('Loading the PID...' + currentDrawnShape.pid);
+                        showObjectOnMap(currentDrawnShape.pid);
+                        siteViewModel.extent().setCurrentPID();
+                    } else if(currentDrawnShape.type == 'Point'){
+                        console.log('Loading the point...' + currentDrawnShape.pid);
+                        showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
+                        zoomToShapeBounds();
+                        showSatellite();
+                        //addMarker(currentDrawnShape.decimalLatitude,currentDrawnShape.decimalLongitude);
+                    }
+                }
+            };
+            self.shapeDrawn = function(source, type, shape) {
+                var drawnShape;
+                if (source === 'clear') {
+                    drawnShape = null;
+
+                } else {
+
+                    switch (type) {
+                        case google.maps.drawing.OverlayType.CIRCLE:
+                            /*// don't show or set circle props if source is a locality
+                             if (source === "user-drawn") {*/
+                            var center = shape.getCenter();
+                            // set coord display
+
+                            var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
+
+                            //calculate the area
+                            drawnShape = {
+                                type:'Circle',
+                                userDrawn: 'Circle',
+                                coordinates:[center.lng(), center.lat()],
+                                centre: [center.lng(), center.lat()],
+                                radius: shape.getRadius(),
+                                areaKmSq:calcAreaKm
+                            };
+                            break;
+                        case google.maps.drawing.OverlayType.RECTANGLE:
+                            var bounds = shape.getBounds(),
+                                    sw = bounds.getSouthWest(),
+                                    ne = bounds.getNorthEast();
+
+                            //calculate the area
+                            var mvcArray = new google.maps.MVCArray();
+                            mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+                            mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
+                            mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
+                            mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
+                            mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+
+                            var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
+                            var calcAreaKm = ((calculatedArea)/1000)/1000;
+
+                            var centreY = (sw.lat() + ne.lat())/2;
+                            var centreX =  (sw.lng() + ne.lng())/2;
+
+                            drawnShape = {
+                                type: 'Polygon',
+                                userDrawn: 'Rectangle',
+                                coordinates:[[
+                                    [sw.lng(),sw.lat()],
+                                    [sw.lng(),ne.lat()],
+                                    [ne.lng(),ne.lat()],
+                                    [ne.lng(),sw.lat()],
+                                    [ne.lng(),sw.lat()]
+                                ]],
+                                bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
+                                areaKmSq:calcAreaKm,
+                                centre: [centreX,centreY]
+                            }
+                            break;
+                        case google.maps.drawing.OverlayType.POLYGON:
+                            /*
+                             * Note that the path received from the drawing manager does not end by repeating the starting
+                             * point (number coords = number vertices). However the path derived from a WKT does repeat
+                             * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
+                             * first and if so ignore it.
+                             */
+                            var path;
+
+                            if(shape.getPath()){
+                                path = shape.getPath();
+                            } else {
+                                path = shape;
+                            }
+
+                            //calculate the area
+                            var calculatedAreaInSqM = google.maps.geometry.spherical.computeArea(path);
+                            var calcAreaKm = ((calculatedAreaInSqM)/1000)/1000;
+
+
+                            //get the centre point of a polygon ??
+                            var minLat=90,
+                                    minLng=180,
+                                    maxLat=-90,
+                                    maxLng=-180;
+
+                            // There appears to have been an API change here - this is required locally but it
+                            // still works without this change in test and prod.
+                            var pathArray = path;
+                            if (typeof(path.getArray) === 'function') {
+                                pathArray = path.getArray();
+                            }
+                            $.each(pathArray, function(i){
+                              //console.log(path.getAt(i));
+                              var coord = path.getAt(i);
+                              if(coord.lat()>maxLat) maxLat = coord.lat();
+                              if(coord.lat()<minLat) minLat = coord.lat();
+                              if(coord.lng()>maxLng) maxLng = coord.lng();
+                              if(coord.lng()<minLng) minLng = coord.lng();
+                            });
+                            var centreX = minLng + ((maxLng - minLng) / 2);
+                            var centreY = minLat + ((maxLat - minLat) / 2);
+
+                            drawnShape = {
+                                type:'Polygon',
+                                userDrawn: 'Polygon',
+                                coordinates: polygonToGeoJson(path),
+                                areaKmSq: calcAreaKm,
+                                centre: [centreX,centreY]
+                            };
+                            break;
+                        case google.maps.drawing.OverlayType.MARKER:
+                            siteViewModel.extent().updateGeometry(shape.getPosition());
+                            // This call is too expensive to do while dragging so the marker has been decorated with
+                            // the event information.
+                            if (!shape.dragging) {
+                                siteViewModel.refreshGazInfo();
+                            }
+
+                            break;
+                    }
+
+                }
+                //set the drawn shape
+                if(drawnShape != null && type !== google.maps.drawing.OverlayType.MARKER){
+                    siteViewModel.extent().updateGeom(drawnShape);
+                    siteViewModel.refreshGazInfo();
+                }
+            };
+            self.mapInitialised = function(map) {
+                self.loadExtent();
+                self.renderPOIs();
+                self.renderSavedShape();
+                setCurrentShapeCallback(self.shapeDrawn);
+            }
+
+        };
 
         //retrieve serialised model
-        siteViewModel = new SiteViewModel2(savedSiteData);
-        console.log(siteViewModel);
+        siteViewModel = new SiteViewModelWithMapIntegration(savedSiteData);
         ko.applyBindings(siteViewModel, document.getElementById("sitemap"));
 
         init_map({
@@ -418,260 +586,11 @@ function initSiteViewModel() {
             mapContainer: 'mapForExtent'
         });
 
-        siteViewModel.loadExtent();
-        siteViewModel.loadPOI();
 
-        //render POIs
-        siteViewModel.renderPOIs();
+        siteViewModel.mapInitialised(window);
 
-        // this sets the function to call when the user draws a shape
-        setCurrentShapeCallback(shapeDrawn);
 
-        //render the shape that is store if it exists
-        if(SERVER_CONF.siteData != null && SERVER_CONF.siteData.extent != undefined && SERVER_CONF.siteData.extent.geometry != null){
-            renderSavedShape(SERVER_CONF.siteData.extent.geometry);
-        }
     }());
-
-    function renderSavedShape(currentDrawnShape){
-        //retrieve the current shape if exists
-%{--var currentDrawnShape = siteViewModel.extent().geometry();--}%
-%{--console.log('Retrieved shape: ' + currentDrawnShape);--}%
-    console.log(currentDrawnShape);
-
-    if(currentDrawnShape !== undefined){
-        if(currentDrawnShape.type == 'Polygon'){
-            console.log('Redrawing polygon');
-            showOnMap('polygon', geoJsonToPath(currentDrawnShape));
-            zoomToShapeBounds();
-        } else if(currentDrawnShape.type == 'Circle'){
-            console.log('Redrawing circle');
-            showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
-            zoomToShapeBounds();
-        } else if(currentDrawnShape.type == 'Rectangle'){
-            console.log('Redrawing rectangle');
-            var shapeBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
-                new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
-            );
-            //render on the map
-            showOnMap('rectangle', shapeBounds);
-            zoomToShapeBounds();
-        } else if(currentDrawnShape.type == 'pid'){
-            console.log('Loading the PID...' + currentDrawnShape.pid);
-            showObjectOnMap(currentDrawnShape.pid);
-            siteViewModel.extent().setCurrentPID();
-        } else if(currentDrawnShape.type == 'Point'){
-            console.log('Loading the point...' + currentDrawnShape.pid);
-            showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
-            zoomToShapeBounds();
-            showSatellite();
-            //addMarker(currentDrawnShape.decimalLatitude,currentDrawnShape.decimalLongitude);
-        }
-    }
-}
-
-function setPageValues(){}
-
-function clearSessionData(){}
-
-function clearData() {
-    $('#drawnArea > div').css('display','none');
-    $('#drawnArea input').val("");
-    $('#wkt').val("");
-    $('#circleLat').val("");
-    $('#circleLon').val("");
-    $('#circleRadius').val("");
-}
-
-function shapeDrawn(source, type, shape) {
-    console.log("[shapeDrawn] shapeDrawn called: " + type);
-    if (source === 'clear') {
-        DRAW_TOOL.drawnShape = null;
-        clearData();
-        clearSessionData('drawnShapes');
-        $('#useLocation').addClass("disabled");
-    } else {
-        $('#useLocation').removeClass("disabled");
-        switch (type) {
-            case google.maps.drawing.OverlayType.CIRCLE:
-                /*// don't show or set circle props if source is a locality
-                 if (source === "user-drawn") {*/
-                var center = shape.getCenter();
-                // set coord display
-                $('#circLat').val(round(center.lat()));
-                $('#circLon').val(round(center.lng()));
-                $('#circRadius').val(round(shape.getRadius()/1000,2) + "km");
-                $('#circleArea').css('display','block');
-                // set hidden inputs
-                $('#circleLat').val(center.lat());
-                $('#circleLon').val(center.lng());
-                $('#circleRadius').val(shape.getRadius());
-                console.log("circle lat: " + center.lat());
-                console.log("circle lng: " + center.lng());
-                console.log("circle radius: " + shape.getRadius());
-
-                var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
-                $('#calculatedArea').html(calcAreaKm);
-                //calculate the area
-                DRAW_TOOL.drawnShape = {
-                    type:'Circle',
-                    userDrawn: 'Circle',
-                    coordinates:[center.lng(), center.lat()],
-                    centre: [center.lng(), center.lat()],
-                    radius: shape.getRadius(),
-                    areaKmSq:calcAreaKm
-                };
-                break;
-            case google.maps.drawing.OverlayType.RECTANGLE:
-                var bounds = shape.getBounds(),
-                        sw = bounds.getSouthWest(),
-                        ne = bounds.getNorthEast();
-                // set coord display
-                $('#swLat').val(round(sw.lat()));
-                $('#swLon').val(round(sw.lng()));
-                $('#neLat').val(round(ne.lat()));
-                $('#neLon').val(round(ne.lng()));
-                $('#rectangleArea').css('display','block');
-
-                //calculate the area
-                var mvcArray = new google.maps.MVCArray();
-                mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-                mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
-                mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
-                mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
-                mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-
-                var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
-                var calcAreaKm = ((calculatedArea)/1000)/1000;
-                $('#calculatedArea').html(calcAreaKm);
-
-                var centreY = (sw.lat() + ne.lat())/2;
-                var centreX =  (sw.lng() + ne.lng())/2;
-
-                DRAW_TOOL.drawnShape = {
-                    type: 'Polygon',
-                    userDrawn: 'Rectangle',
-                    coordinates:[[
-                        [sw.lng(),sw.lat()],
-                        [sw.lng(),ne.lat()],
-                        [ne.lng(),ne.lat()],
-                        [ne.lng(),sw.lat()],
-                        [ne.lng(),sw.lat()]
-                    ]],
-                    bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
-                    areaKmSq:calcAreaKm,
-                    centre: [centreX,centreY]
-                }
-                break;
-            case google.maps.drawing.OverlayType.POLYGON:
-                /*
-                 * Note that the path received from the drawing manager does not end by repeating the starting
-                 * point (number coords = number vertices). However the path derived from a WKT does repeat
-                 * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
-                 * first and if so ignore it.
-                 */
-                var path,
-                        $lat = null,
-                        $ul = $('#polygonArea ul'),
-                        realLength = 0,
-                        isRect;
-
-                if(shape.getPath()){
-                    path = shape.getPath();
-                } else {
-                    path = shape;
-                }
-
-                isRect = representsRectangle(path);
-
-                // set coord display
-                if (isRect) {
-                    $('#swLat').val(round(path.getAt(0).lat()));
-                    $('#swLon').val(round(path.getAt(0).lng()));
-                    $('#neLat').val(round(path.getAt(2).lat()));
-                    $('#neLon').val(round(path.getAt(2).lng()));
-                    $('#rectangleArea').css('display','block');
-                } else {
-                    $ul.find('li').remove();
-                    realLength = path.getLength();
-                    if (path.getAt(0).equals(path.getAt(path.length - 1))) {
-                        realLength = realLength - 1;
-                    }
-                    for (i = 0; i < realLength; i++) {
-                        // check whether widget exists
-                        $lat = $('#lat' + i);
-                        if ($lat.length === 0) {
-                            // doesn't so create it
-                            $lat = $('<li><input type="text" id="lat' + i +
-                                        '"/><input type="text" id="lon' + i + '"/></li>')
-                                        .appendTo($ul);
-                            }
-                            $('#lat' + i).val(round(path.getAt(i).lat()));
-                            $('#lon' + i).val(round(path.getAt(i).lng()));
-                        }
-                        $('#polygonArea').css('display','block');
-                    }
-
-                    //calculate the area
-                    var calculatedAreaInSqM = google.maps.geometry.spherical.computeArea(path);
-                    var calcAreaKm = ((calculatedAreaInSqM)/1000)/1000;
-
-                    $('#calculatedArea').html(calcAreaKm);
-
-                    //get the centre point of a polygon ??
-                    var minLat=90,
-                            minLng=180,
-                            maxLat=-90,
-                            maxLng=-180;
-
-                    // There appears to have been an API change here - this is required locally but it
-                    // still works without this change in test and prod.
-                    var pathArray = path;
-                    if (typeof(path.getArray) === 'function') {
-                        pathArray = path.getArray();
-                    }
-                    $.each(pathArray, function(i){
-                      //console.log(path.getAt(i));
-                      var coord = path.getAt(i);
-                      if(coord.lat()>maxLat) maxLat = coord.lat();
-                      if(coord.lat()<minLat) minLat = coord.lat();
-                      if(coord.lng()>maxLng) maxLng = coord.lng();
-                      if(coord.lng()<minLng) minLng = coord.lng();
-                    });
-                    var centreX = minLng + ((maxLng - minLng) / 2);
-                    var centreY = minLat + ((maxLat - minLat) / 2);
-
-                    DRAW_TOOL.drawnShape = {
-                        type:'Polygon',
-                        userDrawn: 'Polygon',
-                        coordinates: polygonToGeoJson(path),
-                        areaKmSq: calcAreaKm,
-                        centre: [centreX,centreY]
-                    };
-                    break;
-                case google.maps.drawing.OverlayType.MARKER:
-                    siteViewModel.extent().updateGeometry(shape.getPosition());
-                    // This call is too expensive to do while dragging so the marker has been decorated with
-                    // the event information.
-                    if (!shape.dragging) {
-                        siteViewModel.refreshGazInfo();
-                    }
-
-                    break;
-            }
-
-        }
-        //set the drawn shape
-        if(DRAW_TOOL.drawnShape != null && type !== google.maps.drawing.OverlayType.MARKER){
-            // alert('setting drawn shape...');
-            amplify.store("drawnShape", DRAW_TOOL.drawnShape);
-            siteViewModel.extent().updateGeom(DRAW_TOOL.drawnShape);
-            siteViewModel.refreshGazInfo();
-        }
-    }
-
-
 
     return siteViewModel;
 }

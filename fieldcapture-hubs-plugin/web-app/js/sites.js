@@ -16,6 +16,17 @@ var SiteViewModel = function (site, feature) {
     self.address = ko.observable("");
     self.feature = feature;
     self.projects = site.projects || [];
+    self.extentSource = ko.pureComputed({
+        read: function() {
+            if (self.extent()) {
+                return self.extent().source();
+            }
+            return 'none'
+        },
+        write: function(value) {
+            self.updateExtent(value);
+        }
+    });
 
     self.setAddress = function (address) {
         if (address.indexOf(', Australia') === address.length - 11) {
@@ -23,7 +34,7 @@ var SiteViewModel = function (site, feature) {
         }
         self.address(address);
     };
-    self.poi = ko.observableArray(site.poi || []);
+    self.poi = ko.observableArray();
 
     self.addPOI = function(poi) {
         self.poi.push(poi);
@@ -44,7 +55,7 @@ var SiteViewModel = function (site, feature) {
     /** Check if the supplied POI has any photos attached to it */
     self.hasPhotoPointDocuments = function(poi) {
         var hasDoc = false;
-        $.each(self.documents, function(i, doc) {
+        $.each(site.documents, function(i, doc) {
             if (doc.poiId === poi.poiId) {
                 hasDoc = true;
                 return false;
@@ -53,39 +64,33 @@ var SiteViewModel = function (site, feature) {
         return hasDoc;
     };
     self.saved = function(){
-        return self.siteId();
+        return self.siteId;
     };
     self.loadPOI = function (pois) {
         if (!pois) {
             return;
         }
         $.each(pois, function (i, poi) {
-            self.poi.push(new POI(poi, self.hasDocuments(poi)));
+            self.poi.push(new POI(poi, self.hasPhotoPointDocuments(poi)));
         });
     };
     self.loadExtent = function(){
-        console.log('Loading the extent.....');
-        var geometry;
         if(site && site.extent) {
             var extent = site.extent;
-            console.log('Loading the extent source.....' + extent.source);
-            console.log(extent.geometry);
             switch (extent.source) {
                 case 'point':   self.extent(new PointLocation(extent.geometry)); break;
                 case 'pid':     self.extent(new PidLocation(extent.geometry)); break;
                 case 'upload':  self.extent(new UploadLocation()); break;
                 case 'drawn':   self.extent(new DrawnLocation(extent.geometry)); break;
             }
-            console.log('Setting the extent .....' + extent);
         } else {
-            console.log('Initialising dummy extent....');
             self.extent(new EmptyLocation());
         }
     };
 
-    self.updateExtent = function(event){
-        console.log('Updating the extent: ' + self.extent().source());
-        switch (self.extent().source()) {
+
+    self.updateExtent = function(source){
+        switch (source) {
             case 'point':
                 if(site && site.extent) {
                     self.extent(new PointLocation(site.extent.geometry));
@@ -104,11 +109,10 @@ var SiteViewModel = function (site, feature) {
             case 'drawn':
                 //breaks the edits....
                 self.extent(new DrawnLocation({}));
-                console.log(self.extent());
                 break;
             default: self.extent(new EmptyLocation());
         }
-        return self.extent().source();
+
     };
 
     self.refreshGazInfo = function() {
@@ -152,7 +156,9 @@ var SiteViewModel = function (site, feature) {
                 self.extent().geometry().locality(data.results[0].formatted_address);
             }
         });
-    }
+    };
+    self.loadPOI(site.poi);
+    self.loadExtent(site.extent);
 
 };
 
@@ -161,7 +167,7 @@ var POI = function (l, hasDocuments) {
     self.poiId = ko.observable(exists(l, 'poiId'));
     self.name = ko.observable(exists(l,'name'));
     self.type = ko.observable(exists(l,'type'));
-    self.hasDocuments = hasDocuments;
+    self.hasPhotoPointDocuments = hasDocuments;
     var storedGeom;
     if(l !== undefined){
         storedGeom = l.geometry;
@@ -186,12 +192,9 @@ var POI = function (l, hasDocuments) {
             && self.geometry().decimalLatitude() !== ''
             && self.geometry().decimalLongitude() !== undefined
             && self.geometry().decimalLongitude() !== '';
-        if(hasCoordinate){
-            //removeMarkers();
-            siteViewModel.renderPOIs();
-        }
+
         return hasCoordinate;
-    }
+    };
     self.toJSON = function(){
         var js = ko.toJS(self);
         delete js.hasDocuments;

@@ -128,7 +128,7 @@
                             document.location.href = fcConfig.projectUrl;
                         </g:if>
                         <g:else>
-                            document.location.href = fcConfig.sitePageUrl + '/' + data.id;
+                            document.location.href = fcConfig.sitePageUrl + '/' + json.siteId;
                         </g:else>
                         } else {
                             document.location.href = fcConfig.sitePageUrl;
