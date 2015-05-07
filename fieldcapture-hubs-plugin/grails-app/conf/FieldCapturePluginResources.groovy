@@ -171,6 +171,11 @@ modules = {
         resource url: 'js/document.js', plugin: 'fieldcapture-plugin'
     }
 
+    activity {
+        dependsOn 'knockout'
+        resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/parser.js', plugin: 'fieldcapture-plugin'
+    }
 
     jqueryGantt {
         resource url:[dir:'jquery-gantt/css/', file:'style.css', plugin: 'fieldcapture-plugin']

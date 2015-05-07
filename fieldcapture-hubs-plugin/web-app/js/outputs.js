@@ -288,3 +288,30 @@ ko.bindingHandlers.imageUpload = {
     }
 
 };
+
+ko.bindingHandlers.editDocument = {
+    init:function(element, valueAccessor) {
+        if (ko.isObservable(valueAccessor())) {
+            var document = ko.utils.unwrapObservable(valueAccessor());
+            if (typeof document.status == 'function') {
+                document.status.subscribe(function(status) {
+                    if (status == 'deleted') {
+                        valueAccessor()(null);
+                    }
+                });
+            }
+        }
+        var options = {
+            name:'documentEditTemplate',
+            data:valueAccessor()
+        };
+        return ko.bindingHandlers['template'].init(element, function() {return options;});
+    },
+    update:function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+        var options = {
+            name:'documentEditTemplate',
+            data:valueAccessor()
+        };
+        ko.bindingHandlers['template'].update(element, function() {return options;}, allBindings, viewModel, bindingContext);
+    }
+}
