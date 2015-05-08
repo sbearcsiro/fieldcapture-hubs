@@ -11,33 +11,9 @@ class OrganisationService {
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
-        def organisation = webService.getJson(url)
-
-
-        organisation.projects = getProjectsByName(organisation)
-
-        organisation
+        webService.getJson(url)
     }
 
-    private def getProjectsByName(organisation) {
-        def projects = new JSONArray()
-        if (!organisation) {
-            return projects
-        }
-
-        def resp = projectService.search([serviceProviderName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects)
-        }
-
-        resp = projectService.search([organisationName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
-        }
-        projects
-    }
 
     def list() {
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
