@@ -137,7 +137,7 @@
                             </ul>
                          </div>
 
-                         <div style="padding-top:10px;" data-bind="template: { name: extent().source, data: extent, afterRender: extent().renderMap}"></div>
+                         <div style="padding-top:10px;" data-bind="template: { name: extent().source, data: extent }"></div>
                         </div>
 
                     <div class="well well-small">
@@ -172,8 +172,8 @@
 <div class="drawLocationDiv row-fluid">
     <div class="span12">
         <div class="row-fluid controls-row">
-            <fc:textField data-bind="value:geometry().decimalLatitude, event: { change: renderMap }" data-validation-engine="validate[required,custom[number],min[-90],max[0]]" outerClass="span6" label="Latitude"/>
-            <fc:textField data-bind="value:geometry().decimalLongitude, event: { change: renderMap }" data-validation-engine="validate[required,custom[number],min[-180],max[180]]" data-prompt-position="topRight:-150" outerClass="span6" label="Longitude"/>
+            <fc:textField data-bind="value:geometry().decimalLatitude" data-validation-engine="validate[required,custom[number],min[-90],max[0]]" outerClass="span6" label="Latitude"/>
+            <fc:textField data-bind="value:geometry().decimalLongitude" data-validation-engine="validate[required,custom[number],min[-180],max[180]]" data-prompt-position="topRight:-150" outerClass="span6" label="Longitude"/>
         </div>
         <div class="row-fluid controls-row">
             <fc:textField data-bind="value:geometry().uncertainty, enable: hasCoordinate()" outerClass="span4" label="Uncertainty"/>
@@ -372,210 +372,6 @@ function initSiteViewModel() {
 
     (function(){
 
-        function SiteViewModelWithMapIntegration (siteData) {
-            var self = $.extend(this, new SiteViewModel(siteData));
-
-            self.renderPOIs = function(){
-               // console.log('Rendering the POIs now');
-                removeMarkers();
-                for(var i=0; i<self.poi().length; i++){
-                    //console.log('Rendering the POI: ' + self.poi()[i].geometry().decimalLatitude() +':'+ self.poi()[i].geometry().decimalLongitude());
-                    addMarker(self.poi()[i].geometry().decimalLatitude(), self.poi()[i].geometry().decimalLongitude(), self.poi()[i].name(), self.poi()[i].dragEvent)
-                }
-            };
-            self.newPOI = function(){
-                //get the center of the map
-                var lngLat = getMapCentre();
-                var randomBit = (self.poi().length + 1) /1000;
-                var poi = new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}, false);
-                self.addPOI(poi);
-                self.watchPOIGeometryChanges(poi);
-
-            };
-            self.notImplemented = function () {
-                alert("Not implemented yet.")
-            };
-
-            self.watchPOIGeometryChanges = function(poi) {
-                poi.geometry().decimalLatitude.subscribe(self.renderPOIs);
-                poi.geometry().decimalLongitude.subscribe(self.renderPOIs);
-            };
-            self.poi.subscribe(self.renderPOIs);
-            $.each(self.poi(), function(i, poi) {
-                self.watchPOIGeometryChanges(poi);
-            });
-
-            self.renderSavedShape = function(){
-                var currentDrawnShape = ko.toJS(self.extent().geometry);
-                //retrieve the current shape if exists
-                if(currentDrawnShape !== undefined){
-                    if(currentDrawnShape.type == 'Polygon'){
-                        showOnMap('polygon', geoJsonToPath(currentDrawnShape));
-                        zoomToShapeBounds();
-                    } else if(currentDrawnShape.type == 'Circle'){
-                        console.log('Redrawing circle');
-                        showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
-                        zoomToShapeBounds();
-                    } else if(currentDrawnShape.type == 'Rectangle'){
-                        console.log('Redrawing rectangle');
-                        var shapeBounds = new google.maps.LatLngBounds(
-                            new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
-                            new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
-                        );
-                        //render on the map
-                        showOnMap('rectangle', shapeBounds);
-                        zoomToShapeBounds();
-                    } else if(currentDrawnShape.type == 'pid'){
-                        console.log('Loading the PID...' + currentDrawnShape.pid);
-                        showObjectOnMap(currentDrawnShape.pid);
-                        siteViewModel.extent().setCurrentPID();
-                    } else if(currentDrawnShape.type == 'Point'){
-                        console.log('Loading the point...' + currentDrawnShape.pid);
-                        showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
-                        zoomToShapeBounds();
-                        showSatellite();
-                        //addMarker(currentDrawnShape.decimalLatitude,currentDrawnShape.decimalLongitude);
-                    }
-                }
-            };
-            self.shapeDrawn = function(source, type, shape) {
-                var drawnShape;
-                if (source === 'clear') {
-                    drawnShape = null;
-
-                } else {
-
-                    switch (type) {
-                        case google.maps.drawing.OverlayType.CIRCLE:
-                            /*// don't show or set circle props if source is a locality
-                             if (source === "user-drawn") {*/
-                            var center = shape.getCenter();
-                            // set coord display
-
-                            var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
-
-                            //calculate the area
-                            drawnShape = {
-                                type:'Circle',
-                                userDrawn: 'Circle',
-                                coordinates:[center.lng(), center.lat()],
-                                centre: [center.lng(), center.lat()],
-                                radius: shape.getRadius(),
-                                areaKmSq:calcAreaKm
-                            };
-                            break;
-                        case google.maps.drawing.OverlayType.RECTANGLE:
-                            var bounds = shape.getBounds(),
-                                    sw = bounds.getSouthWest(),
-                                    ne = bounds.getNorthEast();
-
-                            //calculate the area
-                            var mvcArray = new google.maps.MVCArray();
-                            mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-                            mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
-                            mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
-                            mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
-                            mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
-
-                            var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
-                            var calcAreaKm = ((calculatedArea)/1000)/1000;
-
-                            var centreY = (sw.lat() + ne.lat())/2;
-                            var centreX =  (sw.lng() + ne.lng())/2;
-
-                            drawnShape = {
-                                type: 'Polygon',
-                                userDrawn: 'Rectangle',
-                                coordinates:[[
-                                    [sw.lng(),sw.lat()],
-                                    [sw.lng(),ne.lat()],
-                                    [ne.lng(),ne.lat()],
-                                    [ne.lng(),sw.lat()],
-                                    [ne.lng(),sw.lat()]
-                                ]],
-                                bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
-                                areaKmSq:calcAreaKm,
-                                centre: [centreX,centreY]
-                            }
-                            break;
-                        case google.maps.drawing.OverlayType.POLYGON:
-                            /*
-                             * Note that the path received from the drawing manager does not end by repeating the starting
-                             * point (number coords = number vertices). However the path derived from a WKT does repeat
-                             * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
-                             * first and if so ignore it.
-                             */
-                            var path;
-
-                            if(shape.getPath()){
-                                path = shape.getPath();
-                            } else {
-                                path = shape;
-                            }
-
-                            //calculate the area
-                            var calculatedAreaInSqM = google.maps.geometry.spherical.computeArea(path);
-                            var calcAreaKm = ((calculatedAreaInSqM)/1000)/1000;
-
-
-                            //get the centre point of a polygon ??
-                            var minLat=90,
-                                    minLng=180,
-                                    maxLat=-90,
-                                    maxLng=-180;
-
-                            // There appears to have been an API change here - this is required locally but it
-                            // still works without this change in test and prod.
-                            var pathArray = path;
-                            if (typeof(path.getArray) === 'function') {
-                                pathArray = path.getArray();
-                            }
-                            $.each(pathArray, function(i){
-                              //console.log(path.getAt(i));
-                              var coord = path.getAt(i);
-                              if(coord.lat()>maxLat) maxLat = coord.lat();
-                              if(coord.lat()<minLat) minLat = coord.lat();
-                              if(coord.lng()>maxLng) maxLng = coord.lng();
-                              if(coord.lng()<minLng) minLng = coord.lng();
-                            });
-                            var centreX = minLng + ((maxLng - minLng) / 2);
-                            var centreY = minLat + ((maxLat - minLat) / 2);
-
-                            drawnShape = {
-                                type:'Polygon',
-                                userDrawn: 'Polygon',
-                                coordinates: polygonToGeoJson(path),
-                                areaKmSq: calcAreaKm,
-                                centre: [centreX,centreY]
-                            };
-                            break;
-                        case google.maps.drawing.OverlayType.MARKER:
-                            siteViewModel.extent().updateGeometry(shape.getPosition());
-                            // This call is too expensive to do while dragging so the marker has been decorated with
-                            // the event information.
-                            if (!shape.dragging) {
-                                siteViewModel.refreshGazInfo();
-                            }
-
-                            break;
-                    }
-
-                }
-                //set the drawn shape
-                if(drawnShape != null && type !== google.maps.drawing.OverlayType.MARKER){
-                    siteViewModel.extent().updateGeom(drawnShape);
-                    siteViewModel.refreshGazInfo();
-                }
-            };
-            self.mapInitialised = function(map) {
-                self.loadExtent();
-                self.renderPOIs();
-                self.renderSavedShape();
-                setCurrentShapeCallback(self.shapeDrawn);
-            }
-
-        };
-
         //retrieve serialised model
         siteViewModel = new SiteViewModelWithMapIntegration(savedSiteData);
         ko.applyBindings(siteViewModel, document.getElementById("sitemap"));
@@ -586,9 +382,7 @@ function initSiteViewModel() {
             mapContainer: 'mapForExtent'
         });
 
-
         siteViewModel.mapInitialised(window);
-
 
     }());
 

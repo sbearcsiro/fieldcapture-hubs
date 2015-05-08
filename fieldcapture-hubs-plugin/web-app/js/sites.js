@@ -48,12 +48,14 @@ var SiteViewModel = function (site, feature) {
     };
     self.toJSON = function(){
         var js = ko.toJS(self);
-        delete js.drawnShape;
-        delete js.projectList;
+        delete js.extentSource;
         return js;
     };
     /** Check if the supplied POI has any photos attached to it */
     self.hasPhotoPointDocuments = function(poi) {
+        if (!site.documents) {
+            return;
+        }
         var hasDoc = false;
         $.each(site.documents, function(i, doc) {
             if (doc.poiId === poi.poiId) {
@@ -112,7 +114,6 @@ var SiteViewModel = function (site, feature) {
                 break;
             default: self.extent(new EmptyLocation());
         }
-
     };
 
     self.refreshGazInfo = function() {
@@ -160,6 +161,31 @@ var SiteViewModel = function (site, feature) {
     self.loadPOI(site.poi);
     self.loadExtent(site.extent);
 
+
+    // Watch for changes to the extent content and notify subscribers when they do.
+    self.extentWatcher = ko.pureComputed(function() {
+        // We care about changes to either the geometry coordinates or the PID in the case of known shape.
+        var result = {};
+        if (self.extent()) {
+            console.log('b');
+            var geom = self.extent().geometry();
+            if (geom) {
+                if (geom.decimalLatitude) result.decimalLatitude = ko.utils.unwrapObservable(geom.decimalLatitude);
+                if (geom.decimalLongitude) result.decimalLongitude = ko.utils.unwrapObservable(geom.decimalLongitude);
+                if (geom.coordinates) result.coordinates = ko.utils.unwrapObservable(geom.coordinates);
+                if (geom.pid) result.pid = ko.utils.unwrapObservable(geom.pid);
+                if (geom.fid) result.fid = ko.utils.unwrapObservable(geom.fid);
+            }
+
+        }
+        return result;
+
+    });
+    self.extentWatcher.subscribe(function(blah) {
+        console.log(blah);
+        self.extent.notifySubscribers();
+    });
+
 };
 
 var POI = function (l, hasDocuments) {
@@ -173,10 +199,9 @@ var POI = function (l, hasDocuments) {
         storedGeom = l.geometry;
     }
     self.dragEvent = function(lat,lng){
-        console.log("New lat lng " + lat + ", " + lng);
         self.geometry().decimalLatitude(lat);
         self.geometry().decimalLongitude(lng);
-    }
+    };
     self.description = ko.observable(exists(l,'description'));
     self.geometry = ko.observable({
         type: "Point",
@@ -197,7 +222,7 @@ var POI = function (l, hasDocuments) {
     };
     self.toJSON = function(){
         var js = ko.toJS(self);
-        delete js.hasDocuments;
+        delete js.hasPhotoPointDocuments;
         if(js.geometry.decimalLatitude !== undefined
             && js.geometry.decimalLatitude !== ''
             && js.geometry.decimalLongitude !== undefined
@@ -211,7 +236,6 @@ var POI = function (l, hasDocuments) {
 var EmptyLocation = function () {
     this.source = ko.observable('none');
     this.geometry = ko.observable({type:'empty'});
-    self.renderMap = function(){}
 };
 var PointLocation = function (l) {
     var self = this;
@@ -236,7 +260,7 @@ var PointLocation = function (l) {
             && self.geometry().decimalLongitude() !== undefined
             && self.geometry().decimalLongitude() !== '';
         return hasCoordinate;
-    }
+    };
 
     /**
      * This is called only from a map drag event so we clear uncertaintly, precision and intercept data.
@@ -249,7 +273,7 @@ var PointLocation = function (l) {
         geom.uncertainty('');
         geom.precision('');
         self.clearGazInfo();
-    }
+    };
     self.clearGazInfo = function() {
         var geom = self.geometry();
         geom.nrm('');
@@ -258,19 +282,10 @@ var PointLocation = function (l) {
         geom.locality('');
         geom.mvg('');
         geom.mvs('');
-    }
-    self.renderMap = function(){
-        if(self.hasCoordinate()){
-            console.log('Rendering the point');
-            //addMarker(self.geometry().decimalLatitude(), self.geometry().decimalLongitude(), 'Extent of site');
-            showOnMap('point', self.geometry().decimalLatitude(), self.geometry().decimalLongitude(),'Extent of site');
-            zoomToShapeBounds();
-            showSatellite();
+    };
 
-        }
-    }
 
-    self.toJSON = function(){
+    self.toJS = function(){
         var js = ko.toJS(self);
         if(js.geometry.decimalLatitude !== undefined
             && js.geometry.decimalLatitude !== ''
@@ -280,7 +295,7 @@ var PointLocation = function (l) {
             js.geometry.coordinates = [js.geometry.decimalLongitude, js.geometry.decimalLatitude]
         }
         return js;
-    }
+    };
 };
 
 var DrawnLocation = function (l) {
@@ -312,20 +327,10 @@ var DrawnLocation = function (l) {
         self.geometry().areaKmSq(exists(l,'areaKmSq'));
         self.geometry().coordinates(exists(l,'coordinates'));
     };
-    self.renderMap = function(elements){
-        console.log('Rendering map called...');
-        clearObjects();
-        var $drawLocationDiv = $(elements[1]);
-        if(self.geometry() != null && self.geometry().centre !== undefined){
-            $drawLocationDiv.find('.propertyGroup').css('display','none');
-            //clone the object to avoid side affects with mapping
-            switch (self.geometry().type) {
-                case 'Polygon': $drawLocationDiv.find('.polygonProperties').css('display','block'); break;
-                case 'Circle': $drawLocationDiv.find('.circleProperties').css('display','block'); break;
-                case 'Rectangle': $drawLocationDiv.find('.rectangleProperties').css('display','block'); break;
-            }
-        }
-    }
+    self.toJS= function() {
+        var js = ko.toJS(self);
+        return js;
+    };
 };
 
 var PidLocation = function (l) {
@@ -373,14 +378,6 @@ var PidLocation = function (l) {
     self.updateGeom = function(l){
         //to be added
     };
-    self.renderMap = function(){
-        console.log("Render map on PidLocation called...with PID id:" + self.geometry().pid())
-        if(self.geometry().pid() != null && self.geometry().pid() != '' ){
-            console.log("Rendering PID: " + self.geometry().pid());
-            clearObjectsAndShapes();
-            showObjectOnMap(self.geometry().pid());
-        }
-    }
     self.setCurrentPID = function(){
         self.refreshObjectList();
         console.log('Refreshing the layer object list for ' + self.chosenLayer());
@@ -413,14 +410,14 @@ var PidLocation = function (l) {
                 self.geometry().name(data.name)
                 self.geometry().layerName(data.fieldname)
                 if(data.area_km !== undefined){
-                    console.log("Selected shape area: " + data.area_km);
                     self.geometry().area(data.area_km)
                 }
-                self.renderMap();
+
             });
         }
-    }
-    self.toJSON = function(){
+    };
+
+    self.toJS = function(){
         var js = ko.toJS(self);
         delete js.layers;
         delete js.layerObjects;
@@ -430,6 +427,212 @@ var PidLocation = function (l) {
         return js;
     }
 };
+
+function SiteViewModelWithMapIntegration (siteData) {
+    var self = $.extend(this, new SiteViewModel(siteData));
+
+    self.renderPOIs = function(){
+        // console.log('Rendering the POIs now');
+        removeMarkers();
+        for(var i=0; i<self.poi().length; i++){
+            //console.log('Rendering the POI: ' + self.poi()[i].geometry().decimalLatitude() +':'+ self.poi()[i].geometry().decimalLongitude());
+            addMarker(self.poi()[i].geometry().decimalLatitude(), self.poi()[i].geometry().decimalLongitude(), self.poi()[i].name(), self.poi()[i].dragEvent)
+        }
+    };
+    self.newPOI = function(){
+        //get the center of the map
+        var lngLat = getMapCentre();
+        var randomBit = (self.poi().length + 1) /1000;
+        var poi = new POI({name:'Point of interest #' + (self.poi().length + 1) , geometry:{decimalLongitude:lngLat[0] - (0.001+randomBit),decimalLatitude:lngLat[1] - (0.001+randomBit)}}, false);
+        self.addPOI(poi);
+        self.watchPOIGeometryChanges(poi);
+
+    };
+    self.notImplemented = function () {
+        alert("Not implemented yet.")
+    };
+
+    self.watchPOIGeometryChanges = function(poi) {
+        poi.geometry().decimalLatitude.subscribe(self.renderPOIs);
+        poi.geometry().decimalLongitude.subscribe(self.renderPOIs);
+    };
+    self.poi.subscribe(self.renderPOIs);
+    $.each(self.poi(), function(i, poi) {
+        self.watchPOIGeometryChanges(poi);
+    });
+
+    self.renderOnMap = function(){
+        var currentDrawnShape = ko.toJS(self.extent().geometry);
+        //retrieve the current shape if exists
+        if(currentDrawnShape !== undefined){
+            if(currentDrawnShape.type == 'Polygon'){
+                showOnMap('polygon', geoJsonToPath(currentDrawnShape));
+                zoomToShapeBounds();
+            } else if(currentDrawnShape.type == 'Circle'){
+                showOnMap('circle', currentDrawnShape.coordinates[1],currentDrawnShape.coordinates[0],currentDrawnShape.radius);
+                zoomToShapeBounds();
+            } else if(currentDrawnShape.type == 'Rectangle'){
+                var shapeBounds = new google.maps.LatLngBounds(
+                    new google.maps.LatLng(currentDrawnShape.minLat,currentDrawnShape.minLon),
+                    new google.maps.LatLng(currentDrawnShape.maxLat,currentDrawnShape.maxLon)
+                );
+                //render on the map
+                showOnMap('rectangle', shapeBounds);
+                zoomToShapeBounds();
+            } else if(currentDrawnShape.type == 'pid'){
+                showObjectOnMap(currentDrawnShape.pid);
+                //self.extent().setCurrentPID();
+            } else if(currentDrawnShape.type == 'Point'){
+                showOnMap('point', currentDrawnShape.decimalLatitude, currentDrawnShape.decimalLongitude,'site name');
+                zoomToShapeBounds();
+                showSatellite();
+            }
+        }
+    };
+    self.shapeDrawn = function(source, type, shape) {
+        var drawnShape;
+        if (source === 'clear') {
+            drawnShape = null;
+
+        } else {
+
+            switch (type) {
+                case google.maps.drawing.OverlayType.CIRCLE:
+                    /*// don't show or set circle props if source is a locality
+                     if (source === "user-drawn") {*/
+                    var center = shape.getCenter();
+                    // set coord display
+
+                    var calcAreaKm = ((3.14 * shape.getRadius() * shape.getRadius())/1000)/1000;
+
+                    //calculate the area
+                    drawnShape = {
+                        type:'Circle',
+                        userDrawn: 'Circle',
+                        coordinates:[center.lng(), center.lat()],
+                        centre: [center.lng(), center.lat()],
+                        radius: shape.getRadius(),
+                        areaKmSq:calcAreaKm
+                    };
+                    break;
+                case google.maps.drawing.OverlayType.RECTANGLE:
+                    var bounds = shape.getBounds(),
+                        sw = bounds.getSouthWest(),
+                        ne = bounds.getNorthEast();
+
+                    //calculate the area
+                    var mvcArray = new google.maps.MVCArray();
+                    mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+                    mvcArray.push(new google.maps.LatLng(ne.lat(), sw.lng()));
+                    mvcArray.push(new google.maps.LatLng(ne.lat(), ne.lng()));
+                    mvcArray.push(new google.maps.LatLng(sw.lat(), ne.lng()));
+                    mvcArray.push(new google.maps.LatLng(sw.lat(), sw.lng()));
+
+                    var calculatedArea = google.maps.geometry.spherical.computeArea(mvcArray);
+                    var calcAreaKm = ((calculatedArea)/1000)/1000;
+
+                    var centreY = (sw.lat() + ne.lat())/2;
+                    var centreX =  (sw.lng() + ne.lng())/2;
+
+                    drawnShape = {
+                        type: 'Polygon',
+                        userDrawn: 'Rectangle',
+                        coordinates:[[
+                            [sw.lng(),sw.lat()],
+                            [sw.lng(),ne.lat()],
+                            [ne.lng(),ne.lat()],
+                            [ne.lng(),sw.lat()],
+                            [ne.lng(),sw.lat()]
+                        ]],
+                        bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
+                        areaKmSq:calcAreaKm,
+                        centre: [centreX,centreY]
+                    }
+                    break;
+                case google.maps.drawing.OverlayType.POLYGON:
+                    /*
+                     * Note that the path received from the drawing manager does not end by repeating the starting
+                     * point (number coords = number vertices). However the path derived from a WKT does repeat
+                     * (num coords = num vertices + 1). So we need to check whether the last coord is the same as the
+                     * first and if so ignore it.
+                     */
+                    var path;
+
+                    if(shape.getPath()){
+                        path = shape.getPath();
+                    } else {
+                        path = shape;
+                    }
+
+                    //calculate the area
+                    var calculatedAreaInSqM = google.maps.geometry.spherical.computeArea(path);
+                    var calcAreaKm = ((calculatedAreaInSqM)/1000)/1000;
+
+
+                    //get the centre point of a polygon ??
+                    var minLat=90,
+                        minLng=180,
+                        maxLat=-90,
+                        maxLng=-180;
+
+                    // There appears to have been an API change here - this is required locally but it
+                    // still works without this change in test and prod.
+                    var pathArray = path;
+                    if (typeof(path.getArray) === 'function') {
+                        pathArray = path.getArray();
+                    }
+                    $.each(pathArray, function(i){
+                        //console.log(path.getAt(i));
+                        var coord = path.getAt(i);
+                        if(coord.lat()>maxLat) maxLat = coord.lat();
+                        if(coord.lat()<minLat) minLat = coord.lat();
+                        if(coord.lng()>maxLng) maxLng = coord.lng();
+                        if(coord.lng()<minLng) minLng = coord.lng();
+                    });
+                    var centreX = minLng + ((maxLng - minLng) / 2);
+                    var centreY = minLat + ((maxLat - minLat) / 2);
+
+                    drawnShape = {
+                        type:'Polygon',
+                        userDrawn: 'Polygon',
+                        coordinates: polygonToGeoJson(path),
+                        areaKmSq: calcAreaKm,
+                        centre: [centreX,centreY]
+                    };
+                    break;
+                case google.maps.drawing.OverlayType.MARKER:
+
+                    // Updating the point coordinates refreshes the map so don't do so until the drag is finished.
+                    if (!shape.dragging) {
+                        self.extent().updateGeometry(shape.getPosition());
+                        self.refreshGazInfo();
+                    }
+
+                    break;
+            }
+
+        }
+        //set the drawn shape
+        if(drawnShape != null && type !== google.maps.drawing.OverlayType.MARKER){
+            self.extent().updateGeom(drawnShape);
+            self.refreshGazInfo();
+        }
+    };
+    self.mapInitialised = function(map) {
+        self.loadExtent();
+        self.renderPOIs();
+        self.renderOnMap();
+
+        setCurrentShapeCallback(self.shapeDrawn);
+        self.extent.subscribe(function(newExtent) {
+            clearObjectsAndShapes();
+            self.renderOnMap();
+
+        });
+    }
+
+};
+
 
 var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
