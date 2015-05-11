@@ -445,13 +445,11 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         }
     };
     self.attachDocument = function() {
-        alert(fcConfig.documentUpdateUrl);
         showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information', maxStages: maxStages},{key:'projectId', value:project.projectId}), '#attachDocument')
             .done(function(result){self.documents.push(new DocumentViewModel(result))});
     };
     self.editDocumentMetadata = function(document) {
         var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
-        alert(url);
         showDocumentAttachInModal( url, document, '#attachDocument')
             .done(function(result){
                 window.location.href = here; // The display doesn't update properly otherwise.
