@@ -278,6 +278,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate: false});
     self.plannedEndDate = ko.observable(project.plannedEndDate).extend({simpleDate: false});
     self.funding = ko.observable(project.funding).extend({currency:{}});
+    self.iframes =  ko.observableArray($.map((project.iframes ? project.iframes : []), function (obj, i) {
+        return new iFrameRow(obj);
+    }));
 
     self.regenerateProjectTimeline = ko.observable(false);
     self.projectDatesChanged = ko.computed(function() {
@@ -344,6 +347,34 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return jsData;
     };
 
+    self.addiFrames = function(){
+        self.iframes.push(new iFrameRow());
+    };
+    self.removeiFrames = function(iframe){
+        self.iframes.remove(iframe)
+    };
+    self.saveiFrames = function(url){
+        var payload = {};
+        payload.iframes = ko.mapping.toJS(self.iframes);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: JSON.stringify(payload, function (key, value) { return value === undefined ? "" : value;}),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.error) {
+                        showAlert("Error, "+ data.error,"alert-error","save-iframe-details-result-placeholder");
+                } else {
+                    showAlert("Successfully saved.","alert-success","save-iframe-details-result-placeholder");
+                }
+            },
+            error: function (data) {
+                var status = data.status;
+                alert('An unhandled error occurred: ' + data.status);
+            }
+        });
+    };
+
     // settings
     self.saveSettings = function () {
         if ($('#settings-validation').validationEngine('validate')) {
@@ -379,7 +410,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             });
             var id = "${project?.projectId}";
             $.ajax({
-                url: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+                url: "${createLink(controller:'project', action: 'ajaxUpdate', id: project.projectId)}",
                 type: 'POST',
                 data: json,
                 contentType: 'application/json',
@@ -400,20 +431,22 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     // documents
-
+    var maxStages = project.timeline ? project.timeline.length : 0 ;
     self.addDocument = function(doc) {
         // check permissions
         if ((isUserEditor && doc.role !== 'approval') ||  doc.public) {
+            doc.maxStages = maxStages;
             self.documents.push(new DocumentViewModel(doc));
         }
     };
     self.attachDocument = function() {
-
-        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information'},{key:'projectId', value:project.projectId}), '#attachDocument')
+        alert(fcConfig.documentUpdateUrl);
+        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information', maxStages: maxStages},{key:'projectId', value:project.projectId}), '#attachDocument')
             .done(function(result){self.documents.push(new DocumentViewModel(result))});
     };
     self.editDocumentMetadata = function(document) {
         var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
+        alert(url);
         showDocumentAttachInModal( url, document, '#attachDocument')
             .done(function(result){
                 window.location.href = here; // The display doesn't update properly otherwise.
@@ -439,3 +472,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     }
 };
 
+function iFrameRow(o) {
+    var self = this;
+    if(!o) o = {};
+    self.code = ko.observable(o.code);
+};
