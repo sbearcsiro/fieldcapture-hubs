@@ -153,7 +153,6 @@ var SiteViewModel = function (site, feature) {
             async: false
         }).done(function (data) {
             if (data.results.length > 0) {
-                console.log('Setting locality - ' + data.results[0].formatted_address);
                 self.extent().geometry().locality(data.results[0].formatted_address);
             }
         });
@@ -167,7 +166,6 @@ var SiteViewModel = function (site, feature) {
         // We care about changes to either the geometry coordinates or the PID in the case of known shape.
         var result = {};
         if (self.extent()) {
-            console.log('b');
             var geom = self.extent().geometry();
             if (geom) {
                 if (geom.decimalLatitude) result.decimalLatitude = ko.utils.unwrapObservable(geom.decimalLatitude);
@@ -182,7 +180,6 @@ var SiteViewModel = function (site, feature) {
 
     });
     self.extentWatcher.subscribe(function(blah) {
-        console.log(blah);
         self.extent.notifySubscribers();
     });
 
@@ -236,6 +233,9 @@ var POI = function (l, hasDocuments) {
 var EmptyLocation = function () {
     this.source = ko.observable('none');
     this.geometry = ko.observable({type:'empty'});
+    self.isValid = function() {
+        return false;
+    };
 };
 var PointLocation = function (l) {
     var self = this;
@@ -284,6 +284,9 @@ var PointLocation = function (l) {
         geom.mvs('');
     };
 
+    self.isValid = function() {
+        return self.geometry().decimalLatitude() && self.geometry().decimalLongitude();
+    };
 
     self.toJS = function(){
         var js = ko.toJS(self);
@@ -330,6 +333,9 @@ var DrawnLocation = function (l) {
     self.toJS= function() {
         var js = ko.toJS(self);
         return js;
+    };
+    self.isValid = function() {
+        return self.geometry().coordinates();
     };
 };
 
@@ -425,7 +431,11 @@ var PidLocation = function (l) {
         delete js.chosenLayer;
         delete js.type;
         return js;
-    }
+    };
+
+    self.isValid = function() {
+        return self.geometry().fid() && self.geometry().pid();
+    };
 };
 
 function SiteViewModelWithMapIntegration (siteData) {
