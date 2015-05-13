@@ -14,7 +14,7 @@ function DocumentViewModel (doc, owner, settings) {
     var self = this;
 
     var defaults = {
-        roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
+        roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}, {id:'embeddedVideo', name:'Embedded Video'}],
         stages:[],
         showSettings: true,
         thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText',
@@ -63,9 +63,14 @@ function DocumentViewModel (doc, owner, settings) {
             this.isPrimaryProjectImage(false);
         }
     };
+
     this.isPrimaryProjectImage = ko.observable(doc.isPrimaryProjectImage);
     this.thirdPartyConsentDeclarationMade = ko.observable(doc.thirdPartyConsentDeclarationMade);
     this.thirdPartyConsentDeclarationText = null;
+    this.embeddedVideo = ko.observable(doc.embeddedVideo);
+    this.embeddedVideoVisible = ko.computed(function() {
+        return (self.role() == 'embeddedVideo');
+    });
 
     this.thirdPartyConsentDeclarationMade.subscribe(function(declarationMade) {
         // Record the text that the user agreed to (as it is an editable setting).
@@ -92,6 +97,9 @@ function DocumentViewModel (doc, owner, settings) {
 
         if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
             return false;
+        }
+        if(self.role() == 'embeddedVideo'){
+            return true;
         }
         return self.fileReady();
     });
@@ -201,7 +209,7 @@ function DocumentViewModel (doc, owner, settings) {
     }
 
     this.modelForSaving = function() {
-        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
+        return ko.mapping.toJS(self, {'ignore':['embeddedVideoVisible','iframe','helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
     }
 }
 
@@ -285,7 +293,8 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
                 uploadUrl,
                 {document:documentViewModel.toJSONString()},
                 function(result) {
-                    documentViewModel.fileUploaded(result);
+                    var resp = JSON.parse(result).resp;
+                    documentViewModel.fileUploaded(resp);
                 })
                 .fail(function() {
                     documentViewModel.fileUploadFailed('Error uploading document');
