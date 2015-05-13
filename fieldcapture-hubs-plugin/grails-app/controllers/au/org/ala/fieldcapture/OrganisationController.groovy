@@ -20,6 +20,10 @@ class OrganisationController {
         ]
     }
 
+    def isProjectCreationDisabled() {
+        return false;
+    }
+
     def index(String id) {
         def organisation = organisationService.get(id, 'all')
 
@@ -39,6 +43,7 @@ class OrganisationController {
             [organisation: organisation,
              dashboard: dashboard,
              roles:roles,
+             disableProjectCreation: isProjectCreationDisabled(),
              user:user,
              citizenScience: params.citizenScience == "true",
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
