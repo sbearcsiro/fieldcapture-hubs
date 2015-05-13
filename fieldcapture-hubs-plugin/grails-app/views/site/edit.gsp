@@ -116,7 +116,7 @@
 
         $('#save').click(function () {
             if ($('#validation-container').validationEngine('validate')) {
-                var json = ko.toJSON(siteViewModel);
+                var json = siteViewModel.modelAsJSON();
                 $.ajax({
                     url: fcConfig.ajaxUpdateUrl,
                     type: 'POST',

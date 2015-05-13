@@ -46,11 +46,19 @@ var SiteViewModel = function (site, feature) {
         }
         self.poi.remove(poi);
     };
-    self.toJSON = function(){
+    self.toJS = function(){
         var js = ko.toJS(self);
+        js.extent = self.extent().toJS();
         delete js.extentSource;
+        delete js.extentWatcher;
+        delete js.isValid;
         return js;
     };
+
+    self.modelAsJSON = function() {
+        var js = self.toJS();
+        return JSON.stringify(js);
+    }
     /** Check if the supplied POI has any photos attached to it */
     self.hasPhotoPointDocuments = function(poi) {
         if (!site.documents) {
@@ -135,8 +143,7 @@ var SiteViewModel = function (site, feature) {
 
         $.ajax({
             url: fcConfig.siteMetaDataUrl + "?lat=" + lat + "&lon=" + lng,
-            dataType: "json",
-            async: false
+            dataType: "json"
         })
             .done(function (data) {
                 var geom = self.extent().geometry();
@@ -157,6 +164,9 @@ var SiteViewModel = function (site, feature) {
             }
         });
     };
+    self.isValid = ko.pureComputed(function() {
+        return self.extent() && self.extent().isValid();
+    });
     self.loadPOI(site.poi);
     self.loadExtent(site.extent);
 
@@ -182,7 +192,6 @@ var SiteViewModel = function (site, feature) {
     self.extentWatcher.subscribe(function(blah) {
         self.extent.notifySubscribers();
     });
-
 };
 
 var POI = function (l, hasDocuments) {
@@ -233,7 +242,7 @@ var POI = function (l, hasDocuments) {
 var EmptyLocation = function () {
     this.source = ko.observable('none');
     this.geometry = ko.observable({type:'empty'});
-    self.isValid = function() {
+    this.isValid = function() {
         return false;
     };
 };
@@ -261,6 +270,12 @@ var PointLocation = function (l) {
             && self.geometry().decimalLongitude() !== '';
         return hasCoordinate;
     };
+    self.geometry.coordinates = ko.pureComputed(function() {
+        if (self.hasCoordinate()) {
+            return [self.geometry().decimalLongitude(), self.geometry().decimalLatitude()];
+        }
+        return undefined;
+    });
 
     /**
      * This is called only from a map drag event so we clear uncertaintly, precision and intercept data.
@@ -285,7 +300,7 @@ var PointLocation = function (l) {
     };
 
     self.isValid = function() {
-        return self.geometry().decimalLatitude() && self.geometry().decimalLongitude();
+        return self.hasCoordinate();
     };
 
     self.toJS = function(){
@@ -635,11 +650,30 @@ function SiteViewModelWithMapIntegration (siteData) {
 
         setCurrentShapeCallback(self.shapeDrawn);
         self.extent.subscribe(function(newExtent) {
-            clearObjectsAndShapes();
-            self.renderOnMap();
-
+            setTimeout(function() {
+                clearObjectsAndShapes();
+                self.renderOnMap();
+            }, 1000);
         });
-    }
+    };
+
+    /**
+     * Allows the jquery-validation-engine to respond to changes to the validity of a site extent.
+     * This function returns a function that can be attached to an element via the funcCall[] validation method.
+     */
+    self.attachExtentValidation = function(fieldSelector, message) {
+        // Expose the siteViewModel validate function in global scope so the validation engine can use it.
+        var validateSiteExtent = function() {
+            var result = self.isValid();
+            if (!result) {
+                return message || 'Please define the site extent';
+            }
+        }
+        self.isValid.subscribe(function() {
+            $(fieldSelector).validationEngine('validate');
+        });
+        return validateSiteExtent;
+    };
 
 };
 

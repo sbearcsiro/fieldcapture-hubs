@@ -78,7 +78,7 @@
 
                         <div>
                             <h4>Define extent using:
-                            <g:select class="input-medium" data-bind="value: extentSource"
+                            <g:select class="input-medium" data-bind="value: extentSource" data-validation-engine="validate[funcCall[validateSiteExtent]]"
                                       name='extentSource'
                                       from="['choose type','point','known shape','draw a shape']"
                                       keys="['none','point','pid','drawn']"/>
@@ -374,6 +374,8 @@ function initSiteViewModel() {
 
         //retrieve serialised model
         siteViewModel = new SiteViewModelWithMapIntegration(savedSiteData);
+        window.validateSiteExtent = siteViewModel.attachExtentValidation()
+
         ko.applyBindings(siteViewModel, document.getElementById("sitemap"));
 
         init_map({
