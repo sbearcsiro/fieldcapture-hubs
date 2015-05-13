@@ -261,6 +261,8 @@ function isValid(p, a) {
 	 return p;
 }
 
+
+
 function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
 
@@ -278,9 +280,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.plannedStartDate = ko.observable(project.plannedStartDate).extend({simpleDate: false});
     self.plannedEndDate = ko.observable(project.plannedEndDate).extend({simpleDate: false});
     self.funding = ko.observable(project.funding).extend({currency:{}});
-    self.iframes =  ko.observableArray($.map((project.iframes ? project.iframes : []), function (obj, i) {
-        return new iFrameRow(obj);
-    }));
 
     self.regenerateProjectTimeline = ko.observable(false);
     self.projectDatesChanged = ko.computed(function() {
@@ -352,34 +351,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return jsData;
     };
 
-    self.addiFrames = function(){
-        self.iframes.push(new iFrameRow());
-    };
-    self.removeiFrames = function(iframe){
-        self.iframes.remove(iframe)
-    };
-    self.saveiFrames = function(url){
-        var payload = {};
-        payload.iframes = ko.mapping.toJS(self.iframes);
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: JSON.stringify(payload, function (key, value) { return value === undefined ? "" : value;}),
-            contentType: 'application/json',
-            success: function (data) {
-                if (data.error) {
-                        showAlert("Error, "+ data.error,"alert-error","save-iframe-details-result-placeholder");
-                } else {
-                    showAlert("Successfully saved.","alert-success","save-iframe-details-result-placeholder");
-                }
-            },
-            error: function (data) {
-                var status = data.status;
-                alert('An unhandled error occurred: ' + data.status);
-            }
-        });
-    };
-
     // settings
     self.saveSettings = function () {
         if ($('#settings-validation').validationEngine('validate')) {
@@ -446,7 +417,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
     self.attachDocument = function() {
         showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information', maxStages: maxStages},{key:'projectId', value:project.projectId}), '#attachDocument')
-            .done(function(result){self.documents.push(new DocumentViewModel(result))});
+            .done(function(result){
+                self.documents.push(new DocumentViewModel(result))}
+            );
     };
     self.editDocumentMetadata = function(document) {
         var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
@@ -468,6 +441,25 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return pi.length > 0 ? pi : null;
     });
 
+    var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
+    this.embeddedVideos = ko.computed(function () {
+        var ev = $.grep(self.documents(), function (doc) {
+            if(doc.embeddedVideo() && doc.public()){
+                var html = $.parseHTML(doc.embeddedVideo());
+                for(var i = 0; i < html.length; i++){
+                    var element = html[i];
+                    var src = element.getAttribute('src');
+                    if(src && $.inArray(getHostName(src), allowedHost) > -1){
+                        doc.iframe = '<iframe src ="' + src + '" width = "' + element.getAttribute("width") + '" height = "' + element.getAttribute("height") + '" /></iframe>';
+                        return doc;
+                    }
+                    break;
+                }
+            }
+        });
+        return ev.length > 0 ? ev : null;
+    });
+
     if (project.documents) {
         $.each(project.documents, function(i, doc) {
             self.addDocument(doc);
@@ -475,8 +467,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     }
 };
 
-function iFrameRow(o) {
-    var self = this;
-    if(!o) o = {};
-    self.code = ko.observable(o.code);
-};
+function getHostName(href) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l.hostname;
+}
