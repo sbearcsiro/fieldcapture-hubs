@@ -286,4 +286,11 @@ modules = {
 
     }
 
+    magnific_poppup{
+        dependsOn 'jquery'
+        resource url: 'js/magnific-popup/magnific-popup.css', plugin: 'fieldcapture-plugin'
+        resource url: 'js/magnific-popup/jquery.magnific-popup.min.js', plugin: 'fieldcapture-plugin'
+    }
+
+
 }

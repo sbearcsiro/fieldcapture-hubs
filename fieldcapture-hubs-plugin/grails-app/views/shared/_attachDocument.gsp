@@ -55,83 +55,93 @@
                         <label class="control-label" for="public">Settings</label>
                         <div class="controls">
                             <label class="checkbox" for="public">
-                                <input id="public" type="checkbox" data-bind="checked:public, enable: role() =='information'"/>
+                                <input id="public" type="checkbox" data-bind="checked:public, disable: role() =='programmeLogic'"/>
                                 make this document public on the project overview tab
                             </label>
                         </div>
 
                     </div>
 
-                    <div class="control-group"  data-bind="visible:settings.showSettings">
-                        <label class="control-label" for="documentFile">Image settings</label>
+                    <div data-bind="visible: !embeddedVideoVisible()">
+                        <div class="control-group"  data-bind="visible:settings.showSettings">
+                            <label class="control-label" for="documentFile">Image settings</label>
+                            <div class="controls">
+                                <label class="checkbox" for="documentRole">
+                                    <input id="documentRole" type="checkbox" data-bind="enable:type() == 'image' && public() && role() =='information', checked: isPrimaryProjectImage"/>
+                                    use as the main project image
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="control-group" data-bind="visible:thirdPartyConsentDeclarationRequired">
+                            <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
+                            <div id="thirdPartyConsentDeclarationMade" class="controls">
+                                <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
+                                    <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" class="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
+                                    <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="documentFile">File</label>
+
+                            <div class="controls">
+
+                                <span class="btn fileinput-button">
+                                    <i class="icon-plus"></i>
+                                    <input id="documentFile" type="file" name="files"/>
+                                    <span data-bind="text:fileButtonText">Attach file</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="fileLabel"></label>
+
+                            <div class="controls">
+
+                                <span data-bind="visible:filename()">
+                                    <input id="fileLabel" type="text" readonly="readonly" data-bind="value:fileLabel"/>
+                                    <button class="btn" data-bind="click:removeFile">
+                                        <span class="icon-remove"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="control-group" data-bind="visible:hasPreview">
+                            <label class="control-label">Preview</label>
+
+                            <div id="preview" class="controls"></div>
+                        </div>
+
+                        <div class="control-group" data-bind="visible:progress() > 0">
+                            <label for="progress" class="control-label">Progress</label>
+
+                            <div id="progress" class="controls progress progress-info active input-large"
+                                 data-bind="visible:!error() && progress() <= 100, css:{'progress-info':progress()<100, 'progress-success':complete()}">
+                                <div class="bar" data-bind="style:{width:progress()+'%'}"></div>
+                            </div>
+
+                            <div id="successmessage" class="controls" data-bind="visible:complete()">
+                                <span class="alert alert-success">File successfully uploaded</span>
+                            </div>
+
+                            <div id="message" class="controls" data-bind="visible:error()">
+                                <span class="alert alert-error" data-bind="text:error"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-bind="visible: embeddedVideoVisible()">
+                        <label class="control-label" for="embeddedVideo">Embed video </label>
                         <div class="controls">
-                            <label class="checkbox" for="documentRole">
-                                <input id="documentRole" type="checkbox" data-bind="enable:type() == 'image' && public() && role() =='information', checked: isPrimaryProjectImage"/>
-                                use as the main project image
-                            </label>
+                            <textarea data-bind="value: embeddedVideo" style="width: 97%;" rows="5" id="embeddedVideo" type="text" ></textarea>
                         </div>
                     </div>
 
-                    <div class="control-group" data-bind="visible:thirdPartyConsentDeclarationRequired">
-                        <label for="thirdPartyConsentDeclarationMade" class="control-label">Privacy declaration</label>
-                        <div id="thirdPartyConsentDeclarationMade" class="controls">
-                            <label id="thirdPartyDeclarationText" class="checkbox" for="thirdPartyConsentDeclarationMade">
-                                <input id="thirdPartyConsentCheckbox" type="checkbox" name="thirdPartyConsentDeclarationMade" class="validate[required]" data-bind="checked:thirdPartyConsentDeclarationMade">
-                                <fc:getSettingContent settingType="${au.org.ala.fieldcapture.SettingPageType.THIRD_PARTY_PHOTO_CONSENT_DECLARATION}"/>
-                            </label>
-                        </div>
-
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="documentFile">File</label>
-
-                        <div class="controls">
-
-                            <span class="btn fileinput-button">
-                                <i class="icon-plus"></i>
-                                <input id="documentFile" type="file" name="files"/>
-                                <span data-bind="text:fileButtonText">Attach file</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label" for="fileLabel"></label>
-
-                        <div class="controls">
-
-                            <span data-bind="visible:filename()">
-                                <input id="fileLabel" type="text" readonly="readonly" data-bind="value:fileLabel"/>
-                                <button class="btn" data-bind="click:removeFile">
-                                    <span class="icon-remove"></span>
-                                </button>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="control-group" data-bind="visible:hasPreview">
-                        <label class="control-label">Preview</label>
-
-                        <div id="preview" class="controls"></div>
-                    </div>
-
-                    <div class="control-group" data-bind="visible:progress() > 0">
-                        <label for="progress" class="control-label">Progress</label>
-
-                        <div id="progress" class="controls progress progress-info active input-large"
-                             data-bind="visible:!error() && progress() <= 100, css:{'progress-info':progress()<100, 'progress-success':complete()}">
-                            <div class="bar" data-bind="style:{width:progress()+'%'}"></div>
-                        </div>
-
-                        <div id="successmessage" class="controls" data-bind="visible:complete()">
-                            <span class="alert alert-success">File successfully uploaded</span>
-                        </div>
-
-                        <div id="message" class="controls" data-bind="visible:error()">
-                            <span class="alert alert-error" data-bind="text:error"></span>
-                        </div>
-                    </div>
 
                 </form>
 
@@ -150,4 +160,3 @@
     </div>
 </div>
 <!-- /ko -->
-

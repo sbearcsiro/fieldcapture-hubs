@@ -8,6 +8,7 @@ class ProjectController {
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
+    def citizenScienceOrgId = null
 
     def index(String id) {
         def project = projectService.get(id, 'brief')
@@ -64,7 +65,6 @@ class ProjectController {
     @PreAuthorise
     def edit(String id) {
         def project = projectService.get(id, 'all')
-
         def organisations = organisationService.list()
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
@@ -78,15 +78,11 @@ class ProjectController {
         }
     }
 
+    @PreAuthorise
     def create() {
-        boolean allowAdHocOrgNameOnCreate = true; // set true for MERIT
-        if (!allowAdHocOrgNameOnCreate && !params.organisationId)
-            render status: 400, text: 'Either an organisation id or ad hoc organisation name must be active'
-
         [
-                citizenScience: params.citizenScience,
+                citizenScience: params.citizenScience == "true",
                 organisationId: params.organisationId,
-                allowAdHocOrgNameOnCreate: allowAdHocOrgNameOnCreate,
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
@@ -95,9 +91,14 @@ class ProjectController {
     }
 
     def citizenScience() {
+        if (citizenScienceOrgId == null) {
+            def orgName = grailsApplication.config.citizenScienceOrgName?:"ALA"
+            citizenScienceOrgId = organisationService.getByName(orgName)?.organisationId
+        }
         def user = userService.getUser()
         def userId = user?.userId
         [user: user,
+         registrationOrgId: citizenScienceOrgId,
          projects: projectService.list(false, true).collect {
              def imgUrl;
              it.documents.each { doc ->
@@ -109,7 +110,7 @@ class ProjectController {
               it.description,
               userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
               it.name,
-              it.organisationName?:metadataService.getOrganisationName(it.organisationId),
+              it.organisationName?:organisationService.getNameFromId(it.organisationId),
               it.status,
               it.urlAndroid,
               it.urlITunes,

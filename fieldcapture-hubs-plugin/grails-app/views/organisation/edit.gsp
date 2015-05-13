@@ -126,8 +126,8 @@
 
         <span class="span6">
             <div>
-                <h4 class="demphasise">Type&nbsp;&nbsp;</h4>
-                <select class="well" id="orgType"
+                <h4 class="demphasise" style="vertical-align:center">Type&nbsp;&nbsp;</h4>
+                <select id="orgType"
                         data-bind="value:orgType,options:transients.orgTypes,optionsText:'name',optionsValue:'orgType',optionsCaption: 'Choose...'"
                         data-validation-engine="validate[required]"></select>
             </div>

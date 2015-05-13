@@ -16,8 +16,12 @@ class OrganisationController {
         [organisations:organisations.list?:[],
          user:user,
          userOrgIds: userOrgIds,
-         citizenScience: params.citizenScience
+         citizenScience: params.citizenScience == "true"
         ]
+    }
+
+    def isProjectCreationDisabled() {
+        return false;
     }
 
     def index(String id) {
@@ -39,8 +43,9 @@ class OrganisationController {
             [organisation: organisation,
              dashboard: dashboard,
              roles:roles,
+             disableProjectCreation: isProjectCreationDisabled(),
              user:user,
-             citizenScience: params.citizenScience,
+             citizenScience: params.citizenScience == "true",
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
              isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
         }

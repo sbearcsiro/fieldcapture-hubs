@@ -5,43 +5,27 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class OrganisationService {
 
-    def grailsApplication, webService, projectService, userService
+    def grailsApplication, webService, metadataService, projectService, userService
 
 
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
-        def organisation = webService.getJson(url)
-
-
-        organisation.projects = getProjectsByName(organisation)
-
-        organisation
+        webService.getJson(url)
     }
 
-    private def getProjectsByName(organisation) {
-        def projects = new JSONArray()
-        if (!organisation) {
-            return projects
-        }
+    def getByName(orgName) {
+        // The result of the service call will be a JSONArray if it's successful
+        return list().list.find({ it.name == orgName })
+    }
 
-        def resp = projectService.search([serviceProviderName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects)
-        }
-
-        resp = projectService.search([organisationName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
-        }
-        projects
+    def getNameFromId(orgId) {
+        // The result of the service call will be a JSONArray if it's successful
+        return orgId ? list().list.find({ it.organisationId == orgId })?.name : ''
     }
 
     def list() {
-        def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
-        webService.getJson(url)
+        metadataService.organisationList()
     }
 
     def update(id, organisation) {
