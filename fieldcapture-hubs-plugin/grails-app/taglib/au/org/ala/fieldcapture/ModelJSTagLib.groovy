@@ -101,7 +101,11 @@ class ModelJSTagLib {
                 out << INDENT*4 << "self.data['${mod.name}'].loadData(data['${mod.name}']);\n"
             }
             else if (mod.dataType == 'document') {
-                out << INDENT*4 << "self.data['${mod.name}'](findDocumentById(documents, data['${mod.name}']));\n"
+                out << INDENT*4 << "var doc = findDocumentById(documents, data['${mod.name}']);\n"
+                out << INDENT*4 << "if (doc) {\n"
+                out << INDENT*8 << "self.data['${mod.name}'](new DocumentViewModel(doc));\n"
+                out << INDENT*4 << "}\n"
+
             }
         }
     }
@@ -183,6 +187,14 @@ class ModelJSTagLib {
         else if (model.computed.operation == 'count') {
             out << INDENT*4 << "return ${dependantContext}.${model.computed.dependents.source}().length;\n"
         }
+        else if (model.computed.expression) {
+            out << "var expression = Parser.parse('${model.computed.expression}');\n"
+            out << "var variables = {};\n";
+            for(int i=0; i < model.computed.dependents.source.size(); i++) {
+                out << "variables['${model.computed.dependents.source[i]}'] = Number(${dependantContext}.${model.computed.dependents.source[i]}());\n"
+            }
+            out << "return expression.evaluate(variables);\n"
+        }
         else if (model.computed.dependents.fromList) {
             out << INDENT*4 << "var total = 0;\n"
             if (model.computed.operation == 'average') {
@@ -248,6 +260,7 @@ class ModelJSTagLib {
             }
             out << INDENT*4 << "return total;"
         }
+
         out << INDENT*3 << "});\n"
     }
 

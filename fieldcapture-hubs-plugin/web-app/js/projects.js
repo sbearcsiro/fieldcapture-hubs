@@ -261,6 +261,8 @@ function isValid(p, a) {
 	 return p;
 }
 
+
+
 function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
 
@@ -383,7 +385,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             });
             var id = "${project?.projectId}";
             $.ajax({
-                url: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+                url: "${createLink(controller:'project', action: 'ajaxUpdate', id: project.projectId)}",
                 type: 'POST',
                 data: json,
                 contentType: 'application/json',
@@ -404,17 +406,19 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     // documents
-
+    var maxStages = project.timeline ? project.timeline.length : 0 ;
     self.addDocument = function(doc) {
         // check permissions
         if ((isUserEditor && doc.role !== 'approval') ||  doc.public) {
+            doc.maxStages = maxStages;
             self.documents.push(new DocumentViewModel(doc));
         }
     };
     self.attachDocument = function() {
-
-        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information'},{key:'projectId', value:project.projectId}), '#attachDocument')
-            .done(function(result){self.documents.push(new DocumentViewModel(result))});
+        showDocumentAttachInModal(fcConfig.documentUpdateUrl, new DocumentViewModel({role:'information', maxStages: maxStages},{key:'projectId', value:project.projectId}), '#attachDocument')
+            .done(function(result){
+                self.documents.push(new DocumentViewModel(result))}
+            );
     };
     self.editDocumentMetadata = function(document) {
         var url = fcConfig.documentUpdateUrl + "/" + document.documentId;
@@ -436,6 +440,25 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return pi.length > 0 ? pi : null;
     });
 
+    var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
+    this.embeddedVideos = ko.computed(function () {
+        var ev = $.grep(self.documents(), function (doc) {
+            if(doc.embeddedVideo() && doc.public()){
+                var html = $.parseHTML(doc.embeddedVideo());
+                for(var i = 0; i < html.length; i++){
+                    var element = html[i];
+                    var src = element.getAttribute('src');
+                    if(src && $.inArray(getHostName(src), allowedHost) > -1){
+                        doc.iframe = '<iframe src ="' + src + '" width = "' + element.getAttribute("width") + '" height = "' + element.getAttribute("height") + '" /></iframe>';
+                        return doc;
+                    }
+                    break;
+                }
+            }
+        });
+        return ev.length > 0 ? ev : null;
+    });
+
     if (project.documents) {
         $.each(project.documents, function(i, doc) {
             self.addDocument(doc);
@@ -443,3 +466,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     }
 };
 
+function getHostName(href) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l.hostname;
+}

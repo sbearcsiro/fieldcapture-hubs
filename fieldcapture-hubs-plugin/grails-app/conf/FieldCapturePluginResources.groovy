@@ -52,7 +52,7 @@ modules = {
     }
 
     knockout {
-        resource url:'js/knockout-3.3.0.min.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/knockout-3.3.0.debug.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
@@ -171,6 +171,11 @@ modules = {
         resource url: 'js/document.js', plugin: 'fieldcapture-plugin'
     }
 
+    activity {
+        dependsOn 'knockout'
+        resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
+        resource url:'js/parser.js', plugin: 'fieldcapture-plugin'
+    }
 
     jqueryGantt {
         resource url:[dir:'jquery-gantt/css/', file:'style.css', plugin: 'fieldcapture-plugin']
@@ -280,5 +285,12 @@ modules = {
         resource url: 'slider-pro-master/css/images/blank.gif', plugin: 'fieldcapture-plugin'
 
     }
+
+    magnific_poppup{
+        dependsOn 'jquery'
+        resource url: 'js/magnific-popup/magnific-popup.css', plugin: 'fieldcapture-plugin'
+        resource url: 'js/magnific-popup/jquery.magnific-popup.min.js', plugin: 'fieldcapture-plugin'
+    }
+
 
 }

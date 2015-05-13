@@ -19,11 +19,12 @@
         activityUpdateUrl: "${createLink(controller: 'activity', action: 'ajaxUpdate')}",
         activityDeleteUrl: "${createLink(controller: 'activity', action: 'ajaxDelete')}",
         projectViewUrl: "${createLink(controller: 'project', action: 'index')}/",
-        siteViewUrl: "${createLink(controller: 'site', action: 'index')}/"
+        siteViewUrl: "${createLink(controller: 'site', action: 'index')}/",
+        imageLocation:"${resource(dir:'/images/filetypes')}"
         },
         here = document.location.href;
     </r:script>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,mapWithFeatures,species"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,mapWithFeatures,species,activity"/>
 </head>
 <body>
 <div class="container-fluid validationEngineContainer" id="validation-container">
