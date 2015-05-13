@@ -35,7 +35,7 @@
         <div class="control-group">
             <label class="control-label" for="name">Type</label>
             <div class="controls required">
-                <select class="span12" id="orgType"
+                <select id="orgType"
                         data-bind="value:orgType,options:transients.orgTypes,optionsText:'name',optionsValue:'orgType',optionsCaption: 'Choose...'"
                         data-validation-engine="validate[required]"></select>
             </div>
@@ -110,6 +110,10 @@
 
         ko.applyBindings(organisationViewModel);
         $('.validationEngineContainer').validationEngine();
+
+        $("#cancel").on("click", function() {
+            document.location.href = "${createLink(action:'list')}";
+        })
 
     });
 

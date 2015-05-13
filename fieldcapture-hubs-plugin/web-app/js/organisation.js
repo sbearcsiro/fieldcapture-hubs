@@ -8,6 +8,9 @@ OrganisationViewModel = function (props) {
     
     self.organisationId = props.organisationId;
     self.orgType = ko.observable(props.orgType);
+    self.orgTypeDisplayOnly = ko.computed(function() {
+        return self.orgType() || "Unspecified";
+    });
     self.name = ko.observable(props.name);
     self.description = ko.observable(props.description).extend({markdown:true});
     self.url = ko.observable(props.url);

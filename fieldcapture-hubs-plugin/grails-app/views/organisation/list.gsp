@@ -59,9 +59,8 @@
                 <tr>
                     <td class="organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
                         <h4>
-                            <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
+                            <a data-bind="attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
                             data-bind="text:name"></span></a>
-                            <b data-bind="visible:!organisationId,text:name"></b>
                         </h4>
                         <span data-bind="html:description.markdownToHtml()"></span>
                     </td>

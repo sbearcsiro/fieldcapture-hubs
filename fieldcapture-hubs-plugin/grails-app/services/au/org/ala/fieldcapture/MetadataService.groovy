@@ -203,12 +203,6 @@ class MetadataService {
         outputTypes
     }
 
-    def getOrganisationName(orgId) {
-        def organisations = organisationList()
-        // The result of the service call will be a JSONArray if it's successful
-        return orgId ? organisations.find({ it.organisationId == orgId })?.name : ''
-    }
-
     def organisationList() {
         return cacheService.get('organisations',{
             webService.getJson(grailsApplication.config.ecodata.baseUrl + "organisation")

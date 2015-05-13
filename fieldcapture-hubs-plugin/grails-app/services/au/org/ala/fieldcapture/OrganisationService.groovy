@@ -5,7 +5,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class OrganisationService {
 
-    def grailsApplication, webService, projectService, userService
+    def grailsApplication, webService, metadataService, projectService, userService
 
 
     def get(String id, view = '') {
@@ -14,10 +14,18 @@ class OrganisationService {
         webService.getJson(url)
     }
 
+    def getByName(orgName) {
+        // The result of the service call will be a JSONArray if it's successful
+        return list().list.find({ it.name == orgName })
+    }
+
+    def getNameFromId(orgId) {
+        // The result of the service call will be a JSONArray if it's successful
+        return orgId ? list().list.find({ it.organisationId == orgId })?.name : ''
+    }
 
     def list() {
-        def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
-        webService.getJson(url)
+        metadataService.organisationList()
     }
 
     def update(id, organisation) {

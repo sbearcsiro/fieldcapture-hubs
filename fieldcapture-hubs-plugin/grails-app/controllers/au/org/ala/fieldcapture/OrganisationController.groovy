@@ -16,7 +16,7 @@ class OrganisationController {
         [organisations:organisations.list?:[],
          user:user,
          userOrgIds: userOrgIds,
-         citizenScience: params.citizenScience
+         citizenScience: params.citizenScience == "true"
         ]
     }
 
@@ -40,7 +40,7 @@ class OrganisationController {
              dashboard: dashboard,
              roles:roles,
              user:user,
-             citizenScience: params.citizenScience,
+             citizenScience: params.citizenScience == "true",
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
              isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
         }
