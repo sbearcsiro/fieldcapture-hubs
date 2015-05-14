@@ -5,11 +5,40 @@
  */
 OrganisationViewModel = function (props) {
     var self = $.extend(this, new Documents());
+    var orgTypesMap = {
+    aquarium:'Aquarium',
+    archive:'Archive',
+    botanicGarden:'Botanic Garden',
+    conservation:'Conservation',
+    fieldStation:'Field Station',
+    government:'Government',
+    governmentDepartment:'Government Department',
+    herbarium:'Herbarium',
+    historicalSociety:'Historical Society',
+    horticulturalInstitution:'Horticultural Institution',
+    independentExpert:'Independent Expert',
+    industry:'Industry',
+    laboratory:'Laboratory',
+    library:'Library',
+    management:'Management',
+    museum:'Museum',
+    natureEducationCenter:'Nature Education Center',
+    nonUniversityCollege:'Non-University College',
+    park:'Park',
+    repository:'Repository',
+    researchInstitute:'Research Institute',
+    school:'School',
+    scienceCenter:'Science Center',
+    society:'Society',
+    university:'University',
+    voluntaryObserver:'Voluntary Observer',
+    zoo:'Zoo'
+    }
     
     self.organisationId = props.organisationId;
     self.orgType = ko.observable(props.orgType);
     self.orgTypeDisplayOnly = ko.computed(function() {
-        return self.orgType() || "Unspecified";
+        return orgTypesMap[self.orgType()] || "Unspecified";
     });
     self.name = ko.observable(props.name);
     self.description = ko.observable(props.description).extend({markdown:true});
@@ -40,35 +69,11 @@ OrganisationViewModel = function (props) {
     };
 
     self.transients = {};
-    self.transients.orgTypes = [
-        {orgType:'aquarium', name:'Aquarium'},
-        {orgType:'archive', name:'Archive'},
-        {orgType:'botanicGarden', name:'Botanic Garden'},
-        {orgType:'conservation', name:'Conservation'},
-        {orgType:'fieldStation', name:'Field Station'},
-        {orgType:'government', name:'Government'},
-        {orgType:'governmentDepartment', name:'Government Department'},
-        {orgType:'herbarium', name:'Herbarium'},
-        {orgType:'historicalSociety', name:'Historical Society'},
-        {orgType:'horticulturalInstitution', name:'Horticultural Institution'},
-        {orgType:'independentExpert', name:'Independent Expert'},
-        {orgType:'industry', name:'Industry'},
-        {orgType:'laboratory', name:'Laboratory'},
-        {orgType:'library', name:'Library'},
-        {orgType:'management', name:'Management'},
-        {orgType:'museum', name:'Museum'},
-        {orgType:'natureEducationCenter', name:'Nature Education Center'},
-        {orgType:'nonUniversityCollege', name:'Non-University College'},
-        {orgType:'park', name:'Park'},
-        {orgType:'repository', name:'Repository'},
-        {orgType:'researchInstitute', name:'Research Institute'},
-        {orgType:'school', name:'School'},
-        {orgType:'scienceCenter', name:'Science Center'},
-        {orgType:'society', name:'Society'},
-        {orgType:'university', name:'University'},
-        {orgType:'voluntaryObserver', name:'Voluntary Observer'},
-        {orgType:'zoo', name:'Zoo'}
-    ];
+    self.transients.orgTypes = [];
+    for (var ot in orgTypesMap) {
+        if (orgTypesMap.hasOwnProperty(ot))
+            self.transients.orgTypes.push({orgType:ot, name:orgTypesMap[ot]});
+    }
 
     self.toJS = function() {
         return ko.mapping.toJS(self,

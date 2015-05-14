@@ -31,7 +31,9 @@ class OrganisationService {
     def update(id, organisation) {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
-        webService.doPost(url, organisation)
+        def result = webService.doPost(url, organisation)
+        metadataService.clearOrganisationList()
+        result
 
     }
 
