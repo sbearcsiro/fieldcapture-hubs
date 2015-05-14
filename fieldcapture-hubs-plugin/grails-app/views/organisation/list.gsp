@@ -59,8 +59,9 @@
                 <tr>
                     <td class="organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
                         <h4>
-                            <a data-bind="attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
+                            <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
                             data-bind="text:name"></span></a>
+                            <span data-bind="visible:!organisationId,text:name"></span>
                         </h4>
                         <span data-bind="html:description.markdownToHtml()"></span>
                     </td>
@@ -168,12 +169,12 @@
 
         (function() {
             var fuseUserOrgs, fuseOtherOrgs, userOrgsBanner = {
-                  organisationId: "",
+                  organisationId: null,
                   bannerUrl: "",
                   description: ko.observable("").extend({markdown:true}),
                   name: "You are a member of the following organisations"
                 }, otherOrgsBanner = {
-                  organisationId: "",
+                  organisationId: null,
                   bannerUrl: "",
                   description: ko.observable("").extend({markdown:true}),
                   name: "You are NOT a member of the following organisations"
@@ -191,7 +192,9 @@
               }
               orgs = fuseOtherOrgs && key? fuseOtherOrgs.search(key): otherOrgs;
               if (orgs.length) {
+    <g:if test="${user}">
                 organisationsViewModel.allOrganisations.push(otherOrgsBanner);
+    </g:if>
                 $.each(orgs, function(i, org) {
                   organisationsViewModel.allOrganisations.push(org);
                 });

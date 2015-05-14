@@ -61,18 +61,7 @@
     <div class="container-fluid">
 
         <g:render template="/shared/flashScopeMessage"/>
-
-        <div class="row-fluid">
-            <h4 style="display:inline">Type:&nbsp;</h4>
-            <span data-bind="text:orgTypeDisplayOnly"></span>
-        </div>
         <div class="row-fluid" data-bind="template:detailsTemplate"></div>
-
-        <g:if test="${!organisation.projects}">
-            <div class="row-fluid">
-                <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
-            </div>
-        </g:if>
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
@@ -107,6 +96,9 @@
                             </tfoot>
                         </table>
 </g:if>
+<g:else>
+    <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+</g:else>
                 </div>
 
 <g:if test="${organisation.projects}">
@@ -315,6 +307,8 @@
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+        <h4 style="display:inline">Type&nbsp;</h4>
+        <span data-bind="text:orgTypeDisplayOnly"></span>
     </span>
     <span class="span3">
         <h4>News and events</h4>
@@ -327,7 +321,8 @@
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-
+        <h4 style="display:inline">Type&nbsp;</h4>
+        <span data-bind="text:orgTypeDisplayOnly"></span>
     </span>
     <span class="span3">
         <h4>News and events</h4>
