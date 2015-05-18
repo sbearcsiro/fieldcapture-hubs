@@ -245,12 +245,11 @@
             optionsCaption:'Choose a layer...',
             optionsValue: 'id',
             optionsText:'name',
-            value: chosenLayer,
-            event: { change: refreshObjectList }"></select>
+            value: chosenLayer"></select>
             <select data-bind="options: layerObjects, disable: layerObjects().length == 0,
             optionsCaption:'Choose shape ...',
             optionsValue: 'pid',
-            optionsText:'name', value: layerObject, event: { change: updateSelectedPid }"></select>
+            optionsText:'name', value: layerObject"></select>
             <div class="row-fluid controls-row" style="display:none;">
                 <span class="label label-success">PID</span> <span data-bind="text:geometry().pid"></span>
             </div>

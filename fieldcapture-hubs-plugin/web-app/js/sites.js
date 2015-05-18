@@ -172,7 +172,7 @@ var SiteViewModel = function (site, feature) {
 
 
     // Watch for changes to the extent content and notify subscribers when they do.
-    self.extentWatcher = ko.pureComputed(function() {
+    self.extentGeometryWatcher = ko.pureComputed(function() {
         // We care about changes to either the geometry coordinates or the PID in the case of known shape.
         var result = {};
         if (self.extent()) {
@@ -188,9 +188,6 @@ var SiteViewModel = function (site, feature) {
         }
         return result;
 
-    });
-    self.extentWatcher.subscribe(function(blah) {
-        self.extent.notifySubscribers();
     });
 };
 
@@ -375,7 +372,7 @@ var PidLocation = function (l) {
         self.layerObjects([]);
         if(self.chosenLayer() !== undefined){
             $.ajax({
-                url: fcConfig.featuresService + '?layerId=' +this.chosenLayer(),
+                url: fcConfig.featuresService + '?layerId=' +self.chosenLayer(),
                 dataType:'json'
             }).done(function(data) {
                 self.layerObjects(data);
@@ -399,23 +396,6 @@ var PidLocation = function (l) {
     self.updateGeom = function(l){
         //to be added
     };
-    self.setCurrentPID = function(){
-        self.refreshObjectList();
-        console.log('Refreshing the layer object list for ' + self.chosenLayer());
-        self.layerObjects([]);
-        if(self.chosenLayer() !== undefined){
-            $.ajax({
-                url: fcConfig.featuresService + '?layerId=' + this.chosenLayer(),
-                dataType:'json'
-            }).done(function(data) {
-                self.layerObjects(data);
-                console.log('Refresh complete. Objects:' + data.length);
-                self.layerObject(self.geometry().pid())
-            });
-        } else {
-            console.log('Refreshing the layer object list - no layer currently selected...');
-        }
-    }
     self.updateSelectedPid = function(elements){
         if(self.layerObject() !== undefined){
             self.geometry().pid(self.layerObject())
@@ -451,10 +431,23 @@ var PidLocation = function (l) {
     self.isValid = function() {
         return self.geometry().fid() && self.geometry().pid();
     };
+    self.chosenLayer.subscribe(function() {
+        self.refreshObjectList();
+        self.updateSelectedPid();
+    });
+    self.layerObject.subscribe(function() {
+        self.updateSelectedPid();
+    });
+    if (exists(l,'fid')) {
+        self.chosenLayer.notifySubscribers();
+    }
+
+
 };
 
 function SiteViewModelWithMapIntegration (siteData) {
-    var self = $.extend(this, new SiteViewModel(siteData));
+    var self = this;
+    SiteViewModel.apply(self, [siteData]);
 
     self.renderPOIs = function(){
         // console.log('Rendering the POIs now');
@@ -514,6 +507,37 @@ function SiteViewModelWithMapIntegration (siteData) {
             }
         }
     };
+
+    self.updateExtent = function(source){
+        switch (source) {
+            case 'point':
+                if(siteData && siteData.extent && siteData.extent.source == source) {
+                    self.extent(new PointLocation(siteData.extent.geometry));
+                } else {
+                    var centre = getMapCentre();
+                    self.extent(new PointLocation({decimalLatitude:centre[1], decimalLongitude:centre[0]}));
+                }
+                break;
+            case 'pid':
+                if(siteData && siteData.extent && siteData.extent.source == source) {
+                    self.extent(new PidLocation(siteData.extent.geometry));
+                } else {
+                    self.extent(new PidLocation({}));
+                }
+                break;
+            case 'upload': self.extent(new UploadLocation({})); break;
+            case 'drawn':
+                if (siteData && siteData.extent && siteData.extent.source == source) {
+
+                }
+                else {
+                    self.extent(new DrawnLocation({}));
+                }
+                break;
+            default: self.extent(new EmptyLocation());
+        }
+    };
+
     self.shapeDrawn = function(source, type, shape) {
         var drawnShape;
         if (source === 'clear') {
@@ -644,16 +668,26 @@ function SiteViewModelWithMapIntegration (siteData) {
         }
     };
     self.mapInitialised = function(map) {
+        var updating = false;
         self.loadExtent();
         self.renderPOIs();
         self.renderOnMap();
-
+        var clearAndRedraw = function() {
+            if (!updating) {
+                updating = true;
+                setTimeout(function () {
+                    clearObjectsAndShapes();
+                    self.renderOnMap();
+                    updating = false;
+                }, 500);
+            }
+        }
         setCurrentShapeCallback(self.shapeDrawn);
         self.extent.subscribe(function(newExtent) {
-            setTimeout(function() {
-                clearObjectsAndShapes();
-                self.renderOnMap();
-            }, 1000);
+            clearAndRedraw();
+        });
+        self.extentGeometryWatcher.subscribe(function() {
+            clearAndRedraw();
         });
     };
 
@@ -668,7 +702,7 @@ function SiteViewModelWithMapIntegration (siteData) {
             if (!result) {
                 return message || 'Please define the site extent';
             }
-        }
+        };
         self.isValid.subscribe(function() {
             $(fieldSelector).validationEngine('validate');
         });
