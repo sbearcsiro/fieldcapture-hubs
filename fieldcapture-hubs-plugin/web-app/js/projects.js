@@ -304,8 +304,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
-    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});;
-    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});;
+    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});
+    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});
 
     self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);

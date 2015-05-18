@@ -14,7 +14,8 @@ function DocumentViewModel (doc, owner, settings) {
     var self = this;
 
     var defaults = {
-        roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}, {id:'embeddedVideo', name:'Embedded Video'}],
+        //Information is the default option.
+        roles:  [{id: 'information', name: 'Information'}, {id:'embeddedVideo', name:'Embedded Video'}, {id: 'programmeLogic', name: 'Programme Logic'}],
         stages:[],
         showSettings: true,
         thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText',
