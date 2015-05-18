@@ -449,7 +449,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
                     var element = html[i];
                     var src = element.getAttribute('src');
                     if(src && $.inArray(getHostName(src), allowedHost) > -1){
-                        doc.iframe = '<iframe src ="' + src + '" width = "' + element.getAttribute("width") + '" height = "' + element.getAttribute("height") + '" /></iframe>';
+                        doc.iframe = '<iframe width="100%" src ="' + src + '" height = "' + element.getAttribute("height") + '"/></iframe>';
                         return doc;
                     }
                     break;
