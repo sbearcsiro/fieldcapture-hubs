@@ -135,7 +135,7 @@ $(function(){
 
     var viewModel = initViewModel();
     viewModel.organisationId("${organisationId}");
-<g:if test="${citizenScience == 'true'}">
+<g:if test="${citizenScienceOrgId != ''}">
     $("#isCitizenScience").prop("disabled", true);
     viewModel.isCitizenScience(true);
 </g:if>
