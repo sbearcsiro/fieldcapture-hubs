@@ -8,9 +8,9 @@ class ProjectController {
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
-    def citizenScienceOrgId = null
 
     def index(String id) {
+        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'brief')
         def roles = roleService.getRoles()
 
@@ -64,6 +64,7 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
+        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'all')
         def organisations = organisationService.list()
         if (project) {
@@ -80,8 +81,10 @@ class ProjectController {
 
     @PreAuthorise
     def create() {
+        def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
+        session.removeAttribute('citizenScienceOrgId')
         [
-                citizenScience: params.citizenScience == "true",
+                citizenScienceOrgId: csOrgId,
                 organisationId: params.organisationId,
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
@@ -91,14 +94,9 @@ class ProjectController {
     }
 
     def citizenScience() {
-        if (citizenScienceOrgId == null) {
-            def orgName = grailsApplication.config.citizenScienceOrgName?:"ALA"
-            citizenScienceOrgId = organisationService.getByName(orgName)?.organisationId
-        }
         def user = userService.getUser()
         def userId = user?.userId
         [user: user,
-         registrationOrgId: citizenScienceOrgId,
          projects: projectService.list(false, true).collect {
              def imgUrl;
              it.documents.each { doc ->

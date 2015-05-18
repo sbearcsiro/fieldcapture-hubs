@@ -80,7 +80,7 @@
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
                     <g:if test="${user && !disableProjectCreation}">
-                        <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId, citizenScience: '${citizenScience}' == 'true'])}"
+                        <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
                            class="btn btn-small">
                             <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
                     </g:if>

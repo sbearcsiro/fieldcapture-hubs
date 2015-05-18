@@ -9,8 +9,7 @@
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             createOrganisationUrl: "${createLink(controller: 'organisation', action: 'create')}",
-            viewOrganisationUrl: "${createLink(controller: 'organisation', action: 'index')}",
-
+            viewOrganisationUrl: "${createLink(controller: 'organisation', action: 'index')}"
             };
     </r:script>
     <r:require modules="knockout,mapWithFeatures,amplify,organisation,fuseSearch"/>
@@ -25,9 +24,16 @@
         <li class="active">Organisations<span class="divider"></span></li>
     </ul>
 
+    <g:if test="${user && citizenScienceOrgId != ''}">
+        <h5>Please select the organisation which will manage your citizen science project
+        If you are not a member of that organisation, you will need to contact that organisation's administrator to induct you as a member.
+        Alternatively, you may register a new organisation if it is not listed below.</h5>
+    </g:if>
 
     <div>
-        <h2 style="display:inline">Registered Organisations</h2>
+        <h2 style="display:inline">Registered
+
+        Organisations</h2>
 
         <g:if test="${user}">
             <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
@@ -93,7 +99,7 @@
 
     $(function () {
 
-        var userOrgs = [], otherOrgs = [];
+        var userOrgs = [], otherOrgs = [], citizenScienceOrg;
 
         var OrganisationsViewModel = function(organisations, userOrgIds) {
             var self = this, userOrgIdsMap = {};
@@ -106,6 +112,10 @@
                 model.fuseDescription = model.description.markdownToHtml();
                 if (userOrgIdsMap[org.organisationId])
                     userOrgs.push(model);
+<g:if test="${user && citizenScienceOrgId != ''}">
+                else if (org.organisationId == "${citizenScienceOrgId}")
+                    citizenScienceOrg = model;
+</g:if>
                 else
                     otherOrgs.push(model);
             });
@@ -178,6 +188,11 @@
                   bannerUrl: "",
                   description: ko.observable("").extend({markdown:true}),
                   name: "You are NOT a member of the following organisations"
+                }, citizenScienceOrgBanner = {
+                  organisationId: null,
+                  bannerUrl: "",
+                  description: ko.observable("").extend({markdown:true}),
+                  name: "The following organisation may be used even by non-members to create or register citizen science projects"
                 };
 
             function search() {
@@ -189,6 +204,10 @@
                 $.each(orgs , function(i, org) {
                   organisationsViewModel.allOrganisations.push(org);
                 });
+              }
+              if (citizenScienceOrg) {
+                organisationsViewModel.allOrganisations.push(citizenScienceOrgBanner);
+                organisationsViewModel.allOrganisations.push(citizenScienceOrg);
               }
               orgs = fuseOtherOrgs && key? fuseOtherOrgs.search(key): otherOrgs;
               if (orgs.length) {
