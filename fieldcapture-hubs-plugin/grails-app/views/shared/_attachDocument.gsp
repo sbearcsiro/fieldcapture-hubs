@@ -56,7 +56,7 @@
                         <div class="controls">
                             <label class="checkbox" for="public">
                                 <input id="public" type="checkbox" data-bind="checked:public, disable: role() =='programmeLogic'"/>
-                                make this document public on the project overview tab
+                                make this document public on the project documents tab
                             </label>
                         </div>
 

@@ -254,7 +254,7 @@ class MetadataService {
 
             }
 
-            facetConfig.gridded.each { name, fid ->
+            facetConfig.contextual.each { name, fid ->
                 def objects = webService.getJson(grailsApplication.config.spatial.baseUrl + '/ws/objects/'+fid)
                 objects.each {
                     results[name] << [(it.name):it]
