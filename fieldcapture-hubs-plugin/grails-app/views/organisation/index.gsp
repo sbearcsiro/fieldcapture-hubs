@@ -61,15 +61,13 @@
     <div class="container-fluid">
 
         <g:render template="/shared/flashScopeMessage"/>
-        <div class="row-fluid" data-bind="template:detailsTemplate"></div>
+        <div class="row-fluid space-after" data-bind="template:detailsTemplate"></div>
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
-                <g:if test="${organisation.projects}">
                     <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
-                </g:if>
                     <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
+                    <g:if test="${organisation.projects}"><li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li></g:if>
                     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
                     <li class="tab"><a id="admin-tab" data-toggle="tab" href="#admin">Admin</a></li>
                     </g:if>
@@ -84,24 +82,23 @@
                            class="btn btn-small">
                             <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
                     </g:if>
-<g:if test="${organisation.projects}">
-                    <table id="projectList" class="table
+                    <g:if test="${organisation.projects}">
+                        <table id="projectList" class="table
 
-                    table-striped" style="width:100%;">
-                            <thead></thead>
-                            <tbody></tbody>
-                            <tfoot>
-                            <tr></tr>
+                        table-striped" style="width:100%;">
+                                <thead></thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                <tr></tr>
 
-                            </tfoot>
-                        </table>
-</g:if>
-<g:else>
-    <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
-</g:else>
+                                </tfoot>
+                            </table>
+                    </g:if>
+                    <g:else>
+                        <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+                    </g:else>
                 </div>
-
-<g:if test="${organisation.projects}">
+                <g:if test="${organisation.projects}">
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
                         <span class="span12"><h4>Report: </h4>
@@ -306,9 +303,9 @@
     <span class="span6">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></span>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-        <h4 style="display:inline">Type&nbsp;</h4>
-        <span data-bind="text:orgTypeDisplayOnly"></span>
+
     </span>
     <span class="span3">
         <h4>News and events</h4>
@@ -320,9 +317,8 @@
     <span class="span9">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4><span data-bind="text:orgTypeDisplayOnly"></span></span>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-        <h4 style="display:inline">Type&nbsp;</h4>
-        <span data-bind="text:orgTypeDisplayOnly"></span>
     </span>
     <span class="span3">
         <h4>News and events</h4>
