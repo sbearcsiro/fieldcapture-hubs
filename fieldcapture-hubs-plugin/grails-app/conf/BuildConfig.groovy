@@ -85,7 +85,7 @@ grails.project.dependency.resolution = {
         build ":tomcat:$tomcatVersion"
 
         compile ':cache:1.1.8'
-        compile ":cache-ehcache:1.0.5-SNAPSHOT"
+        compile ":cache-ehcache:1.0.5"
 
         compile ":google-visualization:0.6.2"
         compile ":mail:1.0.6"
