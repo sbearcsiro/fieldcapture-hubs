@@ -78,9 +78,7 @@ $(function(){
     </g:else>
     });
     $('#save').click(function () {
-    console.log("saving...");
         viewModel.save();
-    console.log("saved...");
     });
  });
 </r:script>
