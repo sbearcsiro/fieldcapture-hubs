@@ -203,16 +203,14 @@ class MetadataService {
         outputTypes
     }
 
-    def getInstitutionName(uid) {
-        def institutions = institutionList()
-        // The result of the service call will be a JSONArray if it's successful
-        return uid ? institutions.find({ it.uid == uid })?.name : ''
+    def organisationList() {
+        return cacheService.get('organisations',{
+            webService.getJson(grailsApplication.config.ecodata.baseUrl + "organisation")
+        })
     }
 
-    def institutionList() {
-        return cacheService.get('institutions',{
-            webService.getJson(grailsApplication.config.collectory.baseURL + 'ws/institution')
-        })
+    def clearOrganisationList() {
+        cacheService.clear('organisations')
     }
 
     def getAccessLevels() {
@@ -256,7 +254,7 @@ class MetadataService {
 
             }
 
-            facetConfig.gridded.each { name, fid ->
+            facetConfig.contextual.each { name, fid ->
                 def objects = webService.getJson(grailsApplication.config.spatial.baseUrl + '/ws/objects/'+fid)
                 objects.each {
                     results[name] << [(it.name):it]

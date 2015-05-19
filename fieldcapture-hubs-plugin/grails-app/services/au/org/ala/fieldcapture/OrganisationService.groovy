@@ -5,47 +5,36 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 
 class OrganisationService {
 
-    def grailsApplication, webService, projectService, userService
+    def grailsApplication, webService, metadataService, projectService, userService
+
+
     def get(String id, view = '') {
 
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id?view=$view"
-        def organisation = webService.getJson(url)
-
-
-        organisation.projects = getProjectsByName(organisation)
-
-        organisation
-    }
-
-    private def getProjectsByName(organisation) {
-        def projects = new JSONArray()
-        if (!organisation) {
-            return projects
-        }
-
-        def resp = projectService.search([serviceProviderName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects)
-        }
-
-        resp = projectService.search([organisationName:organisation.name, view:'enhanced'])
-
-        if (resp?.resp?.projects) {
-            projects.addAll(resp.resp.projects.findAll{it.serviceProviderName != organisation.name}) // Exclude duplicates.
-        }
-        projects
-    }
-
-
-    def list() {
-        def url = "${grailsApplication.config.ecodata.baseUrl}organisation/"
         webService.getJson(url)
     }
 
+    def getByName(orgName) {
+        // The result of the service call will be a JSONArray if it's successful
+        return list().list.find({ it.name == orgName })
+    }
+
+    def getNameFromId(orgId) {
+        // The result of the service call will be a JSONArray if it's successful
+        return orgId ? list().list.find({ it.organisationId == orgId })?.name : ''
+    }
+
+    def list() {
+        metadataService.organisationList()
+    }
+
     def update(id, organisation) {
+
         def url = "${grailsApplication.config.ecodata.baseUrl}organisation/$id"
-        webService.doPost(url, organisation)
+        def result = webService.doPost(url, organisation)
+        metadataService.clearOrganisationList()
+        result
+
     }
 
     def isUserAdminForOrganisation(organisationId) {

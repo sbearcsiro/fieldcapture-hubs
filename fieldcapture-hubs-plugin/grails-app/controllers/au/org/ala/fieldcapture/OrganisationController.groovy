@@ -8,10 +8,30 @@ import grails.converters.JSON
 class OrganisationController {
 
     def organisationService, searchService, documentService, userService, roleService
+    def citizenScienceOrgId = null
 
     def list() {
+        if (params.boolean("createCitizenScienceProject",false)) { // came from CS Hub page
+            if (citizenScienceOrgId == null) {
+                def orgName = grailsApplication.config.citizenScienceOrgName?:"ALA"
+                citizenScienceOrgId = organisationService.getByName(orgName)?.organisationId
+            }
+            // this session attribute indicates user's desire to create a citizen science project
+            // this attribute is cleared on any project indez/edit/create action
+            session.setAttribute('citizenScienceOrgId', citizenScienceOrgId)
+        }
         def organisations = organisationService.list()
-        [organisations:organisations.list?:[]]
+        def user = userService.getUser()
+        def userOrgIds = user? userService.getOrganisationIdsForUserId(user.userId): []
+        [organisations:organisations.list?:[],
+         user:user,
+         userOrgIds: userOrgIds,
+         citizenScienceOrgId: session.getAttribute('citizenScienceOrgId')?:''
+        ]
+    }
+
+    def isProjectCreationDisabled() {
+        return false;
     }
 
     def index(String id) {
@@ -33,6 +53,7 @@ class OrganisationController {
             [organisation: organisation,
              dashboard: dashboard,
              roles:roles,
+             disableProjectCreation: isProjectCreationDisabled(),
              user:user,
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
              isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]

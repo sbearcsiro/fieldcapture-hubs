@@ -10,6 +10,7 @@ class ProjectController {
     static ignore = ['action','controller','id']
 
     def index(String id) {
+        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'brief')
         def roles = roleService.getRoles()
 
@@ -63,8 +64,8 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
+        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'all')
-
         def organisations = organisationService.list()
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
@@ -78,9 +79,13 @@ class ProjectController {
         }
     }
 
+    @PreAuthorise
     def create() {
+        def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
+        session.removeAttribute('citizenScienceOrgId')
         [
-                citizenScience: params.citizenScience,
+                citizenScienceOrgId: csOrgId,
+                organisationId: params.organisationId,
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
@@ -103,12 +108,14 @@ class ProjectController {
               it.description,
               userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
               it.name,
-              it.organisationName?:metadataService.getInstitutionName(it.organisationId),
+              it.organisationName?:organisationService.getNameFromId(it.organisationId),
               it.status,
               it.urlAndroid,
               it.urlITunes,
               it.urlWeb,
-              imgUrl]
+              imgUrl,
+              it.organisationId
+             ]
          }];
     }
 

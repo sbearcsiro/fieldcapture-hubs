@@ -9,11 +9,10 @@
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             createOrganisationUrl: "${createLink(controller: 'organisation', action: 'create')}",
-            viewOrganisationUrl: "${createLink(controller: 'organisation', action: 'index')}",
-
+            viewOrganisationUrl: "${createLink(controller: 'organisation', action: 'index')}"
             };
     </r:script>
-    <r:require modules="knockout,mapWithFeatures,amplify,organisation"/>
+    <r:require modules="knockout,mapWithFeatures,amplify,organisation,fuseSearch"/>
 </head>
 
 <body>
@@ -25,13 +24,39 @@
         <li class="active">Organisations<span class="divider"></span></li>
     </ul>
 
+    <g:if test="${user && citizenScienceOrgId != ''}">
+        <h5>Please select the organisation which will manage your citizen science project
+        If you are not a member of that organisation, you will need to contact that organisation's administrator to induct you as a member.
+        Alternatively, you may register a new organisation if it is not listed below.</h5>
+    </g:if>
 
     <div>
-        <h2 style="display:inline">Registered Organisations</h2>
+        <h2 style="display:inline">Registered
 
-        <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
+        Organisations</h2>
+
+        <g:if test="${user}">
+            <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
+        </g:if>
     </div>
 
+    <div class="row-fluid">
+        <div class="span6">
+            <input id="searchText" class="span12" placeholder="Search..." />
+        </div>
+        <div class="span2">
+            <input id="searchByName" type="checkbox" checked="true" class="fuse-checkbox" />
+            <label for="searchByName" style="display:inline">By name</label></p>
+        </div>
+        <div class="span2">
+            <input id="searchByDescription" type="checkbox" class="fuse-checkbox" />
+            <label for="searchByDescription" style="display:inline">By description</label></p>
+        </div>
+        <div class="span2">
+            <input id="searchCaseSensitive" type="checkbox" class="fuse-checkbox" />
+            <label for="searchCaseSensitive" style="display:inline">Case sensitive</label>
+        </div>
+    </div>
     <div class="row-fluid">
         <span class="span12">
             <table class="table table-striped" id="organisations">
@@ -40,13 +65,12 @@
                 <tr>
                     <td class="organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
                         <h4>
-                            <a data-bind="attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
+                            <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
                             data-bind="text:name"></span></a>
+                            <span data-bind="visible:!organisationId,text:name"></span>
                         </h4>
                         <span data-bind="html:description.markdownToHtml()"></span>
-
                     </td>
-
                 </tr>
                 </tbody>
                 <tfoot>
@@ -75,26 +99,36 @@
 
     $(function () {
 
+        var userOrgs = [], otherOrgs = [], citizenScienceOrg;
 
-        var OrganisationsViewModel = function(organisations) {
-            var self = this;
+        var OrganisationsViewModel = function(organisations, userOrgIds) {
+            var self = this, userOrgIdsMap = {};
+            $.each(userOrgIds, function(i, id) {
+                userOrgIdsMap[id] = true;
+            });
+            $.each(organisations, function(i, org) {
+                var model = new OrganisationViewModel(org);
+                model.fuseName = model.name();
+                model.fuseDescription = model.description.markdownToHtml();
+                if (userOrgIdsMap[org.organisationId])
+                    userOrgs.push(model);
+<g:if test="${user && citizenScienceOrgId != ''}">
+                else if (org.organisationId == "${citizenScienceOrgId}")
+                    citizenScienceOrg = model;
+</g:if>
+                else
+                    otherOrgs.push(model);
+            });
 
             this.allOrganisations = ko.observableArray();
-            $.each(organisations, function(i, org) {
-                self.allOrganisations.push(new OrganisationViewModel(org));
-            });
             this.pageNum = ko.observable(1);
             this.organisationsPerPage = 10;
             this.maxPageButtons = 5;
 
             this.totalPages = ko.computed(function() {
                 var count = self.allOrganisations().length;
-                console.log(count);
                 var pageCount = Math.floor(count / self.organisationsPerPage);
-                console.log(pageCount);
-
                 return count % self.organisationsPerPage > 0 ? pageCount + 1 : pageCount;
-
             });
 
             this.currentPage = ko.computed(function() {
@@ -138,10 +172,78 @@
         };
 
         var organisations = <fc:modelAsJavascript model="${organisations}" default="${[]}"/>;
-        var organisationsViewModel = new OrganisationsViewModel(organisations);
+        var userOrgIds = <fc:modelAsJavascript model="${userOrgIds}" default="${[]}"/>;
+        var organisationsViewModel = new OrganisationsViewModel(organisations, userOrgIds);
 
         ko.applyBindings(organisationsViewModel);
 
+        (function() {
+            var fuseUserOrgs, fuseOtherOrgs, userOrgsBanner = {
+                  organisationId: null,
+                  bannerUrl: "",
+                  description: ko.observable("").extend({markdown:true}),
+                  name: "You are a member of the following organisations"
+                }, otherOrgsBanner = {
+                  organisationId: null,
+                  bannerUrl: "",
+                  description: ko.observable("").extend({markdown:true}),
+                  name: "You are NOT a member of the following organisations"
+                }, citizenScienceOrgBanner = {
+                  organisationId: null,
+                  bannerUrl: "",
+                  description: ko.observable("").extend({markdown:true}),
+                  name: "The following organisation may be used even by non-members to create or register citizen science projects"
+                };
+
+            function search() {
+              var orgs, key = $('#searchText').val();
+              organisationsViewModel.allOrganisations.removeAll();
+              orgs = fuseUserOrgs && key? fuseUserOrgs.search(key): userOrgs;
+              if (orgs.length) {
+                organisationsViewModel.allOrganisations.push(userOrgsBanner);
+                $.each(orgs , function(i, org) {
+                  organisationsViewModel.allOrganisations.push(org);
+                });
+              }
+              if (citizenScienceOrg) {
+                organisationsViewModel.allOrganisations.push(citizenScienceOrgBanner);
+                organisationsViewModel.allOrganisations.push(citizenScienceOrg);
+              }
+              orgs = fuseOtherOrgs && key? fuseOtherOrgs.search(key): otherOrgs;
+              if (orgs.length) {
+    <g:if test="${user}">
+                organisationsViewModel.allOrganisations.push(otherOrgsBanner);
+    </g:if>
+                $.each(orgs, function(i, org) {
+                  organisationsViewModel.allOrganisations.push(org);
+                });
+              }
+              if (organisationsViewModel.pageNum() === 1)
+                organisationsViewModel.pageNum.valueHasMutated();
+              else
+                organisationsViewModel.pageNum(1);
+            }
+            function mkfuse() {
+              var keys = [];
+              if ($('#searchByName').prop('checked')) keys.push('fuseName');
+              if ($('#searchByDescription').prop('checked')) keys.push('fuseDescription');
+              fuseUserOrgs = userOrgs && keys.length && new Fuse(userOrgs, {
+                keys: keys,
+                caseSensitive: $('#searchCaseSensitive').prop('checked')
+              });
+              fuseOtherOrgs = otherOrgs && keys.length && new Fuse(otherOrgs, {
+                keys: keys,
+                caseSensitive: $('#searchCaseSensitive').prop('checked')
+              });
+              search();
+            }
+
+            $('#searchByName').on('change', mkfuse);
+            $('#searchByDescription').on('change', mkfuse);
+            $('#searchCaseSensitive').on('change', mkfuse);
+            $('#searchText').on('keyup', search);
+            mkfuse();
+        })();
 });
 
 </r:script>

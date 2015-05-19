@@ -33,9 +33,10 @@
         spatialWmsUrl: "${grailsApplication.config.spatial.wms.url}",
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
-        organisationLinkBaseUrl: "${grailsApplication.config.collectory.baseURL + 'public/show/'}",
+        organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         documentUpdateUrl: "${g.createLink(controller:"proxy", action:"documentUpdate")}",
         documentDeleteUrl: "${g.createLink(controller:"proxy", action:"deleteDocument")}",
+        imageLocation:"${resource(dir:'/images/filetypes')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
         },
         here = window.location.href;
@@ -112,7 +113,7 @@
                 <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
                     <h4>
                         Recipient:
-                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
+                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}"></a>
                         <span data-bind="visible:organisationName()&&!organisationId(),text:organisationName"></span>
                     </h4>
                 </div>

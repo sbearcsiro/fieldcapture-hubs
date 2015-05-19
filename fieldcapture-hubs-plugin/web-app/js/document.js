@@ -1,4 +1,4 @@
-var imageLocation = "${imageUrl}";
+
 /**
  * A view model to capture metadata about a document and manage progress / feedback as a file is uploaded.
  *
@@ -14,11 +14,13 @@ function DocumentViewModel (doc, owner, settings) {
     var self = this;
 
     var defaults = {
-        roles:  [{id: 'programmeLogic', name: 'Programme Logic'}, {id: 'information', name: 'Information'}],
+        //Information is the default option.
+        roles:  [{id: 'information', name: 'Information'}, {id:'embeddedVideo', name:'Embedded Video'}, {id: 'programmeLogic', name: 'Programme Logic'}],
         stages:[],
         showSettings: true,
-        thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText'
-    }
+        thirdPartyDeclarationTextSelector:'#thirdPartyDeclarationText',
+        imageLocation: fcConfig.imageLocation
+    };
     this.settings = $.extend({}, defaults, settings);
 
     //Associate project document to stages.
@@ -36,9 +38,9 @@ function DocumentViewModel (doc, owner, settings) {
     // the notes field can be used as a pseudo-document (eg a deferral reason) or just for additional metadata
     this.notes = ko.observable(doc.notes);
     this.filetypeImg = function () {
-        return imageLocation + "/" + iconnameFromFilename(self.filename());
+        return self.settings.imageLocation + "/" + iconnameFromFilename(self.filename());
     };
-    
+    this.status = ko.observable(doc.status || 'active');
     this.attribution = ko.observable(doc ? doc.attribution : '');
     this.license = ko.observable(doc ? doc.license : '');
     this.type = ko.observable(doc.type);
@@ -62,9 +64,14 @@ function DocumentViewModel (doc, owner, settings) {
             this.isPrimaryProjectImage(false);
         }
     };
+
     this.isPrimaryProjectImage = ko.observable(doc.isPrimaryProjectImage);
     this.thirdPartyConsentDeclarationMade = ko.observable(doc.thirdPartyConsentDeclarationMade);
     this.thirdPartyConsentDeclarationText = null;
+    this.embeddedVideo = ko.observable(doc.embeddedVideo);
+    this.embeddedVideoVisible = ko.computed(function() {
+        return (self.role() == 'embeddedVideo');
+    });
 
     this.thirdPartyConsentDeclarationMade.subscribe(function(declarationMade) {
         // Record the text that the user agreed to (as it is an editable setting).
@@ -91,6 +98,9 @@ function DocumentViewModel (doc, owner, settings) {
 
         if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
             return false;
+        }
+        if(self.role() == 'embeddedVideo'){
+            return true;
         }
         return self.fileReady();
     });
@@ -200,7 +210,7 @@ function DocumentViewModel (doc, owner, settings) {
     }
 
     this.modelForSaving = function() {
-        return ko.mapping.toJS(self, {'ignore':['helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
+        return ko.mapping.toJS(self, {'ignore':['embeddedVideoVisible','iframe','helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
     }
 }
 
@@ -284,7 +294,8 @@ function attachViewModelToFileUpload(uploadUrl, documentViewModel, uiSelector, p
                 uploadUrl,
                 {document:documentViewModel.toJSONString()},
                 function(result) {
-                    documentViewModel.fileUploaded(result);
+                    var resp = JSON.parse(result).resp;
+                    documentViewModel.fileUploaded(resp);
                 })
                 .fail(function() {
                     documentViewModel.fileUploadFailed('Error uploading document');
@@ -354,7 +365,10 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
 
 function findDocumentByRole(documents, role) {
     for (var i=0; i<documents.length; i++) {
-        if (documents[i].role === role && documents[i].status !== 'deleted') {
+        var docRole = ko.utils.unwrapObservable(documents[i].role);
+        var status = ko.utils.unwrapObservable(documents[i].status);
+
+        if (docRole === role && status !== 'deleted') {
             return documents[i];
         }
     }
@@ -364,7 +378,9 @@ function findDocumentByRole(documents, role) {
 function findDocumentById(documents, id) {
     if (documents) {
         for (var i=0; i<documents.length; i++) {
-            if (documents[i].documentId === id && documents[i].status !== 'deleted') {
+            var docId = ko.utils.unwrapObservable(documents[i].documentId);
+            var status = ko.utils.unwrapObservable(documents[i].status);
+            if (docId === id && status !== 'deleted') {
                 return documents[i];
             }
         }

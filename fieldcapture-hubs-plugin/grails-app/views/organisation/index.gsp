@@ -56,22 +56,18 @@
             </ul>
 
             <h2 data-bind="text:name"></h2>
-
         </div>
     </div>
     <div class="container-fluid">
 
         <g:render template="/shared/flashScopeMessage"/>
-
-        <div class="row-fluid" data-bind="template:detailsTemplate"></div>
-
-        <g:if test="${organisation.projects}">
+        <div class="row-fluid space-after" data-bind="template:detailsTemplate"></div>
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
                     <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
                     <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
-                    <li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li>
+                    <g:if test="${organisation.projects}"><li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li></g:if>
                     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
                     <li class="tab"><a id="admin-tab" data-toggle="tab" href="#admin">Admin</a></li>
                     </g:if>
@@ -81,16 +77,28 @@
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
                 <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
-                        <table id="projectList" class="table table-striped" style="width:100%;">
-                            <thead></thead>
-                            <tbody></tbody>
-                            <tfoot>
-                            <tr></tr>
+                    <g:if test="${user && !disableProjectCreation}">
+                        <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
+                           class="btn btn-small">
+                            <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
+                    </g:if>
+                    <g:if test="${organisation.projects}">
+                        <table id="projectList" class="table
 
-                            </tfoot>
-                        </table>
+                        table-striped" style="width:100%;">
+                                <thead></thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                <tr></tr>
+
+                                </tfoot>
+                            </table>
+                    </g:if>
+                    <g:else>
+                        <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+                    </g:else>
                 </div>
-
+                <g:if test="${organisation.projects}">
                 <div class="tab-pane" id="dashboard">
                     <div class="row-fluid">
                         <span class="span12"><h4>Report: </h4>
@@ -158,6 +166,8 @@
 
                                     </td>
 
+                                </tr>
+
                                 <tr data-bind="visible:report.activitiesVisible()">
                                     <td colspan="6">
                                         <table style="width:100%">
@@ -191,8 +201,6 @@
                                         </table>
                                     </td>
                                 </tr>
-
-                            </tr>
                             </tbody>
 
                     </table>
@@ -264,6 +272,7 @@
                     </script>
                     <!-- /ko -->
                 </g:if>
+</g:if>
                 <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
                 <div class="tab-pane" id="admin">
                     <h4>Administrator actions</h4>
@@ -283,13 +292,6 @@
                 </g:if>
 
             </div>
-
-        </g:if>
-        <g:else>
-            <div class="row-fluid">
-               <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
-            </div>
-        </g:else>
     </div>
 
 
@@ -301,7 +303,9 @@
     <span class="span6">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></span>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+
     </span>
     <span class="span3">
         <h4>News and events</h4>
@@ -313,8 +317,8 @@
     <span class="span9">
         <h4>Description</h4>
         <div class="well" data-bind="html:description.markdownToHtml()"></div>
+        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4><span data-bind="text:orgTypeDisplayOnly"></span></span>
         <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-
     </span>
     <span class="span3">
         <h4>News and events</h4>
