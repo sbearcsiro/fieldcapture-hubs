@@ -70,8 +70,8 @@ class SiteController {
         } else if (!isUserMemberOfSiteProjects(result.site)) {
             // check user has permissions to edit - user must have edit access to
             // ALL linked projects to proceed.
-            flash.message = "Access denied: User does not have <b>editor</b> permission for projectId ${p.projectId}"
-            redirect(controller:'project', action:'index', id: p.projectId)
+            flash.message = "Access denied: User does not have <b>editor</b> permission to edit site: ${id}"
+            redirect(controller:'home', action:'index')
         } else {
             result
         }
