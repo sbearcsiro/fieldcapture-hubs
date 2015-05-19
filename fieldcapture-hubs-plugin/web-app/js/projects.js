@@ -304,8 +304,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
-    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});;
-    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});;
+    self.newsAndEvents = ko.observable(project.newsAndEvents).extend({markdown:true});
+    self.projectStories = ko.observable(project.projectStories).extend({markdown:true});
 
     self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
@@ -449,7 +449,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
                     var element = html[i];
                     var src = element.getAttribute('src');
                     if(src && $.inArray(getHostName(src), allowedHost) > -1){
-                        doc.iframe = '<iframe src ="' + src + '" width = "' + element.getAttribute("width") + '" height = "' + element.getAttribute("height") + '" /></iframe>';
+                        doc.iframe = '<iframe width="100%" src ="' + src + '" height = "' + element.getAttribute("height") + '"/></iframe>';
                         return doc;
                     }
                     break;

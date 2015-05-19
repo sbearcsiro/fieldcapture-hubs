@@ -103,6 +103,5 @@ grails.project.dependency.resolution = {
             exclude "spock-grails-support"
         }
         build ":release:3.0.1"
-//        compile ':webflow:2.1.0'
     }
 }

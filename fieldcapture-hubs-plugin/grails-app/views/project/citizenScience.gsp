@@ -28,13 +28,8 @@
             <h1 class="pull-left"><g:message code="project.citizenScience.heading"/></h1>
         </div>
         <g:if test="${user}">
-            <div class="pull-right space-after">
-                <button data-bind="click:newPortal" type="button" class="btn"><g:message
-                        code="project.citizenScience.portalLink"/></button>
-                <a data-bind="visible:registrationOrgId" href="${createLink(controller:'project',action:'create',params: [organisationId:registrationOrgId, citizenScience: true])}"
-                   class="btn btn-small">
-                    <i class="icon-file"></i>&nbsp;<g:message code="project.citizenScience.registerLink"/></a>
-            </div>
+            <button id="newPortal" type="button" class="pull-right btn"><g:message
+                    code="project.citizenScience.portalLink"/></button>
         </g:if>
     </div>
 
@@ -370,6 +365,10 @@ $(document).ready(function () {
         updateTotal();
         populateTable();
     });
+
+    $("#newPortal").on("click", function() {
+        document.location.href = "${createLink(controller:'organisation',action:'list',params:[createCitizenScienceProject:true])}";
+    })
 });
 </r:script>
 </body>
