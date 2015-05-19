@@ -7,7 +7,7 @@
     </head>
 
     <body>
-        <r:require modules="bootstrap_combo,jqueryValidationEngine"/>
+        <r:require module="jqueryValidationEngine"/>
         <content tag="pageTitle">Users - Bulk Load User Permissions</content>
         <div class="container">
             <div class="well">Logged in user is <b class="tooltips" title="${user}">${user.userDisplayName}</b></div>

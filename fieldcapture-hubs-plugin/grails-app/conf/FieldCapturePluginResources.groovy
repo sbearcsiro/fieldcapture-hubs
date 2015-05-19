@@ -83,17 +83,14 @@ modules = {
         resource url: 'bootstrap/img/glyphicons-halflings-white.png', plugin: 'fieldcapture-plugin'
         resource url: 'bootstrap/img/glyphicons-halflings.png', plugin: 'fieldcapture-plugin'
         resource url: 'css/empty.css' , plugin: 'fieldcapture-plugin'// needed for less-resources plugin ?
+        resource url: 'js/bootstrap-combobox.js', plugin: 'fieldcapture-plugin'
+        resource url: 'css/bootstrap-combobox.css', plugin: 'fieldcapture-plugin'
     }
 
     app_bootstrap_responsive {
         dependsOn 'app_bootstrap'
         resource url: 'bootstrap/less/responsive.less', plugin: 'fieldcapture-plugin',attrs:[rel: "stylesheet/less", type:'css', media:'screen,print'], bundle:'bundle_app_bootstrap_responsive'
         resource url: 'css/empty.css', plugin: 'fieldcapture-plugin' // needed for less-resources plugin ?
-    }
-
-    bootstrap_combo {
-        resource url: 'js/bootstrap-combobox.js', plugin: 'fieldcapture-plugin'
-        resource url: 'css/bootstrap-combobox.css', plugin: 'fieldcapture-plugin'
     }
 
     amplify {

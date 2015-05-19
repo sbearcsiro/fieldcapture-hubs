@@ -1,5 +1,3 @@
-<r:require modules="bootstrap_combo"/>
-
 <form class="form-horizontal" id="userAccessForm">
     <div class="control-group">
         <label class="control-label" for="emailAddress">User's email address</label>
