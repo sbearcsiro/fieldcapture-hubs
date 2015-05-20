@@ -368,7 +368,6 @@ var PidLocation = function (l) {
         centre:[]
     });
     self.refreshObjectList = function(){
-        console.log('Refreshing the layer object list for ' + self.chosenLayer());
         self.layerObjects([]);
         if(self.chosenLayer() !== undefined){
             $.ajax({
@@ -376,10 +375,7 @@ var PidLocation = function (l) {
                 dataType:'json'
             }).done(function(data) {
                 self.layerObjects(data);
-                console.log('Refresh complete. Objects:' + data.length);
             });
-        } else {
-            console.log('Refreshing the layer object list - no layer currently selected...');
         }
     }
     //TODO load this from config
@@ -406,7 +402,6 @@ var PidLocation = function (l) {
                 url: fcConfig.featureService + '?featureId=' + self.layerObject(),
                 dataType:'json'
             }).done(function(data) {
-                console.log('Retrieving details of ' + self.layerObject());
                 self.layerObject(self.geometry().pid())
                 self.geometry().name(data.name)
                 self.geometry().layerName(data.fieldname)
@@ -450,10 +445,8 @@ function SiteViewModelWithMapIntegration (siteData) {
     SiteViewModel.apply(self, [siteData]);
 
     self.renderPOIs = function(){
-        // console.log('Rendering the POIs now');
         removeMarkers();
         for(var i=0; i<self.poi().length; i++){
-            //console.log('Rendering the POI: ' + self.poi()[i].geometry().decimalLatitude() +':'+ self.poi()[i].geometry().decimalLongitude());
             addMarker(self.poi()[i].geometry().decimalLatitude(), self.poi()[i].geometry().decimalLongitude(), self.poi()[i].name(), self.poi()[i].dragEvent)
         }
     };
@@ -631,7 +624,6 @@ function SiteViewModelWithMapIntegration (siteData) {
                         pathArray = path.getArray();
                     }
                     $.each(pathArray, function(i){
-                        //console.log(path.getAt(i));
                         var coord = path.getAt(i);
                         if(coord.lat()>maxLat) maxLat = coord.lat();
                         if(coord.lat()<minLat) minLat = coord.lat();
@@ -875,7 +867,6 @@ function geoJsonToPath(geojson){
 function coordArrayToPath(coords){
     var path = [];
     for(var i = 0; i<coords.length; i++){
-        console.log(coords[i][1]+" : "+ coords[i][0]);
         path.push(new google.maps.LatLng(coords[i][1],coords[i][0]));
     }
     return path;
@@ -898,7 +889,6 @@ function polygonToGeoJson(path){
         points.push([firstPoint.lng(),firstPoint.lat()]);
     }
     var coordinates =  [points];
-    console.log(coordinates);
     return coordinates;
 }
 
