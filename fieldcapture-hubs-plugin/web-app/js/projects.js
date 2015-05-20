@@ -443,8 +443,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
     this.embeddedVideos = ko.computed(function () {
         var ev = $.grep(self.documents(), function (doc) {
-            if(doc.embeddedVideo() && doc.public()){
-                var html = $.parseHTML(doc.embeddedVideo());
+            var isPublic = ko.utils.unwrapObservable(doc.public);
+            var embeddedVideo = ko.utils.unwrapObservable(doc.embeddedVideo);
+            if(isPublic && embeddedVideo) {
+                var html = $.parseHTML(embeddedVideo);
                 for(var i = 0; i < html.length; i++){
                     var element = html[i];
                     var src = element.getAttribute('src');
