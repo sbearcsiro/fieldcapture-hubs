@@ -6,6 +6,13 @@
     <r:script disposition="head">
     var fcConfig = {
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        spatialService: '${createLink(controller:'proxy',action:'feature')}',
+        intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
+        featuresService: "${createLink(controller: 'proxy', action: 'features')}",
+        featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+        spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
+        geocodeUrl: "${grailsApplication.config.google.geocode.url}",
+        siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;
@@ -71,9 +78,7 @@ $(function(){
     </g:else>
     });
     $('#save').click(function () {
-    console.log("saving...");
         viewModel.save();
-    console.log("saved...");
     });
  });
 </r:script>

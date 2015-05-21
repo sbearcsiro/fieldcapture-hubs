@@ -1,7 +1,9 @@
 modules = {
 
     ala2Skin {
-        dependsOn 'defaultSkin, bootstrap, jquery_ui'
+        dependsOn 'bootstrap, defaultSkin, jquery_ui'
+        resource url: 'js/bootstrap-combobox.js', plugin: 'fieldcapture-plugin'
+        resource url: 'css/bootstrap-combobox.css', plugin: 'fieldcapture-plugin'
     }
 
     nrmSkin {

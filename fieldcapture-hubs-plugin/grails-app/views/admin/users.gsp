@@ -7,7 +7,7 @@
     </head>
 
     <body>
-    <r:require modules="bootstrap_combo,jqueryValidationEngine"/>
+    <r:require module="jqueryValidationEngine"/>
     <content tag="pageTitle">Users</content>
 
     <div class="container">

@@ -166,12 +166,13 @@
 </div>
 
 
-
-
 <div class="row-fluid">
 <hr class="clearfix"/>
-<h4 class="header"><g:message code="project.details.site"/></h4>
-<g:render template="/site/map" model="${pageScope.variables}"/>
+<h4 class="header" style="display:inline"><g:message code="project.details.site"/></h4><fc:iconHelp title="Extent of the site">The extent of the site can be represented by
+                a polygon, radius or point. KML, WKT and shape files are supported for uploading polygons.
+                As are PID's of existing features in the Atlas Spatial Portal.</fc:iconHelp>
+
+<g:render template="/site/simpleSite" model="${pageScope.variables}"/>
 <hr class="clearfix"/>
 </div>
 

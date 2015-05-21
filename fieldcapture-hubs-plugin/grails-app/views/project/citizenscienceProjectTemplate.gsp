@@ -126,7 +126,7 @@
             <!-- /ko -->
         </div>
         <div class="pill-pane" id="documents">
-            Documents
+            <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
         </div>
         <div class="pill-pane" id="admin">
             <h4>Administrator actions</h4>
@@ -168,7 +168,7 @@
                 });
             };
 
-        }
+        };
         ko.applyBindings(new ViewModel());
         if (projectViewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({

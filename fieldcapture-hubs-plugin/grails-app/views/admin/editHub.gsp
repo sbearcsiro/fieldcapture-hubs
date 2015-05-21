@@ -69,6 +69,14 @@
             <textarea rows="3" class="input-xxlarge" data-bind="value:title" data-validation-engine="validate[required]" id="description" placeholder="Displays as a heading on the home page"></textarea>
         </div>
     </div>
+
+    <div class="control-group">
+        <label class="control-label" for="description">Home Page Path</label>
+        <div class="controls required">
+            <input type="text" class="input-xxlarge" data-bind="value:homePagePath" placeholder="Relative path to home page (leave blank for default)"></input>
+        </div>
+    </div>
+
     <div class="control-group">
         <label class="control-label" for="supported-programs">Supported Programs (Projects in this hub can only select from these programs)</label>
         <div class="controls">
@@ -145,6 +153,7 @@
             self.adminFacets = ko.observableArray();
             self.availableMapFacets = ko.observableArray();
             self.defaultFacetQuery = ko.observableArray();
+            self.homePagePath = ko.observableArray();
             self.bannerUrl = ko.observable();
             self.logoUrl = ko.observable();
             self.documents = ko.observableArray();
@@ -219,6 +228,7 @@
                self.availableMapFacets(self.orEmptyArray(settings.availableMapFacets));
                self.bannerUrl(self.orBlank(settings.bannerUrl));
                self.logoUrl(self.orBlank(settings.logoUrl));
+               self.homePathPath(self.orBlank(settings.homePagePath));
 
                if (settings.defaultFacetQuery && settings.defaultFacetQuery instanceof Array) {
                    $.each(settings.defaultFacetQuery, function(i, obj) {

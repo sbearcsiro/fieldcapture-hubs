@@ -53,9 +53,19 @@ function orEmptyArray(v) {
     return v === undefined ? [] : v;
 }
 
-// returns blank string if the object or the specified property is undefined, else the value
 function exists(parent, prop) {
-    return parent === undefined ? '' : (parent[prop] === undefined ? '' : parent[prop]);
+    if(parent === undefined)
+        return '';
+    if(parent == null)
+        return '';
+    if(parent[prop] === undefined)
+        return '';
+    if(parent[prop] == null)
+        return '';
+    if(ko.isObservable(parent[prop])){
+        return parent[prop]();
+    }
+    return parent[prop];
 }
 
 function neat_number (number, decimals) {
