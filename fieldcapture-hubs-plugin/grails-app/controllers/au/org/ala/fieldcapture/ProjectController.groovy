@@ -96,27 +96,57 @@ class ProjectController {
     def citizenScience() {
         def user = userService.getUser()
         def userId = user?.userId
-        [user: user,
-         projects: projectService.list(false, true).collect {
-             def imgUrl;
-             it.documents.each { doc ->
-                 if (doc.isPrimaryProjectImage) imgUrl = doc.url
-             }
-             // pass array instead of object to reduce size
-             [it.projectId,
-              it.coverage ?: '',
-              it.description,
-              userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
-              it.name,
-              it.organisationName?:organisationService.getNameFromId(it.organisationId),
-              it.status,
-              it.urlAndroid,
-              it.urlITunes,
-              it.urlWeb,
-              imgUrl,
-              it.organisationId
-             ]
-         }];
+        def projects = projectService.list(false, true).collect {
+            def imgDoc;
+            it.documents.each { doc ->
+                if (doc.role == 'logo')
+                    imgDoc = doc
+                else if (!imgDoc && doc.isPrimaryProjectImage)
+                    imgDoc = doc
+            }
+            [
+                    projectId     : it.projectId,
+                    coverage      : it.coverage ?: '',
+                    description   : it.description,
+                    canEdit       : userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
+                    name          : it.name,
+                    organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
+                    status        : it.status,
+                    urlAndroid    : it.urlAndroid,
+                    urlITunes     : it.urlITunes,
+                    urlWeb        : it.urlWeb,
+                    urlImage      : imgDoc?.url,
+                    organisationId: it.organisationId
+            ]
+        }
+        if (params.boolean('download', false)) {
+            response.setHeader("Content-Disposition","attachment; filename=\"projects.json\"");
+            // This is returned to the browswer as a text response due to workaround the warning
+            // displayed by IE8/9 when JSON is returned from an iframe submit.
+            response.setContentType('text/plain;charset=UTF8')
+            def resultJson = projects as JSON
+            render resultJson.toString()
+        } else {
+            [
+                    user: user,
+                    projects: projects.collect {
+                        // pass array instead of object to reduce size
+                        [it.projectId,
+                         it.coverage,
+                         it.description,
+                         it.canEdit,
+                         it.name,
+                         it.organisationName,
+                         it.status,
+                         it.urlAndroid,
+                         it.urlITunes,
+                         it.urlWeb,
+                         it.urlImage,
+                         it.organisationId
+                        ]
+                    }
+            ]
+        }
     }
 
     /**
