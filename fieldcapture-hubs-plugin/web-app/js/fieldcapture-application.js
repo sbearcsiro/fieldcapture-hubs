@@ -382,6 +382,34 @@ function Documents() {
         self.deleteDocumentByRole('mainImage');
     };
 
+    // this supports display of the project's primary images
+    this.primaryImages = ko.computed(function () {
+        var pi = $.grep(self.documents(), function (doc) {
+            return ko.utils.unwrapObservable(doc.isPrimaryProjectImage);
+        });
+        return pi.length > 0 ? pi : null;
+    });
+
+    var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
+    this.embeddedVideos = ko.computed(function () {
+        var ev = $.grep(self.documents(), function (doc) {
+            var isPublic = ko.utils.unwrapObservable(doc.public);
+            var embeddedVideo = ko.utils.unwrapObservable(doc.embeddedVideo);
+            if(isPublic && embeddedVideo) {
+                var html = $.parseHTML(embeddedVideo);
+                for(var i = 0; i < html.length; i++){
+                    var element = html[i];
+                    var src = element.getAttribute('src');
+                    if(src && $.inArray(getHostName(src), allowedHost) > -1){
+                        doc.iframe = '<iframe width="100%" src ="' + src + '" height = "' + element.getAttribute("height") + '"/></iframe>';
+                        return doc;
+                    }
+                    break;
+                }
+            }
+        });
+        return ev.length > 0 ? ev : null;
+    });
 
     self.deleteDocumentByRole = function(role) {
         var doc = self.findDocumentByRole(self.documents(), role);
@@ -395,6 +423,8 @@ function Documents() {
             }
         }
     };
+
+    self.ignore = ['documents', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
 
 };
 

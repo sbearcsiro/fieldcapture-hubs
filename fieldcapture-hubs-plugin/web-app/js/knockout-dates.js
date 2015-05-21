@@ -1072,3 +1072,15 @@ ko.extenders.numericString = function(target, precision) {
     //return the new computed observable
     return result;
 };
+
+ko.extenders.url = function(target) {
+    var result = ko.pureComputed({
+        read:target,
+        write: function(url) {
+            var value = typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
+            target(value);
+        }
+    });
+    result(target());
+    return result;
+};
