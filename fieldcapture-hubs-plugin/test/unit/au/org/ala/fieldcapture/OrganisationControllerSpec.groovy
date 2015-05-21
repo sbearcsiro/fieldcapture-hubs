@@ -13,11 +13,15 @@ class OrganisationControllerSpec extends Specification {
     def organisationService = Mock(OrganisationService)
     def searchService = Mock(SearchService)
     def documentService = Mock(DocumentService)
+    def roleService = Stub(RoleService)
+    def userService = Stub(UserService)
 
     def setup() {
         controller.organisationService = organisationService
         controller.searchService = searchService
         controller.documentService = documentService
+        controller.roleService = roleService
+        controller.userService = userService
     }
 
     def "retrieve an organisation by id"() {
