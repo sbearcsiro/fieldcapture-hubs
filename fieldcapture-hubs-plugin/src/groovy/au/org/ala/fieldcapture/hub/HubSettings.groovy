@@ -76,4 +76,8 @@ class HubSettings {
         return [controller:'home', action:'index']
     }
 
+    public void setHomePageControllerAndAction(Map unused) {
+        // Do nothing - this method is here to allow us to construct this object using a Map without errors.
+    }
+
 }

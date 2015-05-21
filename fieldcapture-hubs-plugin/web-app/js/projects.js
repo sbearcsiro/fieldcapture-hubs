@@ -291,7 +291,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         projectDefault = project.status;
     }
     self.status = ko.observable(projectDefault.toLowerCase());
-    self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'}];
+    self.projectStatus = [{id: 'active', name:'Active'},{id:'completed',name:'Completed'},{id:'deleted', name:'Deleted'}];
 
     self.organisationId = ko.observable(project.organisationId);
     self.collectoryInstitutionId = ko.computed(function() {
@@ -302,6 +302,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         var org = self.organisationId() && organisationsMap[self.organisationId()];
         return org? org.name: project.organisationName;
     });
+    self.orgIdGrantee = ko.observable(project.orgIdGrantee);
+    self.orgIdSponsor = ko.observable(project.orgIdSponsor);
+    self.orgIdSvcProvider = ko.observable(project.orgIdSvcProvider);
+
     self.serviceProviderName = ko.observable(project.serviceProviderName);
     self.associatedProgram = ko.observable(); // don't initialise yet - we want the change to trigger dependents
     self.associatedSubProgram = ko.observable(project.associatedSubProgram);
@@ -317,9 +321,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.projectSiteId = project.projectSiteId;
     self.projectType = ko.observable(project.projectType || "works");
     self.scienceType = ko.observable(project.scienceType);
-    self.urlAndroid = ko.observable(project.urlAndroid);
-    self.urlITunes = ko.observable(project.urlITunes);
-    self.urlWeb = ko.observable(project.urlWeb);
+    self.urlAndroid = ko.observable(project.urlAndroid).extend({url:true});
+    self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
+    self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
     self.isExternal = ko.observable(project.isExternal);
 
     self.transients = {};
@@ -346,9 +350,15 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         });
         self.associatedProgram(project.associatedProgram); // to trigger the computation of sub-programs
     };
-    self.removeTransients = function (jsData) {
-        delete jsData.transients;
-        return jsData;
+
+    self.toJS = function() {
+        var toIgnore = self.ignore; // document properties to ignore.
+        toIgnore.concat(['transients', 'projectDatesChanged', 'collectoryInstitutionId']);
+        return ko.mapping.toJS(self, {ignore:toIgnore});
+    }
+
+    self.modelAsJSON = function() {
+        return JSON.stringify(self.toJS());
     };
 
     // settings
@@ -433,34 +443,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         $.post(url, {}, function() {self.documents.remove(document);});
 
     };
-    // this supports display of the project's primary images
-    this.primaryImages = ko.computed(function () {
-        var pi = $.grep(self.documents(), function (doc) {
-            return ko.utils.unwrapObservable(doc.isPrimaryProjectImage);
-        });
-        return pi.length > 0 ? pi : null;
-    });
-
-    var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
-    this.embeddedVideos = ko.computed(function () {
-        var ev = $.grep(self.documents(), function (doc) {
-            var isPublic = ko.utils.unwrapObservable(doc.public);
-            var embeddedVideo = ko.utils.unwrapObservable(doc.embeddedVideo);
-            if(isPublic && embeddedVideo) {
-                var html = $.parseHTML(embeddedVideo);
-                for(var i = 0; i < html.length; i++){
-                    var element = html[i];
-                    var src = element.getAttribute('src');
-                    if(src && $.inArray(getHostName(src), allowedHost) > -1){
-                        doc.iframe = '<iframe width="100%" src ="' + src + '" height = "' + element.getAttribute("height") + '"/></iframe>';
-                        return doc;
-                    }
-                    break;
-                }
-            }
-        });
-        return ev.length > 0 ? ev : null;
-    });
 
     if (project.documents) {
         $.each(project.documents, function(i, doc) {

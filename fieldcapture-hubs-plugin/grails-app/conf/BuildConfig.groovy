@@ -102,6 +102,7 @@ grails.project.dependency.resolution = {
         test (":spock:0.7") {
             exclude "spock-grails-support"
         }
+        test ":karma-test-runner:0.2.4"
         build ":release:3.0.1"
     }
 }
