@@ -42,7 +42,7 @@ class ProjectService {
         def activities = props.remove('selectedActivities')
 
         // create a project in ecodata
-        result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
+        def result = webService.doPost(grailsApplication.config.ecodata.baseUrl + 'project/', props)
         if (result?.resp?.projectId) {
             def projectId = result.resp.projectId
             // Add the user who created the project as an admin of the project
