@@ -21,11 +21,11 @@ script:
   - cd fieldcapture-hubs-plugin; 
   - MAVEN_REPO="ala-repo-snapshot"; grep 'def version =' ./FieldcapturePluginGrailsPlugin.groovy | grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
   - grails clean; grails refresh-dependencies --non-interactive; grails test-app --non-interactive
-  - [ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
+  - '[ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive'
   - cd ../fieldcapture-hub; 
   - MAVEN_REPO="ala-repo-snapshot"; grep '^app\.version=' ./application.properties | grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
   - grails clean; grails refresh-dependencies --non-interactive; grails prod war 
-  - [ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive
+  - '[ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive'
 env:
   global:
   - secure: enbmAS6MFwP5f/94ZK8UHbGu0uJtdKNGr1HJsVTCa2Nfv5P3zXRkbmW2kKsvV7AXROUOz7+GAkNYzWbb1NApLkNcjwq5Dptip20uYfYCXqgVw76S2ddubpsOWoBgGETpSCO0zi6YnBwzdc1aY5+IP8UKgY34sHjgppNfe39UUmQ=
