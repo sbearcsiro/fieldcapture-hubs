@@ -1,5 +1,6 @@
 package au.org.ala.fieldcapture
 
+import au.org.ala.fieldcapture.hub.HubSettings
 import grails.converters.JSON
 
 class HomeController {
@@ -24,6 +25,15 @@ class HomeController {
     }
 
     def index() {
+        HubSettings hubSettings = SettingService.hubConfig
+        if (hubSettings.overridesHomePage()) {
+            forward(hubSettings.getHomePageControllerAndAction())
+            return
+        }
+        return defaultHome()
+    }
+
+    private def defaultHome() {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 
