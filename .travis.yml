@@ -1,6 +1,8 @@
 language: groovy
 jdk:
 - oraclejdk7
+node_js:
+  - "0.10"
 branches:
   except:
   - trunk
@@ -14,6 +16,7 @@ before_install:
 - GRAILS_VERSION=`grep '^app\.grails\.version=' ./fieldcapture-hubs-plugin/application.properties | sed -e
   's/^app\.grails\.version=//g'`
 - gvm install grails $GRAILS_VERSION || true
+- npm install --save-dev
 before_script:
 - mkdir -p ~/.grails; wget -q -O ~/.grails/settings.groovy https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_grails_settings_new.groovy
 
