@@ -13,7 +13,7 @@
         },
         here = document.location.href;
     </r:script>
-    <r:require modules="application,knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,attachDocuments,species"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,jQueryFileUploadUI,mapWithFeatures,activity,attachDocuments,species,amplify,imageViewer"/>
 </head>
 <body>
 <div class="container-fluid validationEngineContainer" id="validation-container">
