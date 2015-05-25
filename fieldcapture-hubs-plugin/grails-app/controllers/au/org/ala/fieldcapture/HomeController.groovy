@@ -30,10 +30,10 @@ class HomeController {
             forward(hubSettings.getHomePageControllerAndAction())
             return
         }
-        return defaultHome()
+        return projectFinder()
     }
 
-    private def defaultHome() {
+    def projectFinder() {
         def facetsList = SettingService.getHubConfig().availableFacets
         def mapFacets = SettingService.getHubConfig().availableMapFacets
 

@@ -153,7 +153,7 @@
             self.adminFacets = ko.observableArray();
             self.availableMapFacets = ko.observableArray();
             self.defaultFacetQuery = ko.observableArray();
-            self.homePagePath = ko.observableArray();
+            self.homePagePath = ko.observable();
             self.bannerUrl = ko.observable();
             self.logoUrl = ko.observable();
             self.documents = ko.observableArray();
