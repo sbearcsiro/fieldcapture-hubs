@@ -11,13 +11,11 @@
     <div class="control-group span5">
         <label class="control-label">Choose an organisation</label>
         <select class="input-xlarge" id="organisation"
-                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'uid', value:organisation, optionsCaption: 'Choose...'"></select>
+                data-bind="options:transients.organisations, optionsText:'name', optionsValue:'organisationId', value:organisationId, optionsCaption: 'Choose...'"></select>
     </div>
-    <span class="control-group span1" style="margin-top: 28px;"><b> OR</b></span>
     <div class="control-group span6">
-        <label class="control-label">Enter the name of an organisation or person</label>
-        <input class="input-xlarge" data-bind="value:organisationName" id="organisationName"
-            data-validation-engine="validate[funcCall[exclusive[organisation,You  can only specify one organisation. One field must be cleared.]]]"/>
+        <label class="control-label">Organisation name</label>
+        <input class="input-xlarge" readonly="readonly" data-bind="value:organisationName" id="organisationName"/>
     </div>
 </div>
 <div class="row-fluid">

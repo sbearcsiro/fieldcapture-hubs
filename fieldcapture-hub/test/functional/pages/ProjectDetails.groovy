@@ -1,3 +1,5 @@
+package pages
+
 import geb.Module
 import geb.Page
 

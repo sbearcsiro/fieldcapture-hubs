@@ -8,8 +8,9 @@
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 
-baseUrl = 'https://fieldcapture-test.ala.org.au/'
+baseUrl = 'http://devt.ala.org.au:8087/fieldcapture-hub/'
 reportsDir = 'target/geb-reports'
+
 
 // Use htmlunit as the default
 // See: http://code.google.com/p/selenium/wiki/HtmlUnitDriver

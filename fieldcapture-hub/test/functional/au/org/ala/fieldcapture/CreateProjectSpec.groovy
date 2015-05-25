@@ -1,21 +1,33 @@
 package au.org.ala.fieldcapture
 
-import geb.spock.GebReportingSpec
+import pages.ProjectDetails
+import pages.EntryPage
+
 import spock.lang.Stepwise
 
 @Stepwise
-class CreateProjectSpec extends GebReportingSpec {
+class CreateProjectSpec extends FieldcaptureFunctionalTest {
 
-    def "Blah"() {
+    def "The user must be logged in to create a project"() {
+
+        logout(browser)
+
+        when: "attempt to create a project"
+        via ProjectDetails
+
+        then: "redirected to the home page with an error"
+        at EntryPage
+    }
+
+    def "The user can create a citizen science project"() {
 
         logout(browser)
         login(browser, "fc-te@outlook.com", "testing!")
 
-        when: "go to new activity page"
-        def projectId = "cb5497a9-0f36-4fef-9f6a-9ea832c5b68c"
-        via AddActivityPage, projectId:projectId
+        when: "navigate to the create project page"
+        to ProjectDetails
 
-        then:
-        at ProjectIndex
+        then: "blank"
+        at ProjectDetails
     }
 }

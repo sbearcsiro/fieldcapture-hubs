@@ -17,7 +17,7 @@ class LoginPage extends Page {
 
 
         submitButton() {
-            $("input", class:"btn-submit")
+            $("input", class:"btn-primary")
         }
     }
 
