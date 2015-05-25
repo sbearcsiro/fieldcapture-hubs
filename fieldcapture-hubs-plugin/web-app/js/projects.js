@@ -8,11 +8,18 @@
  * @param callback optional callback for the results of any asynch saves
  * @returns updated project object
  */
-function checkAndUpdateProject (project, callback) {
+function checkAndUpdateProject (project, callback, programs) {
     var propertiesToSave = {},
         isEmpty=function(x,p){for(p in x)return!1;return!0};
     // add any checks here - return true if the project representation needs to be saved
-    propertiesToSave = $.extend(propertiesToSave, createTimelineIfMissing(project));
+    var program = null;
+    if (programs && project.associatedProgram) {
+        var matchingProgram = $.grep(programs.programs, function(program, index) {
+            return program.name == project.associatedProgram;
+        });
+        program = matchingProgram[0];
+    }
+    propertiesToSave = $.extend(propertiesToSave, createTimelineIfMissing(project, program));
     // check for saves
     if (!isEmpty(propertiesToSave) && fcConfig.projectUpdateUrl !== undefined) {
         $.ajax({
@@ -47,13 +54,18 @@ function checkAndUpdateProject (project, callback) {
  * @param project
  * @returns updated properties
  */
-function createTimelineIfMissing (project) {
+function createTimelineIfMissing (project, program) {
     if (project.timeline === undefined) {
         var props = {};
         if (project.currentStage !== undefined) {
             props.currentStage = '';
         }
-        addTimelineBasedOnStartDate(project);
+        if (program) {
+            addTimelineBasedOnStartDate(project, program.reportingPeriod, program.reportingPeriodAlignedToCalendar || false);
+        }
+        else {
+            addTimelineBasedOnStartDate(project);
+        }
         props.timeline = project.timeline;
         return props;
     }
@@ -325,8 +337,160 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
     self.isExternal = ko.observable(project.isExternal);
+    self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
+    self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
     self.transients = {};
+
+    var calculateDuration = function(startDate, endDate) {
+        if (!startDate || !endDate) {
+            return '';
+        }
+        var start = moment(startDate);
+        var end = moment(endDate);
+        var durationInDays = end.diff(start, 'days');
+
+        return Math.ceil(durationInDays/7);
+    };
+    var calculateEndDate = function(startDate, duration) {
+        var start =  moment(startDate);
+        var end = start.add(duration*7, 'days');
+        return end.toDate().toISOStringNoMillis();
+    };
+
+    var contractDatesFixed = function() {
+        var programs = self.transients.programs;
+        for (var i=0; i<programs.length; i++) {
+            if (programs[i].name === self.associatedProgram()) {
+                return programs[i].projectDatesContracted;
+            }
+        }
+        return true;
+    };
+
+    var updatingDurations = false; // Flag to prevent endless loops during change of end date / duration.
+
+    self.transients.plannedDuration = ko.observable(calculateDuration(self.plannedStartDate(), self.plannedEndDate()));
+    self.transients.plannedDuration.subscribe(function(newDuration) {
+        if (updatingDurations) {
+            return;
+        }
+        try {
+            updatingDurations = true;
+            self.plannedEndDate(calculateEndDate(self.plannedStartDate(), newDuration));
+        }
+        finally {
+            updatingDurations = false;
+        }
+    });
+
+    self.plannedEndDate.subscribe(function(newEndDate) {
+        if (updatingDurations) {
+            return;
+        }
+        try {
+            updatingDurations = true;
+            self.transients.plannedDuration(calculateDuration(self.plannedStartDate(), newEndDate));
+        }
+        finally {
+            updatingDurations = false;
+        }
+    });
+
+    self.plannedStartDate.subscribe(function(newStartDate) {
+        if (updatingDurations) {
+            return;
+        }
+        if (contractDatesFixed()) {
+            if (!self.plannedEndDate()) {
+                return;
+            }
+            try {
+                updatingDurations = true;
+                self.transients.plannedDuration(calculateDuration(newStartDate, self.plannedEndDate()));
+            }
+            finally {
+                updatingDurations = false;
+            }
+        }
+        else {
+            if (!self.transients.plannedDuration()) {
+                return;
+            }
+            try {
+                updatingDurations = true;
+                self.plannedEndDate(calculateEndDate(newStartDate, self.transients.plannedDuration()));
+            }
+            finally {
+                updatingDurations = false;
+            }
+        }
+    });
+
+    self.transients.contractDuration = ko.observable(calculateDuration(self.contractStartDate(), self.contractEndDate()));
+    self.transients.contractDuration.subscribe(function(newDuration) {
+        if (updatingDurations) {
+            return;
+        }
+        if (!self.contractStartDate()) {
+            return;
+        }
+        try {
+            updatingDurations = true;
+            self.contractEndDate(calculateEndDate(self.contractStartDate(), newDuration));
+        }
+        finally {
+            updatingDurations = false;
+        }
+    });
+
+
+    self.contractEndDate.subscribe(function(newEndDate) {
+        if (updatingDurations) {
+            return;
+        }
+        if (!self.contractStartDate()) {
+            return;
+        }
+        try {
+            updatingDurations = true;
+            self.transients.contractDuration(calculateDuration(self.contractStartDate(), newEndDate));
+        }
+        finally {
+            updatingDurations = false;
+        }
+    });
+
+    self.contractStartDate.subscribe(function(newStartDate) {
+        if (updatingDurations) {
+            return;
+        }
+        if (contractDatesFixed()) {
+            if (!self.contractEndDate()) {
+                return;
+            }
+            try {
+                updatingDurations = true;
+                self.transients.contractDuration(calculateDuration(newStartDate, self.contractEndDate()));
+            }
+            finally {
+                updatingDurations = false;
+            }
+        }
+        else {
+            if (!self.transients.contractDuration()) {
+                return;
+            }
+            try {
+                updatingDurations = true;
+                self.contractEndDate(calculateEndDate(newStartDate, self.transients.contractDuration()));
+            }
+            finally {
+                updatingDurations = false;
+            }
+        }
+    });
+
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
@@ -342,7 +506,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.loadPrograms = function (programsModel) {
         $.each(programsModel.programs, function (i, program) {
-            if (program.readOnly) {
+            if (program.readOnly && self.associatedProgram() != program.name) {
                 return;
             }
             self.transients.programs.push(program.name);
