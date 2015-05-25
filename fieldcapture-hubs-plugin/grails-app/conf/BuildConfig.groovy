@@ -34,6 +34,7 @@ grails.project.dependency.resolution = {
     def httpmimeVersion = "4.2.1"
     def jtsVersion = "1.8"
     def geoToolsVersion = "11.1"
+    def gebVersion = "0.10.0"
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 
@@ -53,10 +54,7 @@ grails.project.dependency.resolution = {
                 version:'2.1-SNAPSHOT',
                 transitive:false
 
-
-        // runtime 'mysql:mysql-connector-java:5.1.22'
-        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-        test "org.gebish:geb-spock:0.9.3"
+        test "org.gebish:geb-spock:${gebVersion}"
         test("org.seleniumhq.selenium:selenium-htmlunit-driver:$seleniumVersion") {
             exclude "xml-apis"
         }
@@ -98,10 +96,7 @@ grails.project.dependency.resolution = {
         }
         compile ':cookie:1.4'
 
-        test ":geb:0.9.3"
-        test (":spock:0.7") {
-            exclude "spock-grails-support"
-        }
+        test ":geb:${gebVersion}"
         test ":karma-test-runner:0.2.4"
         build ":release:3.0.1"
     }
