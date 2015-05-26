@@ -868,7 +868,7 @@ ko.extenders.markdown = function(target, options) {
         var text = target();
         if (text) {
             text = text.replace(/<[^<>]*>?/gi, function (tag) {
-                return (tag.match(filterOptions.allowedTags) || tag.match(filterOptions.patternLink) || tag.match(filterOptions.patternImage)) ? tag : "";
+                return (tag.match(filterOptions.allowedTags) || tag.match(filterOptions.patternLink) || tag.match(filterOptions.patternImage) || tag.match(filterOptions.patternAudio)) ? tag : "";
             });
         }
         else {
