@@ -2,7 +2,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.type"/></label><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp>
+            <label class="control-label span6" for="name"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
             <div class="controls span6">
                 <select data-bind="value:projectType" data-validation-engine="validate[required]">
@@ -16,7 +16,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.useALA"/></label><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp>
+            <label class="control-label span6" for="name"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
             <div class="controls span6">
                 <select data-bind="value:isExternal" data-validation-engine="validate[required]">
@@ -27,17 +27,49 @@
             </div>
         </div>
     </div>
-    <div class="row-fluid">
+    <!-- ko stopBinding: true -->
+    <div id="organisationSearch">
+        <div class="row-fluid">
 
-        <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.organisationNameSearch"/></label><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp>
+            <div class="clearfix control-group">
 
-            <div class="controls span6">
-                <input type="text" data-bind="value:organisationNameSearch" data-validation-engine="validate[required]">
+                <label class="control-label span6" for="organisationName"><g:message code="project.organisationNameSearch"/><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp></label>
+                <div class="span6 controls">
+                    <div class="input-append">
+                        <input id="organisationName" type="text" class="input-xxlarge" placeholder="Start typing a name here" data-bind="value:term, valueUpdate:'afterkeydown', disable:selection"><button class="btn" type="button" data-bind="click:clearSelection"><i class='icon-search' data-bind="css:{'icon-search':!term(), 'icon-remove':term()}"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-fluid" data-bind="slideVisible:!selection()">
+            <div class="span6">
+                <div class="control-label span12" style="display:none;" data-bind="visible:!selection() && allViewed()">
+                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" data-bind="checked:organisationNotPresent"></label>
+                </div>
+                <div style="display:none;" data-bind="visible:!selection() && allViewed() && organisationNotPresent()">
+                    <button class="btn btn-success" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
+                </div>
+            </div>
 
+            <div class="span6">
+
+                <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
+                <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
+                    <ul class="nav nav-list">
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
+                        <!-- ko foreach:userOrganisationResults -->
+                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                        <!-- /ko -->
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length && otherResults().length">Other organisations</li>
+                        <!-- ko foreach:otherResults -->
+                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
+    <!-- /ko -->
 
 </div>
 

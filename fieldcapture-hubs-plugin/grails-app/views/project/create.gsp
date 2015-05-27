@@ -2,10 +2,11 @@
 <html>
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
-    <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
+    <title>Create | Project | <g:message code="g.fieldCapture"/></title>
     <r:script disposition="head">
     var fcConfig = {
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        organisationCreateUrl: "${createLink(controller: 'organisation', action: 'create')}",
         spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
         featuresService: "${createLink(controller: 'proxy', action: 'features')}",
@@ -18,7 +19,7 @@
         here = window.location.href;
 
     </r:script>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects,organisation,fuseSearch"/>
 </head>
 
 <body>
@@ -42,21 +43,18 @@
 <r:script>
 $(function(){
 
-    function initViewModel() {
 
-        var programsModel = <fc:modelAsJavascript model="${programs}"/>;
-        var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
-        var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-        var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
-        var viewModel =  new ProjectViewModel(project, true, organisations);
-        viewModel.loadPrograms(programsModel);
-        return viewModel;
-    };
+    var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
+    var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
+    var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
+    var viewModel =  new ProjectViewModel(project, true, organisations);
+    viewModel.loadPrograms(programsModel);
 
     $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
-    var viewModel = initViewModel();
+
     var siteViewModel = initSiteViewModel({type:'projectArea'});
     siteViewModel.name = ko.computed(function() {
         return 'Project area for '+viewModel.name();
@@ -64,6 +62,10 @@ $(function(){
 
     $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
+    var organisationSearch = new OrganisationSelectionViewModel(organisations, [], ['name']);
+    ko.applyBindings(organisationSearch, document.getElementById("organisationSearch"));
+
+
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
         document.location.href = "${createLink(action: 'citizenScience')}";

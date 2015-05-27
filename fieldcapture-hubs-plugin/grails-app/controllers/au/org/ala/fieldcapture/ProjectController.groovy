@@ -79,8 +79,13 @@ class ProjectController {
         }
     }
 
-    @PreAuthorise
     def create() {
+        def user = userService.getUser()
+        if (!user) {
+            flash.message = "You do not have permission to perform that operation"
+            redirect controller: 'home', action: 'index'
+        }
+
         def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
         session.removeAttribute('citizenScienceOrgId')
         [

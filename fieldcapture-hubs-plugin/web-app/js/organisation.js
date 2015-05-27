@@ -112,4 +112,88 @@ OrganisationViewModel = function (props) {
 
     return self;
 
-}
+};
+
+/**
+ * Provides the ability to search a user's organsations and other organisations at the same time.  The results
+ * are maintained as separate lists for ease of display (so a users existing organisations can be prioritised).
+ * @param organisations the organisations not belonging to the user.
+ * @param userOrganisations the organisations that belong to the user.
+ */
+OrganisationSelectionViewModel = function(organisations, userOrganisations) {
+
+    var self = this;
+    var userOrgList = new SearchableList(userOrganisations, ['name']);
+    var otherOrgList = new SearchableList(organisations, ['name']);
+
+    self.term = ko.observable('');
+    self.term.subscribe(function() {
+        userOrgList.term(self.term());
+        otherOrgList.term(self.term());
+    });
+
+    self.selection = ko.computed(function() {
+        return userOrgList.selection() || otherOrgList.selection();
+    });
+
+    self.userOrganisationResults = userOrgList.results;
+    self.otherResults = otherOrgList.results;
+
+    self.clearSelection = function() {
+
+        userOrgList.clearSelection();
+        otherOrgList.clearSelection();
+        self.term('');
+    };
+    self.isSelected = function(value) {
+        return userOrgList.isSelected(value) || otherOrgList.isSelected(value);
+    };
+    self.select = function(value) {
+        self.term(value['name']);
+
+        userOrgList.select(value);
+        otherOrgList.select(value);
+    };
+
+    self.allViewed = ko.observable(false);
+
+    self.scrolled = function(blah, event) {
+        var elem = event.target;
+        var scrollPos = elem.scrollTop;
+        var maxScroll = elem.scrollHeight - elem.clientHeight;
+
+        if ((maxScroll - scrollPos) < 9) {
+            self.allViewed(true);
+        }
+    };
+
+    self.visibleRows = ko.computed(function() {
+        var count = 0;
+        if (self.userOrganisationResults().length) {
+            count += self.userOrganisationResults().length+1; // +1 for the "user orgs" label.
+        }
+        if (self.otherResults().length) {
+            count += self.otherResults().length;
+            if (self.userOrganisationResults().length) {
+                count ++; // +1 for the "other orgs" label (it will only show if the my organisations label is also showing.
+            }
+        }
+        return count;
+    });
+
+    self.visibleRows.subscribe(function() {
+        if (self.visibleRows() <= 4 && !self.selection()) {
+            self.allViewed(true);
+        }
+    });
+
+    self.organisationNotPresent = ko.observable();
+
+    self.createOrganisation = function(url) {
+        if (!url) {
+            url = fcConfig.organisationCreateUrl;
+        }
+        window.location.href = url;
+    }
+
+};
