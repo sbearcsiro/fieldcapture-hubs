@@ -34,7 +34,7 @@
     </div>
 
     <div class="row-fluid"><g:message code="project.citizenScience.preamble"/></div>
-    <div id="pt-root" class="span9">
+    <div id="pt-root" class="row-fluid">
         <div class="well">
             <div class="row-fluid">
                     <span id="pt-resultsReturned"></span>
@@ -43,7 +43,7 @@
                         <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
                         <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
                     </div>
-                <a href="#" id="pt-downloadLink" class="btn pull-right"
+                <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn pull-right"
                    title="Download metadata for projects in JSON format">
                     <i class="icon-download"></i><g:message code="g.download" /></a>
             </div>
@@ -75,8 +75,8 @@
                 <td class="td1">
                     <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
                         <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
-                    <div class="projectInfo" id="proj_$id" style="position:relative;height:auto;min-height:120px;margin-left:205px">
-                        <div style="position:absolute;left:-203px;width:200px;height:100%">
+                    <div class="projectInfo" id="proj_$id" style="position:relative;height:9em;margin-left:11em">
+                        <div style="position:absolute;left:-11em;width:10em;height:100%;overflow:hidden">
                             <img style="max-width:100%;max-height:100%">
                         </div>
                         <div class="homeLine">
@@ -86,7 +86,7 @@
                         <div class="orgLine">
                             <i class="icon-user"></i>
                         </div>
-                        <div class="descLine">
+                        <div class="descLine" style="height:4.5em; overflow:hidden; line-height:1.5em">
                         </div>
                         <div class="linksLine">
                             <i class="icon-info-sign"></i>
@@ -131,7 +131,7 @@ $(document).ready(function () {
             urlWeb: props[9],
             urlAndroid: props[7],
             urlITunes: props[8],
-            urlImage: this.mainImageUrl = props[10],
+            urlImage: this.imageUrl = props[10],
             orgId: props[11]
         }
         this.coverage = props[1];
@@ -139,9 +139,11 @@ $(document).ready(function () {
         this.descriptionTrimmed = moreless(this.description, 100);
         this.editable = props[3];
         this.orgLine = dl.orgId? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + dl.orgId + '">' + dl.orgName + '</a>': dl.orgName;
-        this.links = (dl.urlWeb? '<a href="' + dl.urlWeb + '">Website</a> ': '')
-                   + (dl.urlAndroid? '<a href="' + dl.urlAndroid + '">Android</a> ': '')
-                   + (dl.urlITunes? '<a href="' + dl.urlITunes + '">ITunes</a>': '');
+        var l = [];
+        if (dl.urlWeb) l.push('<a href="' + dl.urlWeb + '">Website</a>');
+        if (dl.urlAndroid) l.push('<a href="' + dl.urlAndroid + '">Android</a>');
+        if (dl.urlITunes) l.push('<a href="' + dl.urlITunes + '">ITunes</a>');
+        this.links = l.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
         this.searchText = (this.name + ' ' + this.description + ' ' + this.organisationName).toLowerCase();
     }
 
@@ -205,13 +207,13 @@ $(document).ready(function () {
             $tr.find('a.zoom-in').data("id", id);
             $tr.find('a.zoom-out').data("id", id);
             $tr.find('.orgLine').append(src.orgLine);
-            $tr.find('.descLine').append(src.description);
+            $tr.find('.descLine').html(src.description);
             if (src.links)
                 $tr.find('.linksLine').append(src.links);
             else
                 $tr.find('.linksLine').hide();
-            if (src.mainImageUrl)
-                $tr.find('.projectInfo img').attr("src", src.mainImageUrl);
+            if (src.imageUrl)
+                $tr.find('.projectInfo img').attr("src", src.imageUrl);
             else
                 $tr.find('.projectInfo img').hide();
             if (src.editable)
@@ -350,11 +352,6 @@ $(document).ready(function () {
             event.preventDefault();
             doSearch();
         }
-    });
-    $('#pt-downloadLink').click(function () {
-        $('body').html(JSON.stringify($.map(projects, function(v) {
-            return v.download;
-        })));
     });
     $('#pt-reset').click(function () {
         projects = allProjects;

@@ -65,9 +65,10 @@
 		
 		tagFilter: {
 			enabled: false,
-			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i,
+			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul|audio)>|<(br|hr)\s?\/?>)$/i,
 			patternLink: /^(<a\shref=("|')(\#\d+|(https?:\/\/|ftp:\/\/|mailto:)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)\2(\stitle="[^"<>]+")?\s?>|<\/a>)$/i,
-			patternImage: /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i
+			patternImage: /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i,
+			patternAudio: /^(<audio.*>)$/i
 		}
 	}; // }}}
 	WMDEditor.prototype = {
@@ -1024,7 +1025,7 @@
 				// code courtesy of https://github.com/polestarsoft/wmd/commit/e7a09c9170ea23e7e806425f46d7423af2a74641
 				if (wmd.options.tagFilter.enabled) {
 					text = text.replace(/<[^<>]*>?/gi, function (tag) {
-						return (tag.match(wmd.options.tagFilter.allowedTags) || tag.match(wmd.options.tagFilter.patternLink) || tag.match(wmd.options.tagFilter.patternImage)) ? tag : "";
+						return (tag.match(wmd.options.tagFilter.allowedTags) || tag.match(wmd.options.tagFilter.patternLink) || tag.match(wmd.options.tagFilter.patternImage) || tag.match(wmd.options.tagFilter.patternAudio)) ? tag : "";
 					});
 				}
 				wmd.panels.preview.innerHTML = text;

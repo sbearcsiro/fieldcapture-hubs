@@ -219,11 +219,6 @@ class FCTagLib {
                         link:createLink(controller: 'home', action: "help"),
                         label:'Help'
                 ],
-                citizenScience:[
-                        icon:"icon-user",
-                        link:createLink(controller: 'home', action: 'citizenScience'),
-                        label:'Citizen Science'
-                ],
                 contacts:[
                         icon:"icon-envelope",
                         link:createLink(controller: 'home', action: 'contacts'),
@@ -231,7 +226,7 @@ class FCTagLib {
                 ]
         ]
 
-        def navDefaults = ['home', 'about', 'help', 'citizenScience', 'contacts']
+        def navDefaults = ['home', 'about', 'help', 'contacts']
         def navItems = attrs.items ?: navDefaults
 
         def mb = new MarkupBuilder(out)

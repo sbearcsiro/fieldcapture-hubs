@@ -17,6 +17,7 @@
 /stacktrace.log
 /test/reports
 /logs
+/fieldcapture*.log
 
 
 # project release file
@@ -36,3 +37,6 @@
 # Intellij files
 /*.iml
 /.idea
+
+# Node js packages
+/node_modules

@@ -69,7 +69,7 @@ grails.project.dependency.resolution = {
         runtime ":ala-bootstrap2:2.2"
 
         if (Environment.current != Environment.DEVELOPMENT || !inlinePluginAvailable) {
-            compile ":fieldcapture-plugin:1.1.2-SNAPSHOT"
+            compile ":fieldcapture-plugin:1.1.3-SNAPSHOT"
         }
 
         build ":release:3.0.1"

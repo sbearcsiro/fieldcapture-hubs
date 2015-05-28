@@ -71,6 +71,8 @@
 
 </div>
 
+<div class="alert alert-block">Be careful if you are considering changing the programme, project dates or regenerating the timeline for a project with approved stages.</div>
+
 <div class="row-fluid">
     <div class="span4">
         <label class="control-label">Programme name</label>
@@ -160,7 +162,7 @@
 </div>
 
 
-<div class="row-fluid" data-bind="visible:projectDatesChanged">
+<div class="row-fluid">
     <span class="span6">
         <label for="regenerateProjectTimeline">Re-calculate the project stage dates? (This page must be reloaded before the change will be visible)</label>
         <fc:iconHelp title="Timeline">Selecting the checkbox will result in the project stage start and end dates being adjusted to match the new project dates.</fc:iconHelp>

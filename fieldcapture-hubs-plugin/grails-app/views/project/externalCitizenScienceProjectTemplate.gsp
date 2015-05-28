@@ -91,9 +91,27 @@
         var project = <fc:modelAsJavascript model="${project}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
-        ko.applyBindings(projectViewModel);
+        var ViewModel = function() {
+            var self = this;
+            $.extend(this, projectViewModel);
 
-        if (projectViewModel.mainImageUrl()) {
+            self.editProject = function() {
+                window.location.href = fcConfig.projectEditUrl;
+            };
+            self.deleteProject = function() {
+                var message = "<span class='label label-important'>Important</span><p><b>This cannot be undone</b></p><p>Are you sure you want to delete this project?</p>";
+                bootbox.confirm(message, function(result) {
+                    if (result) {
+                        console.log("not implemented!");
+                    }
+                });
+            };
+
+        };
+        var viewModel = new ViewModel();
+        ko.applyBindings(viewModel);
+
+        if (viewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
                 height: 400,

@@ -6,6 +6,13 @@
     <r:script disposition="head">
     var fcConfig = {
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        spatialService: '${createLink(controller:'proxy',action:'feature')}',
+        intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
+        featuresService: "${createLink(controller: 'proxy', action: 'features')}",
+        featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+        spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
+        geocodeUrl: "${grailsApplication.config.google.geocode.url}",
+        siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;
@@ -54,11 +61,57 @@
 </div>
 <r:script>
 $(function(){
-    $('#validation-container').validationEngine();
+
+    function initViewModel() {
+
+        function ViewModel (data, activityTypes, organisations) {
+            var self = this;
+            $.extend(self, new ProjectViewModel(data, true, organisations));
+
+            self.save = function () {
+                if ($('#projectDetails').validationEngine('validate')) {
+
+                    var json = viewModel.modelAsJSON();
+                    var id = "${project?.projectId ? '/' + project.projectId : ''}";
+                    $.ajax({
+                        url: "${createLink(action: 'ajaxUpdate')}" + id,
+                        type: 'POST',
+                        data: json,
+                        contentType: 'application/json',
+                        success: function (data) {
+                            if (data.error) {
+                                alert(data.detail + ' \n' + data.error);
+                            } else {
+                                var projectId = "${project?.projectId}" || data.projectId;
+                                document.location.href = "${createLink(action: 'index')}/" + projectId;
+
+                            }
+                        },
+                        error: function (data) {
+                            alert('An unhandled error occurred: ' + data.status);
+                        }
+                    });
+                }
+            };
+        }
+
+        var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+        var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
+        var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
+        var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
+        var viewModel =  new ViewModel(project, activityTypes, organisations);
+        viewModel.loadPrograms(programsModel);
+        return viewModel;
+    };
+
+    $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
     var viewModel = initViewModel();
     viewModel.projectSite = initSiteViewModel();
+    viewModel.projectSite.name = ko.computed(function() {
+        return 'Project area for '+viewModel.name();
+    });
     viewModel.projectSite.type("projectArea");
     $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
@@ -71,11 +124,10 @@ $(function(){
     </g:else>
     });
     $('#save').click(function () {
-    console.log("saving...");
         viewModel.save();
-    console.log("saved...");
     });
  });
 </r:script>
+
 </body>
 </html>

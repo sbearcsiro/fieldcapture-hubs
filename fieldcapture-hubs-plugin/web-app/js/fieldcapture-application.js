@@ -53,9 +53,19 @@ function orEmptyArray(v) {
     return v === undefined ? [] : v;
 }
 
-// returns blank string if the object or the specified property is undefined, else the value
 function exists(parent, prop) {
-    return parent === undefined ? '' : (parent[prop] === undefined ? '' : parent[prop]);
+    if(parent === undefined)
+        return '';
+    if(parent == null)
+        return '';
+    if(parent[prop] === undefined)
+        return '';
+    if(parent[prop] == null)
+        return '';
+    if(ko.isObservable(parent[prop])){
+        return parent[prop]();
+    }
+    return parent[prop];
 }
 
 function neat_number (number, decimals) {
@@ -372,6 +382,34 @@ function Documents() {
         self.deleteDocumentByRole('mainImage');
     };
 
+    // this supports display of the project's primary images
+    this.primaryImages = ko.computed(function () {
+        var pi = $.grep(self.documents(), function (doc) {
+            return ko.utils.unwrapObservable(doc.isPrimaryProjectImage);
+        });
+        return pi.length > 0 ? pi : null;
+    });
+
+    var allowedHost = ['fast.wistia.com','embed-ssl.ted.com', 'www.youtube.com', 'player.vimeo.com'];
+    this.embeddedVideos = ko.computed(function () {
+        var ev = $.grep(self.documents(), function (doc) {
+            var isPublic = ko.utils.unwrapObservable(doc.public);
+            var embeddedVideo = ko.utils.unwrapObservable(doc.embeddedVideo);
+            if(isPublic && embeddedVideo) {
+                var html = $.parseHTML(embeddedVideo);
+                for(var i = 0; i < html.length; i++){
+                    var element = html[i];
+                    var src = element.getAttribute('src');
+                    if(src && $.inArray(getHostName(src), allowedHost) > -1){
+                        doc.iframe = '<iframe width="100%" src ="' + src + '" height = "' + element.getAttribute("height") + '"/></iframe>';
+                        return doc;
+                    }
+                    break;
+                }
+            }
+        });
+        return ev.length > 0 ? ev : null;
+    });
 
     self.deleteDocumentByRole = function(role) {
         var doc = self.findDocumentByRole(self.documents(), role);
@@ -385,6 +423,8 @@ function Documents() {
             }
         }
     };
+
+    self.ignore = ['documents', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
 
 };
 

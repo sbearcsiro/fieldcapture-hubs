@@ -868,7 +868,7 @@ ko.extenders.markdown = function(target, options) {
         var text = target();
         if (text) {
             text = text.replace(/<[^<>]*>?/gi, function (tag) {
-                return (tag.match(filterOptions.allowedTags) || tag.match(filterOptions.patternLink) || tag.match(filterOptions.patternImage)) ? tag : "";
+                return (tag.match(filterOptions.allowedTags) || tag.match(filterOptions.patternLink) || tag.match(filterOptions.patternImage) || tag.match(filterOptions.patternAudio)) ? tag : "";
             });
         }
         else {
@@ -1070,5 +1070,17 @@ ko.extenders.numericString = function(target, precision) {
     result(target());
 
     //return the new computed observable
+    return result;
+};
+
+ko.extenders.url = function(target) {
+    var result = ko.pureComputed({
+        read:target,
+        write: function(url) {
+            var value = typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
+            target(value);
+        }
+    });
+    result(target());
     return result;
 };

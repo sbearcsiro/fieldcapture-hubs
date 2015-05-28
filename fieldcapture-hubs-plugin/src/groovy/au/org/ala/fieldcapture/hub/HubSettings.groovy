@@ -35,6 +35,12 @@ class HubSettings {
     String skin = "nrm"
 
     /**
+     * Path to this hub's home page - must be in the format /<controller>/<action>
+     * This allows a hub to specify a different home page to the default.
+     */
+    String homePagePath = ""
+
+    /**
      * Allows the property to be set using a JSONArray which has an implementation of join which is
      * incompatible with how this is used by the SearchService.
      */
@@ -49,6 +55,29 @@ class HubSettings {
         this.supportedPrograms = new ArrayList<String>(supportedPrograms)
     }
 
+    public boolean overridesHomePage() {
+        return homePagePath as boolean
+    }
 
+    /**
+     * Returns a map [controller: , action: ] based on parsing the homePathPage.  If the homePathPath property
+     * isn't set or doesn't match the expected pattern, the default home index page will be returned..
+     */
+    public Map getHomePageControllerAndAction() {
+        if (overridesHomePage()) {
+            def regexp = "\\/(.*)\\/(.*)"
+            def matcher = (homePagePath =~ regexp)
+            if (matcher.matches()) {
+                def controller = matcher[0][1]
+                def action = matcher[0][2]
+                return [controller:controller, action:action]
+            }
+        }
+        return [controller:'home', action:'index']
+    }
+
+    public void setHomePageControllerAndAction(Map unused) {
+        // Do nothing - this method is here to allow us to construct this object using a Map without errors.
+    }
 
 }
