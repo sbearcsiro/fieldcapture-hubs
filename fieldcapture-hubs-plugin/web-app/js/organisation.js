@@ -81,6 +81,11 @@ OrganisationViewModel = function (props) {
         );
     };
 
+    self.modelAsJSON = function() {
+        var orgJs = self.toJS();
+        return JSON.stringify(orgJs);
+    };
+
     self.save = function() {
         if ($('.validationEngineContainer').validationEngine('validate')) {
 
@@ -188,12 +193,5 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations) {
     });
 
     self.organisationNotPresent = ko.observable();
-
-    self.createOrganisation = function(url) {
-        if (!url) {
-            url = fcConfig.organisationCreateUrl;
-        }
-        window.location.href = url;
-    }
 
 };
