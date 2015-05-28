@@ -9,13 +9,13 @@
 	</head>
 	<body>
         <r:require modules="pretty_text_diff"/>
-        <h4>Audit ${message.entityType?.substring(message.entityType?.lastIndexOf('.')+1)}: ${message?.entity?.name} ${message?.entity?.type} </h4>
+        <h4>Audit ${message?.entityType?.substring(message?.entityType?.lastIndexOf('.')+1)}: ${message?.entity?.name} ${message?.entity?.type} </h4>
         <g:set var="projectId" value="${params.projectId}"/>
         <g:set var="searchTerm" value="${params.searchTerm}"/>
 
     <div class="row-fluid">
         <div class="span6">
-            <h4>Edited by: ${userDetails?.displayName} <g:encodeAs codec="HTML">${message.userId ?: '<anon>'}</g:encodeAs> </h4>
+            <h4>Edited by: ${userDetails?.displayName} <g:encodeAs codec="HTML">${message?.userId ?: '<anon>'}</g:encodeAs> </h4>
             <h5><small>${message?.eventType} : ${DateUtils.displayFormatWithTime(message?.date)}</small></h5>
         </div>
         <div class="span6 text-right">
@@ -68,7 +68,7 @@
                             <tr>
                                 <td>${obj.key}</td>
                                 <td wrap class="diff1"></td>
-                                <td style="display:none" class="original">${compare?.entity[obj.key]}</td>
+                                <td style="display:none" class="original"> ${(compare ? compare?.entity[obj.key] : "")}</td>
                                 <td style="display:none" class="changed">${obj.value}</td>
 
                             </tr>
@@ -99,14 +99,7 @@
             </div>
         </div>
 
-
-
-
-
-
     </div>
-
-
 
     </body>
 </html>
