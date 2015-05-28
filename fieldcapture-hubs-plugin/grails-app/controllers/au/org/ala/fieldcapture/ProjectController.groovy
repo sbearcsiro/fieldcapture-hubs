@@ -87,6 +87,15 @@ class ProjectController {
         }
 
         def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
+
+        // Prepopulate the project as appropriate.
+        def project = [:]
+        if (params.organisationId) {
+            project.organisationId = params.organisationId
+        }
+        if (csOrgId) {
+            project.isCitizenScience = true;
+        }
         session.removeAttribute('citizenScienceOrgId')
         [
                 citizenScienceOrgId: csOrgId,
@@ -94,7 +103,8 @@ class ProjectController {
                 siteDocuments: '[]',
                 organisations: organisationService.list().list,
                 programs: projectService.programsModel(),
-                activityTypes: metadataService.activityTypesList()
+                activityTypes: metadataService.activityTypesList(),
+                project:project
         ]
     }
 

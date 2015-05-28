@@ -43,11 +43,17 @@
 <r:script>
 $(function(){
 
+    var PROJECT_DATA_KEY="CreateProjectSavedData";
 
     var programsModel = <fc:modelAsJavascript model="${programs}"/>;
     var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
     var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
+    <g:if test="${params.returning}">
+        project = JSON.parse(amplify.store(PROJECT_DATA_KEY));
+        console.log(project);
+    </g:if>
+
     var viewModel =  new ProjectViewModel(project, true, organisations);
     viewModel.loadPrograms(programsModel);
 
@@ -63,6 +69,20 @@ $(function(){
     $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
     var organisationSearch = new OrganisationSelectionViewModel(organisations, [], ['name']);
+    if (viewModel.organisationId()) {
+        organisationSearch.select($.grep(organisations, function(org){return org.organisationId == viewModel.organisationId()})[0]);
+    }
+    organisationSearch.createOrganisation = function() {
+        var projectData = JSON.stringify(viewModel.toJS());
+        amplify.store(PROJECT_DATA_KEY, projectData);
+        var here = document.location.href;
+        document.location.href = fcConfig.organisationCreateUrl+'?returnTo='+here+'&returning=true';
+    };
+    organisationSearch.selection.subscribe(function(newSelection) {
+        if (newSelection) {
+            viewModel.organisationId(newSelection.organisationId);
+        }
+    });
     ko.applyBindings(organisationSearch, document.getElementById("organisationSearch"));
 
 
