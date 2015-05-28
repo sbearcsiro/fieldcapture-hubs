@@ -242,7 +242,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
         errorMessage:"Failed to save your data: ",
         successMessage:"Save successful!",
         errorCallback:undefined,
-        successCallback:undefined
+        successCallback:undefined,
+        blockUIOnSave:false,
+        blockUISaveMessage:"Saving..."
     };
 
     var config = $.extend(defaults, options);
@@ -269,6 +271,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
     );
 
     viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
+        if (config.blockUIOnSave) {
+            blockUIWithMessage(config.blockUISaveMessage);
+        }
         $(config.restoredDataWarningSelector).hide();
         var json = serializeModel();
         // Store data locally in case the save fails.plan
@@ -309,6 +314,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
+                }
+            },
+            always: function(data) {
+                if (config.blockUIOnSave) {
+                    $.unblockUI();
                 }
             }
         });
