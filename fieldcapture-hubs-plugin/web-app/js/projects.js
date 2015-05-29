@@ -278,6 +278,12 @@ function isValid(p, a) {
 function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
 
+    if (isUserEditor === undefined) {
+        isUserEditor = false;
+    }
+    if (!organisations) {
+        organisations = [];
+    }
     var organisationsMap = {}, organisationsRMap = {};
     $.map(organisations, function(org) {
         organisationsMap[org.organisationId] = org;
@@ -503,6 +509,32 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             {lic:'CC BY-NC-SA', name:'Creative Commons Attribution-NonCommercial-ShareAlike'}
         ];
     self.transients.organisations = organisations;
+
+
+    self.transients.availableProjectTypes = [
+        {name:'Citizen Science Project', value:'citizenScience'},
+        {name:'Ecological or biological survey / assessment (not citizen science)', value:'survey'},
+        {name:'Natural resource management works project', value:'works'}
+    ];
+    /** Map between the available selection of project types and how the data is stored */
+    self.transients.kindOfProject = ko.pureComputed({
+        read: function() {
+            if (self.isCitizenScience()) {
+                return 'citizenScience';
+            }
+            return self.projectType() == 'survey' ? 'survey' : 'works';
+        },
+        write: function(value) {
+            if (value === 'citizenScience') {
+                self.isCitizenScience(true);
+                self.projectType('survey');
+            }
+            else {
+                self.isCitizenScience(false);
+                self.projectType(value);
+            }
+        }
+    });
 
     self.loadPrograms = function (programsModel) {
         $.each(programsModel.programs, function (i, program) {
