@@ -124,8 +124,9 @@ OrganisationViewModel = function (props) {
  * are maintained as separate lists for ease of display (so a users existing organisations can be prioritised).
  * @param organisations the organisations not belonging to the user.
  * @param userOrganisations the organisations that belong to the user.
+ * @param (optional) if present, this value should contain the organisationId of an organisation to pre-select.
  */
-OrganisationSelectionViewModel = function(organisations, userOrganisations) {
+OrganisationSelectionViewModel = function(organisations, userOrganisations, inititialSelection) {
 
     var self = this;
     var userOrgList = new SearchableList(userOrganisations, ['name']);
@@ -193,5 +194,22 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations) {
     });
 
     self.organisationNotPresent = ko.observable();
+
+    var findByOrganisationId = function(list, organisationId) {
+        for (var i=0; i<list.length; i++) {
+            if (list[i].organisationId === organisationId) {
+                return list[i];
+            }
+        }
+        return null;
+    };
+
+    if (inititialSelection) {
+        var userOrg = findByOrganisationId(userOrganisations, inititialSelection);
+        var orgToSelect = userOrg ? userOrg : findByOrganisationId(organisations, inititialSelection);
+        if (orgToSelect) {
+            self.select(orgToSelect);
+        }
+    }
 
 };
