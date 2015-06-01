@@ -242,7 +242,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
         errorMessage:"Failed to save your data: ",
         successMessage:"Save successful!",
         errorCallback:undefined,
-        successCallback:undefined
+        successCallback:undefined,
+        blockUIOnSave:false,
+        blockUISaveMessage:"Saving..."
     };
 
     var config = $.extend(defaults, options);
@@ -269,6 +271,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
     );
 
     viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
+        if (config.blockUIOnSave) {
+            blockUIWithMessage(config.blockUISaveMessage);
+        }
         $(config.restoredDataWarningSelector).hide();
         var json = serializeModel();
         // Store data locally in case the save fails.plan
@@ -309,6 +314,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
+                }
+            },
+            always: function(data) {
+                if (config.blockUIOnSave) {
+                    $.unblockUI();
                 }
             }
         });
@@ -428,5 +438,48 @@ function Documents() {
 
 };
 
+/**
+ * Wraps a list in a fuse search and exposes results and selection as knockout variables.
+ * Make sure to require Fuse on any page using this.
+ */
+SearchableList = function(list, keys, options) {
 
+    var self = this;
+    var options = $.extend({keys:keys, maxPatternLength:64}, options || {});
 
+    var searchable = new Fuse(list, options);
+
+    self.term = ko.observable();
+    self.selection = ko.observable();
+
+    self.results = ko.computed(function() {
+        if (self.term()) {
+            var searchTerm = self.term();
+            if (searchTerm > options.maxPatternLength) {
+                searchTerm = searchTerm.substring(0, options.maxPatternLength);
+            }
+            return searchable.search(searchTerm);
+        }
+        return list;
+    });
+
+    self.select = function(value) {
+        self.selection(value);
+    };
+    self.clearSelection = function() {
+        self.selection(null);
+        self.term(null);
+    };
+    self.isSelected = function(value) {
+        if (!self.selection() || !value) {
+            return false;
+        }
+        for (var i=0; i<keys.length; i++) {
+            var selection = self.selection();
+            if (selection[keys[i]] != value[keys[i]]) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
