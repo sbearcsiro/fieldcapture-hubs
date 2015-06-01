@@ -30,14 +30,18 @@
 
     <li class="active">Create Project</li>
 </ul>
-<form id="projectDetails" class="form-horizontal">
-    <g:set var="template" value="${params.citizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
-    <g:render template="${template}" model="${pageScope.variables}"/>
-</form>
-<div class="form-actions">
-    <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
-    <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
-</div>
+    <h2>Register a new project</h2>
+    <p>
+    Please tell us about your project by completing the form below.  Questions marked with a * are mandatory.
+    </p>
+    <form id="projectDetails" class="form-horizontal">
+        <g:set var="template" value="${params.citizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
+        <g:render template="${template}" model="${pageScope.variables}"/>
+    </form>
+    <div class="form-actions">
+        <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
+        <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
+    </div>
 
 </div>
 <r:script>
@@ -46,6 +50,7 @@ $(function(){
     var PROJECT_DATA_KEY="CreateProjectSavedData";
 
     var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+    var userOrganisations = <fc:modelAsJavascript model="${userOrganisations?:[]}"/>;
     var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
     var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
@@ -68,10 +73,8 @@ $(function(){
 
     $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
-    var organisationSearch = new OrganisationSelectionViewModel(organisations, [], ['name']);
-    if (viewModel.organisationId()) {
-        organisationSearch.select($.grep(organisations, function(org){return org.organisationId == viewModel.organisationId()})[0]);
-    }
+    var organisationSearch = new OrganisationSelectionViewModel(organisations, userOrganisations, viewModel.organisationId());
+
     organisationSearch.createOrganisation = function() {
         var projectData = JSON.stringify(viewModel.toJS());
         amplify.store(PROJECT_DATA_KEY, projectData);
