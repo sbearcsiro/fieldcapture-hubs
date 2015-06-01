@@ -16,18 +16,7 @@
             <label class="control-label span3" for="name"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <g:if test="${params.citizenScience}">
-                    <input type="text" readonly="readonly" data-bind="value:transients.projectKind">
-                </g:if>
-                <g:else>
-
-                    <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'" data-validation-engine="validate[required]">
-                        <option value="citizenScience">Citizen Science Project</option>
-                        <option value="survey">Ecological or biological survey / assessment (not citizen science)</option>
-                        <option value="works">Natural resource management works project</option>
-                    </select>
-
-                </g:else>
+                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
             </div>
         </div>
     </div>
@@ -37,10 +26,8 @@
             <label class="control-label span3" for="name"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <select data-bind="value:isExternal" data-validation-engine="validate[required]">
-                    <option>Select</option>
-                    <option value="false">Yes</option>
-                    <option value="true">No</option>
+                <select data-bind="value:isExternal, options:[{label:'Yes', value:true}, {label:'No', value:false}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+
                 </select>
             </div>
         </div>
@@ -269,7 +256,7 @@
 <div class="row-fluid">
     <div class="well">
     <h4 class="block-header"><g:message code="project.details.site"/></h4>
-
+    <g:set var="mapHeight" value="400px"/>
     <g:render template="/site/simpleSite" model="${pageScope.variables}"/>
 </div>
 </div>
