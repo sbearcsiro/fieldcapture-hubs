@@ -82,6 +82,7 @@ class ProjectController {
         if (!user) {
             flash.message = "You do not have permission to perform that operation"
             redirect controller: 'home', action: 'index'
+            return
         }
         def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
         def organisations = metadataService.organisationList().list ?: []
