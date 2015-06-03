@@ -12,17 +12,18 @@ class ProjectDetails extends Page {
     static at = { title == "Create | Project | Field Capture"}
 
     static content = {
-        projectType { $('[data-bind~=value:projectType]') }
-        recordUsingALA { $('[data-bind~=booleanValue:isExternal]') }
+        projectType { $('[data-bind*="value:transients.projectKind"]') }
+        recordUsingALA { $('[data-bind*="booleanValue:isExternal"]') }
         organisation { module OrganisationSearch }
-        name { $('[data-bind~=value:name]') }
-        description { $('[data-bind~=value:name]') }
+        name { $('[data-bind*="value:name"]') }
+        description { $('[data-bind*="value:description"]') }
         contactEmailAddress { $('') }
         plannedStartDate { $('#plannedStartDate') }
         plannedEndDate { $('#plannedEndDate') }
-        getInvolved { $('[data-bind~=value:getInvolved]') }
-        scienceType { $('[data-bind~=value:scienceType]') }
+        getInvolved { $('[data-bind*="value:getInvolved"]') }
+        scienceType { $('[data-bind*="value:scienceType"]') }
 
+        site { module Site }
         saveButton { $('#save') }
         cancelButton { $('#cancel') }
 
@@ -46,8 +47,8 @@ class OrganisationSearch extends Module {
     static content = {
         organisationName { $('#organisationName')}
         results {}
-        notOnList { $('[data-bind~=checked:organisationNotPresent') }
-        clearButton {$('[data-bind~=click:clearSelection')}
+        notOnList { $('[data-bind*="checked:organisationNotPresent"') }
+        clearButton {$('[data-bind*="click:clearSelection"')}
         registerButton {$('#registerOrganisation')}
     }
     def clearSelection() {
@@ -55,7 +56,8 @@ class OrganisationSearch extends Module {
     }
 
     def selectOrganisation(name) {
-        $('a [data-bind~=text:'+name+']').click()
+        println $('#organisation-list a', text:name)
+        $('#organisation-list a', text:name).click()
     }
 
 }

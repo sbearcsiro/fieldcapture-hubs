@@ -1,12 +1,17 @@
 package au.org.ala.fieldcapture
 
 import pages.ProjectDetails
+import pages.ProjectIndex
 import pages.EntryPage
 
 import spock.lang.Stepwise
 
 @Stepwise
 class CreateProjectSpec extends FieldcaptureFunctionalTest {
+
+    def setup() {
+        useDataSet("data-set-1")
+    }
 
     def "The user must be logged in to create a project"() {
 
@@ -37,33 +42,52 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
 
 
         when: "an organisation is selected"
-        organisation.selectOrganisation("Test 1")
+        organisation.selectOrganisation("Test organisation 1")
 
         then: "The search field is disabled and updated to match the organisation name"
-        organisationName == "Test 1"
-        organisationName.is(":disabled")
+
+        organisation.organisationName == "Test organisation 1"
+        organisation.organisationName.@disabled == 'true'
 
     }
 
-    def "The user can create a citizen science project"() {
+    def "If the user is a member of exactly one organisation it should be preselected"() {
+        logout(browser)
+        login(browser, "fc-ta@outlook.com", "testing!")
+
+        given: "navigate to the create project page"
+        to ProjectDetails, citizenScience:true
+
+        expect: "the user's organisation is selected"
+        at ProjectDetails
+
+        organisation.organisationName == "Test organisation 3"
+        organisation.organisationName.@disabled == 'true'
+    }
+
+    def "The user can register an external citizen science project"() {
 
         logout(browser)
-        login(browser, "fc-te@outlook.com", "testing!")
+        login(browser, "fc-ta@outlook.com", "testing!")
 
         given: "navigate to the create project page"
         to ProjectDetails, citizenScience:true
 
         expect:
         at ProjectDetails
+        projectType == 'citizenScience' // The field should be pre-selected and disabled - note the selector returns the value, not the text.
 
         when: "enter project details"
-        //projectType = 'Citizen Science Project' // The field should be pre-selected and disabled
-        recordUsingALA = 'Yes'
-        organisationName = 'Type Something here'
+        recordUsingALA = 'No'
+        name = 'External project'
+        description = 'External project description'
+        setDate(plannedStartDate, '01/01/2015')
+        site.extentType = 'point'
 
-        submit()
+        save()
 
         then: "at the newly created project page"
+
         waitFor { at ProjectIndex }
 
 

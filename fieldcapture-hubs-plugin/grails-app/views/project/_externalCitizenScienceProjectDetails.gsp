@@ -60,7 +60,7 @@
 
                 <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
                 <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
-                    <ul class="nav nav-list">
+                    <ul id="organisation-list" class="nav nav-list">
                         <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
                         <!-- ko foreach:userOrganisationResults -->
                             <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
