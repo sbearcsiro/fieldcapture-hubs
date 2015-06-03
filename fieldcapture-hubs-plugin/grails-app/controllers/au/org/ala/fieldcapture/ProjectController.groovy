@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 
 class ProjectController {
 
-    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication
+    def projectService, metadataService, organisationService, commonService, activityService, userService, webService, roleService, grailsApplication, projectActivityService
     def siteService, documentService
     static defaultAction = "index"
     static ignore = ['action','controller','id']
@@ -33,6 +33,7 @@ class ProjectController {
                 user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
                 user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
+
             def model = [project: project,
              activities: activityService.activitiesForProject(id),
              mapFeatures: commonService.getMapFeatures(project),
@@ -49,6 +50,17 @@ class ProjectController {
              themes:metadataService.getThemesForProject(project)
             ]
 
+            if(project.projectType == 'survey'){
+                def projectActivities = projectActivityService.getAllByProject(project.projectId)
+                def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
+                model.projectActivities = projectActivities
+                def pActivityForms = []
+                activityModel.collect{
+                    pActivityForms.add([name: it.name, images: it.images])
+                }
+                model.pActivityForms =  pActivityForms
+            }
+
             render view:projectView(project), model:model
         }
     }
@@ -59,7 +71,7 @@ class ProjectController {
                 return 'externalCitizenScienceProjectTemplate'
             }
         }
-        return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
+        return project.projectType == 'survey' ? 'citizenScienceProjectTemplate' : 'index'
     }
 
     @PreAuthorise
