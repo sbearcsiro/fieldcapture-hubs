@@ -79,17 +79,41 @@ class ProjectController {
         }
     }
 
-    @PreAuthorise
     def create() {
+        def user = userService.getUser()
+        if (!user) {
+            flash.message = "You do not have permission to perform that operation"
+            redirect controller: 'home', action: 'index'
+        }
+
         def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
+
+        // Prepopulate the project as appropriate.
+        def project = [:]
+        if (params.organisationId) {
+            project.organisationId = params.organisationId
+        }
+        if (csOrgId) {
+            project.isCitizenScience = true
+        }
+        def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
+        def organisations = metadataService.organisationList().list ?: []
+        def groupedOrganisations = organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
+
+        // Default the project organisation if the user is a member of a single organisation.
+        if (userOrgIds.size() == 1) {
+            project.organisationId = userOrgIds[0]
+        }
         session.removeAttribute('citizenScienceOrgId')
         [
                 citizenScienceOrgId: csOrgId,
                 organisationId: params.organisationId,
                 siteDocuments: '[]',
-                organisations: organisationService.list().list,
+                userOrganisations: groupedOrganisations.user ?: [],
+                organisations: groupedOrganisations.other ?: [],
                 programs: projectService.programsModel(),
-                activityTypes: metadataService.activityTypesList()
+                activityTypes: metadataService.activityTypesList(),
+                project:project
         ]
     }
 

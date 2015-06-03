@@ -406,8 +406,8 @@ $(document).ready(function () {
     });
 
     $("#newPortal").on("click", function() {
-        document.location.href = "${createLink(controller:'organisation',action:'list',params:[createCitizenScienceProject:true])}";
-    });
+        document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
+    })
 });
 </r:script>
 </body>

@@ -23,8 +23,10 @@ module.exports = function (config) {
             'web-app/js/knockout-dates.js',
             'web-app/wmd/showdown.js',
             'web-app/wmd/wmd.js',
+            'web-app/js/fuse.min.js',
             'web-app/js/fieldcapture-application.js',
             'web-app/js/projects.js',
+            'web-app/js/organisation.js',
             'test/unit/javascript/spec/**/*.js'
         ],
 
