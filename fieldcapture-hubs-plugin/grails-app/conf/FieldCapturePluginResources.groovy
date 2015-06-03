@@ -195,6 +195,11 @@ modules = {
         resource url:'js/moment.min.js', plugin: 'fieldcapture-plugin'
     }
 
+    projectActivities {
+        dependsOn 'knockout'
+        resource url:'js/projectActivity.js', plugin: 'fieldcapture-plugin'
+    }
+
     jquery_cookie {
         dependsOn 'jquery'
         resource url:'js/jquery.cookie.js', plugin: 'fieldcapture-plugin'
