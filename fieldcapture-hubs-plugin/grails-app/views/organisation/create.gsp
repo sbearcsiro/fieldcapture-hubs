@@ -128,6 +128,10 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
+                    },
+                    undefined,
+                    {
+                        serializeModel:function() {return organisationViewModel.modelToJSON(true);}
                     }
                 );
 
