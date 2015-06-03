@@ -41,20 +41,20 @@
                         <span data-bind="text:urlWeb"></span>
                     </div>
                 </div>
-                <div class="row-fluid" data-bind="visible:urlAndroid">
+                <div class="row-fluid" data-bind="visible:mobileAppLinks">
                     <div class="span6">
-                        <label>Android app:</label>
+                        <label>Mobile apps:</label>
                     </div>
                     <div class="span6">
-                        <span data-bind="text:urlWeb"></span>
+                        <span data-bind="html:mobileAppLinks"></span>
                     </div>
                 </div>
-                <div class="row-fluid" data-bind="visible:urlITunes">
+                <div class="row-fluid" data-bind="visible:socialMediaLinks">
                     <div class="span6">
-                        <label>iTunes app:</label>
+                        <label>Social media:</label>
                     </div>
                     <div class="span6">
-                        <span data-bind="text:urlITunes"></span>
+                        <span data-bind="html:socialMediaLinks"></span>
                     </div>
                 </div>
 

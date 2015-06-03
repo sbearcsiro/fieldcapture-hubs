@@ -53,6 +53,10 @@ function orEmptyArray(v) {
     return v === undefined ? [] : v;
 }
 
+function fixUrl(url) {
+    return typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
+}
+
 function exists(parent, prop) {
     if(parent === undefined)
         return '';
@@ -352,6 +356,47 @@ function Documents() {
         }
         return null;
     };
+
+    self.links = ko.observableArray();
+    self.findLinkByRole = function(links, roleToFind) {
+        for (var i=0; i<links.length; i++) {
+            var role = ko.utils.unwrapObservable(links[i].role);
+            var status = ko.utils.unwrapObservable(links[i].status);
+            if (role === roleToFind && status !== 'deleted') {
+                return links[i];
+            }
+        }
+        return null;
+    };
+    self.pushLinkUrl = function (urls, links, role) {
+        var link = self.findLinkByRole(links, role);
+        if (link && link.url) urls.push({
+            url: link.url,
+            logo: function(dir) {
+                return dir + "/" + role.toLowerCase() + ".png";
+            }
+        });
+    };
+    self.mobileApps = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        self.pushLinkUrl(urls, links, "android");
+        self.pushLinkUrl(urls, links, "blackberry");
+        self.pushLinkUrl(urls, links, "iTunes");
+        self.pushLinkUrl(urls, links, "windowsPhone");
+        return urls;
+    });
+    self.socialMedia = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        self.pushLinkUrl(urls, links, "facebook");
+        self.pushLinkUrl(urls, links, "googlePlus");
+        self.pushLinkUrl(urls, links, "linkedIn");
+        self.pushLinkUrl(urls, links, "pinterest");
+        self.pushLinkUrl(urls, links, "rssFeed");
+        self.pushLinkUrl(urls, links, "tumblr");
+        self.pushLinkUrl(urls, links, "twitter");
+        return urls;
+    });
+
     self.logoUrl = ko.pureComputed(function() {
         var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
         return logoDocument ? logoDocument.url : null;
@@ -423,8 +468,20 @@ function Documents() {
             }
         }
     };
+    self.deleteLinkByRole = function(role) {
+        var link = self.findLinkByRole(self.links(), role);
+        if (link) {
+            if (link.documentId) {
+                link.status = 'deleted';
+                self.links.valueHasMutated(); // observableArrays don't fire events when contained objects are mutated.
+            }
+            else {
+                self.links.remove(link);
+            }
+        }
+    };
 
-    self.ignore = ['documents', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
+    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
 
 };
 

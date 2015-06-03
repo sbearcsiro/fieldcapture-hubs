@@ -327,10 +327,6 @@ function initViewModel() {
         }
     }
 
-    function fixUrl(url) {
-        return typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
-    }
-
     var programsModel = <fc:modelAsJavascript model="${programs}"/>;
     var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
     var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');

@@ -285,7 +285,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.name = ko.observable(project.name);
-    self.description = ko.observable(project.description).extend({markdown:true});;
+    self.description = ko.observable(project.description).extend({markdown:true});
     self.externalId = ko.observable(project.externalId);
     self.grantId = ko.observable(project.grantId);
     self.manager = ko.observable(project.manager);
@@ -328,6 +328,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
     self.getInvolved = ko.observable(project.getInvolved);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.isExternal = ko.observable(project.isExternal);
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
@@ -336,7 +337,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.urlAndroid = ko.observable(project.urlAndroid).extend({url:true});
     self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
-    self.isExternal = ko.observable(project.isExternal);
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
@@ -608,9 +608,19 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     };
 
-    if (project.documents) {
-        $.each(project.documents, function(i, doc) {
-            self.addDocument(doc);
+    // links
+    self.addLink = function(link) {
+        self.links.push(new DocumentViewModel(link));
+    };
+    self.deleteLink = function(link) {
+        var url = fcConfig.documentDeleteUrl+'/'+link.documentId;
+        $.post(url, {}, function() {self.links.remove(link);});
+
+    };
+
+    if (project.links) {
+        $.each(project.links, function(i, link) {
+            self.addLink(link);
         });
     }
 };

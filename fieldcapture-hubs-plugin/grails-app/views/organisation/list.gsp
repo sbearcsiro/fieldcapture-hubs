@@ -46,11 +46,11 @@
         </div>
         <div class="span2">
             <input id="searchByName" type="checkbox" checked="true" class="fuse-checkbox" />
-            <label for="searchByName" style="display:inline">By name</label></p>
+            <label for="searchByName" style="display:inline">By name</label>
         </div>
         <div class="span2">
             <input id="searchByDescription" type="checkbox" class="fuse-checkbox" />
-            <label for="searchByDescription" style="display:inline">By description</label></p>
+            <label for="searchByDescription" style="display:inline">By description</label>
         </div>
         <div class="span2">
             <input id="searchCaseSensitive" type="checkbox" class="fuse-checkbox" />

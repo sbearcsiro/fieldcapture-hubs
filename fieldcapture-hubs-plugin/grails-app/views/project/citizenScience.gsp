@@ -14,11 +14,13 @@
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        imageLocation:"${resource(dir:'/images')}",
+        logoLocation:"${resource(dir:'/images/filetypes')}",
         dashboardUrl: "${g.createLink(controller: 'report', action: 'dashboardReport', params: params)}"
     }
     </r:script>
     <script type="text/javascript" src="//www.google.com/jsapi"></script>
-    <r:require modules="knockout,js_iso8601,wmd"/>
+    <r:require modules="js_iso8601,projects"/>
 </head>
 
 <body>
@@ -37,32 +39,39 @@
     <div id="pt-root" class="row-fluid">
         <div class="well">
             <div class="row-fluid">
+                <div class="span10">
                     <span id="pt-resultsReturned"></span>
                     <div class="input-append">
                         <input type="text" name="pt-search" id="pt-search"/>
                         <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
                         <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
                     </div>
-                <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn pull-right"
+                </div>
+                <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn span2 pull-right"
                    title="Download metadata for projects in JSON format">
                     <i class="icon-download"></i><g:message code="g.download" /></a>
             </div>
-            <div id="pt-searchControls">
-                <div id="pt-sortWidgets" class="row-fluid">
-                    <div class="span4">
+            <div id="pt-searchControls" class="row-fluid">
+                <div id="pt-sortWidgets">
+                    <div class="span3">
                         <label for="pt-per-page"><g:message code="g.projects"/>&nbsp;<g:message code="g.perPage"/></label>
                         <g:select name="pt-per-page" from="[20,50,100,500]"/>
                     </div>
-                    <div class="span4">
+                    <div class="span3">
                         <label for="pt-sort"><g:message code="g.sortBy" /></label>
                         <g:select name="pt-sort" from="['Name','Description','Organisation Name','Status']"  keys="['name','description','organisationName','status']"/>
                     </div>
-                    <div class="span4">
+                    <div class="span3">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
                         <g:select name="pt-dir" from="['Ascending','Descending']" keys="[1,-1]"/>
                     </div>
                 </div>
+                <div class="span2 pull-right text-center">
+                    <label for="pt-search-active-only">Show active projects only</label>
+                    <input id="pt-search-active-only" type="checkbox" />
+                </div>
             </div><!--drop downs-->
+            <a href="#" id="pt-collapse-expand">collapse all</a>
         </div>
 
         <table class="table table-bordered table-hover" id="projectTable">
@@ -74,10 +83,10 @@
             <tr class="clearfix">
                 <td class="td1">
                     <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
-                        <span class="showHideCaret">&#9658;</span> <span class="projectTitleName">$name</span></a>
+                        <span class="showHideCaret">&#9658;</span> <span class="projectTitleName" style="font-size:120%;font-weight:bold">$name</span></a>
                     <div class="projectInfo" id="proj_$id" style="position:relative;height:9em;margin-left:11em">
                         <div style="position:absolute;left:-11em;width:10em;height:100%;overflow:hidden">
-                            <img style="max-width:100%;max-height:100%">
+                            <img class="projectImage" style="max-width:100%;max-height:100%">
                         </div>
                         <div class="homeLine">
                             <i class="icon-home"></i>
@@ -93,7 +102,8 @@
                         </div>
                     </div>
                 </td>
-                <td class="td2" style="width:10px"><a><i class="icon-edit"></i></a></td>
+                <td class="td2" style="width:100px"><a><img/></a></td>
+                <td class="td3" style="width:10px"><a><i class="icon-edit"></i></a></td>
             </tr>
         </table>
 
@@ -121,34 +131,38 @@ $(document).ready(function () {
             + text + '<a onclick="moreOrLess(this)"><g:message code="g.less"/></a></div>';
     }
     var markdown = new Showdown.converter();
-    var ProjectVM = function (props) {
-        var dl = this.download = {
-            projectId: this.projectId = props[0],
-            name: this.name = props[4],
+    function createVM(props) {
+        var vm = new ProjectViewModel({
+            coverage: props[1],
             description: props[2],
-            orgName: this.organisationName = props[5],
-            status: this.status = props[6],
-            urlWeb: props[9],
-            urlAndroid: props[7],
-            urlITunes: props[8],
-            urlImage: this.imageUrl = props[10],
-            orgId: props[11]
-        }
-        this.coverage = props[1];
-        this.description = markdown.makeHtml(dl.description);
-        this.descriptionTrimmed = moreless(this.description, 100);
-        this.editable = props[3];
-        this.orgLine = dl.orgId? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + dl.orgId + '">' + dl.orgName + '</a>': dl.orgName;
-        var l = [];
-        if (dl.urlWeb) l.push('<a href="' + dl.urlWeb + '">Website</a>');
-        if (dl.urlAndroid) l.push('<a href="' + dl.urlAndroid + '">Android</a>');
-        if (dl.urlITunes) l.push('<a href="' + dl.urlITunes + '">ITunes</a>');
-        this.links = l.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        this.searchText = (this.name + ' ' + this.description + ' ' + this.organisationName).toLowerCase();
+            isExternal: props[5],
+            name: props[6],
+            organisationName: props[8],
+            status: props[9],
+            urlWeb: props[11],
+            links: props[12]
+        }, false, []);
+        vm.projectId = props[0];
+        vm.isActive = props[3];
+        vm.isEditable = props[4];
+        vm.descriptionTrimmed = moreless(vm.description(), 100);
+        vm.orgLine = props[7]? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + props[7] + '">' + props[8] + '</a>': props[8];
+        vm.urlImage = props[10];
+        var x, urls = [];
+        if (vm.urlWeb()) urls.push('<a href="' + fixUrl(vm.urlWeb()) + '">Website</a>');
+        for (x = "", docs = vm.mobileApps(), i = 0; i < docs.length; i++)
+          x += '<a href="' + docs[i].url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Mobile Apps&nbsp;&nbsp;" + x);
+        for (x = "", docs = vm.socialMedia(), i = 0; i < docs.length; i++)
+          x += '<a href="' + docs[i].url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Social Media&nbsp;&nbsp;" + x);
+        vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
+        vm.searchText = (vm.name() + ' ' + vm.description() + ' ' + vm.organisationName()).toLowerCase();
+        return vm;
     }
 
     var allProjects = [
-    <g:each var="p" in="${projects}">new ProjectVM(${p as JSON}),</g:each>
+    <g:each var="p" in="${projects}">createVM(${p as JSON}),</g:each>
     ];
 
     /* holds current filtered list */
@@ -174,6 +188,7 @@ $(document).ready(function () {
     /*************************************************\
      *  Filter projects by search term
      \*************************************************/
+     var showActiveOnly;
     function doSearch() {
         var val = $('#pt-search').val().toLowerCase();
         if (val == searchTerm) return;
@@ -181,7 +196,7 @@ $(document).ready(function () {
         projects = [];
         for (var i = 0; i < allProjects.length; i++) {
             var item = allProjects[i];
-            if (item && item.searchText.indexOf(searchTerm) >= 0)
+            if (item && (!showActiveOnly || it.isActive) && item.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }
         offset = 0;
@@ -193,7 +208,6 @@ $(document).ready(function () {
      *  Show filtered projects on current page
      \*************************************************/
     function populateTable() {
-        var editPrefix = "${createLink(action: 'edit')}/";
         var max = offset + perPage;
         if (max > projects.length) max = projects.length;
         $('#projectTable tbody').empty();
@@ -201,27 +215,42 @@ $(document).ready(function () {
             var id = src.projectId;
             var $tr = $('#projectRowTempl tr').clone(); // template
             $tr.find('.td1 > a').attr("id", "a_" + id).data("id", id);
-            $tr.find('.td1 .projectTitleName').text(src.name); // projectTitleName
+            $tr.find('.td1 .projectTitleName').text(src.name());
             $tr.find('.projectInfo').attr("id", "proj_" + id);
             $tr.find('.homeLine a').attr("href", "${createLink()}/" + id);
             $tr.find('a.zoom-in').data("id", id);
             $tr.find('a.zoom-out').data("id", id);
             $tr.find('.orgLine').append(src.orgLine);
-            $tr.find('.descLine').html(src.description);
+            $tr.find('.descLine').html(src.description());
             if (src.links)
                 $tr.find('.linksLine').append(src.links);
             else
                 $tr.find('.linksLine').hide();
-            if (src.imageUrl)
-                $tr.find('.projectInfo img').attr("src", src.imageUrl);
+            if (src.urlImage)
+                $tr.find('.projectImage').attr("src", src.urlImage);
             else
-                $tr.find('.projectInfo img').hide();
-            if (src.editable)
-                $tr.find('.td2 a').attr("href", editPrefix + id);
+                $tr.find('.projectImage').hide();
+            if (src.isExternal() && src.urlWeb())
+                $tr.find('.td2 a').attr("href", src.urlWeb());
+            if (src.isActive) {
+              $tr.find('.td2 img').attr("src", fcConfig.imageLocation + "/CS-project-active.png");
+              if (!src.isExternal())
+                $tr.find('.td2 a').attr("href", "${createLink()}/" + id);
+            } else {
+              $tr.find('.td2 img').attr("src", fcConfig.imageLocation + "/CS-project-ended.png");
+              if (!src.isExternal())
+                $tr.find('.td2 a').attr("href", "${createLink()}/" + id);
+            }
+            if (src.isEditable)
+                $tr.find('.td3 a').attr("href", "${createLink(action: 'edit')}/" + id);
             else
-                $tr.find('.td2 a').hide();
+                $tr.find('.td3 a').hide();
             $('#projectTable tbody').append($tr);
         });
+        if ($('#pt-collapse-expand').text().charAt(0) === "c")
+          $(".projectInfo").show();
+        else
+          $(".projectInfo").hide();
     }
 
     var prevFeatureId;
@@ -319,12 +348,12 @@ $(document).ready(function () {
 
     /* comparator for data projects */
     function comparator(a, b) {
-        var va = a[sortBy], vb = b[sortBy];
+        var va = a[sortBy](), vb = b[sortBy]();
         va = va? va.toLowerCase(): '';
         vb = vb? vb.toLowerCase(): '';
         if (va == vb && sortBy != 'name') { // sort on name
-            va = a.name.toLowerCase();
-            vb = b.name.toLowerCase();
+            va = a.name().toLowerCase();
+            vb = b.name().toLowerCase();
         }
         return (va < vb ? -1 : (va > vb ? 1 : 0)) * sortOrder;
     }
@@ -362,10 +391,23 @@ $(document).ready(function () {
         updateTotal();
         populateTable();
     });
+    $('#pt-search-active-only').on('change', function() {
+      showActiveOnly = $('#pt-search-active-only').prop('checked');
+    });
+    $('#pt-collapse-expand').click(function () {
+        var a = $('#pt-collapse-expand');
+        if (a.text().charAt(0) === "c") {
+          $(".projectInfo").hide();
+          a.text("expand all");
+        } else {
+          $(".projectInfo").show();
+          a.text("collapse all");
+        }
+    });
 
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'organisation',action:'list',params:[createCitizenScienceProject:true])}";
-    })
+    });
 });
 </r:script>
 </body>
