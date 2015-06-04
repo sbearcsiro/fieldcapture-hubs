@@ -88,10 +88,11 @@ class OrganisationService {
     def addUserAsRoleToOrganisation(String userId, String organisationId, String role) {
 
         def organisation = get(organisationId, 'flat')
-        userService.addUserAsRoleToOrganisation(userId, organisationId, role)
+        def resp = userService.addUserAsRoleToOrganisation(userId, organisationId, role)
         organisation.projects.each {
             userService.addUserAsRoleToProject(userId, it.projectId, role)
         }
+        resp
     }
 
     /**

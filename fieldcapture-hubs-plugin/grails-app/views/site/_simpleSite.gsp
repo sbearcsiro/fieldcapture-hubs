@@ -5,7 +5,7 @@
     <div class="row-fluid">
 
         <div class="span6">
-            <div id="mapForExtent" class="smallMap span6" style="width:100%;height:600px;"></div>
+            <div id="mapForExtent" class="smallMap span6" style="width:100%;height:${mapHeight?:'600px'};"></div>
         </div>
 
         <div class="span6">

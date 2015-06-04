@@ -10,7 +10,6 @@ class ProjectController {
     static ignore = ['action','controller','id']
 
     def index(String id) {
-        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'brief')
         def roles = roleService.getRoles()
 
@@ -64,7 +63,6 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
-        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'all')
         def organisations = organisationService.list()
         if (project) {
@@ -84,29 +82,26 @@ class ProjectController {
         if (!user) {
             flash.message = "You do not have permission to perform that operation"
             redirect controller: 'home', action: 'index'
+            return
         }
-
-        def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
+        def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
+        def organisations = metadataService.organisationList().list ?: []
+        def groupedOrganisations = organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
 
         // Prepopulate the project as appropriate.
         def project = [:]
         if (params.organisationId) {
             project.organisationId = params.organisationId
         }
-        if (csOrgId) {
+        if (params.citizenScience) {
             project.isCitizenScience = true
+            project.projectType = 'survey'
         }
-        def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
-        def organisations = metadataService.organisationList().list ?: []
-        def groupedOrganisations = organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
-
         // Default the project organisation if the user is a member of a single organisation.
         if (userOrgIds.size() == 1) {
             project.organisationId = userOrgIds[0]
         }
-        session.removeAttribute('citizenScienceOrgId')
         [
-                citizenScienceOrgId: csOrgId,
                 organisationId: params.organisationId,
                 siteDocuments: '[]',
                 userOrganisations: groupedOrganisations.user ?: [],

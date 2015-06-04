@@ -33,7 +33,7 @@ OrganisationViewModel = function (props) {
     university:'University',
     voluntaryObserver:'Voluntary Observer',
     zoo:'Zoo'
-    }
+    };
     
     self.organisationId = props.organisationId;
     self.orgType = ko.observable(props.orgType);
@@ -44,7 +44,7 @@ OrganisationViewModel = function (props) {
     self.description = ko.observable(props.description).extend({markdown:true});
     self.url = ko.observable(props.url);
     self.newsAndEvents = ko.observable(props.newsAndEvents).extend({markdown:true});;
-
+    self.collectoryInstitutionId = props.collectoryInstitutionId;
     self.breadcrumbName = ko.computed(function() {
         return self.name()?self.name():'New Organisation';
     });
@@ -75,22 +75,24 @@ OrganisationViewModel = function (props) {
             self.transients.orgTypes.push({orgType:ot, name:orgTypesMap[ot]});
     }
 
-    self.toJS = function() {
-        return ko.mapping.toJS(self,
-            {ignore:['breadcrumbName', 'mainImageUrl', 'bannerUrl', 'logoUrl', 'detailsTemplate', 'transients']}
-        );
+    self.toJS = function(includeDocuments) {
+        var ignore = self.ignore.concat(['detailsTemplate', 'breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
+        var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
+        if (includeDocuments) {
+            js.documents = ko.toJS(self.documents);
+        }
+        return js;
     };
 
-    self.modelAsJSON = function() {
-        var orgJs = self.toJS();
+    self.modelAsJSON = function(includeDocuments) {
+        var orgJs = self.toJS(includeDocuments);
         return JSON.stringify(orgJs);
     };
 
     self.save = function() {
         if ($('.validationEngineContainer').validationEngine('validate')) {
 
-            var orgJs = self.toJS();
-            var orgData = JSON.stringify(orgJs);
+            var orgData = self.modelAsJSON(true);
             $.ajax(fcConfig.organisationSaveUrl, {type:'POST', data:orgData, contentType:'application/json'}).done( function(data) {
                 if (data.errors) {
 
@@ -192,6 +194,8 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations, init
             self.allViewed(true);
         }
     });
+    self.visibleRows.notifySubscribers();
+
 
     self.organisationNotPresent = ko.observable();
 

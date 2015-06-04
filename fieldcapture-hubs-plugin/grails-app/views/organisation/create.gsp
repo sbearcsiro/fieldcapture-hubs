@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
-    <title>${organisation.name.encodeAsHTML()} | Field Capture</title>
+    <title>Create | Organisation | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
         var fcConfig = {
@@ -128,6 +128,10 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
+                    },
+                    undefined,
+                    {
+                        serializeModel:function() {return organisationViewModel.modelToJSON(true);}
                     }
                 );
 
