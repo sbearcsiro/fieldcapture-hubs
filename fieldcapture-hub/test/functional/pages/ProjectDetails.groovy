@@ -5,12 +5,23 @@ import geb.Page
 import geb.navigator.Navigator
 import org.openqa.selenium.Keys
 
-class ProjectDetails extends Page {
+class CreateProject extends ProjectDetails {
 
     static url = "project/create"
 
-    static at = { title == "Create | Project | Field Capture"}
+    static at = { title == "Create | Project | Field Capture" }
+}
 
+
+class EditProject extends ProjectDetails {
+
+    static url = "project/edit"
+
+    static at = { title.endsWith("Projects | Field Capture") }
+
+}
+
+class ProjectDetails extends Page {
     static content = {
         projectType { $('[data-bind*="value:transients.projectKind"]') }
         recordUsingALA { $('[data-bind*="booleanValue:isExternal"]') }

@@ -1,7 +1,7 @@
 package au.org.ala.fieldcapture
 
 import pages.CreateOrganisation
-import pages.ProjectDetails
+import pages.CreateProject
 import pages.ProjectIndex
 import pages.EntryPage
 
@@ -19,7 +19,7 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         logout(browser)
 
         when: "attempt to create a project"
-        via ProjectDetails
+        via CreateProject
 
         then: "redirected to the home page with an error"
         at EntryPage
@@ -30,10 +30,10 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         login(browser, "fc-te@outlook.com", "testing!")
 
         given: "navigate to the create project page"
-        to ProjectDetails, citizenScience:true
+        to CreateProject, citizenScience:true
 
         expect:
-        at ProjectDetails
+        at CreateProject
         organisation.organisationName == ''
 
         when: "search for an organisation"
@@ -57,10 +57,10 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         login(browser, "fc-ta@outlook.com", "testing!")
 
         given: "navigate to the create project page"
-        to ProjectDetails, citizenScience:true
+        to CreateProject, citizenScience:true
 
         expect: "the user's organisation is selected"
-        at ProjectDetails
+        at CreateProject
 
         organisation.organisationName == "Test organisation 3"
         organisation.organisationName.@disabled == 'true'
@@ -71,10 +71,10 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         login(browser, "fc-te@outlook.com", "testing!")
 
         given: "navigate to the create project page"
-        to ProjectDetails, citizenScience:true
+        to CreateProject, citizenScience:true
 
         expect: "the user's organisation is selected"
-        at ProjectDetails
+        at CreateProject
 
         organisation.notOnList.displayed == true
 
@@ -97,7 +97,7 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         create()
 
         then: "the user should be returned to the create project page without loss of data and with the new organisation pre-selected"
-        waitFor {at ProjectDetails}
+        waitFor {at CreateProject}
 
 
 
@@ -110,10 +110,10 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         login(browser, "fc-ta@outlook.com", "testing!")
 
         given: "navigate to the create project page"
-        to ProjectDetails, citizenScience:true
+        to CreateProject, citizenScience:true
 
         expect:
-        at ProjectDetails
+        at CreateProject
         projectType == 'citizenScience' // The field should be pre-selected and disabled - note the selector returns the value, not the text.
 
         when: "enter project details"
