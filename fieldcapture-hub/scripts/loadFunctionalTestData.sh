@@ -13,5 +13,7 @@ mongo $DATABASE_NAME --eval "db.dropDatabase()"
 
 # Configure the ecodata-test database to be how the functional tests expect it.
 mongoimport --db $DATABASE_NAME --collection organisation --file $DATA_PATH/organisation.json
+mongoimport --db $DATABASE_NAME --collection project --file $DATA_PATH/project.json
 mongoimport --db $DATABASE_NAME --collection userPermission --file $DATA_PATH/userPermission.json
+
 

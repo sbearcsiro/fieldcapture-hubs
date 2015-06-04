@@ -10,5 +10,4 @@ export DATA_PATH=test/functional/resources/$1
 # Configure the ecodata-test database to be how the functional tests expect it.
 mongoexport --db $DATABASE_NAME --collection organisation --out $DATA_PATH/organisation.json
 mongoexport --db $DATABASE_NAME --collection userPermission --out $DATA_PATH/userPermission.json
-
-#mongoimport --db $DATABASE_NAME --collection organisation --file test/functional/resources/data-set-1/organisation.json
+mongoexport --db $DATABASE_NAME --collection project --out $DATA_PATH/project.json
