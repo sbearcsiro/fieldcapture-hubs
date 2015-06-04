@@ -242,6 +242,9 @@ var EmptyLocation = function () {
     this.isValid = function() {
         return false;
     };
+    this.toJS = function() {
+        return {};
+    };
 };
 var PointLocation = function (l) {
     var self = this;

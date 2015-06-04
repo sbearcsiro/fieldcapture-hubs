@@ -1099,3 +1099,19 @@ ko.bindingHandlers.slideVisible = {
         ko.unwrap(value) ? $(element).slideDown() : $(element).slideUp();
     }
 };
+
+ko.bindingHandlers.booleanValue = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+        var observable = valueAccessor(),
+            interceptor = ko.computed({
+                read: function() {
+                    return (observable() || false).toString();
+                },
+                write: function(newValue) {
+                    observable(newValue === "true");
+                }
+            });
+
+        ko.applyBindingsToNode(element, { value: interceptor });
+    }
+};

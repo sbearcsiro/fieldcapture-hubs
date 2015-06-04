@@ -237,6 +237,10 @@ function confirmOnPageExit(e) {
  */
 function autoSaveModel(viewModel, saveUrl, options) {
 
+    var serializeModel = function() {
+        return (typeof viewModel.modelAsJSON === 'function') ? viewModel.modelAsJSON() : ko.toJSON(viewModel);
+    };
+
     var defaults = {
         storageKey:window.location.href+'.autosaveData',
         autoSaveIntervalInSeconds:60,
@@ -248,20 +252,19 @@ function autoSaveModel(viewModel, saveUrl, options) {
         errorCallback:undefined,
         successCallback:undefined,
         blockUIOnSave:false,
-        blockUISaveMessage:"Saving..."
+        blockUISaveMessage:"Saving...",
+        serializeModel:serializeModel
     };
 
     var config = $.extend(defaults, options);
 
-    var serializeModel = function() {
-        return (typeof viewModel.modelAsJSON === 'function') ? viewModel.modelAsJSON() : ko.toJSON(viewModel);
-    };
+
     var autoSaveModel = function() {
         amplify.store(config.storageKey, serializeModel());
         if (viewModel.dirtyFlag.isDirty()) {
             window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
         }
-    }
+    };
 
     if (typeof viewModel.dirtyFlag === 'undefined') {
         viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
@@ -274,12 +277,14 @@ function autoSaveModel(viewModel, saveUrl, options) {
         }
     );
 
-    viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
+    viewModel.saveWithErrorDetection = function(successCallback, errorCallback, saveFunction) {
         if (config.blockUIOnSave) {
             blockUIWithMessage(config.blockUISaveMessage);
         }
         $(config.restoredDataWarningSelector).hide();
-        var json = serializeModel();
+
+        var json = config.serializeModel();
+
         // Store data locally in case the save fails.plan
         amplify.store(config.storageKey, json);
 
@@ -509,7 +514,7 @@ function Documents() {
         }
     };
 
-    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
+    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos', 'ignore', 'transients'];
 
 };
 

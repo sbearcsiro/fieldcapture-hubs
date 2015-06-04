@@ -16,18 +16,7 @@
             <label class="control-label span3" for="name"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <g:if test="${params.citizenScience}">
-                    <input type="text" readonly="readonly" data-bind="value:transients.projectKind">
-                </g:if>
-                <g:else>
-
-                    <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'" data-validation-engine="validate[required]">
-                        <option value="citizenScience">Citizen Science Project</option>
-                        <option value="survey">Ecological or biological survey / assessment (not citizen science)</option>
-                        <option value="works">Natural resource management works project</option>
-                    </select>
-
-                </g:else>
+                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
             </div>
         </div>
     </div>
@@ -37,16 +26,13 @@
             <label class="control-label span3" for="name"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <select data-bind="value:isExternal" data-validation-engine="validate[required]">
-                    <option>Select</option>
-                    <option value="false">Yes</option>
-                    <option value="true">No</option>
+                <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+
                 </select>
             </div>
         </div>
     </div>
-    <!-- ko stopBinding: true -->
-    <div id="organisationSearch">
+    <div id="organisationSearch" data-bind="with:organisationSearch">
         <div class="row-fluid">
 
             <div class="clearfix control-group">
@@ -62,10 +48,10 @@
         <div class="row-fluid" data-bind="slideVisible:!selection()">
             <div class="span9">
                 <div class="control-label span12" style="display:none;" data-bind="visible:!selection() && allViewed()">
-                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" data-bind="checked:organisationNotPresent"></label>
+                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" value="organisationNotOnList" data-bind="checked:organisationNotPresent"></label>
                 </div>
                 <div style="display:none;" data-bind="visible:!selection() && allViewed() && organisationNotPresent()">
-                    <button class="btn btn-success" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
+                    <button class="btn btn-success" id="registerOrganisation" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
                 </div>
             </div>
 
@@ -73,21 +59,20 @@
 
                 <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
                 <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
-                    <ul class="nav nav-list">
+                    <ul id="organisation-list" class="nav nav-list">
                         <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
                         <!-- ko foreach:userOrganisationResults -->
-                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
                         <!-- /ko -->
                         <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length && otherResults().length">Other organisations</li>
                         <!-- ko foreach:otherResults -->
-                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
                         <!-- /ko -->
                     </ul>
                 </div>
             </div>
         </div>
     </div>
-    <!-- /ko -->
 
 </div>
 
@@ -258,7 +243,7 @@
 <div class="row-fluid">
     <div class="well">
     <h4 class="block-header"><g:message code="project.details.site"/></h4>
-
+    <g:set var="mapHeight" value="400px"/>
     <g:render template="/site/simpleSite" model="${pageScope.variables}"/>
 </div>
 </div>
