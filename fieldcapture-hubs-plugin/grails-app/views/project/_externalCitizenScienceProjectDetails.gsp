@@ -185,23 +185,9 @@
         </div>
 
         <g:render template="/shared/editDocumentLinks"
-                  model="${[mobileApps:mobileApps,socialMedia:socialMedia,imageUrl:resource(dir:'/images/filetypes')]}"/>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" type="url" name="urlAndroid" data-bind="value:urlAndroid" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" type="url" name="urlITunes" data-bind="value:urlITunes" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
+                  model="${[mobileApps:mobileApps,mobileAppsUnspecified:mobileAppsUnspecified,
+                            socialMedia:socialMedia,socialMediaUnspecified:socialMediaUnspecified,
+                            imageUrl:resource(dir:'/images/filetypes')]}"/>
 
         <div class="control-group">
             <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>

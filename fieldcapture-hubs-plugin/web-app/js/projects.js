@@ -340,8 +340,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.projectSiteId = project.projectSiteId;
     self.projectType = ko.observable(project.projectType || "works");
     self.scienceType = ko.observable(project.scienceType);
-    self.urlAndroid = ko.observable(project.urlAndroid).extend({url:true});
-    self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
@@ -641,18 +639,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     // links
-    self.addLink = function(link) {
-        self.links.push(new DocumentViewModel(link));
-    };
-    self.deleteLink = function(link) {
-        var url = fcConfig.documentDeleteUrl+'/'+link.documentId;
-        $.post(url, {}, function() {self.links.remove(link);});
-
-    };
-
     if (project.links) {
         $.each(project.links, function(i, link) {
-            self.addLink(link);
+            self.addLink(link.role, link.url);
         });
     }
 };

@@ -145,7 +145,7 @@ class ProjectController {
                 urlWeb     : it.urlWeb
             ]
         }
-        if (params.boolean('download', false)) {
+        if (params.download as boolean) {
             response.setHeader("Content-Disposition","attachment; filename=\"projects.json\"");
             // This is returned to the browswer as a text response due to workaround the warning
             // displayed by IE8/9 when JSON is returned from an iframe submit.
@@ -239,7 +239,6 @@ class ProjectController {
             if (!id) id = result.resp.projectId
             links.each { link ->
                 link.projectId = id
-                link.public = true
                 documentService.saveLink(link)
             }
         }

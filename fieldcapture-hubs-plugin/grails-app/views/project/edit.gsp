@@ -109,6 +109,7 @@ $(function(){
     $('.helphover').popover({animation: true, trigger:'hover'});
 
     var viewModel = initViewModel();
+    initEditDocumentLinks(viewModel); // used by shared/_editDocumentLinks.gsp template
     viewModel.projectSite = initSiteViewModel();
     viewModel.projectSite.name = ko.computed(function() {
         return 'Project area for '+viewModel.name();

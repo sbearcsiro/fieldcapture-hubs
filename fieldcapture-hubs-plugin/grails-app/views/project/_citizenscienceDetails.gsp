@@ -151,21 +151,10 @@
                 </div>
             </div>
 
-            <div class="clearfix control-group">
-                <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
-
-                <div class="controls span9">
-                    <g:textField class="span12" tye="url" name="urlAndroid" data-bind="value:urlAndroid"/>
-                </div>
-            </div>
-
-            <div class="clearfix control-group">
-                <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
-
-                <div class="controls span9">
-                    <g:textField class="span12" tye="url" name="urlITunes" data-bind="value:urlITunes"/>
-                </div>
-            </div>
+            <g:render template="/shared/editDocumentLinks"
+                      model="${[mobileApps:mobileApps,mobileAppsUnspecified:mobileAppsUnspecified,
+                                socialMedia:socialMedia,socialMediaUnspecified:socialMediaUnspecified,
+                                imageUrl:resource(dir:'/images/filetypes')]}"/>
         </div>
 
         <div class="span6">
@@ -299,8 +288,6 @@ function initViewModel() {
                 }
 
                 var jsData = ko.mapping.toJS(self, {ignore:['mainImageUrl', 'transients', 'dataSharing']});
-                jsData.urlAndroid = fixUrl(jsData.urlAndroid);
-                jsData.urlITunes  = fixUrl(jsData.urlITunes);
                 jsData.urlWeb = fixUrl(jsData.urlWeb);
                 jsData.isDataSharing = self.dataSharing() === 'Enabled';
                 if (!jsData.dataSharingLicense) jsData.dataSharingLicense = 'other';

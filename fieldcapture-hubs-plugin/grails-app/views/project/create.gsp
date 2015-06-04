@@ -60,6 +60,7 @@ $(function(){
     </g:if>
 
     var viewModel =  new ProjectViewModel(project, true, organisations);
+    initEditDocumentLinks(viewModel); // used by shared/_editDocumentLinks.gsp template
     viewModel.loadPrograms(programsModel);
 
     $('#projectDetails').validationEngine();
