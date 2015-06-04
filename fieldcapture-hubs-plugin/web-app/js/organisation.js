@@ -194,6 +194,8 @@ OrganisationSelectionViewModel = function(organisations, userOrganisations, init
             self.allViewed(true);
         }
     });
+    self.visibleRows.notifySubscribers();
+
 
     self.organisationNotPresent = ko.observable();
 

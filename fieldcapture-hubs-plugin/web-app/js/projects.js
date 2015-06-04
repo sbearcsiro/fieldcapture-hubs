@@ -557,61 +557,6 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return JSON.stringify(self.toJS());
     };
 
-    // settings
-    self.saveSettings = function () {
-        if ($('#settings-validation').validationEngine('validate')) {
-
-            // only collect those fields that can be edited in the settings pane
-            var jsData = {
-                name: self.name(),
-                description: self.description(),
-                externalId: self.externalId(),
-                grantId: self.grantId(),
-                manager: self.manager(),
-                plannedStartDate: self.plannedStartDate(),
-                plannedEndDate: self.plannedEndDate(),
-                organisationId: self.organisationId(),
-                organisationName: self.organisationName(),
-                serviceProviderName: self.serviceProviderName(),
-                associatedProgram: self.associatedProgram(),
-                associatedSubProgram: self.associatedSubProgram(),
-                funding: new Number(self.funding())
-            };
-            if (self.regenerateProjectTimeline()) {
-                var dates = {
-                    plannedStartDate: self.plannedStartDate(),
-                    plannedEndDate: self.plannedEndDate()
-                };
-                addTimelineBasedOnStartDate(dates);
-                jsData.timeline = dates.timeline;
-            }
-            // this call to stringify will make sure that undefined values are propagated to
-            // the update call - otherwise it is impossible to erase fields
-            var json = JSON.stringify(jsData, function (key, value) {
-                return value === undefined ? "" : value;
-            });
-            var id = "${project?.projectId}";
-            $.ajax({
-                url: "${createLink(controller:'project', action: 'ajaxUpdate', id: project.projectId)}",
-                type: 'POST',
-                data: json,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (data.error) {
-                        showAlert("Failed to save settings: " + data.detail + ' \n' + data.error,
-                            "alert-error","save-result-placeholder");
-                    } else {
-                        showAlert("Project settings saved","alert-success","save-result-placeholder");
-                    }
-                },
-                error: function (data) {
-                    var status = data.status;
-                    alert('An unhandled error occurred: ' + data.status);
-                }
-            });
-        }
-    };
-
     // documents
     var maxStages = project.timeline ? project.timeline.length : 0 ;
     self.addDocument = function(doc) {
@@ -645,6 +590,65 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             self.addDocument(doc);
         });
     }
+};
+
+/**
+ * View model for use by the project create and edit pages.  Extends the ProjectViewModel to provide support
+ * for organisation search and selection as well as saving project information.
+ * @param project pre-populated or existing project data.
+ * @param isUserEditor true if the user can edit the project.
+ * @param userOrganisations the list of organisations for which the user is a member.
+ * @param organisations the list of organisations for which the user is not a member.
+ * @constructor
+ */
+function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, organisations, options) {
+    ProjectViewModel.apply(this, [project, isUserEditor, userOrganisations.concat(organisations)]);
+
+    var defaults = {
+        projectSaveUrl: fcConfig.projectUpdateUrl + '/' + (project.projectId || ''),
+        organisationCreateUrl: fcConfig.organisationCreateUrl,
+        blockUIOnSave:true,
+        storageKey:project.projectId?project.projectId+'.savedData':'projectData'
+    };
+    var config = $.extend(defaults, options);
+
+    var self = this;
+
+    // Automatically create the site of type "Project Area" with a name of "Project area for ..."
+    var siteViewModel = initSiteViewModel({type:'projectArea'});
+    siteViewModel.name = ko.computed(function() {
+        return 'Project area for '+self.name();
+    });
+    self.organisationSearch = new OrganisationSelectionViewModel(organisations, userOrganisations, project.organisationId);
+
+    self.organisationSearch.createOrganisation = function() {
+        var projectData = self.modelAsJSON();
+        amplify.store(config.storageKey, projectData);
+        var here = document.location.href;
+        document.location.href = config.organisationCreateUrl+'?returnTo='+here+'&returning=true';
+    };
+    self.organisationSearch.selection.subscribe(function(newSelection) {
+        if (newSelection) {
+            self.organisationId(newSelection.organisationId);
+        }
+    });
+
+    self.ignore = self.ignore.concat(['organisationSearch']);
+
+    self.modelAsJSON = function() {
+        var projectData = self.toJS();
+
+        var siteData = siteViewModel.toJS();
+        var documents = ko.mapping.toJS(self.documents());
+
+        // Assemble the data into the package expected by the service.
+        projectData.projectSite = siteData;
+        projectData.documents = documents;
+
+        return JSON.stringify(projectData);
+    };
+
+    autoSaveModel(self, config.projectSaveUrl, {blockUIOnSave:config.blockUIOnSave, blockUISaveMessage:"Saving project...", storageKey:config.storageKey});
 };
 
 function getHostName(href) {

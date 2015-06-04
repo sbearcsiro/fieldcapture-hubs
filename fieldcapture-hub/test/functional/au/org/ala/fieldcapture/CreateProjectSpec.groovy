@@ -1,5 +1,6 @@
 package au.org.ala.fieldcapture
 
+import pages.CreateOrganisation
 import pages.ProjectDetails
 import pages.ProjectIndex
 import pages.EntryPage
@@ -64,6 +65,44 @@ class CreateProjectSpec extends FieldcaptureFunctionalTest {
         organisation.organisationName == "Test organisation 3"
         organisation.organisationName.@disabled == 'true'
     }
+
+    def "The user can register an organisation during project creation"() {
+        logout(browser)
+        login(browser, "fc-te@outlook.com", "testing!")
+
+        given: "navigate to the create project page"
+        to ProjectDetails, citizenScience:true
+
+        expect: "the user's organisation is selected"
+        at ProjectDetails
+
+        organisation.notOnList.displayed == true
+
+        when: "the user indicates their organisation is not on the list"
+        organisation.notOnList = 'organisationNotOnList' // check the checkbox
+
+        then: "the user is given the option to register a new organsation"
+        organisation.registerButton.displayed == true
+
+        when: "the user selects to register a new organisation"
+        organisation.registerButton.click()
+
+        then: "the user is sent to the create organisation page"
+        at CreateOrganisation
+
+        when: "enter the details of the new organisation"
+        name = "Test organisation 4"
+        description = "Test organisation 4 description"
+        type = "Government"
+        create()
+
+        then: "the user should be returned to the create project page without loss of data and with the new organisation pre-selected"
+        waitFor {at ProjectDetails}
+
+
+
+    }
+
 
     def "The user can register an external citizen science project"() {
 
