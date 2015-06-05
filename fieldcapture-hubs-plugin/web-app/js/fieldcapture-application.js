@@ -406,8 +406,9 @@ function Documents() {
         var existingLength = existingLinks? existingLinks.length: 0;
         if (!existingLength) return;
         $.each(self.links(), function(i, link) {
+            var role = ko.utils.unwrapObservable(link.role);
             for (i = 0; i < existingLength; i++)
-                if (existingLinks[i].role === link.role) {
+                if (existingLinks[i].role === role) {
                     link.documentId = existingLinks[i].documentId;
                     return;
                 }
