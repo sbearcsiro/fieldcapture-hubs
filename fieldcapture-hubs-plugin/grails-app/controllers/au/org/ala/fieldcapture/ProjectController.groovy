@@ -113,32 +113,34 @@ class ProjectController {
     }
 
     def citizenScience() {
+        def today = new Date()
         def user = userService.getUser()
         def userId = user?.userId
         def projects = projectService.list(false, true).collect {
-            def imgDoc;
+            def urlImage
             it.documents.each { doc ->
-                if (doc.role == 'logo')
-                    imgDoc = doc
-                else if (!imgDoc && doc.isPrimaryProjectImage)
-                    imgDoc = doc
+                if (doc.role == documentService.ROLE_LOGO)
+                    urlImage = doc.url
+                else if (!urlImage && doc.isPrimaryProjectImage)
+                    urlImage = doc.url
             }
             [
-                    projectId     : it.projectId,
-                    coverage      : it.coverage ?: '',
-                    description   : it.description,
-                    canEdit       : userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
-                    name          : it.name,
-                    organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
-                    status        : it.status,
-                    urlAndroid    : it.urlAndroid,
-                    urlITunes     : it.urlITunes,
-                    urlWeb        : it.urlWeb,
-                    urlImage      : imgDoc?.url,
-                    organisationId: it.organisationId
+                projectId  : it.projectId,
+                coverage   : it.coverage ?: '',
+                description: it.description,
+                isActive   : !it.actualEndDate || it.actualEndDate >= today,
+                isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
+                isExternal : it.isExternal && true, // force it to boolean
+                links      : it.links,
+                name       : it.name,
+                organisationId: it.organisationId,
+                organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
+                status     : it.status,
+                urlImage   : urlImage,
+                urlWeb     : it.urlWeb
             ]
         }
-        if (params.boolean('download', false)) {
+        if (params.download as boolean) {
             response.setHeader("Content-Disposition","attachment; filename=\"projects.json\"");
             // This is returned to the browswer as a text response due to workaround the warning
             // displayed by IE8/9 when JSON is returned from an iframe submit.
@@ -147,23 +149,24 @@ class ProjectController {
             render resultJson.toString()
         } else {
             [
-                    user: user,
-                    projects: projects.collect {
-                        // pass array instead of object to reduce size
-                        [it.projectId,
-                         it.coverage,
-                         it.description,
-                         it.canEdit,
-                         it.name,
-                         it.organisationName,
-                         it.status,
-                         it.urlAndroid,
-                         it.urlITunes,
-                         it.urlWeb,
-                         it.urlImage,
-                         it.organisationId
-                        ]
-                    }
+                user: user,
+                projects: projects.collect {
+                    // pass array instead of object to reduce JSON size
+                    [it.projectId,
+                     it.coverage,
+                     it.description,
+                     it.isActive,
+                     it.isEditable,
+                     it.isExternal,
+                     it.name,
+                     it.organisationId,
+                     it.organisationName,
+                     it.status,
+                     it.urlImage,
+                     it.urlWeb,
+                     it.links
+                    ]
+                }
             ]
         }
     }
@@ -215,6 +218,7 @@ class ProjectController {
         log.debug "id=${id} class=${id?.getClass()}"
         def projectSite = values.remove("projectSite")
         def documents = values.remove('documents')
+        def links = values.remove('links')
         def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
         if (documents && !result.error) {
@@ -224,6 +228,13 @@ class ProjectController {
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
                 if (doc.isPrimaryProjectImage) doc.public = true
                 documentService.saveStagedImageDocument(doc)
+            }
+        }
+        if (links && !result.error) {
+            if (!id) id = result.resp.projectId
+            links.each { link ->
+                link.projectId = id
+                documentService.saveLink(link)
             }
         }
         if (projectSite && !result.error) {

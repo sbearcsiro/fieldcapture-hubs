@@ -53,6 +53,10 @@ function orEmptyArray(v) {
     return v === undefined ? [] : v;
 }
 
+function fixUrl(url) {
+    return typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
+}
+
 function exists(parent, prop) {
     if(parent === undefined)
         return '';
@@ -354,6 +358,21 @@ if (typeof Object.create !== 'function') {
 }
 
 /** A function that works with documents.  Intended for inheritance by ViewModels */
+var mobileAppRoles = [
+    { role: "android", name: "Android" },
+    { role: "blackberry", name: "Blackberry" },
+    { role: "iTunes", name: "ITunes" },
+    { role: "windowsPhone", name: "Windows Phone" }
+];
+var socialMediaRoles = [
+    { role: "facebook", name: "Facebook" },
+    { role: "googlePlus", name: "Google+" },
+    { role: "linkedIn", name: "LinkedIn" },
+    { role: "pinterest", name: "Pinterest" },
+    { role: "rssFeed", name: "Rss Feed" },
+    { role: "tumblr", name: "Tumblr" },
+    { role: "twitter", name: "Twitter" }
+];
 function Documents() {
     var self = this;
     self.documents = ko.observableArray();
@@ -367,6 +386,85 @@ function Documents() {
         }
         return null;
     };
+
+    self.links = ko.observableArray();
+    self.findLinkByRole = function(links, roleToFind) {
+        for (var i=0; i<links.length; i++) {
+            var role = ko.utils.unwrapObservable(links[i].role);
+            if (role === roleToFind) return links[i];
+        }
+        return null;
+    };
+    self.addLink = function(role, url) {
+        self.links.push(new DocumentViewModel({
+            role: role,
+            url: url
+        }));
+    };
+    self.fixLinkDocumentIds = function(existingLinks) {
+        // match up the documentId for existing link roles
+        var existingLength = existingLinks? existingLinks.length: 0;
+        if (!existingLength) return;
+        $.each(self.links(), function(i, link) {
+            var role = ko.utils.unwrapObservable(link.role);
+            for (i = 0; i < existingLength; i++)
+                if (existingLinks[i].role === role) {
+                    link.documentId = existingLinks[i].documentId;
+                    return;
+                }
+        });
+    }
+    function pushLinkUrl(urls, links, role) {
+        var link = self.findLinkByRole(links, role);
+        if (link) urls.push({
+            link: link,
+            role: role,
+            remove: function() {
+              self.links.remove(link);
+            },
+            logo: function(dir) {
+                return dir + "/" + role.toLowerCase() + ".png";
+            }
+        });
+    };
+
+    self.transients = {};
+
+    self.transients.mobileApps = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        for (var i = 0; i < mobileAppRoles.length; i++)
+            pushLinkUrl(urls, links, mobileAppRoles[i].role);
+        return urls;
+    });
+    self.transients.mobileAppsUnspecified = ko.pureComputed(function() {
+        var apps = [], links = self.links();
+        for (var i = 0; i < mobileAppRoles.length; i++)
+        if (!self.findLinkByRole(links, mobileAppRoles[i].role))
+            apps.push(mobileAppRoles[i]);
+        return apps;
+    });
+    self.transients.mobileAppToAdd = ko.observable();
+    self.transients.mobileAppToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
+    });
+    self.transients.socialMedia = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        for (var i = 0; i < socialMediaRoles.length; i++)
+            pushLinkUrl(urls, links, socialMediaRoles[i].role);
+        return urls;
+    });
+    self.transients.socialMediaUnspecified = ko.pureComputed(function() {
+        var apps = [], links = self.links();
+        for (var i = 0; i < socialMediaRoles.length; i++)
+            if (!self.findLinkByRole(links, socialMediaRoles[i].role))
+                apps.push(socialMediaRoles[i]);
+        return apps;
+    });
+    self.transients.socialMediaToAdd = ko.observable();
+    self.transients.socialMediaToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
+    });
+
     self.logoUrl = ko.pureComputed(function() {
         var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
         return logoDocument ? logoDocument.url : null;
@@ -439,7 +537,7 @@ function Documents() {
         }
     };
 
-    self.ignore = ['documents', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos', 'ignore', 'transients'];
+    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos', 'ignore', 'transients'];
 
 };
 
