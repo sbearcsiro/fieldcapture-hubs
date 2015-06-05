@@ -583,6 +583,12 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     };
 
+    if (project.documents) {
+        $.each(project.documents, function(i, doc) {
+            self.addDocument(doc);
+        });
+    }
+
     // links
     if (project.links) {
         $.each(project.links, function(i, link) {
