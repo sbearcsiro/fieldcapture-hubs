@@ -291,7 +291,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.name = ko.observable(project.name);
-    self.description = ko.observable(project.description).extend({markdown:true});;
+    self.description = ko.observable(project.description).extend({markdown:true});
     self.externalId = ko.observable(project.externalId);
     self.grantId = ko.observable(project.grantId);
     self.manager = ko.observable(project.manager);
@@ -334,19 +334,17 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
     self.getInvolved = ko.observable(project.getInvolved);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.isExternal = ko.observable(project.isExternal);
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
     self.projectType = ko.observable(project.projectType || "works");
     self.scienceType = ko.observable(project.scienceType);
-    self.urlAndroid = ko.observable(project.urlAndroid).extend({url:true});
-    self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
-    self.isExternal = ko.observable(project.isExternal);
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
-    self.transients = {};
+    self.transients = self.transients || {};
 
     var calculateDuration = function(startDate, endDate) {
         if (!startDate || !endDate) {
@@ -590,6 +588,13 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             self.addDocument(doc);
         });
     }
+
+    // links
+    if (project.links) {
+        $.each(project.links, function(i, link) {
+            self.addLink(link.role, link.url);
+        });
+    }
 };
 
 /**
@@ -634,16 +639,20 @@ function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, or
     });
 
     self.ignore = self.ignore.concat(['organisationSearch']);
+    self.transients.existingLinks = project.links;
 
     self.modelAsJSON = function() {
         var projectData = self.toJS();
 
         var siteData = siteViewModel.toJS();
         var documents = ko.mapping.toJS(self.documents());
+        self.fixLinkDocumentIds(self.transients.existingLinks);
+        var links = ko.mapping.toJS(self.links());
 
         // Assemble the data into the package expected by the service.
         projectData.projectSite = siteData;
         projectData.documents = documents;
+        projectData.links = links;
 
         return JSON.stringify(projectData);
     };

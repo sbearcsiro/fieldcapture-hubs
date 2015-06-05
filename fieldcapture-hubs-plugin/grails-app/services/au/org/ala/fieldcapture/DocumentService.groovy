@@ -6,6 +6,7 @@ import grails.converters.JSON
  * Proxies to the ecodata DocumentController/DocumentService.
  */
 class DocumentService {
+    public String ROLE_LOGO = "logo"
 
     def webService, grailsApplication
 
@@ -60,5 +61,12 @@ class DocumentService {
             result = updateDocument(document)
         }
         result
+    }
+
+    def saveLink(link) {
+        link.public = true
+        link.type = "link"
+        link.externalUrl = link.remove('url')
+        updateDocument(link)
     }
 }
