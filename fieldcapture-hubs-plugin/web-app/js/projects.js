@@ -344,7 +344,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
-    self.transients = {};
+    self.transients = self.transients || {};
 
     var calculateDuration = function(startDate, endDate) {
         if (!startDate || !endDate) {
@@ -633,16 +633,20 @@ function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, or
     });
 
     self.ignore = self.ignore.concat(['organisationSearch']);
+    self.transients.existingLinks = project.links;
 
     self.modelAsJSON = function() {
         var projectData = self.toJS();
 
         var siteData = siteViewModel.toJS();
         var documents = ko.mapping.toJS(self.documents());
+        self.fixLinkDocumentIds(self.transients.existingLinks);
+        var links = ko.mapping.toJS(self.links());
 
         // Assemble the data into the package expected by the service.
         projectData.projectSite = siteData;
         projectData.documents = documents;
+        projectData.links = links;
 
         return JSON.stringify(projectData);
     };

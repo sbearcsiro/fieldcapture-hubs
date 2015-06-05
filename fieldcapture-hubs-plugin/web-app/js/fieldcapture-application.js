@@ -401,45 +401,67 @@ function Documents() {
             url: url
         }));
     };
-    self.removeLink = function(role) {
-        var link = self.findLinkByRole(self.links(), role);
-        if (link) self.links.remove(link);
-    };
+    self.fixLinkDocumentIds = function(existingLinks) {
+        // match up the documentId for existing link roles
+        var existingLength = existingLinks? existingLinks.length: 0;
+        if (!existingLength) return;
+        $.each(self.links(), function(i, link) {
+            for (i = 0; i < existingLength; i++)
+                if (existingLinks[i].role === link.role) {
+                    link.documentId = existingLinks[i].documentId;
+                    return;
+                }
+        });
+    }
     function pushLinkUrl(urls, links, role) {
         var link = self.findLinkByRole(links, role);
         if (link) urls.push({
-            url: link.url,
+            link: link,
             role: role,
+            remove: function() {
+              self.links.remove(link);
+            },
             logo: function(dir) {
                 return dir + "/" + role.toLowerCase() + ".png";
             }
         });
     };
-    self.mobileApps = ko.pureComputed(function() {
+
+    self.transients = {};
+
+    self.transients.mobileApps = ko.pureComputed(function() {
         var urls = [], links = self.links();
         for (var i = 0; i < mobileAppRoles.length; i++)
             pushLinkUrl(urls, links, mobileAppRoles[i].role);
         return urls;
     });
-    self.mobileAppsUnspecified = ko.pureComputed(function() {
+    self.transients.mobileAppsUnspecified = ko.pureComputed(function() {
         var apps = [], links = self.links();
         for (var i = 0; i < mobileAppRoles.length; i++)
         if (!self.findLinkByRole(links, mobileAppRoles[i].role))
             apps.push(mobileAppRoles[i]);
         return apps;
     });
-    self.socialMedia = ko.pureComputed(function() {
+    self.transients.mobileAppToAdd = ko.observable();
+    self.transients.mobileAppToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
+    });
+    self.transients.socialMedia = ko.pureComputed(function() {
         var urls = [], links = self.links();
         for (var i = 0; i < socialMediaRoles.length; i++)
             pushLinkUrl(urls, links, socialMediaRoles[i].role);
         return urls;
     });
-    self.socialMediaUnspecified = ko.pureComputed(function() {
+    self.transients.socialMediaUnspecified = ko.pureComputed(function() {
         var apps = [], links = self.links();
         for (var i = 0; i < socialMediaRoles.length; i++)
             if (!self.findLinkByRole(links, socialMediaRoles[i].role))
                 apps.push(socialMediaRoles[i]);
         return apps;
+    });
+    self.transients.socialMediaToAdd = ko.observable();
+    self.transients.socialMediaToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
     });
 
     self.logoUrl = ko.pureComputed(function() {

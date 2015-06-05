@@ -61,7 +61,6 @@ $(function(){
     </g:if>
 
     var viewModel =  new CreateEditProjectViewModel(project, true, userOrganisations, organisations, {storageKey:PROJECT_DATA_KEY});
-    initEditDocumentLinks(viewModel); // used by shared/_editDocumentLinks.gsp template
     viewModel.loadPrograms(programsModel);
 
     $('#projectDetails').validationEngine();

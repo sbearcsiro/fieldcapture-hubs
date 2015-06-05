@@ -170,9 +170,7 @@
         </div>
 
         <g:render template="/shared/editDocumentLinks"
-                  model="${[mobileApps:mobileApps,mobileAppsUnspecified:mobileAppsUnspecified,
-                            socialMedia:socialMedia,socialMediaUnspecified:socialMediaUnspecified,
-                            imageUrl:resource(dir:'/images/filetypes')]}"/>
+                  model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
 
         <div class="control-group">
             <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>

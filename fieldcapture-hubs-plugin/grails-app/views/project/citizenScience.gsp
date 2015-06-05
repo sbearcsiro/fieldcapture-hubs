@@ -150,11 +150,11 @@ $(document).ready(function () {
         vm.urlImage = props[10];
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + fixUrl(vm.urlWeb()) + '">Website</a>');
-        for (x = "", docs = vm.mobileApps(), i = 0; i < docs.length; i++)
-          x += '<a href="' + docs[i].url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
+          x += '<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Mobile Apps&nbsp;&nbsp;" + x);
-        for (x = "", docs = vm.socialMedia(), i = 0; i < docs.length; i++)
-          x += '<a href="' + docs[i].url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
+          x += '<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Social Media&nbsp;&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
         vm.searchText = (vm.name() + ' ' + vm.description() + ' ' + vm.organisationName()).toLowerCase();

@@ -152,9 +152,7 @@
             </div>
 
             <g:render template="/shared/editDocumentLinks"
-                      model="${[mobileApps:mobileApps,mobileAppsUnspecified:mobileAppsUnspecified,
-                                socialMedia:socialMedia,socialMediaUnspecified:socialMediaUnspecified,
-                                imageUrl:resource(dir:'/images/filetypes')]}"/>
+                      model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
         </div>
 
         <div class="span6">

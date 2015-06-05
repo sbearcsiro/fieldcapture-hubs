@@ -64,8 +64,8 @@ class DocumentService {
     }
 
     def saveLink(link) {
-        link.type = "link"
         link.public = true
+        link.type = "link"
         link.externalUrl = link.remove('url')
         updateDocument(link)
     }
