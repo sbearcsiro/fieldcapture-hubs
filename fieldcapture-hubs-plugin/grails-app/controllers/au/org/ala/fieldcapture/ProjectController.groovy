@@ -58,7 +58,7 @@ class ProjectController {
                 return 'externalCitizenScienceProjectTemplate'
             }
         }
-        return project.projectType == 'survey'?'citizenScienceProjectTemplate':'index'
+        return project.projectType == 'survey'?'citizenscienceProjectTemplate':'index'
     }
 
     @PreAuthorise
