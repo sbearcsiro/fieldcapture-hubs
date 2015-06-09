@@ -1101,11 +1101,12 @@ ko.bindingHandlers.slideVisible = {
 };
 
 ko.bindingHandlers.booleanValue = {
+    'after': ['options', 'foreach'],
     init: function(element, valueAccessor, allBindingsAccessor) {
         var observable = valueAccessor(),
             interceptor = ko.computed({
                 read: function() {
-                    return (observable() || false).toString();
+                    return (observable() !== undefined ? observable().toString() : undefined);
                 },
                 write: function(newValue) {
                     observable(newValue === "true");

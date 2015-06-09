@@ -12,11 +12,13 @@ class ProjectControllerSpec extends Specification {
     def userServiceStub = Stub(UserService)
     def metadataServiceStub = Stub(MetadataService)
     def projectServiceStub = Stub(ProjectService)
+    def siteServiceMock = Mock(SiteService)
 
     void setup() {
         controller.userService = userServiceStub
         controller.metadataService = metadataServiceStub
         controller.projectService = projectServiceStub
+        controller.siteService = siteServiceMock
         metadataServiceStub.organisationList() >> [list:[buildOrganisation(), buildOrganisation(), buildOrganisation()]]
         userServiceStub.getOrganisationIdsForUserId(_) >> ['1']
     }
@@ -58,6 +60,46 @@ class ProjectControllerSpec extends Specification {
         ["2", "3"].each { orgId ->
             model.organisations.find{it.organisationId == orgId}.organisationId == orgId
         }
+    }
+
+    void "the edit method should overwrite the project organisation if returning from the create organisation workflow"() {
+        def siteId = 'site1'
+
+        when:
+        def projectId = 'project1'
+        userServiceStub.getUser() >> [userId:'1234']
+        projectServiceStub.get(projectId, _) >> [organisationId:'org1', projectId:projectId, name:'Test', projectSiteId:siteId]
+
+        params.organisationId = 'org2'
+        def model = controller.edit(projectId)
+
+        then:
+        1 * siteServiceMock.getRaw(siteId) >> [:]
+        model.project.projectId == projectId
+        model.project.organisationId == 'org2'
+    }
+
+    void "the edit method should split the organisations into two lists for the convenience of the page"() {
+        def siteId = 'site1'
+
+        when:
+        def projectId = 'project1'
+        userServiceStub.getUser() >> [userId:'1234']
+        projectServiceStub.get(projectId, _) >> [organisationId:'org1', projectId:projectId, name:'Test', projectSiteId:siteId]
+        def model = controller.edit(projectId)
+
+        then:
+        1 * siteServiceMock.getRaw(siteId) >> [:]
+        model.userOrganisations.size() == 1
+        model.userOrganisations[0].organisationId == '1'
+
+        model.organisations.size() == 2
+        ["2", "3"].each { orgId ->
+            model.organisations.find{it.organisationId == orgId}.organisationId == orgId
+        }
+        model.project.projectId == projectId
+        model.project.organisationId == 'org1'
+        model.project.name == 'Test'
     }
 
     int orgCount = 0;
