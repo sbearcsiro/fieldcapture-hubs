@@ -63,14 +63,22 @@ class ProjectController {
 
     @PreAuthorise
     def edit(String id) {
+
         def project = projectService.get(id, 'all')
-        def organisations = organisationService.list()
+        // This will happen if we are returning from the organisation create page during an edit workflow.
+        if (params.organisationId) {
+            project.organisationId = params.organisationId
+        }
+        def user = userService.getUser()
+        def groupedOrganisations = groupOrganisationsForUser(user.userId)
+
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
              siteDocuments: siteInfo.documents?:'[]',
              site: siteInfo.site,
-             organisations: organisations.list,
+             userOrganisations: groupedOrganisations.user ?: [],
+             organisations: groupedOrganisations.other ?: [],
              programs: metadataService.programsModel()]
         } else {
             forward(action: 'list', model: [error: 'no such id'])
@@ -84,10 +92,7 @@ class ProjectController {
             redirect controller: 'home', action: 'index'
             return
         }
-        def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
-        def organisations = metadataService.organisationList().list ?: []
-        def groupedOrganisations = organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
-
+        def groupedOrganisations = groupOrganisationsForUser(user.userId)
         // Prepopulate the project as appropriate.
         def project = [:]
         if (params.organisationId) {
@@ -98,8 +103,8 @@ class ProjectController {
             project.projectType = 'survey'
         }
         // Default the project organisation if the user is a member of a single organisation.
-        if (userOrgIds.size() == 1) {
-            project.organisationId = userOrgIds[0]
+        if (groupedOrganisations.user?.size() == 1) {
+            project.organisationId = groupedOrganisations.user[0].organisationId
         }
         [
                 organisationId: params.organisationId,
@@ -107,9 +112,22 @@ class ProjectController {
                 userOrganisations: groupedOrganisations.user ?: [],
                 organisations: groupedOrganisations.other ?: [],
                 programs: projectService.programsModel(),
-                activityTypes: metadataService.activityTypesList(),
                 project:project
         ]
+    }
+
+    /**
+     * Splits the list of organisations into two - one containing organisations that the user is a member of,
+     * the other containing the rest.
+     * @param the user id to use for the grouping.
+     * @return [user:[], other:[]]
+     */
+    private Map groupOrganisationsForUser(userId) {
+
+        def organisations = metadataService.organisationList().list ?: []
+        def userOrgIds = userService.getOrganisationIdsForUserId(userId)
+
+        organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
     }
 
     def citizenScience() {

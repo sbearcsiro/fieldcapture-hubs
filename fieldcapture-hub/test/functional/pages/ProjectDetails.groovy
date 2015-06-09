@@ -24,7 +24,9 @@ class EditProject extends ProjectDetails {
 class ProjectDetails extends Page {
     static content = {
         projectType { $('[data-bind*="value:transients.projectKind"]') }
+        projectTypeSelectedText {projectType.find('option', value:projectType.value()).text()}
         recordUsingALA { $('[data-bind*="booleanValue:isExternal"]') }
+        recordUsingALASelectedText {recordUsingALA.find('option', value:recordUsingALA.value()).text()}
         organisation { module OrganisationSearch }
         name { $('[data-bind*="value:name"]') }
         description { $('[data-bind*="value:description"]') }
@@ -57,7 +59,7 @@ class ProjectDetails extends Page {
 class OrganisationSearch extends Module {
     static content = {
         organisationName { $('#organisationName')}
-        results {}
+        results { $('#organisation-list a') }
         notOnList { $('[data-bind*="checked:organisationNotPresent"') }
         clearButton {$('[data-bind*="click:clearSelection"')}
         registerButton {$('#registerOrganisation')}
