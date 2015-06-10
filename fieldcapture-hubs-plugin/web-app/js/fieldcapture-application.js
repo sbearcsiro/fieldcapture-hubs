@@ -415,15 +415,16 @@ function Documents() {
         });
     }
     function pushLinkUrl(urls, links, role) {
-        var link = self.findLinkByRole(links, role);
+        var link = self.findLinkByRole(links, role.role);
         if (link) urls.push({
             link: link,
-            role: role,
+            name: role.name,
+            role: role.role,
             remove: function() {
               self.links.remove(link);
             },
             logo: function(dir) {
-                return dir + "/" + role.toLowerCase() + ".png";
+                return dir + "/" + role.role.toLowerCase() + ".png";
             }
         });
     };
@@ -433,7 +434,7 @@ function Documents() {
     self.transients.mobileApps = ko.pureComputed(function() {
         var urls = [], links = self.links();
         for (var i = 0; i < mobileAppRoles.length; i++)
-            pushLinkUrl(urls, links, mobileAppRoles[i].role);
+            pushLinkUrl(urls, links, mobileAppRoles[i]);
         return urls;
     });
     self.transients.mobileAppsUnspecified = ko.pureComputed(function() {
@@ -450,7 +451,7 @@ function Documents() {
     self.transients.socialMedia = ko.pureComputed(function() {
         var urls = [], links = self.links();
         for (var i = 0; i < socialMediaRoles.length; i++)
-            pushLinkUrl(urls, links, socialMediaRoles[i].role);
+            pushLinkUrl(urls, links, socialMediaRoles[i]);
         return urls;
     });
     self.transients.socialMediaUnspecified = ko.pureComputed(function() {

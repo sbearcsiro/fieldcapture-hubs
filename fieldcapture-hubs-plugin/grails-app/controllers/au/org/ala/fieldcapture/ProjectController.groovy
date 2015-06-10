@@ -131,7 +131,7 @@ class ProjectController {
     }
 
     def citizenScience() {
-        def today = new Date()
+        def today = DateUtils.now()
         def user = userService.getUser()
         def userId = user?.userId
         def projects = projectService.list(false, true).collect {
@@ -142,16 +142,27 @@ class ProjectController {
                 else if (!urlImage && doc.isPrimaryProjectImage)
                     urlImage = doc.url
             }
+            // no need to ship the whole link object down to browser
+            def trimmedLinks = it.links.collect {
+                [
+                    role: it.role,
+                    url: it.url
+                ]
+            }
+            def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
                 projectId  : it.projectId,
                 coverage   : it.coverage ?: '',
                 description: it.description,
-                isActive   : !it.actualEndDate || it.actualEndDate >= today,
+                difficulty : it.difficulty,
+                isActive   : endDate && endDate >= today,
+                isDIY      : it.isDIY && true, // force it to boolean
                 isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
-                links      : it.links,
+                isNoCost   : !it.hasParticipantCost,
+                links      : trimmedLinks,
                 name       : it.name,
-                organisationId: it.organisationId,
+                organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
                 status     : it.status,
                 urlImage   : urlImage,
@@ -169,20 +180,23 @@ class ProjectController {
             [
                 user: user,
                 projects: projects.collect {
-                    // pass array instead of object to reduce JSON size
-                    [it.projectId,
+                    [ // pass array instead of object to reduce JSON size
+                     it.projectId,
                      it.coverage,
                      it.description,
+                     it.difficulty,
                      it.isActive,
+                     it.isDIY,
                      it.isEditable,
                      it.isExternal,
+                     it.isNoCost,
+                     it.links,
                      it.name,
                      it.organisationId,
                      it.organisationName,
                      it.status,
                      it.urlImage,
-                     it.urlWeb,
-                     it.links
+                     it.urlWeb
                     ]
                 }
             ]

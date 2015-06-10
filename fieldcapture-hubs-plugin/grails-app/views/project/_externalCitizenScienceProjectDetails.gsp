@@ -13,7 +13,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="name"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
                 <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
@@ -23,7 +23,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="name"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
                 <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
@@ -151,7 +151,57 @@
                    for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
             <div class="controls span9">
-                <g:textField style="width:90%;" name="scienceType" data-bind="value:scienceType"/>
+                <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp></label>
+
+            <div class="controls span9">
+                <select data-bind="value:difficulty, options:transients.difficultyLevels, optionsCaption:'Select...'" data-validation-engine="validate[required]"></select>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="gear" data-bind="value:gear" rows="2"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="task" data-bind="value:task" rows="2" data-validation-engine="validate[required]"/>
             </div>
         </div>
     </div>
