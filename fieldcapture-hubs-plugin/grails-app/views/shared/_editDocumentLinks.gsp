@@ -3,7 +3,7 @@
     <table class="controls span9">
         <tbody data-bind="foreach:transients.mobileApps">
         <tr>
-            <td><img class="logo-small" data-bind="attr:{src:logo('${imageUrl}')}"/></td>
+            <td><img class="logo-small" data-bind="attr:{alt:name,title:name,src:logo('${imageUrl}')}"/></td>
             <td><input type="url" data-bind="value:link.url"
                        data-validation-engine="validate[required,custom[url]]"/></td>
             <td><a href="#" data-bind="click:remove"><i class="icon-remove"></i></a></td>
@@ -23,7 +23,7 @@
     <table class="controls span9">
         <tbody data-bind="foreach:transients.socialMedia">
         <tr>
-            <td><img class="logo-small" data-bind="attr:{src:logo('${imageUrl}')}"/></td>
+            <td><img class="logo-small" data-bind="attr:{alt:name,title:name,src:logo('${imageUrl}')}"/></td>
             <td><input type="url" data-bind="value:link.url"
                        data-validation-engine="validate[required,custom[url]]"/></td>
             <td><a href="#" data-bind="click:remove"><i class="icon-remove"></i></a></td>

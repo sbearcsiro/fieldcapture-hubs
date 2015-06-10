@@ -66,11 +66,25 @@
                         <g:select name="pt-dir" from="['Ascending','Descending']" keys="[1,-1]"/>
                     </div>
                 </div>
-                <div class="span2 pull-right text-center">
-                    <label for="pt-search-active-only">Show active projects only</label>
-                    <input id="pt-search-active-only" type="checkbox" />
-                </div>
             </div><!--drop downs-->
+            <div class="row-fluid">
+                <div class="span3">
+                    <label for="pt-search-active"><g:message code="project.search.active" /></label>
+                    <input id="pt-search-active" type="checkbox" />
+                </div>
+                <div class="span3">
+                    <label for="pt-search-diy"><g:message code="project.search.diy" /></label>
+                    <input id="pt-search-diy" type="checkbox" />
+                </div>
+                <div class="span3">
+                    <label for="pt-search-noCost"><g:message code="project.search.noCost" /></label>
+                    <input id="pt-search-noCost" type="checkbox" />
+                </div>
+                <div class="span3">
+                    <label for="pt-search-difficulty"><g:message code="project.search.difficulty" /></label>
+                    <g:select name="pt-search-difficulty" from="['Any','Easy','Medium','Hard']"/>
+                </div>
+            </div>
             <a href="#" id="pt-collapse-expand">collapse all</a>
         </div>
 
@@ -95,7 +109,8 @@
                         <div class="orgLine">
                             <i class="icon-user"></i>
                         </div>
-                        <div class="descLine" style="height:4.5em; overflow:hidden; line-height:1.5em">
+                        <div class="descLine" style="position:relative; height:4.5em; overflow:hidden; line-height:1.5em">
+                            <a class="descMore" style="position:absolute;bottom:0;right:0;background:white">&nbsp;...more</a>
                         </div>
                         <div class="linksLine">
                             <i class="icon-info-sign"></i>
@@ -135,19 +150,21 @@ $(document).ready(function () {
         var vm = new ProjectViewModel({
             coverage: props[1],
             description: props[2],
-            isExternal: props[5],
-            name: props[6],
-            organisationName: props[8],
-            status: props[9],
-            urlWeb: props[11],
-            links: props[12]
+            isExternal: props[7],
+            name: props[10],
+            organisationName: props[12],
+            status: props[13],
+            urlWeb: props[15],
+            links: props[9]
         }, false, []);
         vm.projectId = props[0];
-        vm.isActive = props[3];
-        vm.isEditable = props[4];
-        vm.descriptionTrimmed = moreless(vm.description(), 100);
-        vm.orgLine = props[7]? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + props[7] + '">' + props[8] + '</a>': props[8];
-        vm.urlImage = props[10];
+        vm.difficulty = props[3];
+        vm.isActive = props[4];
+        vm.isDIY = props[5];
+        vm.isEditable = props[6];
+        vm.isNoCost = props[8];
+        vm.orgLine = props[11]? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + props[11] + '">' + props[12] + '</a>': props[12];
+        vm.urlImage = props[14];
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + fixUrl(vm.urlWeb()) + '">Website</a>');
         for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
@@ -188,15 +205,20 @@ $(document).ready(function () {
     /*************************************************\
      *  Filter projects by search term
      \*************************************************/
-     var showActiveOnly;
-    function doSearch() {
+    var showActiveOnly, showDIYOnly, showNoCostOnly, showDifficultyOnly;
+    function doSearch(force) {
         var val = $('#pt-search').val().toLowerCase();
-        if (val == searchTerm) return;
+        if (!force && val == searchTerm) return;
         searchTerm = val;
         projects = [];
         for (var i = 0; i < allProjects.length; i++) {
             var item = allProjects[i];
-            if (item && (!showActiveOnly || it.isActive) && item.searchText.indexOf(searchTerm) >= 0)
+            if (!item) continue;
+            if (showActiveOnly && !item.isActive) continue;
+            if (showDIYOnly && !item.isDIY) continue;
+            if (showNoCostOnly && !item.isNoCost) continue;
+            if (showDifficultyOnly && item.difficulty != showDifficultyOnly) continue;
+            if (item.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }
         offset = 0;
@@ -213,15 +235,17 @@ $(document).ready(function () {
         $('#projectTable tbody').empty();
         $.each(projects.slice(offset, max), function(i, src) {
             var id = src.projectId;
+            var homeLink = src.isExternal()? src.urlWeb(): "${createLink()}/" + id;
             var $tr = $('#projectRowTempl tr').clone(); // template
             $tr.find('.td1 > a').attr("id", "a_" + id).data("id", id);
             $tr.find('.td1 .projectTitleName').text(src.name());
             $tr.find('.projectInfo').attr("id", "proj_" + id);
-            $tr.find('.homeLine a').attr("href", "${createLink()}/" + id);
+            $tr.find('.homeLine a').attr("href", homeLink);
             $tr.find('a.zoom-in').data("id", id);
             $tr.find('a.zoom-out').data("id", id);
             $tr.find('.orgLine').append(src.orgLine);
-            $tr.find('.descLine').html(src.description());
+            var descLine = $tr.find('.descLine'), descMore = descLine.find('.descMore');
+            descLine.html(src.description());
             if (src.links)
                 $tr.find('.linksLine').append(src.links);
             else
@@ -234,22 +258,30 @@ $(document).ready(function () {
                 $tr.find('.td2 a').attr("href", src.urlWeb());
             if (src.isActive) {
               $tr.find('.td2 img').attr("src", fcConfig.imageLocation + "/CS-project-active.png");
-              if (!src.isExternal())
-                $tr.find('.td2 a').attr("href", "${createLink()}/" + id);
+              if (!src.isExternal()) $tr.find('.td2 a').attr("href", homeLink);
             } else {
               $tr.find('.td2 img').attr("src", fcConfig.imageLocation + "/CS-project-ended.png");
-              if (!src.isExternal())
-                $tr.find('.td2 a').attr("href", "${createLink()}/" + id);
+              if (!src.isExternal()) $tr.find('.td2 a').attr("href", homeLink);
             }
             if (src.isEditable)
                 $tr.find('.td3 a').attr("href", "${createLink(action: 'edit')}/" + id);
             else
                 $tr.find('.td3 a').hide();
             $('#projectTable tbody').append($tr);
+            var t = $(descLine.clone(true))
+					.hide()
+					.css('position', 'absolute')
+					.css('overflow', 'visible')
+					.width(descLine.width())
+					.height('auto');
+            descLine.after(t);
+            if (t.height() > descLine.height() || t.width() > descLine.width()) {
+                descMore.attr("href", homeLink);
+                descLine.append(descMore);
+            }
+            t.remove();
         });
-        if ($('#pt-collapse-expand').text().charAt(0) === "c")
-          $(".projectInfo").show();
-        else
+        if ($('#pt-collapse-expand').text().charAt(0) != "c")
           $(".projectInfo").hide();
     }
 
@@ -359,17 +391,17 @@ $(document).ready(function () {
     }
 
     $('#pt-per-page').change(function () {
-        perPage = $('#pt-per-page').val();
+        perPage = $(this).val();
         offset = 0;
         populateTable();
     });
     $('#pt-sort').change(function () {
-        sortBy = $('#pt-sort').val();
+        sortBy = $(this).val();
         projects.sort(comparator);
         populateTable();
     });
     $('#pt-dir').change(function () {
-        sortOrder = $('#pt-dir').val();
+        sortOrder = $(this).val();
         projects.sort(comparator);
         populateTable();
     });
@@ -391,11 +423,25 @@ $(document).ready(function () {
         updateTotal();
         populateTable();
     });
-    $('#pt-search-active-only').on('change', function() {
-      showActiveOnly = $('#pt-search-active-only').prop('checked');
+    $('#pt-search-active').on('change', function() {
+        showActiveOnly = $(this).prop('checked');
+        doSearch(true);
+    });
+    $('#pt-search-diy').on('change', function() {
+        showDIYOnly = $(this).prop('checked');
+        doSearch(true);
+    });
+    $('#pt-search-noCost').on('change', function() {
+        showNoCostOnly = $(this).prop('checked');
+        doSearch(true);
+    });
+    $('#pt-search-difficulty').change(function () {
+        showDifficultyOnly = $(this).val();
+        if (showDifficultyOnly === "Any") showDifficultyOnly = null;
+        doSearch(true);
     });
     $('#pt-collapse-expand').click(function () {
-        var a = $('#pt-collapse-expand');
+        var a = $(this);
         if (a.text().charAt(0) === "c") {
           $(".projectInfo").hide();
           a.text("expand all");
@@ -407,7 +453,16 @@ $(document).ready(function () {
 
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
-    })
+    });
+
+    // throttle the resize events so it doesn't go crazy
+    (function() {
+         var timer;
+         $(window).resize(function () {
+             if (timer) clearTimeout(timer);
+             timer = setTimeout(populateTable, 100);
+         });
+    }());
 });
 </r:script>
 </body>

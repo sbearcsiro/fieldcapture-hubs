@@ -332,14 +332,21 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
+    self.difficulty = ko.observable(project.difficulty);
+    self.gear = ko.observable(project.gear);
     self.getInvolved = ko.observable(project.getInvolved);
+    self.hasParticipantCost = ko.observable(project.hasParticipantCost);
+    self.hasTeachingMaterials = ko.observable(project.hasTeachingMaterials);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.isDIY = ko.observable(project.isDIY);
     self.isExternal = ko.observable(project.isExternal);
+    self.isSuitableForChildren = ko.observable(project.isSuitableForChildren);
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
     self.projectType = ko.observable(project.projectType || "works");
     self.scienceType = ko.observable(project.scienceType);
+    self.task = ko.observable(project.task);
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
@@ -508,6 +515,13 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         ];
     self.transients.organisations = organisations;
 
+    self.transients.difficultyLevels = [ "Easy", "Medium", "Hard" ];
+
+    self.transients.availableScienceTypes = [
+        {name:'Biodiversity', value:'biodiversity'},
+        {name:'Ecology', value:'ecology'},
+        {name:'Natural resource management', value:'nrm'}
+    ];
 
     self.transients.availableProjectTypes = [
         {name:'Citizen Science Project', value:'citizenScience'},

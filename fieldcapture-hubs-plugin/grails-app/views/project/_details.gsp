@@ -134,7 +134,7 @@
                    for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
             <div class="controls span9">
-                <g:textField class="span12" name="scienceType" data-bind="value:scienceType"/>
+                <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
             </div>
         </div>
     </div>
