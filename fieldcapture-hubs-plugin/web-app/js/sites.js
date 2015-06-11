@@ -355,7 +355,11 @@ var DrawnLocation = function (l) {
 };
 
 var PidLocation = function (l) {
+
+    // These layers are treated specially.
     var USER_UPLOAD_FID = 'c11083';
+    var OLD_NRM_LAYER_FID = 'cl916';
+
     var self = this;
     self.source = ko.observable('pid');
     self.geometry = ko.observable({
@@ -404,8 +408,13 @@ var PidLocation = function (l) {
         {id:'cl22',name:'Australian states'},
         {id:'cl959', name:'Local Gov. Areas'}
     ]);
+    // These layers aren't selectable unless the site is already using them.  This is to support user uploaded
+    // shapes and the previous version of the NRM layer.
     if (l.fid == USER_UPLOAD_FID) {
         self.layers().push({id:USER_UPLOAD_FID, name:'User Uploaded'});
+    }
+    else if (l.fid == OLD_NRM_LAYER_FID) {
+        self.layers().push({id:OLD_NRM_LAYER_FID, name:'NRM Regions - pre 2014'});
     }
     self.chosenLayer = ko.observable(exists(l,'fid'));
     self.layerObjects = ko.observable([]);
