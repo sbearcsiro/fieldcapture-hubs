@@ -607,7 +607,7 @@ function SiteViewModelWithMapIntegration (siteData) {
                             [sw.lng(),ne.lat()],
                             [ne.lng(),ne.lat()],
                             [ne.lng(),sw.lat()],
-                            [ne.lng(),sw.lat()]
+                            [sw.lng(),sw.lat()]
                         ]],
                         bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
                         areaKmSq:calcAreaKm,
