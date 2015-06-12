@@ -245,6 +245,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
     };
     var config = $.extend(defaults, options);
 
+    var autosaving = false;
 
     var deleteAutoSaveData = function() {
         amplify.store(config.storageKey, null);
@@ -268,24 +269,29 @@ function autoSaveModel(viewModel, saveUrl, options) {
     };
 
     var onunloadHandler = function(e) {
+        autosaving = false;
         deleteAutoSaveData();
 
         return confirmOnPageExit(e);
     };
 
     var autoSaveModel = function() {
+        if (!autosaving) {
+            return;
+        }
         amplify.store(config.storageKey, serializeModel());
         if (viewModel.dirtyFlag.isDirty()) {
             window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
         }
     };
 
-    viewModel.cancelEdits = function() {
+    viewModel.cancelAutosave = function() {
+        autosaving = false;
         deleteAutoSaveData();
         if (config.preventNavigationIfDirty) {
             window.removeEventListener('beforeunload', onunloadHandler);
         }
-    }
+    };
 
     if (typeof viewModel.dirtyFlag === 'undefined') {
         viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
@@ -293,16 +299,14 @@ function autoSaveModel(viewModel, saveUrl, options) {
     viewModel.dirtyFlag.isDirty.subscribe(
         function() {
             if (viewModel.dirtyFlag.isDirty()) {
+                autosaving = true;
                 autoSaveModel();
                 if (config.preventNavigationIfDirty) {
                     window.addEventListener('beforeunload', onunloadHandler);
                 }
             }
             else {
-                deleteAutoSaveData();
-                if (config.preventNavigationIfDirty) {
-                    window.removeEventListener('beforeunload', onunloadHandler);
-                }
+                viewModel.cancelAutosave();
             }
         }
     );
@@ -336,7 +340,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
 
                 } else {
                     showAlert(config.successMessage,"alert-success",config.resultsMessageId);
-                    deleteAutoSaveData();
+                    viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
                     if (typeof successCallback === 'function') {
                         successCallback(data);
