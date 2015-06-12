@@ -212,21 +212,7 @@ function blockUIWithMessage(message) {
         } });
 }
 
-function confirmOnPageExit(e) {
-    // If we haven't been passed the event get the window.event
-    e = e || window.event;
 
-    var message = 'You have unsaved changes.';
-
-    // For IE6-8 and Firefox prior to version 4
-    if (e)
-    {
-        e.returnValue = message;
-    }
-
-    // For Chrome, Safari, IE8+ and Opera 12+
-    return message;
-};
 
 /**
  * Attaches a simple dirty flag (one shot change detection) to the supplied model, then once the model changes,
@@ -253,11 +239,39 @@ function autoSaveModel(viewModel, saveUrl, options) {
         successCallback:undefined,
         blockUIOnSave:false,
         blockUISaveMessage:"Saving...",
-        serializeModel:serializeModel
+        serializeModel:serializeModel,
+        pageExitMessage: 'You have unsaved data.  If you leave the page this data will be lost.',
+        preventNavigationIfDirty: false
     };
-
     var config = $.extend(defaults, options);
 
+
+    var deleteAutoSaveData = function() {
+        amplify.store(config.storageKey, null);
+    };
+    var saveLocally = function(data) {
+        amplify.store(config.storageKey, data);
+    };
+
+
+    function confirmOnPageExit(e) {
+        // If we haven't been passed the event get the window.event
+        e = e || window.event;
+
+        // For IE6-8 and Firefox prior to version 4
+        if (e) {
+            e.returnValue = config.pageExitMessage;
+        }
+
+        // For Chrome, Safari, IE8+ and Opera 12+
+        return config.pageExitMessage;
+    };
+
+    var onunloadHandler = function(e) {
+        deleteAutoSaveData();
+
+        return confirmOnPageExit(e);
+    };
 
     var autoSaveModel = function() {
         amplify.store(config.storageKey, serializeModel());
@@ -266,6 +280,13 @@ function autoSaveModel(viewModel, saveUrl, options) {
         }
     };
 
+    viewModel.cancelEdits = function() {
+        deleteAutoSaveData();
+        if (config.preventNavigationIfDirty) {
+            window.removeEventListener('beforeunload', onunloadHandler);
+        }
+    }
+
     if (typeof viewModel.dirtyFlag === 'undefined') {
         viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
     }
@@ -273,6 +294,15 @@ function autoSaveModel(viewModel, saveUrl, options) {
         function() {
             if (viewModel.dirtyFlag.isDirty()) {
                 autoSaveModel();
+                if (config.preventNavigationIfDirty) {
+                    window.addEventListener('beforeunload', onunloadHandler);
+                }
+            }
+            else {
+                deleteAutoSaveData();
+                if (config.preventNavigationIfDirty) {
+                    window.removeEventListener('beforeunload', onunloadHandler);
+                }
             }
         }
     );
@@ -306,7 +336,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
 
                 } else {
                     showAlert(config.successMessage,"alert-success",config.resultsMessageId);
-                    amplify.store(config.storageKey, null);
+                    deleteAutoSaveData();
                     viewModel.dirtyFlag.reset();
                     if (typeof successCallback === 'function') {
                         successCallback(data);
