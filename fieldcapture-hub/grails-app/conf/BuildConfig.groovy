@@ -23,12 +23,31 @@ grails.project.fork = [
     console: false// [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
 ]
 
+
 def inlinePluginAvailable = new File('../fieldcapture-hubs-plugin/application.properties').exists()
+def inlineTestPluginAvailable = false
 
 // settings for the inline fieldcapture-plugin
-if (Environment.current == Environment.DEVELOPMENT && inlinePluginAvailable) {
-    grails.plugin.location.'fieldcapture-plugin' = '../fieldcapture-hubs-plugin'
-    println('Using inline fieldcapture-plugin...')
+if (Environment.current == Environment.DEVELOPMENT) {
+
+    if (inlinePluginAvailable) {
+        grails.plugin.location.'fieldcapture-plugin' = '../fieldcapture-hubs-plugin'
+        println('Using inline fieldcapture-plugin...')
+    }
+
+    def props = new Properties()
+    File propertiesFile = new File('/data/fieldcapture-hub/config/fieldcapture-hub-config.properties')
+    if (propertiesFile.exists()) {
+        propertiesFile.withInputStream {
+            stream -> props.load(stream)
+        }
+    }
+    def testPluginLocation = props.getProperty("fieldcapture-test-plugin.location") ?: '../fieldcapture-test-plugin'
+    if (new File("${testPluginLocation}/application.properties").exists()) {
+        inlineTestPluginAvailable = true
+        println "Using inline test plugin"
+        grails.plugin.location.'fieldcapture-test-plugin' = testPluginLocation
+    }
 }
 grails.project.dependency.resolver = "maven"
 grails.project.dependency.resolution = {
@@ -70,6 +89,9 @@ grails.project.dependency.resolution = {
 
         if (Environment.current != Environment.DEVELOPMENT || !inlinePluginAvailable) {
             compile ":fieldcapture-plugin:1.1.4-SNAPSHOT"
+        }
+        if (Environment.current != Environment.DEVELOPMENT || !inlineTestPluginAvailable) {
+            test ":fieldcapture-test:0.1-SNAPSHOT"
         }
 
         build ":release:3.0.1"
