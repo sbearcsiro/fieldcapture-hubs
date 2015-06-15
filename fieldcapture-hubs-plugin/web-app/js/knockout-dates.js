@@ -628,7 +628,7 @@ ko.bindingHandlers.autocomplete = {
  */
 ko.dirtyFlag = function(root, isInitiallyDirty) {
     var result = function() {};
-    var _isInitiallyDirty = ko.observable(isInitiallyDirty);
+    var _isInitiallyDirty = ko.observable(isInitiallyDirty || false);
     // this allows for models that do not have a modelAsJSON method
     var getRepresentation = function () {
         return (typeof root.modelAsJSON === 'function') ? root.modelAsJSON() : ko.toJSON(root);
