@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta name="layout" content="adminLayout"/>
-    <title>Programs model - Admin - Data capture - Atlas of Living Australia</title>
+    <title>Programs model | Admin</title>
     <r:require modules="knockout,jquery_ui,knockout_sortable,jqueryValidationEngine,datepicker"/>
 </head>
 
@@ -23,7 +23,7 @@
 <div class="row-fluid">
     <div class="span4">
         <h2>Programs</h2>
-        <ul data-bind="sortable:{data:programs}" class="sortableList">
+        <ul data-bind="sortable:{data:programs}" class="sortableList programs">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>%{--<span data-bind="visible:!name()">new</span>--}%
@@ -52,7 +52,7 @@
     </div>
     <div class="span4">
         <h2>Sub-programs</h2>
-        <ul data-bind="sortable:{data:transients.displayedSubprograms}" class="sortableList">
+        <ul data-bind="sortable:{data:transients.displayedSubprograms}" class="sortableList subprograms">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>
@@ -66,7 +66,7 @@
     </div>
     <div class="span4">
         <h2>Themes</h2>
-        <ul data-bind="sortable:{data:transients.displayedThemes}" class="sortableList">
+        <ul data-bind="sortable:{data:transients.displayedThemes}" class="sortableList themes">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>
