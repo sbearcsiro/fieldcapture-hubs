@@ -241,7 +241,8 @@ function autoSaveModel(viewModel, saveUrl, options) {
         blockUISaveMessage:"Saving...",
         serializeModel:serializeModel,
         pageExitMessage: 'You have unsaved data.  If you leave the page this data will be lost.',
-        preventNavigationIfDirty: false
+        preventNavigationIfDirty: false,
+        defaultDirtyFlag:ko.simpleDirtyFlag
     };
     var config = $.extend(defaults, options);
 
@@ -294,7 +295,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
     };
 
     if (typeof viewModel.dirtyFlag === 'undefined') {
-        viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
+        viewModel.dirtyFlag = config.defaultDirtyFlag(viewModel);
     }
     viewModel.dirtyFlag.isDirty.subscribe(
         function() {
