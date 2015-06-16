@@ -27,29 +27,41 @@ class ProjectController {
             def admins = members.findAll{ it.role == "admin" }.collect{ it.userName }.join(",") // comma separated list of user email addresses
 
             if (user) {
-                user.metaClass.isAdmin = projectService.isUserAdminForProject(user.userId, id)?:false
-                user.metaClass.isCaseManager = projectService.isUserCaseManagerForProject(user.userId, id)?:false
-                user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
-                user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
+                user = user.properties
+                user.isAdmin = projectService.isUserAdminForProject(user.userId, id)?:false
+                user.isCaseManager = projectService.isUserCaseManagerForProject(user.userId, id)?:false
+                user.isEditor = projectService.canUserEditProject(user.userId, id)?:false
+                user.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
+            def programs = projectService.programsModel()
             def model = [project: project,
-             activities: activityService.activitiesForProject(id),
-             mapFeatures: commonService.getMapFeatures(project),
-             isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
-             user: user,
-             roles: roles,
-             admins: admins,
-             activityTypes: projectService.activityTypesList(),
-             metrics: projectService.summary(id),
-             outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-             organisations: organisationService.list().list,
-             programs: projectService.programsModel(),
-             today:DateUtils.format(new DateTime()),
-             themes:metadataService.getThemesForProject(project)
+                activities: activityService.activitiesForProject(id),
+                mapFeatures: commonService.getMapFeatures(project),
+                isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
+                user: user,
+                roles: roles,
+                admins: admins,
+                activityTypes: projectService.activityTypesList(),
+                metrics: projectService.summary(id),
+                outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
+                organisations: metadataService.organisationList().list,
+                programs: programs,
+                today:DateUtils.format(new DateTime()),
+                themes:metadataService.getThemesForProject(project),
+                projectContent:projectContent(project, user, programs)
             ]
 
             render view:projectView(project), model:model
         }
+    }
+
+    protected Map projectContent(project, user, programs) {
+        [overview:[label:'Overview', visible: true, type:'tab'],
+         documents:[label:'Documents', visible: true, type:'tab'],
+         activities:[label:'Activities', visible:true, disabled:!user?.hasViewAccess, type:'tab'],
+         site:[label:'Sites', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
+         dashboard:[label:'Dashboard', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
+         admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
     }
 
     private String projectView(project) {
