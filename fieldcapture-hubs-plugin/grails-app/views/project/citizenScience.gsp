@@ -47,9 +47,11 @@
                         <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
                     </div>
                 </div>
+                <g:if test="${fc.userIsAlaOrFcAdmin()}">
                 <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn span2 pull-right"
                    title="Download metadata for projects in JSON format">
                     <i class="icon-download"></i><g:message code="g.download" /></a>
+                </g:if>
             </div>
             <div id="pt-searchControls" class="row-fluid">
                 <div id="pt-sortWidgets">
@@ -64,6 +66,10 @@
                     <div class="span3">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
                         <g:select name="pt-dir" from="['Ascending','Descending']" keys="[1,-1]"/>
+                    </div>
+                    <div class="span3">
+                        <label for="pt-search-difficulty"><g:message code="project.search.difficulty" /></label>
+                        <g:select name="pt-search-difficulty" from="['Any','Easy','Medium','Hard']"/>
                     </div>
                 </div>
             </div><!--drop downs-->
@@ -81,11 +87,10 @@
                     <input id="pt-search-noCost" type="checkbox" />
                 </div>
                 <div class="span3">
-                    <label for="pt-search-difficulty"><g:message code="project.search.difficulty" /></label>
-                    <g:select name="pt-search-difficulty" from="['Any','Easy','Medium','Hard']"/>
+                    <label for="pt-search-children"><g:message code="project.search.children" /></label>
+                    <input id="pt-search-children" type="checkbox" />
                 </div>
             </div>
-            <a href="#" id="pt-collapse-expand">collapse all</a>
         </div>
 
         <table class="table table-bordered table-hover" id="projectTable">
@@ -96,20 +101,16 @@
         <table id="projectRowTempl" class="hide">
             <tr class="clearfix">
                 <td class="td1">
-                    <a href="#" class="projectTitle" id="a_" data-id="" title="click to show/hide details">
-                        <span class="showHideCaret">&#9658;</span> <span class="projectTitleName" style="font-size:120%;font-weight:bold">$name</span></a>
-                    <div class="projectInfo" id="proj_$id" style="position:relative;height:9em;margin-left:11em">
+                    <a href="#" class="projectTitle">
+                         <span class="projectTitleName" style="font-size:200%;font-weight:bold">$name</span></a>
+                    <div class="projectInfo" style="position:relative;height:9em;margin-left:11em">
                         <div style="position:absolute;left:-11em;width:10em;height:100%;overflow:hidden">
                             <img class="projectImage" style="max-width:100%;max-height:100%">
-                        </div>
-                        <div class="homeLine">
-                            <i class="icon-home"></i>
-                            <a href="">View project page</a>
                         </div>
                         <div class="orgLine">
                             <i class="icon-user"></i>
                         </div>
-                        <div class="descLine" style="position:relative; height:4.5em; overflow:hidden; line-height:1.5em">
+                        <div class="descLine" style="position:relative; height:5.2em; overflow:hidden; line-height:1.3em">
                             <a class="descMore" style="position:absolute;bottom:0;right:0;background:white">&nbsp;...more</a>
                         </div>
                         <div class="linksLine">
@@ -118,7 +119,9 @@
                     </div>
                 </td>
                 <td class="td2" style="width:100px"><a><img/></a></td>
+                <g:if test="${user}">
                 <td class="td3" style="width:10px"><a><i class="icon-edit"></i></a></td>
+                </g:if>
             </tr>
         </table>
 
@@ -151,11 +154,11 @@ $(document).ready(function () {
             coverage: props[1],
             description: props[2],
             isExternal: props[7],
-            name: props[10],
-            organisationName: props[12],
-            status: props[13],
-            urlWeb: props[15],
-            links: props[9]
+            name: props[11],
+            organisationName: props[13],
+            status: props[14],
+            urlWeb: props[16],
+            links: props[10]
         }, false, []);
         vm.projectId = props[0];
         vm.difficulty = props[3];
@@ -163,16 +166,17 @@ $(document).ready(function () {
         vm.isDIY = props[5];
         vm.isEditable = props[6];
         vm.isNoCost = props[8];
-        vm.orgLine = props[11]? '<a href="' + fcConfig.organisationLinkBaseUrl + '/' + props[11] + '">' + props[12] + '</a>': props[12];
-        vm.urlImage = props[14];
+        vm.isSuitableForChildren = props[9];
+        vm.orgLine = props[13];
+        vm.urlImage = props[15];
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + fixUrl(vm.urlWeb()) + '">Website</a>');
         for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
-          x += '<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Mobile Apps&nbsp;&nbsp;" + x);
+          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Mobile Apps&nbsp;" + x);
         for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
-          x += '<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Social Media&nbsp;&nbsp;" + x);
+          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Social Media&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
         vm.searchText = (vm.name() + ' ' + vm.description() + ' ' + vm.organisationName()).toLowerCase();
         return vm;
@@ -205,7 +209,7 @@ $(document).ready(function () {
     /*************************************************\
      *  Filter projects by search term
      \*************************************************/
-    var showActiveOnly, showDIYOnly, showNoCostOnly, showDifficultyOnly;
+    var showActiveOnly, showSuitableForChildrenOnly, showDifficultyOnly, showDIYOnly, showNoCostOnly;
     function doSearch(force) {
         var val = $('#pt-search').val().toLowerCase();
         if (!force && val == searchTerm) return;
@@ -215,9 +219,10 @@ $(document).ready(function () {
             var item = allProjects[i];
             if (!item) continue;
             if (showActiveOnly && !item.isActive) continue;
+            if (showSuitableForChildrenOnly && !item.isSuitableForChildren) continue;
+            if (showDifficultyOnly && item.difficulty != showDifficultyOnly) continue;
             if (showDIYOnly && !item.isDIY) continue;
             if (showNoCostOnly && !item.isNoCost) continue;
-            if (showDifficultyOnly && item.difficulty != showDifficultyOnly) continue;
             if (item.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }
@@ -235,14 +240,10 @@ $(document).ready(function () {
         $('#projectTable tbody').empty();
         $.each(projects.slice(offset, max), function(i, src) {
             var id = src.projectId;
-            var homeLink = src.isExternal()? src.urlWeb(): "${createLink()}/" + id;
+            var homeLink = "${createLink()}/" + id;
             var $tr = $('#projectRowTempl tr').clone(); // template
-            $tr.find('.td1 > a').attr("id", "a_" + id).data("id", id);
-            $tr.find('.td1 .projectTitleName').text(src.name());
-            $tr.find('.projectInfo').attr("id", "proj_" + id);
-            $tr.find('.homeLine a').attr("href", homeLink);
-            $tr.find('a.zoom-in').data("id", id);
-            $tr.find('a.zoom-out').data("id", id);
+            $tr.find('.projectTitle').attr("href", homeLink);
+            $tr.find('.projectTitleName').text(src.name());
             $tr.find('.orgLine').append(src.orgLine);
             var descLine = $tr.find('.descLine'), descMore = descLine.find('.descMore');
             descLine.html(src.description());
@@ -263,10 +264,12 @@ $(document).ready(function () {
               $tr.find('.td2 img').attr("src", fcConfig.imageLocation + "/CS-project-ended.png");
               if (!src.isExternal()) $tr.find('.td2 a').attr("href", homeLink);
             }
+    <g:if test="${user}">
             if (src.isEditable)
                 $tr.find('.td3 a').attr("href", "${createLink(action: 'edit')}/" + id);
             else
                 $tr.find('.td3 a').hide();
+    </g:if>
             $('#projectTable tbody').append($tr);
             var t = $(descLine.clone(true))
 					.hide()
@@ -281,44 +284,7 @@ $(document).ready(function () {
             }
             t.remove();
         });
-        if ($('#pt-collapse-expand').text().charAt(0) != "c")
-          $(".projectInfo").hide();
     }
-
-    var prevFeatureId;
-    $('#projectTable').on("click", ".projectTitle", function(el) {
-        el.preventDefault();
-        var thisEl = this;
-        var fId = $(this).data("id");
-        prevFeatureId = fId; // always toggle - no previous feature
-        if (!prevFeatureId) {
-            $("#proj_" + fId).slideToggle();
-            $(thisEl).find(".showHideCaret").html("&#9660;");
-        } else if (prevFeatureId != fId) {
-            if ($("#proj_" + prevFeatureId).is(":visible")) {
-                // hide prev selected, show this
-                $("#proj_" + prevFeatureId).slideUp();
-                $("#a_" + prevFeatureId).find(".showHideCaret").html("&#9658;");
-                $("#proj_" + fId).slideDown();
-                $("#a_" + fId).find(".showHideCaret").html("&#9660;");
-            } else {
-                //show this, hide others
-                $("#proj_" + fId).slideToggle();
-                $(thisEl).find(".showHideCaret").html("&#9660;");
-                $("#proj_" + prevFeatureId).slideUp();
-                $("#a_" + prevFeatureId).find(".showHideCaret").html("&#9658;");
-            }
-        } else {
-            $("#proj_" + fId).slideToggle();
-            if ($("#proj_" + fId).is(':visible')) {
-                $(thisEl).find(".showHideCaret").html("&#9658;");
-            } else {
-                $(thisEl).find(".showHideCaret").html("&#9660;");
-            }
-        }
-        prevFeatureId = fId;
-    });
-
 
     /** display the current size of the filtered list **/
     function updateTotal() {
@@ -427,12 +393,8 @@ $(document).ready(function () {
         showActiveOnly = $(this).prop('checked');
         doSearch(true);
     });
-    $('#pt-search-diy').on('change', function() {
-        showDIYOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-noCost').on('change', function() {
-        showNoCostOnly = $(this).prop('checked');
+    $('#pt-search-children').on('change', function() {
+        showSuitableForChildrenOnly = $(this).prop('checked');
         doSearch(true);
     });
     $('#pt-search-difficulty').change(function () {
@@ -440,15 +402,13 @@ $(document).ready(function () {
         if (showDifficultyOnly === "Any") showDifficultyOnly = null;
         doSearch(true);
     });
-    $('#pt-collapse-expand').click(function () {
-        var a = $(this);
-        if (a.text().charAt(0) === "c") {
-          $(".projectInfo").hide();
-          a.text("expand all");
-        } else {
-          $(".projectInfo").show();
-          a.text("collapse all");
-        }
+    $('#pt-search-diy').on('change', function() {
+        showDIYOnly = $(this).prop('checked');
+        doSearch(true);
+    });
+    $('#pt-search-noCost').on('change', function() {
+        showNoCostOnly = $(this).prop('checked');
+        doSearch(true);
     });
 
     $("#newPortal").on("click", function() {
