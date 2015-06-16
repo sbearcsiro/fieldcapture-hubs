@@ -1,5 +1,18 @@
 describe("SiteViewModelWithMapIntegration Spec", function () {
 
+    beforeAll(function() {
+        $.ajax = function() {
+            var dummy = {}
+            dummy.done = function() { return dummy; }
+            return dummy;
+        }
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
 
     it("should be able to convert a drawn rectangle into geojson", function() {
         var model = new SiteViewModelWithMapIntegration({});

@@ -167,11 +167,12 @@ class ProjectController {
                 coverage   : it.coverage ?: '',
                 description: it.description,
                 difficulty : it.difficulty,
-                isActive   : endDate && endDate >= today,
+                isActive   : !endDate || endDate >= today,
                 isDIY      : it.isDIY && true, // force it to boolean
                 isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
                 isNoCost   : !it.hasParticipantCost,
+                isSuitableForChildren: it.isSuitableForChildren,
                 links      : trimmedLinks,
                 name       : it.name,
                 organisationId  : it.organisationId,
@@ -202,6 +203,7 @@ class ProjectController {
                      it.isEditable,
                      it.isExternal,
                      it.isNoCost,
+                     it.isSuitableForChildren,
                      it.links,
                      it.name,
                      it.organisationId,
