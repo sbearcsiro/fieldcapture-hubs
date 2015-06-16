@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta name="layout" content="adminLayout"/>
-    <title>Programs model - Admin - Data capture - Atlas of Living Australia</title>
+    <title>Programs model | Admin</title>
     <r:require modules="knockout,jquery_ui,knockout_sortable,jqueryValidationEngine,datepicker"/>
 </head>
 
@@ -23,7 +23,7 @@
 <div class="row-fluid">
     <div class="span4">
         <h2>Programs</h2>
-        <ul data-bind="sortable:{data:programs}" class="sortableList">
+        <ul data-bind="sortable:{data:programs}" class="sortableList programs">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>%{--<span data-bind="visible:!name()">new</span>--}%
@@ -35,7 +35,12 @@
                     <div><label for="reportingPeriod">Reporting period (months) <input id="reportingPeriod" class="input-small" type="number" data-bind="enabled:isMeritProgramme, value:reportingPeriod"></label></div>
                     <div><label for="isMeritProgramme">Reporting period is aligned to calendar dates <input id="reportingPeriodAlignedToCalendar" type="checkbox" data-bind="enabled:isMeritProgramme, checked:reportingPeriodAlignedToCalendar"></label></div>
                     <div><label for="projectDatesContracted">Projects must start and end on contract dates <input id="projectDatesContracted" type="checkbox" data-bind="checked:projectDatesContracted"></label></div>
-
+                    <div class="optional-project-content">
+                        <label>Optional project content</label>
+                        <ul class="unstyled" data-bind="foreach:{data: $root.transients.optionalProjectContent}">
+                            <li class="text-left"><input type="checkbox" name="optionalProjectContent" data-bind="value:$data, checked:$parent.optionalProjectContent"> <span data-bind="text:$data"></span></li>
+                        </ul>
+                    </div>
                     <div><label data-toggle="collapse" data-bind="attr:{'data-target':'#activities-'+$index()}">Activities <span data-bind="text:'(' + activities().length + ' selected)'"></span></label></div>
                     <div class="program-activities collapse" data-bind="attr:{id:'activities-'+$index()}">
                         <div data-bind="foreach:{data: $root.transients.activityTypes}">
@@ -52,7 +57,7 @@
     </div>
     <div class="span4">
         <h2>Sub-programs</h2>
-        <ul data-bind="sortable:{data:transients.displayedSubprograms}" class="sortableList">
+        <ul data-bind="sortable:{data:transients.displayedSubprograms}" class="sortableList subprograms">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>
@@ -66,7 +71,7 @@
     </div>
     <div class="span4">
         <h2>Themes</h2>
-        <ul data-bind="sortable:{data:transients.displayedThemes}" class="sortableList">
+        <ul data-bind="sortable:{data:transients.displayedThemes}" class="sortableList themes">
             <li class="item" data-bind="css:{referenced:isSelected}">
                 <div data-bind="click:select">
                     <span data-bind="clickToEdit:name" data-edit-on-dblclick="true" data-input-class="auto-width"></span>
@@ -110,6 +115,7 @@
             this.reportingPeriod = ko.observable(prg.reportingPeriod);
             this.reportingPeriodAlignedToCalendar = ko.observable(prg.reportingPeriodAlignedToCalendar);
             this.projectDatesContracted = ko.observable(prg.projectDatesContracted);
+            this.optionalProjectContent = ko.observableArray(prg.optionalProjectContent || []);
             this.activities = ko.observableArray(prg.activities?prg.activities:[]);
             this.activities.subscribe(function(e){ console.log(e);});
             this.select = function () {
@@ -174,6 +180,7 @@
             this.transients.selectedSubprogram = ko.observable();
             this.transients.selectedTheme = ko.observable();
             this.transients.activityTypes = activityTypes;
+            this.transients.optionalProjectContent = ['MERI Plan', 'Risks and Threats'];
 
             this.programs = ko.observableArray($.map(model.programs, function (obj, i) {
                 return new ProgramModel(obj, self);
@@ -189,7 +196,7 @@
                 return self.transients.selectedSubprogram().themes();
             });
             this.addProgram = function (item, event) {
-                var act = new ProgramModel({name: "", subprograms: []}, self);
+                var act = new ProgramModel({name: "", subprograms: [], optionalProjectContent:self.transients.optionalProjectContent}, self);
                 self.programs.push(act);
                 act.name.editing(true);
             };
