@@ -56,7 +56,7 @@ class ProjectController {
     }
 
     protected Map projectContent(project, user, programs) {
-        [overview:[label:'Overview', visible: true, type:'tab'],
+        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
          documents:[label:'Documents', visible: true, type:'tab'],
          activities:[label:'Activities', visible:true, disabled:!user?.hasViewAccess, type:'tab'],
          site:[label:'Sites', visible: true, disabled:!user?.hasViewAccess, type:'tab'],

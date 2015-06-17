@@ -615,7 +615,7 @@ class FCTagLib {
         attrs.tabs.each { name, details ->
 
             if (details.type == 'tab' && details.visible) {
-                def liClass = name == 'overview' ? 'active':''
+                def liClass = details.default ? 'active':''
                 def linkAttributes = [href:'#'+name, id:name+'-tab']
                 if (!details.disabled) {
                     linkAttributes << ["data-toggle":"tab"]
