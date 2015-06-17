@@ -40,7 +40,7 @@
             output: "${attributeName}Output",
             button_bar: "${attributeName}-button-bar",
             preview: "${attributeName}-preview",
-            helpLink: "${request.contextPath}/static/wmd/markdownhelp.html"
+            helpLink: "${g.resource(dir:"wmd", file:"markdownhelp.html", plugin:'fieldcapture-plugin')}"
         });
 
         self.message = ko.observable('');
