@@ -608,7 +608,7 @@ class FCTagLib {
         }
     }
 
-    /** Render a list of bootstrap tabs based on project content definitions */
+    /** Render a list of bootstrap tabs based on content definitions */
     def tabList = {attrs ->
 
         def mb = new MarkupBuilder(out)
@@ -624,6 +624,21 @@ class FCTagLib {
                 mb.li(class:liClass) {
                     a(linkAttributes, details.label)
                 }
+            }
+        }
+    }
+
+    /** Render the content for a list of tabs based on content definitions */
+    def tabContent = {attrs ->
+
+
+        attrs.tabs.each { name, details ->
+
+            if (details.type == 'tab' && details.visible) {
+                def divClass = details.default ? 'tab-pane active':'tab-pane'
+                out << """<div id="${name}" class="${divClass}">"""
+                out << g.render(template:details.template?:name, model:[config:details])
+                out << "</div>"
             }
         }
     }

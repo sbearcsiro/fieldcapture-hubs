@@ -40,7 +40,6 @@
         }
     </style>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine"/>
-    <g:set var="showReports" value="${organisation.reports && (isAdmin || isGrantManager || fc.userIsAlaOrFcAdmin())}"/>
 </head>
 <body>
 
@@ -65,231 +64,16 @@
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
-                    <g:if test="${showReports}"><li class="active tab"><a id="reporting-tab" data-toggle="tab" href="#reporting">Reporting</a></li></g:if>
-                    <li class="<g:if test="${!showReports}">active </g:if>tab"><a id="projects-tab" data-toggle="tab" href="#projects">Projects</a></li>
-                    <g:if test="${organisation.projects}"><li class="tab"><a id="dashboard-tab" data-toggle="tab" href="#dashboard">Dashboard</a></li></g:if>
-                    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-                    <li class="tab"><a id="admin-tab" data-toggle="tab" href="#admin">Admin</a></li>
-                    </g:if>
 
+                    <ul id="organisationTabs" class="nav nav-tabs big-tabs">
+                        <fc:tabList tabs="${content}"/>
+                    </ul>
                 </ul>
             </div>
             <div class="row-fluid" id="save-agreement-result-placeholder"></div>
             <div class="tab-content row-fluid">
-                <div class="<g:if test="${!showReports}">active </g:if>tab-pane" id="projects">
-                    <g:if test="${user && !disableProjectCreation}">
-                        <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
-                           class="btn btn-small">
-                            <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
-                    </g:if>
-                    <g:if test="${organisation.projects}">
-                        <table id="projectList" class="table
 
-                        table-striped" style="width:100%;">
-                                <thead></thead>
-                                <tbody></tbody>
-                                <tfoot>
-                                <tr></tr>
-
-                                </tfoot>
-                            </table>
-                    </g:if>
-                    <g:else>
-                        <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
-                    </g:else>
-                </div>
-                <g:if test="${organisation.projects}">
-                <div class="tab-pane" id="dashboard">
-                    <div class="row-fluid">
-                        <span class="span12"><h4>Report: </h4>
-                            <select id="dashboardType" name="dashboardType">
-                                <g:if test="${showReports}"><option value="greenArmy">Green Army</option></g:if>
-                                <option value="outputs">Activity Outputs</option>
-                                <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}"><option value="announcements">Announcements</option></g:if>
-                            </select>
-                        </span>
-                    </div>
-                    <div class="loading-message">
-                        <r:img dir="images" file="loading.gif" alt="saving icon"/> Loading...
-                    </div>
-                    <div id="dashboard-content">
-
-                    </div>
-
-                </div>
-
-                <g:if test="${showReports}">
-                    <!-- ko stopBinding: true -->
-
-                    <div class="tab-pane active" id="reporting">
-
-                        %{--<div class="control-group" style="margin-bottom: 5px;">--}%
-                            %{--<span class="controls"><button class="btn btn-success pull-right" style="margin-bottom: 5px;" data-bind="click:addReport"><i class="icon-white icon-plus"></i> New ad hoc Report</button></span>--}%
-                        %{--</div>--}%
-
-                        <table class="table table-striped" style="width:100%;">
-                            <thead>
-
-                            <tr>
-                                <th>Actions</th>
-                                <th>Programme</th>
-                                <th>Report Activity</th>
-                                <th>Date Due<br/><label for="hide-future-reports"><input id="hide-future-reports" type="checkbox" data-bind="checked:hideFutureReports"> Current reports only</label>
-                                </th>
-
-                                <th>Report Progress</th>
-                                <th>Status<br/><label for="hide-approved-reports"><input id="hide-approved-reports" type="checkbox" data-bind="checked:hideApprovedReports"> Hide approved reports</label></th>
-                            </tr>
-                            </thead>
-                            <tbody data-bind="foreach:{ data:filteredReports, as:'report' }">
-
-                                <tr>
-                                    <td>
-                                        <button type="button" class="btn btn-container" data-bind="click:$root.viewAllReports"><i data-bind="css:{'icon-plus':!activitiesVisible(), 'icon-minus':activitiesVisible()}" title="List all project reports"></i></button>
-                                        <button type="button" class="btn btn-container" data-bind="visible:editable, click:$root.editReport"><i class="icon-edit" data-bind="attr:{title:title}" title="Edit reports for all projects in spreadsheet format"></i></button>
-                                    </td>
-                                    <td data-bind="text:report.programme"></td>
-                                    <td><a data-bind="visible:editable, attr:{href:editUrl, title:title}" title="Edit reports for all projects in spreadsheet format"><span data-bind="text:description"></span></a>
-                                        <span data-bind="visible:!editable, text:description"></span>
-                                    </td>
-                                    <td data-bind="text:dueDate.formattedDate()"></td>
-                                    <td>
-                                        <div class="progress active"  data-bind="css:{'progress-success':percentComplete>=100, 'progress-info':percentComplete < 100}">
-                                            <div class="bar" data-bind="style:{width:percentComplete+'%'}"></div>
-                                        </div>
-                                        <div class="progress-label"> <span data-bind="text:'Reporting completed for '+finishedCount+' of '+count+' projects'"></span></div>
-
-                                    </td>
-                                    <td data-bind="template:approvalTemplate()">
-
-                                        <span class="label" data-bind="text:approvalStatus, css:{'label-success':approvalStatus=='Report approved', 'label-info':approvalStatus=='Report submitted', 'label-warning':approvalStatus == 'Report not submitted'}"></span>
-
-                                    </td>
-
-                                </tr>
-
-                                <tr data-bind="visible:report.activitiesVisible()">
-                                    <td colspan="6">
-                                        <table style="width:100%">
-                                            <thead>
-                                            <tr>
-                                                <td>Project</td> <td>Report</td><td>Report Status</td><td>Stage Report Status</td>
-                                            </tr>
-                                            </thead>
-                                            <tbody data-bind="foreach:{data:report.activities, as:'activity'}">
-
-                                                <tr>
-
-                                                    <td>
-                                                        <a data-bind="attr:{'href':fcConfig.viewProjectUrl+'/'+projectId}" title="Open the project page">
-                                                            <span data-bind="text:$root.getProject(projectId).name"></span>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <a data-bind="attr:{'href':activityDetailsUrl, 'title':activityUrlTitle}">
-                                                            <span data-bind="text:description"></span>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="label" data-bind="text:progress, activityProgress:progress"></span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="label" data-bind="text:$root.publicationStatusLabel(publicationStatus), css:{'label-success':publicationStatus=='published', 'label-info':publicationStatus=='pendingApproval', 'label-warning':publicationStatus == 'unpublished' || !publicationStatus}"></span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                    </table>
-
-                    <div id="addReport" class="modal fade" data-bind="with:newReport" style="display:none;">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="title">Add Report</h4>
-                                </div>
-
-                                <div class="modal-body">
-                                    <form class="form-horizontal" id="reportForm">
-
-                                        <div class="control-group">
-                                            <label class="control-label" for="project">Project</label>
-
-                                            <div class="controls">
-                                                <select id="project" style="width: 97%;" data-bind="options:$parent.projects, optionsText: 'name', value:project"></select>
-                                            </div>
-                                        </div>
-
-                                        <div class="control-group">
-                                            <label class="control-label" for="project">Report Type</label>
-
-                                            <div class="controls">
-                                                <select id="reportType" style="width: 97%;" data-bind="enable:project(), options:availableReports, value:type"></select>
-                                            </div>
-                                        </div>
-
-
-                                    </form>
-                                </div>
-                                <div class="modal-footer control-group">
-                                    <div class="controls">
-                                        <button type="button" class="btn btn-success"
-                                                data-bind="enable:type() && project(), click:save">Create</button>
-                                        <button class="btn" data-bind="click:function() {$('#addReport').modal('hide')}">Cancel</button>
-
-
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                    <script id="notReportable" type="text/html">
-                        <span class="badge badge-warning">Report not submitted</span><br/>
-                    </script>
-                    <script id="notApproved" type="text/html">
-                        <span class="badge badge-warning">Report not submitted</span><br/>
-                        <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-                        <button class="btn btn-success btn-small" data-bind="enable:complete,click:submitReport" title="All project reports must be complete and marked as 'finished' before you can submit this report.">Submit report</button>
-                        </g:if>
-                    </script>
-                    <script id="approved" type="text/html">
-                        <span class="badge badge-success">Report approved</span>
-                        <g:if test="${fc.userIsAlaOrFcAdmin()}"><br/><button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Withdraw approval</button></g:if>
-                    </script>
-                    <script id="submitted" type="text/html">
-                        <span class="badge badge-info">Report submitted</span>
-                        <g:if test="${isGrantManager || fc.userIsAlaOrFcAdmin()}"><br/>
-                        <span class="btn-group">
-                            <button type="button" data-bind="click:approveReport" class="btn btn-success"><i class="icon-ok icon-white"></i> Approve</button>
-                            <button type="button" data-bind="click:rejectReport" class="btn btn-danger"><i class="icon-remove icon-white"></i> Reject</button>
-                        </span>
-                        </g:if>
-                    </script>
-                    <!-- /ko -->
-                </g:if>
-</g:if>
-                <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-                <div class="tab-pane" id="admin">
-                    <h4>Administrator actions</h4>
-                    <div class="row-fluid">
-                    <p><button class="btn btn-small admin-action" data-bind="click:editOrganisation"><i class="icon-edit"></i> Edit</button> Edit the organisation details and content</p>
-                    <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteOrganisation"><i class="icon-remove icon-white"></i> Delete</button> Delete this organisation from the system. <strong>This cannot be undone</strong></p></g:if>
-                    </div>
-                    <h4>Add Permissions</h4>
-                    <div class="row-fluid">
-                        <div class="span6 alert alert-info">
-                            Any user access assigned to this organisation will automatically be applied to all projects managed by this organisation.
-                        </div>
-                    </div>
-                    <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'organisation', action:'addUserAsRoleToOrganisation'), entityType:'au.org.ala.ecodata.Organisation', entityId:organisation.organisationId]"/>
-                    <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:loadPermissionsUrl, removeUserUrl:g.createLink(controller:'organisation', action:'removeUserWithRoleFromOrganisation'), entityId:organisation.organisationId, user:user]"/>
-                </div>
-                </g:if>
+                <fc:tabContent tabs="${content}"/>
 
             </div>
     </div>
@@ -340,7 +124,7 @@
         ko.applyBindings(organisationViewModel);
 
 
-        <g:if test="${showReports}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
+        <g:if test="${content.reporting.visible}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
         $.each(projects, function(i, project) {
             project.startDate = project.contractStartDate || project.plannedStartDate;
@@ -569,8 +353,8 @@
             self.newReport = new AdHocReportViewModel();
 
         };
-        <g:if test="${showReports}">
-        ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting'));
+        <g:if test="${content.reporting.visible}">
+        ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting-content'));
         </g:if>
         $('#dashboardType').change(function(e) {
             var $content = $('#dashboard-content');
@@ -792,7 +576,7 @@
 
             }
         });
-        <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
+        <g:if test="${content.admin.visible}">
         populatePermissionsTable(fcConfig.organisationMembersUrl);
         </g:if>
     });

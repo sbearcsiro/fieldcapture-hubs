@@ -22,6 +22,7 @@ class OrganisationControllerSpec extends Specification {
         controller.documentService = documentService
         controller.roleService = roleService
         controller.userService = userService
+
     }
 
     def "retrieve an organisation by id"() {
@@ -104,9 +105,153 @@ class OrganisationControllerSpec extends Specification {
         response.json.organisationId == 'id'
     }
 
+    def "only the organisation projects should be viewable anonymously"() {
+        setup:
+        setupAnonymousUser()
+        def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.organisation == testOrg
+        model.content.projects.visible == true
+        model.content.sites.visible == false
+        model.content.dashboard.visible == false
+        model.content.admin.visible == false
+    }
+
+    def "all tabs except the admin tabs are viewable by a user with read only access"() {
+        setup:
+        setupReadOnlyUser()
+        def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.organisation == testOrg
+        model.content.projects.visible == true
+        model.content.sites.visible == true
+        model.content.dashboard.visible == true
+        model.content.admin.visible == false
+    }
+
+    def "all tabs are visible to fc admins"() {
+        setup:
+         def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+        setupFcAdmin()
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.organisation == testOrg
+        model.content.projects.visible == true
+        model.content.sites.visible == true
+        model.content.dashboard.visible == true
+        model.content.admin.visible == true
+    }
+
+    def "all tabs are visible to organisation admins"() {
+        setup:
+        def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+        setupOrganisationAdmin()
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.organisation == testOrg
+        model.content.projects.visible == true
+        model.content.sites.visible == true
+        model.content.dashboard.visible == true
+        model.content.admin.visible == true
+    }
+
+    def "all tabs expect the admin tab are visible to organisation editors"() {
+        setup:
+        def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+        setupOrganisationEditor()
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.organisation == testOrg
+        model.content.projects.visible == true
+        model.content.sites.visible == true
+        model.content.dashboard.visible == true
+        model.content.admin.visible == false
+    }
+
+    def "the project tab is the default"() {
+        setup:
+        def testOrg = testOrganisation()
+        organisationService.get(_,_) >> testOrg
+        setupOrganisationEditor()
+
+        when:
+        def model = controller.index('id')
+
+        then:
+        model.content.projects.default == true
+        def numDefault = 0
+        model.content.each { k, v ->
+            if (v.default) {
+                numDefault ++
+            }
+        }
+        numDefault == 1
+    }
+
     private Map testOrganisation() {
         def org = [organisationId:'id', name:'name', description:'description']
 
         return org
     }
+
+    private void setupAnonymousUser() {
+        userService.getUser() >> null
+        userService.userHasReadOnlyAccess() >> false
+        userService.userIsAlaOrFcAdmin() >> false
+        organisationService.getMembersOfOrganisation(_) >> []
+    }
+
+    private void setupFcAdmin() {
+        userService.getUser() >> [userId:'1345']
+        userService.userHasReadOnlyAccess() >> false
+        userService.userIsAlaOrFcAdmin() >> true
+        organisationService.getMembersOfOrganisation(_) >> []
+    }
+
+    private void setupReadOnlyUser() {
+        userService.getUser() >> [userId:'1345']
+        userService.userHasReadOnlyAccess() >> true
+        userService.userIsAlaOrFcAdmin() >> false
+        organisationService.getMembersOfOrganisation(_) >> []
+    }
+
+    private void setupOrganisationAdmin() {
+        def userId = '1234'
+        userService.getUser() >> [userId:userId]
+        userService.userHasReadOnlyAccess() >> false
+        userService.userIsAlaOrFcAdmin() >> false
+        organisationService.getMembersOfOrganisation(_) >> [[userId:userId, role:RoleService.PROJECT_ADMIN_ROLE]]
+    }
+
+    private void setupOrganisationEditor() {
+        def userId = '1234'
+        userService.getUser() >> [userId:userId]
+        userService.userHasReadOnlyAccess() >> false
+        userService.userIsAlaOrFcAdmin() >> false
+        organisationService.getMembersOfOrganisation(_) >> [[userId:userId, role:RoleService.PROJECT_EDITOR_ROLE]]
+    }
+
+
 }
