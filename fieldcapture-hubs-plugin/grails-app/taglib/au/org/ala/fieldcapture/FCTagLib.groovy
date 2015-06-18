@@ -608,6 +608,26 @@ class FCTagLib {
         }
     }
 
+    /** Render a list of bootstrap tabs based on project content definitions */
+    def tabList = {attrs ->
+
+        def mb = new MarkupBuilder(out)
+        attrs.tabs.each { name, details ->
+
+            if (details.type == 'tab' && details.visible) {
+                def liClass = details.default ? 'active':''
+                def linkAttributes = [href:'#'+name, id:name+'-tab']
+                if (!details.disabled) {
+                    linkAttributes << ["data-toggle":"tab"]
+                }
+
+                mb.li(class:liClass) {
+                    a(linkAttributes, details.label)
+                }
+            }
+        }
+    }
+
     private void renderObject(Object object, MarkupBuilder mb) {
 
         if (object instanceof JSONObject) {

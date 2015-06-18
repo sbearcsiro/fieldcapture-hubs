@@ -10,7 +10,6 @@ class ProjectController {
     static ignore = ['action','controller','id']
 
     def index(String id) {
-        session.removeAttribute('citizenScienceOrgId')
         def project = projectService.get(id, 'brief')
         def roles = roleService.getRoles()
 
@@ -28,26 +27,28 @@ class ProjectController {
             def admins = members.findAll{ it.role == "admin" }.collect{ it.userName }.join(",") // comma separated list of user email addresses
 
             if (user) {
-                user.metaClass.isAdmin = projectService.isUserAdminForProject(user.userId, id)?:false
-                user.metaClass.isCaseManager = projectService.isUserCaseManagerForProject(user.userId, id)?:false
-                user.metaClass.isEditor = projectService.canUserEditProject(user.userId, id)?:false
-                user.metaClass.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
+                user = user.properties
+                user.isAdmin = projectService.isUserAdminForProject(user.userId, id)?:false
+                user.isCaseManager = projectService.isUserCaseManagerForProject(user.userId, id)?:false
+                user.isEditor = projectService.canUserEditProject(user.userId, id)?:false
+                user.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
-
+            def programs = projectService.programsModel()
             def model = [project: project,
-             activities: activityService.activitiesForProject(id),
-             mapFeatures: commonService.getMapFeatures(project),
-             isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
-             user: user,
-             roles: roles,
-             admins: admins,
-             activityTypes: projectService.activityTypesList(),
-             metrics: projectService.summary(id),
-             outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
-             organisations: organisationService.list().list,
-             programs: projectService.programsModel(),
-             today:DateUtils.format(new DateTime()),
-             themes:metadataService.getThemesForProject(project)
+                activities: activityService.activitiesForProject(id),
+                mapFeatures: commonService.getMapFeatures(project),
+                isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
+                user: user,
+                roles: roles,
+                admins: admins,
+                activityTypes: projectService.activityTypesList(),
+                metrics: projectService.summary(id),
+                outputTargetMetadata: metadataService.getOutputTargetsByOutputByActivity(),
+                organisations: metadataService.organisationList().list,
+                programs: programs,
+                today:DateUtils.format(new DateTime()),
+                themes:metadataService.getThemesForProject(project),
+                projectContent:projectContent(project, user, programs)
             ]
 
             if(project.projectType == 'survey'){
@@ -65,26 +66,42 @@ class ProjectController {
         }
     }
 
+    protected Map projectContent(project, user, programs) {
+        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
+         documents:[label:'Documents', visible: true, type:'tab'],
+         activities:[label:'Activities', visible:true, disabled:!user?.hasViewAccess, type:'tab'],
+         site:[label:'Sites', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
+         dashboard:[label:'Dashboard', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
+         admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
+    }
+
     private String projectView(project) {
         if (project.isExternal) {
             if (project.isCitizenScience) {
                 return 'externalCitizenScienceProjectTemplate'
             }
         }
-        return project.projectType == 'survey' ? 'citizenScienceProjectTemplate' : 'index'
+        return project.projectType == 'survey'?'citizenscienceProjectTemplate':'index'
     }
 
     @PreAuthorise
     def edit(String id) {
-        session.removeAttribute('citizenScienceOrgId')
+
         def project = projectService.get(id, 'all')
-        def organisations = organisationService.list()
+        // This will happen if we are returning from the organisation create page during an edit workflow.
+        if (params.organisationId) {
+            project.organisationId = params.organisationId
+        }
+        def user = userService.getUser()
+        def groupedOrganisations = groupOrganisationsForUser(user.userId)
+
         if (project) {
             def siteInfo = siteService.getRaw(project.projectSiteId)
             [project: project,
              siteDocuments: siteInfo.documents?:'[]',
              site: siteInfo.site,
-             organisations: organisations.list,
+             userOrganisations: groupedOrganisations.user ?: [],
+             organisations: groupedOrganisations.other ?: [],
              programs: metadataService.programsModel()]
         } else {
             forward(action: 'list', model: [error: 'no such id'])
@@ -96,66 +113,87 @@ class ProjectController {
         if (!user) {
             flash.message = "You do not have permission to perform that operation"
             redirect controller: 'home', action: 'index'
+            return
         }
-
-        def csOrgId = session.getAttribute('citizenScienceOrgId')?: ""
-
+        def groupedOrganisations = groupOrganisationsForUser(user.userId)
         // Prepopulate the project as appropriate.
         def project = [:]
         if (params.organisationId) {
             project.organisationId = params.organisationId
         }
-        if (csOrgId) {
+        if (params.citizenScience) {
             project.isCitizenScience = true
+            project.projectType = 'survey'
         }
-        def userOrgIds = userService.getOrganisationIdsForUserId(user.userId)
-        def organisations = metadataService.organisationList().list ?: []
-        def groupedOrganisations = organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
-
         // Default the project organisation if the user is a member of a single organisation.
-        if (userOrgIds.size() == 1) {
-            project.organisationId = userOrgIds[0]
+        if (groupedOrganisations.user?.size() == 1) {
+            project.organisationId = groupedOrganisations.user[0].organisationId
         }
-        session.removeAttribute('citizenScienceOrgId')
         [
-                citizenScienceOrgId: csOrgId,
                 organisationId: params.organisationId,
                 siteDocuments: '[]',
                 userOrganisations: groupedOrganisations.user ?: [],
                 organisations: groupedOrganisations.other ?: [],
                 programs: projectService.programsModel(),
-                activityTypes: metadataService.activityTypesList(),
                 project:project
         ]
     }
 
+    /**
+     * Splits the list of organisations into two - one containing organisations that the user is a member of,
+     * the other containing the rest.
+     * @param the user id to use for the grouping.
+     * @return [user:[], other:[]]
+     */
+    private Map groupOrganisationsForUser(userId) {
+
+        def organisations = metadataService.organisationList().list ?: []
+        def userOrgIds = userService.getOrganisationIdsForUserId(userId)
+
+        organisations.groupBy{organisation -> organisation.organisationId in userOrgIds ? "user" : "other"}
+    }
+
     def citizenScience() {
+        def today = DateUtils.now()
         def user = userService.getUser()
         def userId = user?.userId
         def projects = projectService.list(false, true).collect {
-            def imgDoc;
+            def urlImage
             it.documents.each { doc ->
-                if (doc.role == 'logo')
-                    imgDoc = doc
-                else if (!imgDoc && doc.isPrimaryProjectImage)
-                    imgDoc = doc
+                if (doc.role == documentService.ROLE_LOGO)
+                    urlImage = doc.url
+                else if (!urlImage && doc.isPrimaryProjectImage)
+                    urlImage = doc.url
             }
+            // no need to ship the whole link object down to browser
+            def trimmedLinks = it.links.collect {
+                [
+                    role: it.role,
+                    url: it.url
+                ]
+            }
+            def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
-                    projectId     : it.projectId,
-                    coverage      : it.coverage ?: '',
-                    description   : it.description,
-                    canEdit       : userId && projectService.canUserEditProject(userId, it.projectId) ? 'y' : '',
-                    name          : it.name,
-                    organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
-                    status        : it.status,
-                    urlAndroid    : it.urlAndroid,
-                    urlITunes     : it.urlITunes,
-                    urlWeb        : it.urlWeb,
-                    urlImage      : imgDoc?.url,
-                    organisationId: it.organisationId
+                projectId  : it.projectId,
+                coverage   : it.coverage ?: '',
+                description: it.description,
+                difficulty : it.difficulty,
+                isActive   : !endDate || endDate >= today,
+                isDIY      : it.isDIY && true, // force it to boolean
+                isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
+                isExternal : it.isExternal && true, // force it to boolean
+                isNoCost   : !it.hasParticipantCost,
+                isSuitableForChildren: it.isSuitableForChildren,
+                links      : trimmedLinks,
+                name       : it.name,
+                organisationId  : it.organisationId,
+                organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
+                status     : it.status,
+                urlImage   : urlImage,
+                urlWeb     : it.urlWeb
             ]
         }
-        if (params.boolean('download', false)) {
+        if (params.download as boolean) {
             response.setHeader("Content-Disposition","attachment; filename=\"projects.json\"");
             // This is returned to the browswer as a text response due to workaround the warning
             // displayed by IE8/9 when JSON is returned from an iframe submit.
@@ -164,23 +202,28 @@ class ProjectController {
             render resultJson.toString()
         } else {
             [
-                    user: user,
-                    projects: projects.collect {
-                        // pass array instead of object to reduce size
-                        [it.projectId,
-                         it.coverage,
-                         it.description,
-                         it.canEdit,
-                         it.name,
-                         it.organisationName,
-                         it.status,
-                         it.urlAndroid,
-                         it.urlITunes,
-                         it.urlWeb,
-                         it.urlImage,
-                         it.organisationId
-                        ]
-                    }
+                user: user,
+                projects: projects.collect {
+                    [ // pass array instead of object to reduce JSON size
+                     it.projectId,
+                     it.coverage,
+                     it.description,
+                     it.difficulty,
+                     it.isActive,
+                     it.isDIY,
+                     it.isEditable,
+                     it.isExternal,
+                     it.isNoCost,
+                     it.isSuitableForChildren,
+                     it.links,
+                     it.name,
+                     it.organisationId,
+                     it.organisationName,
+                     it.status,
+                     it.urlImage,
+                     it.urlWeb
+                    ]
+                }
             ]
         }
     }
@@ -232,6 +275,7 @@ class ProjectController {
         log.debug "id=${id} class=${id?.getClass()}"
         def projectSite = values.remove("projectSite")
         def documents = values.remove('documents')
+        def links = values.remove('links')
         def result = id? projectService.update(id, values): projectService.create(values)
         log.debug "result is " + result
         if (documents && !result.error) {
@@ -241,6 +285,13 @@ class ProjectController {
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
                 if (doc.isPrimaryProjectImage) doc.public = true
                 documentService.saveStagedImageDocument(doc)
+            }
+        }
+        if (links && !result.error) {
+            if (!id) id = result.resp.projectId
+            links.each { link ->
+                link.projectId = id
+                documentService.saveLink(link)
             }
         }
         if (projectSite && !result.error) {

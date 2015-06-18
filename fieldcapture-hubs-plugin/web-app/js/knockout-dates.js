@@ -628,7 +628,7 @@ ko.bindingHandlers.autocomplete = {
  */
 ko.dirtyFlag = function(root, isInitiallyDirty) {
     var result = function() {};
-    var _isInitiallyDirty = ko.observable(isInitiallyDirty);
+    var _isInitiallyDirty = ko.observable(isInitiallyDirty || false);
     // this allows for models that do not have a modelAsJSON method
     var getRepresentation = function () {
         return (typeof root.modelAsJSON === 'function') ? root.modelAsJSON() : ko.toJSON(root);
@@ -1097,5 +1097,22 @@ ko.bindingHandlers.slideVisible = {
         // Whenever the value subsequently changes, slowly fade the element in or out
         var value = valueAccessor();
         ko.unwrap(value) ? $(element).slideDown() : $(element).slideUp();
+    }
+};
+
+ko.bindingHandlers.booleanValue = {
+    'after': ['options', 'foreach'],
+    init: function(element, valueAccessor, allBindingsAccessor) {
+        var observable = valueAccessor(),
+            interceptor = ko.computed({
+                read: function() {
+                    return (observable() !== undefined ? observable().toString() : undefined);
+                },
+                write: function(newValue) {
+                    observable(newValue === "true");
+                }
+            });
+
+        ko.applyBindingsToNode(element, { value: interceptor });
     }
 };

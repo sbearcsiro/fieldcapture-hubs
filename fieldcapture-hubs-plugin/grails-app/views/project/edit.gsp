@@ -5,6 +5,8 @@
     <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
     <r:script disposition="head">
     var fcConfig = {
+        projectUpdateUrl: "${createLink(action:'ajaxUpdate')}",
+        organisationCreateUrl: "${createLink(controller: 'organisation', action: 'create')}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
@@ -12,13 +14,14 @@
         featureService: "${createLink(controller: 'proxy', action: 'feature')}",
         spatialWms: "${grailsApplication.config.spatial.geoserverUrl}",
         geocodeUrl: "${grailsApplication.config.google.geocode.url}",
+        imageLocation:"${resource(dir:'/images/filetypes')}",
         siteMetaDataUrl: "${createLink(controller:'site', action:'locationMetadataForPoint')}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project?.projectId)}"
         },
         here = window.location.href;
 
     </r:script>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects,organisation, fuseSearch"/>
 </head>
 
 <body>
@@ -40,81 +43,30 @@
     <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
 </div>
 
-<g:if env="development">
-    <hr/>
-
-    <div class="expandable-debug">
-        <h3>Debug</h3>
-
-        <div>
-            <h4>KO model</h4>
-            <pre data-bind="text:ko.toJSON($root,null,2)"></pre>
-            <h4>Project</h4>
-            <pre>${project.encodeAsHTML()}</pre>
-            <label class="control-label" for="currentStage">Current stage of project</label>
-            <!-- later this will be a dropdown to pick from activity stages -->
-            <g:textField class="" name="currentStage" data-bind="value:currentStage"/>
-        </div>
-    </div>
-    </div>
-</g:if>
 </div>
 <r:script>
 $(function(){
 
-    function initViewModel() {
+    var PROJECT_DATA_KEY="CreateProjectSavedData";
 
-        function ViewModel (data, activityTypes, organisations) {
-            var self = this;
-            $.extend(self, new ProjectViewModel(data, true, organisations));
+    var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+    var userOrganisations = <fc:modelAsJavascript model="${userOrganisations?:[]}"/>;
+    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
+    var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
 
-            self.save = function () {
-                if ($('#projectDetails').validationEngine('validate')) {
+    <g:if test="${params.returning}">
+        project = JSON.parse(amplify.store(PROJECT_DATA_KEY));
+        amplify.store(PROJECT_DATA_KEY, null);
+    </g:if>
 
-                    var json = viewModel.modelAsJSON();
-                    var id = "${project?.projectId ? '/' + project.projectId : ''}";
-                    $.ajax({
-                        url: "${createLink(action: 'ajaxUpdate')}" + id,
-                        type: 'POST',
-                        data: json,
-                        contentType: 'application/json',
-                        success: function (data) {
-                            if (data.error) {
-                                alert(data.detail + ' \n' + data.error);
-                            } else {
-                                var projectId = "${project?.projectId}" || data.projectId;
-                                document.location.href = "${createLink(action: 'index')}/" + projectId;
-
-                            }
-                        },
-                        error: function (data) {
-                            alert('An unhandled error occurred: ' + data.status);
-                        }
-                    });
-                }
-            };
-        }
-
-        var programsModel = <fc:modelAsJavascript model="${programs}"/>;
-        var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
-        var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-        var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
-        var viewModel =  new ViewModel(project, activityTypes, organisations);
-        viewModel.loadPrograms(programsModel);
-        return viewModel;
-    };
+    var viewModel =  new CreateEditProjectViewModel(project, true, userOrganisations, organisations, {storageKey:PROJECT_DATA_KEY});
+    viewModel.loadPrograms(programsModel);
 
     $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
-    var viewModel = initViewModel();
-    viewModel.projectSite = initSiteViewModel();
-    viewModel.projectSite.name = ko.computed(function() {
-        return 'Project area for '+viewModel.name();
-    });
-    viewModel.projectSite.type("projectArea");
-    $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
+
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
         document.location.href = "${createLink(action: 'citizenScience')}";
@@ -124,7 +76,13 @@ $(function(){
     </g:else>
     });
     $('#save').click(function () {
-        viewModel.save();
+        if ($('#projectDetails').validationEngine('validate')) {
+
+            viewModel.saveWithErrorDetection(function(data) {
+                var projectId = "${project?.projectId}" || data.projectId;
+                document.location.href = "${createLink(action: 'index')}/" + projectId;
+            });
+        }
     });
  });
 </r:script>

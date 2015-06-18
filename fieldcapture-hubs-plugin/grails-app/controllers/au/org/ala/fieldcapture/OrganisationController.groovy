@@ -11,7 +11,7 @@ class OrganisationController {
     def citizenScienceOrgId = null
 
     def list() {
-        if (params.boolean("createCitizenScienceProject",false)) { // came from CS Hub page
+        if (params.createCitizenScienceProject as boolean) { // came from CS Hub page
             if (citizenScienceOrgId == null) {
                 def orgName = grailsApplication.config.citizenScienceOrgName?:"ALA"
                 citizenScienceOrgId = organisationService.getByName(orgName)?.organisationId

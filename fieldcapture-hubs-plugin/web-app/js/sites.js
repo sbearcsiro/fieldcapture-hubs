@@ -47,10 +47,10 @@ var SiteViewModel = function (site, feature) {
         self.poi.remove(poi);
     };
     self.toJS = function(){
-        var js = ko.toJS(self);
+        var js = ko.mapping.toJS(self, {ignore:self.ignore});
         js.extent = self.extent().toJS();
         delete js.extentSource;
-        delete js.extentWatcher;
+        delete js.extentGeometryWatcher;
         delete js.isValid;
         return js;
     };
@@ -242,6 +242,9 @@ var EmptyLocation = function () {
     this.isValid = function() {
         return false;
     };
+    this.toJS = function() {
+        return {};
+    };
 };
 var PointLocation = function (l) {
     var self = this;
@@ -352,6 +355,11 @@ var DrawnLocation = function (l) {
 };
 
 var PidLocation = function (l) {
+
+    // These layers are treated specially.
+    var USER_UPLOAD_FID = 'c11083';
+    var OLD_NRM_LAYER_FID = 'cl916';
+
     var self = this;
     self.source = ko.observable('pid');
     self.geometry = ko.observable({
@@ -369,13 +377,27 @@ var PidLocation = function (l) {
     });
     self.refreshObjectList = function(){
         self.layerObjects([]);
+        self.layerObject(undefined);
         if(self.chosenLayer() !== undefined){
-            $.ajax({
-                url: fcConfig.featuresService + '?layerId=' +self.chosenLayer(),
-                dataType:'json'
-            }).done(function(data) {
-                self.layerObjects(data);
-            });
+            if (self.chosenLayer() != USER_UPLOAD_FID) {
+                $.ajax({
+                    url: fcConfig.featuresService + '?layerId=' +self.chosenLayer(),
+                    dataType:'json'
+                }).done(function(data) {
+                    self.layerObjects(data);
+                    // During initialisation of the object list, any existing value for the chosen layer will have
+                    // been set to undefined because it can't match a value in the list.
+                    if (l.pid) {
+                        self.layerObject(l.pid);
+                    }
+                });
+            }
+            else {
+                self.layerObjects([{name:'User Uploaded', pid:self.geometry().pid()}]);
+                if (l.pid) {
+                    self.layerObject(l.pid);
+                }
+            }
         }
     }
     //TODO load this from config
@@ -386,23 +408,28 @@ var PidLocation = function (l) {
         {id:'cl22',name:'Australian states'},
         {id:'cl959', name:'Local Gov. Areas'}
     ]);
+    // These layers aren't selectable unless the site is already using them.  This is to support user uploaded
+    // shapes and the previous version of the NRM layer.
+    if (l.fid == USER_UPLOAD_FID) {
+        self.layers().push({id:USER_UPLOAD_FID, name:'User Uploaded'});
+    }
+    else if (l.fid == OLD_NRM_LAYER_FID) {
+        self.layers().push({id:OLD_NRM_LAYER_FID, name:'NRM Regions - pre 2014'});
+    }
     self.chosenLayer = ko.observable(exists(l,'fid'));
     self.layerObjects = ko.observable([]);
     self.layerObject = ko.observable(exists(l,'pid'));
-    self.updateGeom = function(l){
-        //to be added
-    };
+
     self.updateSelectedPid = function(elements){
         if(self.layerObject() !== undefined){
-            self.geometry().pid(self.layerObject())
-            self.geometry().fid(self.chosenLayer())
+            self.geometry().pid(self.layerObject());
+            self.geometry().fid(self.chosenLayer());
 
             //additional metadata required from service layer
             $.ajax({
                 url: fcConfig.featureService + '?featureId=' + self.layerObject(),
                 dataType:'json'
             }).done(function(data) {
-                self.layerObject(self.geometry().pid())
                 self.geometry().name(data.name)
                 self.geometry().layerName(data.fieldname)
                 if(data.area_km !== undefined){
@@ -424,20 +451,25 @@ var PidLocation = function (l) {
     };
 
     self.isValid = function() {
-        return self.geometry().fid() && self.geometry().pid();
+        return self.geometry().fid() && self.geometry().pid() && self.chosenLayer() && self.layerObject();
     };
     self.chosenLayer.subscribe(function() {
         self.refreshObjectList();
-        self.updateSelectedPid();
     });
     self.layerObject.subscribe(function() {
         self.updateSelectedPid();
     });
     if (exists(l,'fid')) {
-        self.chosenLayer.notifySubscribers();
+        self.refreshObjectList();
     }
+    else {
+        // Uploaded shapes are created without a field id - assign it the correct FID.
+        if (exists(l, 'pid')) {
+            self.layers().push({id:USER_UPLOAD_FID, name:'User Uploaded'});
+            self.chosenLayer(USER_UPLOAD_FID);
 
-
+        }
+    }
 };
 
 function SiteViewModelWithMapIntegration (siteData) {
@@ -584,7 +616,7 @@ function SiteViewModelWithMapIntegration (siteData) {
                             [sw.lng(),ne.lat()],
                             [ne.lng(),ne.lat()],
                             [ne.lng(),sw.lat()],
-                            [ne.lng(),sw.lat()]
+                            [sw.lng(),sw.lat()]
                         ]],
                         bbox:[sw.lat(),sw.lng(),ne.lat(),ne.lng()],
                         areaKmSq:calcAreaKm,
@@ -661,7 +693,6 @@ function SiteViewModelWithMapIntegration (siteData) {
     };
     self.mapInitialised = function(map) {
         var updating = false;
-        self.loadExtent();
         self.renderPOIs();
         self.renderOnMap();
         var clearAndRedraw = function() {

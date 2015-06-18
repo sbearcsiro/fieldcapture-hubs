@@ -13,40 +13,26 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="name"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <g:if test="${params.citizenScience}">
-                    <input type="text" readonly="readonly" data-bind="value:transients.projectKind">
-                </g:if>
-                <g:else>
-
-                    <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'" data-validation-engine="validate[required]">
-                        <option value="citizenScience">Citizen Science Project</option>
-                        <option value="survey">Ecological or biological survey / assessment (not citizen science)</option>
-                        <option value="works">Natural resource management works project</option>
-                    </select>
-
-                </g:else>
+                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
             </div>
         </div>
     </div>
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="name"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
             <div class="controls span9">
-                <select data-bind="value:isExternal" data-validation-engine="validate[required]">
-                    <option>Select</option>
-                    <option value="false">Yes</option>
-                    <option value="true">No</option>
+                <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+
                 </select>
             </div>
         </div>
     </div>
-    <!-- ko stopBinding: true -->
-    <div id="organisationSearch">
+    <div id="organisationSearch" data-bind="with:organisationSearch">
         <div class="row-fluid">
 
             <div class="clearfix control-group">
@@ -62,10 +48,10 @@
         <div class="row-fluid" data-bind="slideVisible:!selection()">
             <div class="span9">
                 <div class="control-label span12" style="display:none;" data-bind="visible:!selection() && allViewed()">
-                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" data-bind="checked:organisationNotPresent"></label>
+                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" value="organisationNotOnList" data-bind="checked:organisationNotPresent"></label>
                 </div>
                 <div style="display:none;" data-bind="visible:!selection() && allViewed() && organisationNotPresent()">
-                    <button class="btn btn-success" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
+                    <button class="btn btn-success" id="registerOrganisation" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
                 </div>
             </div>
 
@@ -73,21 +59,20 @@
 
                 <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
                 <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
-                    <ul class="nav nav-list">
+                    <ul id="organisation-list" class="nav nav-list">
                         <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
                         <!-- ko foreach:userOrganisationResults -->
-                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
                         <!-- /ko -->
                         <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length && otherResults().length">Other organisations</li>
                         <!-- ko foreach:otherResults -->
-                            <li data-bind="css:{active:$root.isSelected($data)}"><a data-bind="click:$root.select, text:name"></a></li>
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
                         <!-- /ko -->
                     </ul>
                 </div>
             </div>
         </div>
     </div>
-    <!-- /ko -->
 
 </div>
 
@@ -166,7 +151,57 @@
                    for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
             <div class="controls span9">
-                <g:textField style="width:90%;" name="scienceType" data-bind="value:scienceType"/>
+                <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp></label>
+
+            <div class="controls span9">
+                <select data-bind="value:difficulty, options:transients.difficultyLevels, optionsCaption:'Select...'" data-validation-engine="validate[required]"></select>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="gear" data-bind="value:gear" rows="2"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="task" data-bind="value:task" rows="2" data-validation-engine="validate[required]"/>
             </div>
         </div>
     </div>
@@ -180,25 +215,12 @@
             <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
 
             <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
+                <g:textField style="width:90%;" type="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
             </div>
         </div>
 
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlAndroid" data-bind="value:urlAndroid" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlITunes" data-bind="value:urlITunes" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
+        <g:render template="/shared/editDocumentLinks"
+                  model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
 
         <div class="control-group">
             <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
@@ -269,7 +291,7 @@
 <div class="row-fluid">
     <div class="well">
     <h4 class="block-header"><g:message code="project.details.site"/></h4>
-
+    <g:set var="mapHeight" value="400px"/>
     <g:render template="/site/simpleSite" model="${pageScope.variables}"/>
 </div>
 </div>
