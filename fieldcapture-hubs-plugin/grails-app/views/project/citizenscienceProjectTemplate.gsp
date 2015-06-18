@@ -37,6 +37,12 @@
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
         projectActivityCreateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxCreate')}",
         projectActivityUpdateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxUpdate')}",
+        addNewSpeciesListsUrl: "${createLink(controller: 'projectActivity', action: 'ajaxAddNewSpeciesLists')}",
+        speciesProfileUrl: "${createLink(controller: 'proxy', action: 'speciesProfile')}",
+        speciesListUrl: "${createLink(controller: 'search', action: 'searchSpeciesList')}",
+        speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
+
+        bieUrl: "${grailsApplication.config.bie.baseURL}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
         },
         here = window.location.href;

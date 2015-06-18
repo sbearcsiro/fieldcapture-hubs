@@ -194,6 +194,7 @@ modules = {
 
     projectActivities {
         dependsOn 'knockout'
+        dependsOn 'species'
         resource url:'js/projectActivity.js', plugin: 'fieldcapture-plugin'
     }
 

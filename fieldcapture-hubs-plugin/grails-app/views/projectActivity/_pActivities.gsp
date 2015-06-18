@@ -45,7 +45,10 @@
                         </span>
                     </div>
                     <div class="pill-pane" id="survey-species">
-                        survey-species
+                        <span class="validationEngineContainer" id="project-activities-species-validation">
+                            <div id="project-activities-species-result-placeholder"></div>
+                            <g:render template="/projectActivity/species"/>
+                        </span>
                     </div>
                     <div class="pill-pane" id="survey-form">
                         <span class="validationEngineContainer" id="project-activities-form-validation">
