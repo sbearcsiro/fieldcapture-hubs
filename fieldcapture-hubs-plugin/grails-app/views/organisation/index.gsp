@@ -124,7 +124,7 @@
         ko.applyBindings(organisationViewModel);
 
 
-        <g:if test="${content.reporting.visible}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
+        <g:if test="${content.reporting?.visible}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
         $.each(projects, function(i, project) {
             project.startDate = project.contractStartDate || project.plannedStartDate;
@@ -353,7 +353,7 @@
             self.newReport = new AdHocReportViewModel();
 
         };
-        <g:if test="${content.reporting.visible}">
+        <g:if test="${content.reporting?.visible}">
         ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting-content'));
         </g:if>
         $('#dashboardType').change(function(e) {

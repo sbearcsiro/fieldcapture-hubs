@@ -64,7 +64,7 @@ class OrganisationController {
         def hasAdminAccess = userService.userIsAlaOrFcAdmin() || orgRole.role == RoleService.PROJECT_ADMIN_ROLE
 
         def hasViewAccess = hasAdminAccess || userService.userHasReadOnlyAccess() || orgRole.role == RoleService.PROJECT_EDITOR_ROLE
-        def dashboardReports = [[name:'outputs', label:'Activity Outputs']]
+        def dashboardReports = [[name:'dashboard', label:'Activity Outputs']]
 
         [projects : [label: 'Projects', visible: true, default:true, type: 'tab'],
          sites    : [label: 'Sites', visible: hasViewAccess, type: 'tab'],
