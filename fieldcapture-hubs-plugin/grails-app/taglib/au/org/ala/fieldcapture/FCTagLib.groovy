@@ -636,9 +636,11 @@ class FCTagLib {
 
             if (details.type == 'tab' && details.visible) {
                 def divClass = details.default ? 'tab-pane active':'tab-pane'
+                out << "<!-- ko stopBinding:true -->"
                 out << """<div id="${name}" class="${divClass}">"""
                 out << g.render(template:details.template?:name, model:[config:details])
                 out << "</div>"
+                out << "<!-- /ko -->"
             }
         }
     }
