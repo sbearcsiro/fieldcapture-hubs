@@ -2,7 +2,7 @@
 <div id="sitesList">
     <div data-bind="visible: sites.length == 0">
         <p>No ${wordForSite}s are currently associated with this project.</p>
-        <g:if test="${user?.isEditor}">
+        <g:if test="${config.editable}">
             <div class="btn-group btn-group-horizontal ">
                 <button data-bind="click: $root.addSite" type="button" class="btn">Add new ${wordForSite}</button>
                 <button data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</button>
@@ -34,7 +34,7 @@
                                                       beforeRemove: hideElement,
                                                       afterAdd: showElement">
                         <li data-bind="event: {mouseover: $root.highlight, mouseout: $root.unhighlight}">
-                            <g:if test="${user?.isEditor}">
+                            <g:if test="${config.editable}">
                                 <span>
                                     <button type="button" data-bind="click:$root.editSite" class="btn btn-container"><i class="icon-edit" title="Edit ${wordForSite.capitalize()}"></i></button>
                                     <button type="button" data-bind="click:$root.viewSite" class="btn btn-container"><i class="icon-eye-open" title="View ${wordForSite.capitalize()}"></i></button>
@@ -71,7 +71,7 @@
            </ul>
        </div>--}%
 
-            <g:if test="${user?.isEditor}">
+            <g:if test="${config.editable}">
 
                 <div class="row-fluid">
                     <div class="span3">
@@ -110,11 +110,9 @@
             },
             mapOptions
         );
-        var mapFeatures = $.parseJSON('${mapFeatures?.encodeAsJavaScript()}');
-        var sitesViewModel = new SitesViewModel(sites, map, mapFeatures, ${user?.isEditor ?: false});
+        var mapFeatures = $.parseJSON('${mapFeatures?:[].encodeAsJavaScript()}');
+        var sitesViewModel = new SitesViewModel(sites, map, mapFeatures, ${config.editable ?: false});
         ko.applyBindings(sitesViewModel, document.getElementById('sitesList'));
-
-
 
     };
 </r:script>
