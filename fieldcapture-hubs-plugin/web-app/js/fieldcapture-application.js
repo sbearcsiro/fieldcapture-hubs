@@ -280,8 +280,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
         if (!autosaving) {
             return;
         }
-        amplify.store(config.storageKey, serializeModel());
+
         if (viewModel.dirtyFlag.isDirty()) {
+            amplify.store(config.storageKey, serializeModel());
             window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
         }
     };
@@ -301,10 +302,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
         function() {
             if (viewModel.dirtyFlag.isDirty()) {
                 autosaving = true;
-                autoSaveModel();
+
                 if (config.preventNavigationIfDirty) {
                     window.addEventListener('beforeunload', onunloadHandler);
                 }
+                window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
             }
             else {
                 viewModel.cancelAutosave();
