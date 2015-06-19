@@ -4,7 +4,7 @@
     </div>
 
     <div style=" float: right;" id="map-info">
-        <span id="numberOfProjects">${organisation.projects?.size() ?: 0 > 0}</span> projects with <span id="numberOfSites">[calculating]</span>
+        <span id="numberOfProjects">${organisation.projects?.size() ?: 0}</span> projects with <span id="numberOfSites">[calculating]</span>
     </div>
 </div>
 
