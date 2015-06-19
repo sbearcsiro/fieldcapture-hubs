@@ -124,7 +124,6 @@
         ko.applyBindings(organisationViewModel);
 
 
-        <g:if test="${content.reporting?.visible}">var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;</g:if>
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
         $.each(projects, function(i, project) {
             project.startDate = project.contractStartDate || project.plannedStartDate;
@@ -132,7 +131,8 @@
         });
 
         <g:if test="${content.reporting?.visible}">
-        ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting-content'));
+            var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
+            ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting-content'));
         </g:if>
         $('#dashboardType').change(function(e) {
             var $content = $('#dashboard-content');
@@ -354,6 +354,10 @@
 
             }
         });
+
+        <g:if test="${content.sites.visible}">
+            generateMap(undefined, ['organisationFacet:'+organisation.name]);
+        </g:if>
         <g:if test="${content.admin.visible}">
         populatePermissionsTable(fcConfig.organisationMembersUrl);
         </g:if>
