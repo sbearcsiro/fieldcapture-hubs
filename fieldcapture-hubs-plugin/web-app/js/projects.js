@@ -278,6 +278,12 @@ function isValid(p, a) {
 function ProjectViewModel(project, isUserEditor, organisations) {
     var self = $.extend(this, new Documents());
 
+    if (isUserEditor === undefined) {
+        isUserEditor = false;
+    }
+    if (!organisations) {
+        organisations = [];
+    }
     var organisationsMap = {}, organisationsRMap = {};
     $.map(organisations, function(org) {
         organisationsMap[org.organisationId] = org;
@@ -285,7 +291,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.name = ko.observable(project.name);
-    self.description = ko.observable(project.description).extend({markdown:true});;
+    self.description = ko.observable(project.description).extend({markdown:true});
     self.externalId = ko.observable(project.externalId);
     self.grantId = ko.observable(project.grantId);
     self.manager = ko.observable(project.manager);
@@ -326,21 +332,26 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.dataSharing = ko.observable(project.isDataSharing? "Enabled": "Disabled");
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
+    self.difficulty = ko.observable(project.difficulty);
+    self.gear = ko.observable(project.gear);
     self.getInvolved = ko.observable(project.getInvolved);
+    self.hasParticipantCost = ko.observable(project.hasParticipantCost);
+    self.hasTeachingMaterials = ko.observable(project.hasTeachingMaterials);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
+    self.isDIY = ko.observable(project.isDIY);
+    self.isExternal = ko.observable(project.isExternal);
+    self.isSuitableForChildren = ko.observable(project.isSuitableForChildren);
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
     self.projectType = ko.observable(project.projectType || "works");
     self.scienceType = ko.observable(project.scienceType);
-    self.urlAndroid = ko.observable(project.urlAndroid).extend({url:true});
-    self.urlITunes = ko.observable(project.urlITunes).extend({url:true});
+    self.task = ko.observable(project.task);
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
-    self.isExternal = ko.observable(project.isExternal);
     self.contractStartDate = ko.observable(project.contractStartDate).extend({simpleDate: false});
     self.contractEndDate = ko.observable(project.contractEndDate).extend({simpleDate: false});
 
-    self.transients = {};
+    self.transients = self.transients || {};
 
     var calculateDuration = function(startDate, endDate) {
         if (!startDate || !endDate) {
@@ -504,6 +515,39 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         ];
     self.transients.organisations = organisations;
 
+    self.transients.difficultyLevels = [ "Easy", "Medium", "Hard" ];
+
+    self.transients.availableScienceTypes = [
+        {name:'Biodiversity', value:'biodiversity'},
+        {name:'Ecology', value:'ecology'},
+        {name:'Natural resource management', value:'nrm'}
+    ];
+
+    self.transients.availableProjectTypes = [
+        {name:'Citizen Science Project', value:'citizenScience'},
+        {name:'Ecological or biological survey / assessment (not citizen science)', value:'survey'},
+        {name:'Natural resource management works project', value:'works'}
+    ];
+    /** Map between the available selection of project types and how the data is stored */
+    self.transients.kindOfProject = ko.pureComputed({
+        read: function() {
+            if (self.isCitizenScience()) {
+                return 'citizenScience';
+            }
+            return self.projectType() == 'survey' ? 'survey' : 'works';
+        },
+        write: function(value) {
+            if (value === 'citizenScience') {
+                self.isCitizenScience(true);
+                self.projectType('survey');
+            }
+            else {
+                self.isCitizenScience(false);
+                self.projectType(value);
+            }
+        }
+    });
+
     self.loadPrograms = function (programsModel) {
         $.each(programsModel.programs, function (i, program) {
             if (program.readOnly && self.associatedProgram() != program.name) {
@@ -517,67 +561,12 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.toJS = function() {
         var toIgnore = self.ignore; // document properties to ignore.
-        toIgnore.concat(['transients', 'projectDatesChanged', 'collectoryInstitutionId']);
+        toIgnore.concat(['transients', 'projectDatesChanged', 'collectoryInstitutionId', 'ignore', 'projectStatus']);
         return ko.mapping.toJS(self, {ignore:toIgnore});
     }
 
     self.modelAsJSON = function() {
         return JSON.stringify(self.toJS());
-    };
-
-    // settings
-    self.saveSettings = function () {
-        if ($('#settings-validation').validationEngine('validate')) {
-
-            // only collect those fields that can be edited in the settings pane
-            var jsData = {
-                name: self.name(),
-                description: self.description(),
-                externalId: self.externalId(),
-                grantId: self.grantId(),
-                manager: self.manager(),
-                plannedStartDate: self.plannedStartDate(),
-                plannedEndDate: self.plannedEndDate(),
-                organisationId: self.organisationId(),
-                organisationName: self.organisationName(),
-                serviceProviderName: self.serviceProviderName(),
-                associatedProgram: self.associatedProgram(),
-                associatedSubProgram: self.associatedSubProgram(),
-                funding: new Number(self.funding())
-            };
-            if (self.regenerateProjectTimeline()) {
-                var dates = {
-                    plannedStartDate: self.plannedStartDate(),
-                    plannedEndDate: self.plannedEndDate()
-                };
-                addTimelineBasedOnStartDate(dates);
-                jsData.timeline = dates.timeline;
-            }
-            // this call to stringify will make sure that undefined values are propagated to
-            // the update call - otherwise it is impossible to erase fields
-            var json = JSON.stringify(jsData, function (key, value) {
-                return value === undefined ? "" : value;
-            });
-            var id = "${project?.projectId}";
-            $.ajax({
-                url: "${createLink(controller:'project', action: 'ajaxUpdate', id: project.projectId)}",
-                type: 'POST',
-                data: json,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (data.error) {
-                        showAlert("Failed to save settings: " + data.detail + ' \n' + data.error,
-                            "alert-error","save-result-placeholder");
-                    } else {
-                        showAlert("Project settings saved","alert-success","save-result-placeholder");
-                    }
-                },
-                error: function (data) {
-                    var status = data.status;
-                    alert('An unhandled error occurred: ' + data.status);
-                }
-            });
-        }
     };
 
     // documents
@@ -613,6 +602,76 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             self.addDocument(doc);
         });
     }
+
+    // links
+    if (project.links) {
+        $.each(project.links, function(i, link) {
+            self.addLink(link.role, link.url);
+        });
+    }
+};
+
+/**
+ * View model for use by the project create and edit pages.  Extends the ProjectViewModel to provide support
+ * for organisation search and selection as well as saving project information.
+ * @param project pre-populated or existing project data.
+ * @param isUserEditor true if the user can edit the project.
+ * @param userOrganisations the list of organisations for which the user is a member.
+ * @param organisations the list of organisations for which the user is not a member.
+ * @constructor
+ */
+function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, organisations, options) {
+    ProjectViewModel.apply(this, [project, isUserEditor, userOrganisations.concat(organisations)]);
+
+    var defaults = {
+        projectSaveUrl: fcConfig.projectUpdateUrl + '/' + (project.projectId || ''),
+        organisationCreateUrl: fcConfig.organisationCreateUrl,
+        blockUIOnSave:true,
+        storageKey:project.projectId?project.projectId+'.savedData':'projectData'
+    };
+    var config = $.extend(defaults, options);
+
+    var self = this;
+
+    // Automatically create the site of type "Project Area" with a name of "Project area for ..."
+    var siteViewModel = initSiteViewModel({type:'projectArea'});
+    siteViewModel.name = ko.computed(function() {
+        return 'Project area for '+self.name();
+    });
+    self.organisationSearch = new OrganisationSelectionViewModel(organisations, userOrganisations, project.organisationId);
+
+    self.organisationSearch.createOrganisation = function() {
+        var projectData = self.modelAsJSON();
+        amplify.store(config.storageKey, projectData);
+        var here = document.location.href;
+        document.location.href = config.organisationCreateUrl+'?returnTo='+here+'&returning=true';
+    };
+    self.organisationSearch.selection.subscribe(function(newSelection) {
+        if (newSelection) {
+            self.organisationId(newSelection.organisationId);
+        }
+    });
+
+    self.ignore = self.ignore.concat(['organisationSearch']);
+    self.transients.existingLinks = project.links;
+
+    self.modelAsJSON = function() {
+        var projectData = self.toJS();
+
+        var siteData = siteViewModel.toJS();
+        var documents = ko.mapping.toJS(self.documents());
+        self.fixLinkDocumentIds(self.transients.existingLinks);
+        var links = ko.mapping.toJS(self.links());
+
+        // Assemble the data into the package expected by the service.
+        projectData.projectSite = siteData;
+        projectData.documents = documents;
+        projectData.links = links;
+
+        return JSON.stringify(projectData);
+    };
+
+    autoSaveModel(self, config.projectSaveUrl, {blockUIOnSave:config.blockUIOnSave, blockUISaveMessage:"Saving project...", storageKey:config.storageKey});
 };
 
 function getHostName(href) {

@@ -28,13 +28,12 @@ grails.project.dependency.resolution = {
 
     }
     def tomcatVersion = '7.0.55'
-    def seleniumVersion = "2.21.0"
     def metadataExtractorVersion = "2.6.2"
     def imgscalrVersion = "4.2"
     def httpmimeVersion = "4.2.1"
     def jtsVersion = "1.8"
     def geoToolsVersion = "11.1"
-    def gebVersion = "0.10.0"
+
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
 
@@ -45,22 +44,14 @@ grails.project.dependency.resolution = {
         compile "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
         compile "joda-time:joda-time:2.3"
         compile "org.codehaus.groovy.modules.http-builder:http-builder:0.7.1"
-        compile "org.apache.httpcomponents:httpcore:4.2.1"
-        compile "org.apache.httpcomponents:httpclient:4.2.1"
+        compile "org.apache.httpcomponents:httpcore:4.4.1"
+        compile "org.apache.httpcomponents:httpclient:4.4.1"
 
 
         compile group: 'au.org.ala',
                 name: 'ala-cas-client',
                 version:'2.1-SNAPSHOT',
                 transitive:false
-
-        test "org.gebish:geb-spock:${gebVersion}"
-        test("org.seleniumhq.selenium:selenium-htmlunit-driver:$seleniumVersion") {
-            exclude "xml-apis"
-        }
-        test("org.seleniumhq.selenium:selenium-support:$seleniumVersion")
-        test("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
-        test("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion")
     }
 
     plugins {
@@ -96,7 +87,6 @@ grails.project.dependency.resolution = {
         }
         compile ':cookie:1.4'
 
-        test ":geb:${gebVersion}"
         test ":karma-test-runner:0.2.4"
         build ":release:3.0.1"
     }

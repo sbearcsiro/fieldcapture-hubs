@@ -53,6 +53,10 @@ function orEmptyArray(v) {
     return v === undefined ? [] : v;
 }
 
+function fixUrl(url) {
+    return typeof url == 'string' && url.indexOf("://") < 0? ("http://" + url): url;
+}
+
 function exists(parent, prop) {
     if(parent === undefined)
         return '';
@@ -208,21 +212,7 @@ function blockUIWithMessage(message) {
         } });
 }
 
-function confirmOnPageExit(e) {
-    // If we haven't been passed the event get the window.event
-    e = e || window.event;
 
-    var message = 'You have unsaved changes.';
-
-    // For IE6-8 and Firefox prior to version 4
-    if (e)
-    {
-        e.returnValue = message;
-    }
-
-    // For Chrome, Safari, IE8+ and Opera 12+
-    return message;
-};
 
 /**
  * Attaches a simple dirty flag (one shot change detection) to the supplied model, then once the model changes,
@@ -233,6 +223,10 @@ function confirmOnPageExit(e) {
  */
 function autoSaveModel(viewModel, saveUrl, options) {
 
+    var serializeModel = function() {
+        return (typeof viewModel.modelAsJSON === 'function') ? viewModel.modelAsJSON() : ko.toJSON(viewModel);
+    };
+
     var defaults = {
         storageKey:window.location.href+'.autosaveData',
         autoSaveIntervalInSeconds:60,
@@ -242,35 +236,92 @@ function autoSaveModel(viewModel, saveUrl, options) {
         errorMessage:"Failed to save your data: ",
         successMessage:"Save successful!",
         errorCallback:undefined,
-        successCallback:undefined
+        successCallback:undefined,
+        blockUIOnSave:false,
+        blockUISaveMessage:"Saving...",
+        serializeModel:serializeModel,
+        pageExitMessage: 'You have unsaved data.  If you leave the page this data will be lost.',
+        preventNavigationIfDirty: false,
+        defaultDirtyFlag:ko.simpleDirtyFlag
     };
-
     var config = $.extend(defaults, options);
 
-    var serializeModel = function() {
-        return (typeof viewModel.modelAsJSON === 'function') ? viewModel.modelAsJSON() : ko.toJSON(viewModel);
+    var autosaving = false;
+
+    var deleteAutoSaveData = function() {
+        amplify.store(config.storageKey, null);
     };
+    var saveLocally = function(data) {
+        amplify.store(config.storageKey, data);
+    };
+
+
+    function confirmOnPageExit(e) {
+        // If we haven't been passed the event get the window.event
+        e = e || window.event;
+
+        // For IE6-8 and Firefox prior to version 4
+        if (e) {
+            e.returnValue = config.pageExitMessage;
+        }
+
+        // For Chrome, Safari, IE8+ and Opera 12+
+        return config.pageExitMessage;
+    };
+
+    var onunloadHandler = function(e) {
+        autosaving = false;
+        deleteAutoSaveData();
+
+        return confirmOnPageExit(e);
+    };
+
     var autoSaveModel = function() {
-        amplify.store(config.storageKey, serializeModel());
+        if (!autosaving) {
+            return;
+        }
+
         if (viewModel.dirtyFlag.isDirty()) {
+            amplify.store(config.storageKey, serializeModel());
             window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
         }
-    }
+    };
+
+    viewModel.cancelAutosave = function() {
+        autosaving = false;
+        deleteAutoSaveData();
+        if (config.preventNavigationIfDirty) {
+            window.removeEventListener('beforeunload', onunloadHandler);
+        }
+    };
 
     if (typeof viewModel.dirtyFlag === 'undefined') {
-        viewModel.dirtyFlag = ko.simpleDirtyFlag(viewModel);
+        viewModel.dirtyFlag = config.defaultDirtyFlag(viewModel);
     }
     viewModel.dirtyFlag.isDirty.subscribe(
         function() {
             if (viewModel.dirtyFlag.isDirty()) {
-                autoSaveModel();
+                autosaving = true;
+
+                if (config.preventNavigationIfDirty) {
+                    window.addEventListener('beforeunload', onunloadHandler);
+                }
+                window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
+            }
+            else {
+                viewModel.cancelAutosave();
             }
         }
     );
 
-    viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
+    viewModel.saveWithErrorDetection = function(successCallback, errorCallback, saveFunction) {
+        if (config.blockUIOnSave) {
+            blockUIWithMessage(config.blockUISaveMessage);
+        }
         $(config.restoredDataWarningSelector).hide();
-        var json = serializeModel();
+
+        var json = config.serializeModel();
+
         // Store data locally in case the save fails.plan
         amplify.store(config.storageKey, json);
 
@@ -292,7 +343,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
 
                 } else {
                     showAlert(config.successMessage,"alert-success",config.resultsMessageId);
-                    amplify.store(config.storageKey, null);
+                    viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
                     if (typeof successCallback === 'function') {
                         successCallback(data);
@@ -309,6 +360,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
+                }
+            },
+            always: function(data) {
+                if (config.blockUIOnSave) {
+                    $.unblockUI();
                 }
             }
         });
@@ -339,6 +395,21 @@ if (typeof Object.create !== 'function') {
 }
 
 /** A function that works with documents.  Intended for inheritance by ViewModels */
+var mobileAppRoles = [
+    { role: "android", name: "Android" },
+    { role: "blackberry", name: "Blackberry" },
+    { role: "iTunes", name: "ITunes" },
+    { role: "windowsPhone", name: "Windows Phone" }
+];
+var socialMediaRoles = [
+    { role: "facebook", name: "Facebook" },
+    { role: "googlePlus", name: "Google+" },
+    { role: "linkedIn", name: "LinkedIn" },
+    { role: "pinterest", name: "Pinterest" },
+    { role: "rssFeed", name: "Rss Feed" },
+    { role: "tumblr", name: "Tumblr" },
+    { role: "twitter", name: "Twitter" }
+];
 function Documents() {
     var self = this;
     self.documents = ko.observableArray();
@@ -352,6 +423,86 @@ function Documents() {
         }
         return null;
     };
+
+    self.links = ko.observableArray();
+    self.findLinkByRole = function(links, roleToFind) {
+        for (var i=0; i<links.length; i++) {
+            var role = ko.utils.unwrapObservable(links[i].role);
+            if (role === roleToFind) return links[i];
+        }
+        return null;
+    };
+    self.addLink = function(role, url) {
+        self.links.push(new DocumentViewModel({
+            role: role,
+            url: url
+        }));
+    };
+    self.fixLinkDocumentIds = function(existingLinks) {
+        // match up the documentId for existing link roles
+        var existingLength = existingLinks? existingLinks.length: 0;
+        if (!existingLength) return;
+        $.each(self.links(), function(i, link) {
+            var role = ko.utils.unwrapObservable(link.role);
+            for (i = 0; i < existingLength; i++)
+                if (existingLinks[i].role === role) {
+                    link.documentId = existingLinks[i].documentId;
+                    return;
+                }
+        });
+    }
+    function pushLinkUrl(urls, links, role) {
+        var link = self.findLinkByRole(links, role.role);
+        if (link) urls.push({
+            link: link,
+            name: role.name,
+            role: role.role,
+            remove: function() {
+              self.links.remove(link);
+            },
+            logo: function(dir) {
+                return dir + "/" + role.role.toLowerCase() + ".png";
+            }
+        });
+    };
+
+    self.transients = {};
+
+    self.transients.mobileApps = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        for (var i = 0; i < mobileAppRoles.length; i++)
+            pushLinkUrl(urls, links, mobileAppRoles[i]);
+        return urls;
+    });
+    self.transients.mobileAppsUnspecified = ko.pureComputed(function() {
+        var apps = [], links = self.links();
+        for (var i = 0; i < mobileAppRoles.length; i++)
+        if (!self.findLinkByRole(links, mobileAppRoles[i].role))
+            apps.push(mobileAppRoles[i]);
+        return apps;
+    });
+    self.transients.mobileAppToAdd = ko.observable();
+    self.transients.mobileAppToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
+    });
+    self.transients.socialMedia = ko.pureComputed(function() {
+        var urls = [], links = self.links();
+        for (var i = 0; i < socialMediaRoles.length; i++)
+            pushLinkUrl(urls, links, socialMediaRoles[i]);
+        return urls;
+    });
+    self.transients.socialMediaUnspecified = ko.pureComputed(function() {
+        var apps = [], links = self.links();
+        for (var i = 0; i < socialMediaRoles.length; i++)
+            if (!self.findLinkByRole(links, socialMediaRoles[i].role))
+                apps.push(socialMediaRoles[i]);
+        return apps;
+    });
+    self.transients.socialMediaToAdd = ko.observable();
+    self.transients.socialMediaToAdd.subscribe(function(role) {
+        if (role) self.addLink(role, "");
+    });
+
     self.logoUrl = ko.pureComputed(function() {
         var logoDocument = self.findDocumentByRole(self.documents(), 'logo');
         return logoDocument ? logoDocument.url : null;
@@ -424,9 +575,52 @@ function Documents() {
         }
     };
 
-    self.ignore = ['documents', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos'];
+    self.ignore = ['documents', 'links', 'logoUrl', 'bannerUrl', 'mainImageUrl', 'primaryImages', 'embeddedVideos', 'ignore', 'transients'];
 
 };
 
+/**
+ * Wraps a list in a fuse search and exposes results and selection as knockout variables.
+ * Make sure to require Fuse on any page using this.
+ */
+SearchableList = function(list, keys, options) {
 
+    var self = this;
+    var options = $.extend({keys:keys, maxPatternLength:64}, options || {});
 
+    var searchable = new Fuse(list, options);
+
+    self.term = ko.observable();
+    self.selection = ko.observable();
+
+    self.results = ko.computed(function() {
+        if (self.term()) {
+            var searchTerm = self.term();
+            if (searchTerm > options.maxPatternLength) {
+                searchTerm = searchTerm.substring(0, options.maxPatternLength);
+            }
+            return searchable.search(searchTerm);
+        }
+        return list;
+    });
+
+    self.select = function(value) {
+        self.selection(value);
+    };
+    self.clearSelection = function() {
+        self.selection(null);
+        self.term(null);
+    };
+    self.isSelected = function(value) {
+        if (!self.selection() || !value) {
+            return false;
+        }
+        for (var i=0; i<keys.length; i++) {
+            var selection = self.selection();
+            if (selection[keys[i]] != value[keys[i]]) {
+                return false;
+            }
+        }
+        return true;
+    }
+};

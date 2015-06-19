@@ -2460,3 +2460,8 @@ span.merit {
     color: white;
     margin: 24px 24px 10px 10px;
 }
+
+.logo-small {
+    width: 16px;
+    margin: 0 2px;
+}

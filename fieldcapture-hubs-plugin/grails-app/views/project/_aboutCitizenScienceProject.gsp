@@ -41,23 +41,8 @@
                         <span data-bind="text:urlWeb"></span>
                     </div>
                 </div>
-                <div class="row-fluid" data-bind="visible:urlAndroid">
-                    <div class="span6">
-                        <label>Android app:</label>
-                    </div>
-                    <div class="span6">
-                        <span data-bind="text:urlWeb"></span>
-                    </div>
-                </div>
-                <div class="row-fluid" data-bind="visible:urlITunes">
-                    <div class="span6">
-                        <label>iTunes app:</label>
-                    </div>
-                    <div class="span6">
-                        <span data-bind="text:urlITunes"></span>
-                    </div>
-                </div>
-
+                <g:render template="/shared/listDocumentLinks"
+                          model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>
             </div>
         </span>
     </div>

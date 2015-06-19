@@ -1,40 +1,75 @@
+<style type="text/css">
+    .block-header {
+        position: relative;
+        top:-19px;
+        left:-5px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid lightgrey;
+    }
+</style>
+
 <div class="well">
+    <h4 class="block-header">Project metadata</h4>
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.type"/></label><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp>
+            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
 
-            <div class="controls span6">
-                <select data-bind="value:projectType" data-validation-engine="validate[required]">
-                    <option value="citizenScience">Citizen Science Project</option>
-                    <option value="survey">Ecological or biological survey / assessment (not citizen science)</option>
-                    <option value="works">Natural resource management works project</option>
-                </select>
+            <div class="controls span9">
+                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
             </div>
         </div>
     </div>
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.useALA"/></label><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp>
+            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
-            <div class="controls span6">
-                <select data-bind="value:isExternal" data-validation-engine="validate[required]">
-                    <option>Select</option>
-                    <option value="false">Yes</option>
-                    <option value="true">No</option>
+            <div class="controls span9">
+                <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+
                 </select>
             </div>
         </div>
     </div>
-    <div class="row-fluid">
+    <div id="organisationSearch" data-bind="with:organisationSearch">
+        <div class="row-fluid">
 
-        <div class="clearfix control-group">
-            <label class="control-label span6" for="name"><g:message code="project.organisationNameSearch"/></label><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp>
+            <div class="clearfix control-group">
 
-            <div class="controls span6">
-                <input type="text" data-bind="value:organisationNameSearch" data-validation-engine="validate[required]">
+                <label class="control-label span3" for="organisationName"><g:message code="project.organisationNameSearch"/><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp></label>
+                <div class="span6 controls">
+                    <div class="input-append" style="width:100%;">
+                        <input id="organisationName" style="width:90%" type="text" placeholder="Start typing a name here" data-bind="value:term, valueUpdate:'afterkeydown', disable:selection"><button class="btn" type="button" data-bind="click:clearSelection"><i class='icon-search' data-bind="css:{'icon-search':!term(), 'icon-remove':term()}"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-fluid" data-bind="slideVisible:!selection()">
+            <div class="span9">
+                <div class="control-label span12" style="display:none;" data-bind="visible:!selection() && allViewed()">
+                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" value="organisationNotOnList" data-bind="checked:organisationNotPresent"></label>
+                </div>
+                <div style="display:none;" data-bind="visible:!selection() && allViewed() && organisationNotPresent()">
+                    <button class="btn btn-success" id="registerOrganisation" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
+                </div>
+            </div>
 
+            <div class="span9">
+
+                <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
+                <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
+                    <ul id="organisation-list" class="nav nav-list">
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
+                        <!-- ko foreach:userOrganisationResults -->
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
+                        <!-- /ko -->
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length && otherResults().length">Other organisations</li>
+                        <!-- ko foreach:otherResults -->
+                            <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -42,9 +77,9 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span6">
+    <div class="span12">
         <div class="well">
-            <h4 class="header"><g:message code="project.details.tell"/></h4>
+            <h4 class="block-header"><g:message code="project.details.tell"/></h4>
 
             <div class="clearfix control-group">
                 <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
@@ -95,63 +130,12 @@
             </div>
         </div>
 
-        <div class="well">
-            <h4 class="header"><g:message code="project.details.image"/></h4>
-
-            <div class="control-group">
-                <label class="control-label span3" for="logo">Project Logo:</label>
-                <img class="span6" data-bind="visible:logoUrl(),attr:{src:logoUrl}">
-                <span class="span3">
-                <span class="btn fileinput-button pull-right"
-                      data-url="${createLink(controller: 'image', action: 'upload')}"
-                      data-role="logo"
-                      data-owner-type="projectId"
-                      data-owner-id="${project?.projectId}"
-                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input
-                        id="logo" type="file" name="files"><span>Attach</span></span>
-
-                <button class="btn main-image-button" data-bind="click:removeLogoImage, visible:logoUrl()"><i class="icon-minus"></i> Remove</button>
-                </span>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label span3" for="mainImage">Feature Graphic:</label>
-                <img class="span6" data-bind="visible:mainImageUrl(),attr:{src:mainImageUrl}">
-                <span class="span3">
-                    <span class="btn fileinput-button pull-right"
-                          data-url="${createLink(controller: 'image', action: 'upload')}"
-                          data-role="mainImage"
-                          data-owner-type="projectId"
-                          data-owner-id="${project?.projectId}"
-                          data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input
-                            id="mainImage" type="file" name="files"><span>Attach</span></span>
-
-                    <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-minus"></i> Remove</button>
-                </span>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label span3" for="bannerImage">Banner:</label>
-                <img class="span6" data-bind="visible:bannerUrl(),attr:{src:bannerUrl}">
-                <span class="span3">
-                    <span class="btn fileinput-button pull-right"
-                          data-url="${createLink(controller: 'image', action: 'upload')}"
-                          data-role="banner"
-                          data-owner-type="projectId"
-                          data-owner-id="${project?.projectId}"
-                          data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input
-                            id="bannerImage" type="file" name="files"><span>Attach</span></span>
-
-                    <button class="btn main-image-button" data-bind="click:removeBannerImage,  visible:bannerUrl()"><i class="icon-minus"></i> Remove</button>
-                </span>
-            </div>
-
-        </div>
     </div>
+</div>
 
-
-    <div class="span6 well">
-        <h4 class="header span12"><g:message code="project.details.involved"/></h4>
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.involved"/></h4>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="getInvolved"><g:message code="project.details.involved"/></label>
@@ -167,35 +151,76 @@
                    for="scienceType"><g:message code="project.details.scienceType"/>:</label>
 
             <div class="controls span9">
-                <g:textField style="width:90%;" name="scienceType" data-bind="value:scienceType"/>
+                <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
             </div>
         </div>
 
-        <h4 class="header"><g:message code="project.details.find"/>:</h4>
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp></label>
+
+            <div class="controls span9">
+                <select data-bind="value:difficulty, options:transients.difficultyLevels, optionsCaption:'Select...'" data-validation-engine="validate[required]"></select>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="gear" data-bind="value:gear" rows="2"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="task" data-bind="value:task" rows="2" data-validation-engine="validate[required]"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.find"/>:</h4>
 
         <div class="control-group">
             <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
 
             <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
+                <g:textField style="width:90%;" type="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
             </div>
         </div>
 
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlAndroid"><g:message code="g.android"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlAndroid" data-bind="value:urlAndroid" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
-
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="urlITunes"><g:message code="g.iTunes"/>:</label>
-
-            <div class="controls span9">
-                <g:textField style="width:90%;" tye="url" name="urlITunes" data-bind="value:urlITunes" data-validation-engine="validate[custom[url]]"/>
-            </div>
-        </div>
+        <g:render template="/shared/editDocumentLinks"
+                  model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
 
         <div class="control-group">
             <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
@@ -208,13 +233,65 @@
     </div>
 </div>
 
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.image"/></h4>
+
+        <div class="control-group">
+            <label class="control-label span3" for="logo">Project Logo:</label>
+            <img class="span6" data-bind="visible:logoUrl(),attr:{src:logoUrl}">
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="logo"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input
+                        id="logo" type="file" name="files"><span>Attach</span></span>
+
+                <button class="btn main-image-button" data-bind="click:removeLogoImage, visible:logoUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label span3" for="mainImage">Feature Graphic:</label>
+            <img class="span6" data-bind="visible:mainImageUrl(),attr:{src:mainImageUrl}">
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="mainImage"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input
+                        id="mainImage" type="file" name="files"><span>Attach</span></span>
+
+                <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label span3" for="bannerImage">Banner:</label>
+            <img class="span6" data-bind="visible:bannerUrl(),attr:{src:bannerUrl}">
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="banner"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input
+                        id="bannerImage" type="file" name="files"><span>Attach</span></span>
+
+                <button class="btn main-image-button" data-bind="click:removeBannerImage,  visible:bannerUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
+
+    </div>
+</div>
 
 <div class="row-fluid">
-<hr class="clearfix"/>
-<h4 class="header" style="display:inline"><g:message code="project.details.site"/></h4><fc:iconHelp title="Extent of the site">The extent of the site can be represented by
-                a polygon, radius or point. KML, WKT and shape files are supported for uploading polygons.
-                As are PID's of existing features in the Atlas Spatial Portal.</fc:iconHelp>
-
-<g:render template="/site/simpleSite" model="${pageScope.variables}"/>
-<hr class="clearfix"/>
+    <div class="well">
+    <h4 class="block-header"><g:message code="project.details.site"/></h4>
+    <g:set var="mapHeight" value="400px"/>
+    <g:render template="/site/simpleSite" model="${pageScope.variables}"/>
+</div>
 </div>

@@ -3,14 +3,15 @@
 <html>
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
-    <title>${organisation.name.encodeAsHTML()} | Field Capture</title>
+    <title>Create | Organisation | Field Capture</title>
     <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
         var fcConfig = {
             serverUrl: "${grailsApplication.config.grails.serverURL}",
             organisationSaveUrl: "${createLink(action:'ajaxUpdate')}",
             organisationViewUrl: "${createLink(action:'index')}",
-            documentUpdateUrl: "${createLink(controller:"proxy", action:"documentUpdate")}"
+            documentUpdateUrl: "${createLink(controller:"proxy", action:"documentUpdate")}",
+            returnTo: "${params.returnTo}"
             };
     </r:script>
     <r:require modules="knockout,jqueryValidationEngine,amplify,organisation"/>
@@ -107,6 +108,35 @@
     $(function () {
         var organisation = <fc:modelAsJavascript model="${organisation}"/>;
         var organisationViewModel = new OrganisationViewModel(organisation);
+        autoSaveModel(organisationViewModel, fcConfig.organisationSaveUrl, {blockUIOnSave:true, blockUISaveMessage:'Creating organisation....'});
+        organisationViewModel.save = function() {
+            if ($('.validationEngineContainer').validationEngine('validate')) {
+                organisationViewModel.saveWithErrorDetection(
+                    function(data) {
+                        var orgId = self.organisationId?self.organisationId:data.organisationId;
+
+                        var url;
+                        if (fcConfig.returnTo) {
+                            if (fcConfig.returnTo.indexOf('?') > 0) {
+                                url = fcConfig.returnTo+'&organisationId='+orgId;
+                            }
+                            else {
+                                url = fcConfig.returnTo+'?organisationId='+orgId;
+                            }
+                        }
+                        else {
+                            url = fcConfig.organisationViewUrl+'/'+orgId;
+                        }
+                        window.location.href = url;
+                    },
+                    undefined,
+                    {
+                        serializeModel:function() {return organisationViewModel.modelToJSON(true);}
+                    }
+                );
+
+            }
+        };
 
         ko.applyBindings(organisationViewModel);
         $('.validationEngineContainer').validationEngine();

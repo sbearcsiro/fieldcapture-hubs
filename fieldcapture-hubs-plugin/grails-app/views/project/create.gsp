@@ -2,10 +2,12 @@
 <html>
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
-    <title>${project?.name?.encodeAsHTML()} | <g:message code="g.projects"/> | <g:message code="g.fieldCapture"/></title>
+    <title>Create | Project | <g:message code="g.fieldCapture"/></title>
     <r:script disposition="head">
     var fcConfig = {
+        projectUpdateUrl: "${createLink(action:'ajaxUpdate')}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        organisationCreateUrl: "${createLink(controller: 'organisation', action: 'create')}",
         spatialService: '${createLink(controller:'proxy',action:'feature')}',
         intersectService: "${createLink(controller: 'proxy', action: 'intersect')}",
         featuresService: "${createLink(controller: 'proxy', action: 'features')}",
@@ -18,7 +20,7 @@
         here = window.location.href;
 
     </r:script>
-    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects"/>
+    <r:require modules="knockout,jqueryValidationEngine,datepicker,amplify,drawmap,jQueryFileUpload,projects,organisation,fuseSearch"/>
 </head>
 
 <body>
@@ -29,41 +31,43 @@
 
     <li class="active">Create Project</li>
 </ul>
-<form id="projectDetails" class="form-horizontal">
-    <g:set var="template" value="${params.citizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
-    <g:render template="${template}" model="${pageScope.variables}"/>
-</form>
-<div class="form-actions">
-    <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
-    <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
-</div>
+    <h2>Register a new project</h2>
+    <p>
+    Please tell us about your project by completing the form below.  Questions marked with a * are mandatory.
+    </p>
+    <form id="projectDetails" class="form-horizontal">
+        <g:set var="template" value="${params.citizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
+        <g:render template="${template}" model="${pageScope.variables}"/>
+    </form>
+    <div class="form-actions">
+        <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
+        <button type="button" id="cancel" class="btn"><g:message code="g.cancel"/></button>
+    </div>
 
 </div>
 <r:script>
 $(function(){
 
-    function initViewModel() {
+    var PROJECT_DATA_KEY="CreateProjectSavedData";
 
-        var programsModel = <fc:modelAsJavascript model="${programs}"/>;
-        var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
-        var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-        var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
-        var viewModel =  new ProjectViewModel(project, true, organisations);
-        viewModel.loadPrograms(programsModel);
-        return viewModel;
-    };
+    var programsModel = <fc:modelAsJavascript model="${programs}"/>;
+    var userOrganisations = <fc:modelAsJavascript model="${userOrganisations?:[]}"/>;
+    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
+    var project = <fc:modelAsJavascript model="${project?:[:]}"/>;
+
+    <g:if test="${params.returning}">
+        project = JSON.parse(amplify.store(PROJECT_DATA_KEY));
+        amplify.store(PROJECT_DATA_KEY, null);
+    </g:if>
+
+    var viewModel =  new CreateEditProjectViewModel(project, true, userOrganisations, organisations, {storageKey:PROJECT_DATA_KEY});
+    viewModel.loadPrograms(programsModel);
 
     $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
-    var viewModel = initViewModel();
-    var siteViewModel = initSiteViewModel({type:'projectArea'});
-    siteViewModel.name = ko.computed(function() {
-        return 'Project area for '+viewModel.name();
-    });
-
-    $("#siteType").prop("disabled", 'disabled');
     ko.applyBindings(viewModel, document.getElementById("projectDetails"));
+
     $('#cancel').click(function () {
     <g:if test="${citizenScience}">
         document.location.href = "${createLink(action: 'citizenScience')}";
@@ -75,33 +79,9 @@ $(function(){
     $('#save').click(function () {
         if ($('#projectDetails').validationEngine('validate')) {
 
-            var projectData = viewModel.toJS();
-            var siteData = siteViewModel.toJS();
-            var documents = ko.mapping.toJS(viewModel.documents());
-
-            // Assemble the data into the package expected by the service.
-            projectData.projectSite = siteData;
-            projectData.documents = documents;
-
-            var json = JSON.stringify(projectData);
-            var id = "${project?.projectId ? '/' + project.projectId : ''}";
-            $.ajax({
-                url: "${createLink(action: 'ajaxUpdate')}" + id,
-                type: 'POST',
-                data: json,
-                contentType: 'application/json',
-                success: function (data) {
-                    if (data.error) {
-                        alert(data.detail + ' \n' + data.error);
-                    } else {
-                        var projectId = "${project?.projectId}" || data.projectId;
-                        document.location.href = "${createLink(action: 'index')}/" + projectId;
-
-                    }
-                },
-                error: function (data) {
-                    alert('An unhandled error occurred: ' + data.status);
-                }
+            viewModel.saveWithErrorDetection(function(data) {
+                var projectId = "${project?.projectId}" || data.projectId;
+                document.location.href = "${createLink(action: 'index')}/" + projectId;
             });
         }
     });

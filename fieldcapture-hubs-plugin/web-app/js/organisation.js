@@ -33,7 +33,7 @@ OrganisationViewModel = function (props) {
     university:'University',
     voluntaryObserver:'Voluntary Observer',
     zoo:'Zoo'
-    }
+    };
     
     self.organisationId = props.organisationId;
     self.orgType = ko.observable(props.orgType);
@@ -44,7 +44,7 @@ OrganisationViewModel = function (props) {
     self.description = ko.observable(props.description).extend({markdown:true});
     self.url = ko.observable(props.url);
     self.newsAndEvents = ko.observable(props.newsAndEvents).extend({markdown:true});;
-
+    self.collectoryInstitutionId = props.collectoryInstitutionId;
     self.breadcrumbName = ko.computed(function() {
         return self.name()?self.name():'New Organisation';
     });
@@ -75,17 +75,24 @@ OrganisationViewModel = function (props) {
             self.transients.orgTypes.push({orgType:ot, name:orgTypesMap[ot]});
     }
 
-    self.toJS = function() {
-        return ko.mapping.toJS(self,
-            {ignore:['breadcrumbName', 'mainImageUrl', 'bannerUrl', 'logoUrl', 'detailsTemplate', 'transients']}
-        );
+    self.toJS = function(includeDocuments) {
+        var ignore = self.ignore.concat(['detailsTemplate', 'breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
+        var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
+        if (includeDocuments) {
+            js.documents = ko.toJS(self.documents);
+        }
+        return js;
+    };
+
+    self.modelAsJSON = function(includeDocuments) {
+        var orgJs = self.toJS(includeDocuments);
+        return JSON.stringify(orgJs);
     };
 
     self.save = function() {
         if ($('.validationEngineContainer').validationEngine('validate')) {
 
-            var orgJs = self.toJS();
-            var orgData = JSON.stringify(orgJs);
+            var orgData = self.modelAsJSON(true);
             $.ajax(fcConfig.organisationSaveUrl, {type:'POST', data:orgData, contentType:'application/json'}).done( function(data) {
                 if (data.errors) {
 
@@ -112,4 +119,101 @@ OrganisationViewModel = function (props) {
 
     return self;
 
-}
+};
+
+/**
+ * Provides the ability to search a user's organsations and other organisations at the same time.  The results
+ * are maintained as separate lists for ease of display (so a users existing organisations can be prioritised).
+ * @param organisations the organisations not belonging to the user.
+ * @param userOrganisations the organisations that belong to the user.
+ * @param (optional) if present, this value should contain the organisationId of an organisation to pre-select.
+ */
+OrganisationSelectionViewModel = function(organisations, userOrganisations, inititialSelection) {
+
+    var self = this;
+    var userOrgList = new SearchableList(userOrganisations, ['name']);
+    var otherOrgList = new SearchableList(organisations, ['name']);
+
+    self.term = ko.observable('');
+    self.term.subscribe(function() {
+        userOrgList.term(self.term());
+        otherOrgList.term(self.term());
+    });
+
+    self.selection = ko.computed(function() {
+        return userOrgList.selection() || otherOrgList.selection();
+    });
+
+    self.userOrganisationResults = userOrgList.results;
+    self.otherResults = otherOrgList.results;
+
+    self.clearSelection = function() {
+
+        userOrgList.clearSelection();
+        otherOrgList.clearSelection();
+        self.term('');
+    };
+    self.isSelected = function(value) {
+        return userOrgList.isSelected(value) || otherOrgList.isSelected(value);
+    };
+    self.select = function(value) {
+        self.term(value['name']);
+
+        userOrgList.select(value);
+        otherOrgList.select(value);
+    };
+
+    self.allViewed = ko.observable(false);
+
+    self.scrolled = function(blah, event) {
+        var elem = event.target;
+        var scrollPos = elem.scrollTop;
+        var maxScroll = elem.scrollHeight - elem.clientHeight;
+
+        if ((maxScroll - scrollPos) < 9) {
+            self.allViewed(true);
+        }
+    };
+
+    self.visibleRows = ko.computed(function() {
+        var count = 0;
+        if (self.userOrganisationResults().length) {
+            count += self.userOrganisationResults().length+1; // +1 for the "user orgs" label.
+        }
+        if (self.otherResults().length) {
+            count += self.otherResults().length;
+            if (self.userOrganisationResults().length) {
+                count ++; // +1 for the "other orgs" label (it will only show if the my organisations label is also showing.
+            }
+        }
+        return count;
+    });
+
+    self.visibleRows.subscribe(function() {
+        if (self.visibleRows() <= 4 && !self.selection()) {
+            self.allViewed(true);
+        }
+    });
+    self.visibleRows.notifySubscribers();
+
+
+    self.organisationNotPresent = ko.observable();
+
+    var findByOrganisationId = function(list, organisationId) {
+        for (var i=0; i<list.length; i++) {
+            if (list[i].organisationId === organisationId) {
+                return list[i];
+            }
+        }
+        return null;
+    };
+
+    if (inititialSelection) {
+        var userOrg = findByOrganisationId(userOrganisations, inititialSelection);
+        var orgToSelect = userOrg ? userOrg : findByOrganisationId(organisations, inititialSelection);
+        if (orgToSelect) {
+            self.select(orgToSelect);
+        }
+    }
+
+};
