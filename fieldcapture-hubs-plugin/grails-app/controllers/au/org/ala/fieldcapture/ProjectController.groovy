@@ -161,13 +161,15 @@ class ProjectController {
                     url: it.url
                 ]
             }
+            def startDate = it.plannedStartDate? DateUtils.parse(it.plannedStartDate): null
             def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
                 projectId  : it.projectId,
                 coverage   : it.coverage ?: '',
+                daysRemaining: endDate? DateUtils.daysBetween(today, endDate) + 1: -1,
+                daysTotal  : startDate && endDate? DateUtils.daysBetween(startDate, endDate) + 1: -1,
                 description: it.description,
                 difficulty : it.difficulty,
-                isActive   : !endDate || endDate >= today,
                 isDIY      : it.isDIY && true, // force it to boolean
                 isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
