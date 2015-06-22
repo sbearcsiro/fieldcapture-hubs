@@ -164,8 +164,9 @@ var SpeciesConstraintViewModel = function (o){
                 else {
                     self.newSpeciesLists.dataResourceUid(data.id);
                     self.speciesLists.push(new SpeciesList(ko.mapping.toJS(self.newSpeciesLists)));
-                    showAlert("Successfully added the new species lists ("+data.id+")", "alert-success", divId);
+                    self.newSpeciesLists(new SpeciesList([]));
                     self.transients.toggleShowAddSpeciesLists();
+                    showAlert("Successfully added the new species lists ("+data.id+")", "alert-success", divId);
                 }
             },
             error: function (data) {

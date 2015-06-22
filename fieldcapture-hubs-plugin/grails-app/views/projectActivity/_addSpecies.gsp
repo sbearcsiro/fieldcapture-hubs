@@ -55,7 +55,7 @@
     </br>
     <div class="row-fluid">
         <div class="span8 text-left">
-            <button class="btn btn-small btn-primary" data-bind="click: species.saveNewSpeciesName">  Create New Species Lists</button>
+            <button class="btn btn-small btn-primary" data-bind="click: species.saveNewSpeciesName">  Add New Species Lists</button>
             <button class="btn btn-small" data-bind="click: species.transients.toggleShowAddSpeciesLists">  Close</button>
         </div>
     </div>
