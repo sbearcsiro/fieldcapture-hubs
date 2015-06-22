@@ -1,4 +1,4 @@
-<div id="pActivitySurvey">
+<div id="pActivitySurvey" class="well">
         <h5>Select a form template  OR build new form for your survey</h5>
         </br>
 
@@ -40,7 +40,7 @@
         <!-- /ko -->
 
     </br>
-    <div class="row-fluid pull-right">
+    <div class="row-fluid">
 
         <div class="span12">
             <button class="btn-primary btn block" data-bind="click: saveForm"> Save </button>

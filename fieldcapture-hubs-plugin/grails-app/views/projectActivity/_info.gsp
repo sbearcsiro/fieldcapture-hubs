@@ -1,4 +1,4 @@
-<div id="pActivityInfo">
+<div id="pActivityInfo" class="well">
 
         <!-- ko foreach: projectActivities -->
             <!-- ko if: current -->
@@ -76,7 +76,7 @@
         <!-- /ko -->
 
     </br></br>
-    <div class="row-fluid pull-right">
+    <div class="row-fluid">
         <div class="span12">
             <button class="btn-primary btn block" data-bind="click: saveInfo"> Save </button>
         </div>
