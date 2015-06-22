@@ -30,10 +30,6 @@ class OrganisationController {
         ]
     }
 
-    def isProjectCreationDisabled() {
-        return false;
-    }
-
     def index(String id) {
         def organisation = organisationService.get(id, 'all')
 
@@ -53,11 +49,27 @@ class OrganisationController {
             [organisation: organisation,
              dashboard: dashboard,
              roles:roles,
-             disableProjectCreation: isProjectCreationDisabled(),
              user:user,
              isAdmin:orgRole?.role == RoleService.PROJECT_ADMIN_ROLE,
-             isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE]
+             isGrantManager:orgRole?.role == RoleService.GRANT_MANAGER_ROLE,
+             content:content(organisation)]
         }
+    }
+
+    protected Map content(organisation) {
+
+        def user = userService.getUser()
+        def members = organisationService.getMembersOfOrganisation(organisation.organisationId)
+        def orgRole = members.find { it.userId == user.userId } ?: [:]
+        def hasAdminAccess = userService.userIsAlaOrFcAdmin() || orgRole.role == RoleService.PROJECT_ADMIN_ROLE
+
+        def hasViewAccess = hasAdminAccess || userService.userHasReadOnlyAccess() || orgRole.role == RoleService.PROJECT_EDITOR_ROLE
+        def dashboardReports = [[name:'dashboard', label:'Activity Outputs']]
+
+        [projects : [label: 'Projects', visible: true, default:true, type: 'tab'],
+         sites    : [label: 'Sites', visible: hasViewAccess, type: 'tab'],
+         dashboard: [label: 'Dashboard', visible: hasViewAccess, type: 'tab', template:'/shared/dashboard', reports:dashboardReports],
+         admin    : [label: 'Admin', visible: hasAdminAccess, type: 'tab']]
     }
 
     def create() {
