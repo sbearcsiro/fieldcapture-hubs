@@ -67,7 +67,7 @@ class OrganisationController {
         def dashboardReports = [[name:'dashboard', label:'Activity Outputs']]
 
         [projects : [label: 'Projects', visible: true, default:true, type: 'tab'],
-         sites    : [label: 'Sites', visible: hasViewAccess, type: 'tab'],
+         sites    : [label: 'Sites', visible: hasViewAccess, type: 'tab', template:'/shared/sites', projectCount:organisation.projects?.size()?:0],
          dashboard: [label: 'Dashboard', visible: hasViewAccess, type: 'tab', template:'/shared/dashboard', reports:dashboardReports],
          admin    : [label: 'Admin', visible: hasAdminAccess, type: 'tab']]
     }
