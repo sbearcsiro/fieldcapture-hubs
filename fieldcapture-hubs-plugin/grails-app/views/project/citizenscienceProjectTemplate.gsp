@@ -35,6 +35,14 @@
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        projectActivityCreateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxCreate')}",
+        projectActivityUpdateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxUpdate')}",
+        addNewSpeciesListsUrl: "${createLink(controller: 'projectActivity', action: 'ajaxAddNewSpeciesLists')}",
+        speciesProfileUrl: "${createLink(controller: 'proxy', action: 'speciesProfile')}",
+        speciesListUrl: "${createLink(controller: 'search', action: 'searchSpeciesList')}",
+        speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
+
+        bieUrl: "${grailsApplication.config.bie.baseURL}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
         },
         here = window.location.href;
@@ -61,7 +69,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivities"/>
 </head>
 <body>
 
@@ -128,18 +136,9 @@
         <div class="pill-pane" id="documents">
             <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
         </div>
+
         <div class="pill-pane" id="admin">
-            <h4>Administrator actions</h4>
-            <div class="row-fluid">
-                <p><button class="btn btn-small admin-action" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button> Edit the project details and content</p>
-                <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteProject"><i class="icon-remove icon-white"></i> Delete</button> Delete this project. <strong>This cannot be undone</strong></p></g:if>
-            </div>
-
-            <h3>Project Access</h3>
-            <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToProject'), entityId:project.projectId]"/>
-            <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:g.createLink(controller:'project', action:'getMembersForProjectId', id:project.projectId), removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromProject'), entityId:project.projectId, user:user]"/>
-
-
+            <g:render template="adminTabs"/>
         </div>
 
 
@@ -148,8 +147,11 @@
 </div>
 <r:script>
     $(function() {
+
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
+        var projectActivities = <fc:modelAsJavascript model="${projectActivities}"/>;
+        var pActivityForms = <fc:modelAsJavascript model="${pActivityForms}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
         var ViewModel = function() {
@@ -170,6 +172,7 @@
 
         };
         ko.applyBindings(new ViewModel());
+
         if (projectViewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
@@ -185,9 +188,12 @@
         }
 
         initialiseSites(project.sites);
+        initialiseProjectActivities(projectActivities, pActivityForms, project.projectId);
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>
+        $('.validationEngineContainer').validationEngine();
+        $('.helphover').popover({animation: true, trigger:'hover'});
     });
 </r:script>
 </body>
