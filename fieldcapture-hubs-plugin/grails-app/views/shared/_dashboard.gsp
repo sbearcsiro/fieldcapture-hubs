@@ -2,7 +2,7 @@
     <div class="row-fluid">
         <span class="span12"><h4>Report: </h4>
             <select id="dashboardType" name="dashboardType">
-                <g:each in="${config.reports}" var="report">
+                <g:each in="${reports}" var="report">
                     <option value="${report.name}">${report.label}</option>
                 </g:each>
             </select>

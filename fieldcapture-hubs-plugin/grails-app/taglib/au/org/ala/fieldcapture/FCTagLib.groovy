@@ -638,7 +638,7 @@ class FCTagLib {
                 def divClass = details.default ? 'tab-pane active':'tab-pane'
                 out << "<!-- ko stopBinding:true -->"
                 out << """<div id="${name}" class="${divClass}">"""
-                out << g.render(template:details.template?:name, model:[config:details])
+                out << g.render(template:details.template?:name, model:details)
                 out << "</div>"
                 out << "<!-- /ko -->"
             }

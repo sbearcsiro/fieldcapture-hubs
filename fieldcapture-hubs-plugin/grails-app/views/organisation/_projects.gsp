@@ -1,4 +1,4 @@
-<g:if test="${!config.disableProjectCreation}">
+<g:if test="${!disableProjectCreation}">
     <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
        class="btn btn-small">
         <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
