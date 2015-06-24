@@ -726,6 +726,150 @@ function ProgressEditor(args) {
     this.init();
 }
 
+function BaseEditor(args) {
+    var self = this;
+    var originalValue;
+
+    self.$element = undefined;
+
+    self.setElement = function(element) {
+        self.$element = element;
+        validationSupport.addValidationSupport(element, args.item, args.column.field);
+    };
+
+
+    this.destroy = function () {
+        self.$element.remove();
+    };
+
+    this.focus = function () {
+        self.$element.focus();
+    };
+
+    this.extractValue = function (item) {
+        var dataExtractor = args.grid.getOptions().dataItemColumnValueExtractor;
+        originalValue = dataExtractor ? dataExtractor(item, args.column) : item[args.column.field];
+        return originalValue;
+    };
+
+    this.serializeValue = function () {
+        return (self.$element.val());
+    };
+
+    this.applyValue = function (item, state) {
+        item[args.column.field] = state;
+        //outputValueEditor(item, args.column, state);
+    };
+
+    this.isValueChanged = function () {
+        return (self.serializeValue() != originalValue);
+    };
+
+    this.validate = function () {
+
+        self.$element.closest('.validationEngineContainer').validationEngine('validate'); // A single field validation returns the opposite of what it should?
+
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+}
+
+function BodyAttachedEditor(args) {
+    var self = this;
+    BaseEditor.apply(this, [args]);
+    this.position = function (position) {
+        self.$element
+            .css("top", position.top - 5)
+            .css("left", position.left - 5)
+    };
+
+    this.hide = function () {
+        self.$element.hide();
+    };
+
+    this.show = function () {
+        self.$element.show();
+    };
+
+}
+
+function ComboBoxEditor(args) {
+
+    BodyAttachedEditor.apply(this, [args]);
+    var self = this;
+    var $comboboxWrapper;
+    var combobox;
+    var $select;
+
+    this.init = function () {
+
+        $select = $("<SELECT tabIndex='0' class='editor'></SELECT>");
+        for (var i=0; i<args.column.options.length; i++) {
+            $select.append($("<OPTION name=\""+args.column.options[i]+"\" value=\""+args.column.options[i]+"\">"+args.column.options[i]+"</OPTION>"));
+        }
+        $select.combobox({bsVersion:'2'});
+        combobox = $select.data('combobox');
+        $comboboxWrapper = combobox.$container;
+        $comboboxWrapper.appendTo($('body'));
+        $comboboxWrapper.css('position', 'absolute');
+        $comboboxWrapper.css('z-index', 10000);
+
+
+        // The default hide and blur behaviour don't work well with the SlickGrid editing model.
+        combobox.hide = function() {
+            if (combobox.selected) {
+                args.commitChanges();
+            }
+            else {
+                args.cancelChanges();
+            }
+        };
+        combobox.$element.off('blur');
+        if (combobox.$element.width() < args.position.width) {
+            combobox.$element.width(args.position.width);
+        }
+        self.setElement($comboboxWrapper);
+        self.position(args.position);
+
+    };
+
+    this.focus = function () {
+
+        combobox.$element.val(combobox.$target.val());
+
+        combobox.$element.on('focus', function() {
+            combobox.$element.select();
+            combobox.$element.off('focus', this);
+            combobox.lookup(combobox.$target.val());
+        });
+        combobox.$element.focus();
+
+    };
+
+    this.destroy = function() {
+        $select.remove();
+        $comboboxWrapper.remove();
+        combobox.$menu.remove();
+        delete combobox;
+    };
+
+    this.loadValue = function (item) {
+        var value = self.extractValue(item);
+        combobox.$target.val(value);
+        self.focus();
+    };
+
+    this.serializeValue = function () {
+        return (combobox.$target.val());
+    };
+
+    this.init();
+}
+
+
+
 progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 
     var saving = dataContext.saving();
