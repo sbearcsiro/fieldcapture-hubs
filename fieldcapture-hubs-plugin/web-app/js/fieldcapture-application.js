@@ -291,7 +291,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         autosaving = false;
         deleteAutoSaveData();
         if (config.preventNavigationIfDirty) {
-            window.removeEventListener('beforeunload', onunloadHandler);
+            window.onbeforeunload = null;
         }
     };
 
@@ -304,7 +304,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 autosaving = true;
 
                 if (config.preventNavigationIfDirty) {
-                    window.addEventListener('beforeunload', onunloadHandler);
+                    window.onbeforeunload = onunloadHandler;
                 }
                 window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
             }

@@ -39,7 +39,7 @@
             width:7em;
         }
     </style>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine,slickgrid"/>
 </head>
 <body>
 
@@ -130,10 +130,14 @@
             project.duration = project.contractDurationInWeeks || project.plannedDurationInWeeks;
         });
 
-        <g:if test="${content.reporting?.visible}">
+    <g:if test="${content.reporting?.visible}">
             var reports = <fc:modelAsJavascript model="${organisation.reports}"/>;
             ko.applyBindings(new ReportsViewModel(reports, projects), document.getElementById('reporting-content'));
         </g:if>
+
+        var SELECTED_REPORT_KEY = 'selectedOrganisationReport';
+        var selectedReport = amplify.store(SELECTED_REPORT_KEY) || 'dashboard';
+        $('#dashboardType').val(selectedReport);
         $('#dashboardType').change(function(e) {
             var $content = $('#dashboard-content');
             var $loading = $('.loading-message');
@@ -142,11 +146,12 @@
 
             var reportType = $('#dashboardType').val();
 
-             $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+            $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
                 $content.html(data);
                 $loading.hide();
                 $content.show();
                 $('#dashboard-content .helphover').popover({animation: true, trigger:'hover', container:'body'});
+                amplify.store(SELECTED_REPORT_KEY, reportType);
             });
 
         }).trigger('change');
@@ -195,19 +200,19 @@
             }
 
             return 'n/a';
-        }
+        };
         var statusRenderer = function(data) {
             var badge = 'badge';
             if (data == 'active') {
                 badge += ' badge-success';
             }
             return '<span class="'+badge+'">'+data+'</span>';
-        }
+        };
         var projectListHeader =  [
             {title:'Grant ID', width:'10%', render:projectUrlRenderer, data:'grantId'},
-            <g:if test="${showReports}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
+            <g:if test="${content.reporting?.visible}">{title:'Work Order', width:'10%', data:'workOrderId', defaultContent:''},</g:if>
             {title:'Name', width:'25%', data:'name'},
-            <g:if test="${showReports}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
+            <g:if test="${content.reporting?.visible}">{title:'Agreement Date', width:'10%', render:agreementDateRenderer, data:'serviceProviderAgreementDate'},</g:if>
             {title:'Contracted Start Date', width:'8%', render:dateRenderer, data:'startDate'},
             {title:'Contracted Project Length (weeks)', width:'4%', data:'duration', defaultContent:''},
             {title:'From Date', width:'8%', render:dateRenderer, data:'plannedStartDate'},
@@ -264,7 +269,7 @@
                         spinner.remove();
                     }
                     });
-            }
+            };
 
             var currentDate = stringToDate(value);
             if (currentDate) {
