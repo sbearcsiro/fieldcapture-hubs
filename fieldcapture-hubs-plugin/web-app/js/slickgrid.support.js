@@ -737,19 +737,27 @@ function BaseEditor(args) {
         validationSupport.addValidationSupport(element, args.item, args.column.field);
     };
 
-
     this.destroy = function () {
         self.$element.remove();
     };
 
     this.focus = function () {
         self.$element.focus();
+        if (typeof self.$element.select === 'function') {
+            self.$element.select();
+        }
     };
 
     this.extractValue = function (item) {
         var dataExtractor = args.grid.getOptions().dataItemColumnValueExtractor;
         originalValue = dataExtractor ? dataExtractor(item, args.column) : item[args.column.field];
         return originalValue;
+    };
+
+    this.loadValue = function (item) {
+        var value = self.extractValue(item);
+        self.$element.val(value);
+        self.focus();
     };
 
     this.serializeValue = function () {
@@ -863,6 +871,36 @@ function ComboBoxEditor(args) {
 
     this.serializeValue = function () {
         return (combobox.$target.val());
+    };
+
+    this.init();
+}
+
+function SelectEditor(args) {
+    BaseEditor.apply(this, [args]);
+    var self = this;
+
+    this.init = function () {
+
+        var $select = $("<SELECT tabIndex='0' class='editor' style='width:100%;'></SELECT>");
+        for (var i=0; i<args.column.options.length; i++) {
+            var option = args.column.options[i];
+            var value, label;
+            if (option.hasOwnProperty('value') && option.hasOwnProperty('label')) {
+                value = option.value;
+                label = option.label;
+            }
+            else {
+                value = option;
+                label = option;
+            }
+            $select.append($("<OPTION name=\""+args.column.field+"\" value=\""+value+"\">"+label+"</OPTION>"));
+        }
+        $select.height($(args.container).height());
+        $select.appendTo(args.container);
+        $select.focus();
+
+        self.setElement($select);
     };
 
     this.init();
