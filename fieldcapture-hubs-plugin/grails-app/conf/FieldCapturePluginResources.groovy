@@ -111,7 +111,7 @@ modules = {
         resource url:'js/jquery-ui-1.9.2.custom.min.js', plugin: 'fieldcapture-plugin'
         resource url:'css/smoothness/jquery-ui-1.9.2.custom.min.css', plugin: 'fieldcapture-plugin'
         resource url:'css/jquery-autocomplete.css', plugin: 'fieldcapture-plugin'
-
+        resource url:'js/jquery.appear.js', plugin: 'fieldcapture-plugin'
     }
 
     jquery_bootstrap_datatable {
