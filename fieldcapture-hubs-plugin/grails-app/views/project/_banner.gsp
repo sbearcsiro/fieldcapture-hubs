@@ -6,6 +6,10 @@
         margin-bottom:10px;
         float:left;
     }
+    .header-days {
+        float:right;
+        margin-right:10px;
+    }
     .header-text {
         float:left;
         margin-left:10px;
@@ -22,7 +26,11 @@
 </style>
 <div class="project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
     <div class="row-fluid" style="margin-left:10px;">
+        <g:if test="${user?.isEditor}">
+            <button class="btn btn-small pull-right" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button>
+        </g:if>
         <ul class="breadcrumb">
+
             <li>
                 <g:link controller="home">Home</g:link> <span class="divider">/</span>
             </li>
@@ -36,5 +44,9 @@
             <h2 data-bind="text:name"></h2>
             <h4 class="organisation" data-bind="text:organisationName"></h4>
         </div>
+        <div class="header-days">
+            <g:render template="dayscount"/>
+        </div>
     </div>
+    <g:render template="daysline"/>
 </div>

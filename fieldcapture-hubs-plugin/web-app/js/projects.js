@@ -291,6 +291,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     });
 
     self.name = ko.observable(project.name);
+    self.aim = ko.observable(project.aim);
     self.description = ko.observable(project.description).extend({markdown:true});
     self.externalId = ko.observable(project.externalId);
     self.grantId = ko.observable(project.grantId);
@@ -353,15 +354,17 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients = self.transients || {};
 
+    var calculateDurationInDays = function(startDate, endDate) {
+        var start = moment(startDate);
+        var end = moment(endDate);
+        var days = end.diff(start, 'days');
+        return days < 0? 0: days;
+    };
     var calculateDuration = function(startDate, endDate) {
         if (!startDate || !endDate) {
             return '';
         }
-        var start = moment(startDate);
-        var end = moment(endDate);
-        var durationInDays = end.diff(start, 'days');
-
-        return Math.ceil(durationInDays/7);
+        return Math.ceil(calculateDurationInDays(startDate, endDate)/7);
     };
     var calculateEndDate = function(startDate, duration) {
         var start =  moment(startDate);
@@ -379,8 +382,13 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return true;
     };
 
+    self.transients.daysRemaining = ko.pureComputed(function() {
+        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()): -1;
+    });
+    self.transients.daysTotal = ko.pureComputed(function() {
+        return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
+    });
     var updatingDurations = false; // Flag to prevent endless loops during change of end date / duration.
-
     self.transients.plannedDuration = ko.observable(calculateDuration(self.plannedStartDate(), self.plannedEndDate()));
     self.transients.plannedDuration.subscribe(function(newDuration) {
         if (updatingDurations) {
