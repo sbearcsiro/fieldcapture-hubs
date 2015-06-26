@@ -13,6 +13,9 @@ import spock.lang.Specification
  */
 class DateUtilsSpec extends Specification {
 
+    def cleanup() {
+        DateTimeUtils.setCurrentMillisSystem()
+    }
 
     def "parsing supports ISO8601"() {
 
