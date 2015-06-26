@@ -200,16 +200,15 @@ $(document).ready(function () {
     }
     var pageWindow = new pageVM();
     ko.applyBindings(pageWindow);
-    var showActiveOnly, showTag = '${showTag}';
 
     /* the base url of the home server */
     var baseUrl = fcConfig.baseUrl;
 
     /** load projects and show first page **/
     allProjects.sort(comparator); // full list is sorted by name
-    projects = allProjects;
-    doSearch(true);
+    doTag('${showTag}');
 
+    var showActiveOnly, showTag;
     function doTag(tag) {
       showTag = tag;
       doSearch(true);
@@ -238,6 +237,7 @@ $(document).ready(function () {
                 projects.push(item);
         }
         offset = 0;
+        total = projects.length;
         populateTable();
     }
 
@@ -247,6 +247,7 @@ $(document).ready(function () {
     function populateTable() {
         pageWindow.pageProjects(projects.slice(offset, offset + perPage));
         pageWindow.pageProjects.valueHasMutated();
+        showPaginator();
     }
 
     /*************************************************\
@@ -256,7 +257,7 @@ $(document).ready(function () {
     function showPaginator() {
         if (total <= perPage) {
             // no pagination required
-            $('div#navLinks').html("");
+            $('div#pt-navLinks').html("");
             return;
         }
         var currentPage = Math.floor(offset / perPage) + 1;
@@ -264,41 +265,35 @@ $(document).ready(function () {
         var $pago = $("<div class='pagination'></div>");
         // add prev
         if (offset > 0)
-            $pago.append('<a href="javascript:prevPage();">« Previous</a></li>');
-        else
-            $pago.append('« Previous</span>');
-        for (var i = 1; i <= maxPage && i < 20; i++) {
+            $pago.append('<a href="javascript:pago.prevPage();">&lt;</a></li>');
+        for (var i = currentPage - 3, n = 0; i <= maxPage && n < 7; i++) {
+            if (i < 1) continue;
+            n++;
             if (i == currentPage)
-                $pago.append('<span class="currentPage disabled">' + i + '</span>');
+                $pago.append('<a href="#" class="currentStep">' + i + '</a>');
             else
-                $pago.append('<a href="javascript:gotoPage(' + i + ');">' + i + '</a>');
+                $pago.append('<a href="javascript:pago.gotoPage(' + i + ');">' + i + '</a>');
         }
         // add next
         if ((offset + perPage) < total)
-            $pago.append('<a href="javascript:nextPage();">Next »</a>');
-        else
-            $pago.append('Next »');
+            $pago.append('<a href="javascript:pago.nextPage();">&gt;</a>');
 
-        $('div#navLinks').html($pago);
+        $('div#pt-navLinks').html($pago);
     }
 
-    /** show the specified page **/
-    function gotoPage(pageNum) {
-        // calculate new offset
-        offset = (pageNum - 1) * perPage;
-        populateTable();
-    }
-
-    /** show the previous page **/
-    function prevPage() {
-        offset -= perPage;
-        populateTable();
-    }
-
-    /** show the next page **/
-    function nextPage() {
-        offset += perPage;
-        populateTable();
+    window.pago = {
+        gotoPage: function(pageNum) {
+            offset = (pageNum - 1) * perPage;
+            populateTable();
+        },
+        prevPage: function() {
+            offset -= perPage;
+            populateTable();
+        },
+        nextPage: function() {
+            offset += perPage;
+            populateTable();
+        }
     }
 
     /* comparator for data projects */
@@ -349,16 +344,6 @@ $(document).ready(function () {
         showActiveOnly = true;
         doSearch(true);
     });
-
-    // throttle the resize events so it doesn't go crazy
-    (function() {
-         return; // no resize for now
-         var timer;
-         $(window).resize(function () {
-             if (timer) clearTimeout(timer);
-             timer = setTimeout(populateTable, 100);
-         });
-    }());
 });
 </r:script>
 </body>
