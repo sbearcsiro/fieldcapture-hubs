@@ -107,13 +107,13 @@
                         <span style="font-weight:bold">View the project page</span></a>
                     </div>
                     TAGS:
-                    <span class="projecttag" data-bind="visible:isNoCost,click:doTag.bind($data,'noCost')"><g:message code="project.tag.noCost"/></span>
-                    <span class="projecttag" data-bind="visible:hasTeachingMaterials,click:doTag.bind($data,'teach')"><g:message code="project.tag.teach"/></span>
-                    <span class="projecttag" data-bind="visible:isDIY,click:doTag.bind($data,'diy')"><g:message code="project.tag.diy"/></span>
-                    <span class="projecttag" data-bind="visible:isSuitableForChildren,click:doTag.bind($data,'children')"><g:message code="project.tag.children"/></span>
-                    <span class="projecttag" data-bind="visible:difficulty == 'Easy',click:doTag.bind($data,'difficultyEasy')"><g:message code="project.tag.difficultyEasy"/></span>
-                    <span class="projecttag" data-bind="visible:difficulty == 'Medium',click:doTag.bind($data,'difficultyMedium')"><g:message code="project.tag.difficultyMedium"/></span>
-                    <span class="projecttag" data-bind="visible:difficulty == 'Hard',click:doTag.bind($data,'difficultyHard')"><g:message code="project.tag.difficultyHard"/></span>
+                    <span class="projecttag" data-bind="visible:!hasParticipantCost(),click:doTag.bind($data,'noCost')"><g:message code="project.tag.noCost"/></span>
+                    <span class="projecttag" data-bind="visible:hasTeachingMaterials(),click:doTag.bind($data,'teach')"><g:message code="project.tag.teach"/></span>
+                    <span class="projecttag" data-bind="visible:isDIY(),click:doTag.bind($data,'diy')"><g:message code="project.tag.diy"/></span>
+                    <span class="projecttag" data-bind="visible:isSuitableForChildren(),click:doTag.bind($data,'children')"><g:message code="project.tag.children"/></span>
+                    <span class="projecttag" data-bind="visible:difficulty() == 'Easy',click:doTag.bind($data,'difficultyEasy')"><g:message code="project.tag.difficultyEasy"/></span>
+                    <span class="projecttag" data-bind="visible:difficulty() == 'Medium',click:doTag.bind($data,'difficultyMedium')"><g:message code="project.tag.difficultyMedium"/></span>
+                    <span class="projecttag" data-bind="visible:difficulty() == 'Hard',click:doTag.bind($data,'difficultyHard')"><g:message code="project.tag.difficultyHard"/></span>
                 </td>
                 <td style="width:10em">
                     <g:render template="dayscount"/>
@@ -129,53 +129,19 @@
 </div>
 <r:script>
 $(document).ready(function () {
-    var markdown = new Showdown.converter();
     function createVM(props) {
-        var vm = new ProjectViewModel({
-            coverage: props[2],
-            aim: props[1],
-            isExternal: props[10],
-            name: props[14],
-            organisationId: props[15],
-            organisationName: props[16],
-            status: props[17],
-            urlWeb: props[19],
-            links: props[13]
-        }, false, []);
-        vm.projectId = props[0];
-        vm.indexUrl = "${createLink()}/" + props[0];
-        vm.transients.daysRemaining = ko.observable(props[3]);
-        vm.transients.daysTotal = ko.observable(props[5]);
-        vm.since = ko.pureComputed(function(){
-          var daysSince = props[4];
-          if (daysSince < 0) return "";
-          if (daysSince === 0) return "today";
-          if (daysSince === 1) return "yesterday";
-          if (daysSince < 30) return daysSince + " days ago";
-          if (daysSince === 30) return "one month ago";
-          if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
-          if (daysSince === 365) return "one year ago";
-          return (daysSince / 365).toFixed(1) + " years ago";
-        });
-        vm.difficulty = props[6];
-        vm.hasTeachingMaterials = props[7];
-        vm.isDIY = props[8];
-        vm.isEditable = props[9];
-        vm.isNoCost = props[11];
-        vm.isSuitableForChildren = props[12];
-        vm.orgUrl = props[15] && ("${createLink(controller:'organisation',action:'index')}/" + props[15]);
-        vm.urlImage = props[18];
+        var vm = new CreateCitizenScienceFinderProjectViewModel(props);
         vm.doTag = doTag;
+        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.organisationName()).toLowerCase();
         var x, urls = [];
-        if (vm.urlWeb()) urls.push('<a href="' + fixUrl(vm.urlWeb()) + '">Website</a>');
+        if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
         for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+            x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Mobile Apps&nbsp;" + x);
         for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+            x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Social Media&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.organisationName()).toLowerCase();
         return vm;
     }
 
@@ -226,13 +192,13 @@ $(document).ready(function () {
             var item = allProjects[i];
             if (!item) continue;
             if (showActiveOnly && item.transients.daysRemaining() == 0) continue;
-            if (showTag === 'children' && !item.isSuitableForChildren) continue;
-            if (showTag === 'difficultyEasy' && item.difficulty != 'Easy') continue;
-            if (showTag === 'difficultyMedium' && item.difficulty != 'Medium') continue;
-            if (showTag === 'difficultyHard' && item.difficulty != 'Hard') continue;
-            if (showTag === 'diy' && !item.isDIY) continue;
-            if (showTag === 'noCost' && !item.isNoCost) continue;
-            if (showTag === 'teach' && !item.hasTeachingMaterials) continue;
+            if (showTag === 'children' && !item.isSuitableForChildren()) continue;
+            if (showTag === 'difficultyEasy' && item.difficulty() != 'Easy') continue;
+            if (showTag === 'difficultyMedium' && item.difficulty() != 'Medium') continue;
+            if (showTag === 'difficultyHard' && item.difficulty() != 'Hard') continue;
+            if (showTag === 'diy' && !item.isDIY()) continue;
+            if (showTag === 'noCost' && item.hasParticipantCost()) continue;
+            if (showTag === 'teach' && !item.hasTeachingMaterials()) continue;
             if (item.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }

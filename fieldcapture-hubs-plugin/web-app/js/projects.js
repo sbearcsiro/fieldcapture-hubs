@@ -620,6 +620,50 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 };
 
 /**
+ * View model for use by the citizen science project finder page.
+ * @param props array of project attributes
+ * @constructor
+ */
+function CreateCitizenScienceFinderProjectViewModel(props) {
+    ProjectViewModel.apply(this, [{
+        coverage: props[2],
+        aim: props[1],
+        difficulty: props[6],
+        hasParticipantCost: !props[11],
+        hasTeachingMaterials: props[7],
+        isDIY: props[8],
+        isExternal: props[10],
+        isSuitableForChildren: props[12],
+        links: props[13],
+        name: props[14],
+        organisationId: props[15],
+        organisationName: props[16],
+        status: props[17],
+        urlWeb: props[19]
+    }, false, []]);
+
+    var self = this;
+    self.projectId = props[0];
+    self.indexUrl = "${createLink()}/" + props[0];
+    self.transients.daysRemaining = ko.observable(props[3]);
+    self.transients.daysTotal = ko.observable(props[5]);
+    self.since = ko.pureComputed(function(){
+        var daysSince = props[4];
+        if (daysSince < 0) return "";
+        if (daysSince === 0) return "today";
+        if (daysSince === 1) return "yesterday";
+        if (daysSince < 30) return daysSince + " days ago";
+        if (daysSince < 32) return "one month ago";
+        if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
+        if (daysSince === 365) return "one year ago";
+        return (daysSince / 365).toFixed(1) + " years ago";
+    });
+    self.isEditable = props[9];
+    self.orgUrl = props[15] && ("${createLink(controller:'organisation',action:'index')}/" + props[15]);
+    self.urlImage = props[18];
+}
+
+/**
  * View model for use by the project create and edit pages.  Extends the ProjectViewModel to provide support
  * for organisation search and selection as well as saving project information.
  * @param project pre-populated or existing project data.
