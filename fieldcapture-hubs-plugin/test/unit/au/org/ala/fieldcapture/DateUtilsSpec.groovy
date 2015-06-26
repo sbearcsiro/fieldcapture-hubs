@@ -2,6 +2,7 @@ package au.org.ala.fieldcapture
 
 import au.org.ala.fieldcapture.DateUtils
 import org.joda.time.DateTime
+import org.joda.time.DateTimeUtils
 import org.joda.time.DateTimeZone
 import org.joda.time.Interval
 import org.joda.time.Period
@@ -12,6 +13,9 @@ import spock.lang.Specification
  */
 class DateUtilsSpec extends Specification {
 
+    def cleanup() {
+        DateTimeUtils.setCurrentMillisSystem()
+    }
 
     def "parsing supports ISO8601"() {
 
@@ -109,6 +113,22 @@ class DateUtilsSpec extends Specification {
         results.values()[3] == ["2014-04-03T00:00:00Z"]
         results.containsKey(new Interval(startDate, period))
 
+    }
+
+    def "the current financial year can be calculated from the current time"() {
+        when: "The current date is the last day of the 2013/2014 financial year"
+        DateTime date = new DateTime(2014, 06, 30, 23, 59)
+        DateTimeUtils.setCurrentMillisFixed(date.getMillis())
+
+        then: "The year 2013 should be returned"
+        DateUtils.currentFinancialYear() == 2013
+
+        when: "The current date is the first day of the 2014/2015 financial year"
+        date = new DateTime(2014, 07, 01, 0, 1)
+        DateTimeUtils.setCurrentMillisFixed(date.getMillis())
+
+        then: "The year 2014 should be returned"
+        DateUtils.currentFinancialYear() == 2014
     }
 
 }
