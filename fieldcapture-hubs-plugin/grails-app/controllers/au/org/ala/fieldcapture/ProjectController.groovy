@@ -161,13 +161,17 @@ class ProjectController {
                     url: it.url
                 ]
             }
+            def startDate = it.plannedStartDate? DateUtils.parse(it.plannedStartDate): null
             def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
                 projectId  : it.projectId,
+                aim        : it.aim,
                 coverage   : it.coverage ?: '',
-                description: it.description,
+                daysRemaining: endDate? DateUtils.daysRemaining(today, endDate): -1,
+                daysSince: startDate? DateUtils.daysRemaining(startDate, today): -1,
+                daysTotal  : startDate && endDate? DateUtils.daysRemaining(startDate, endDate): -1,
                 difficulty : it.difficulty,
-                isActive   : !endDate || endDate >= today,
+                hasTeachingMaterials: it.hasTeachingMaterials,
                 isDIY      : it.isDIY && true, // force it to boolean
                 isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
@@ -192,25 +196,29 @@ class ProjectController {
         } else {
             [
                 user: user,
+                showTag: params.tag,
                 projects: projects.collect {
                     [ // pass array instead of object to reduce JSON size
-                     it.projectId,
-                     it.coverage,
-                     it.description,
-                     it.difficulty,
-                     it.isActive,
-                     it.isDIY,
-                     it.isEditable,
-                     it.isExternal,
-                     it.isNoCost,
-                     it.isSuitableForChildren,
-                     it.links,
-                     it.name,
-                     it.organisationId,
-                     it.organisationName,
-                     it.status,
-                     it.urlImage,
-                     it.urlWeb
+                      it.projectId,
+                      it.aim,
+                      it.coverage,
+                      it.daysRemaining,
+                      it.daysSince,
+                      it.daysTotal,
+                      it.difficulty,
+                      it.hasTeachingMaterials,
+                      it.isDIY,
+                      it.isEditable,
+                      it.isExternal,
+                      it.isNoCost,
+                      it.isSuitableForChildren,
+                      it.links,
+                      it.name,
+                      it.organisationId,
+                      it.organisationName,
+                      it.status,
+                      it.urlImage,
+                      it.urlWeb
                     ]
                 }
             ]
