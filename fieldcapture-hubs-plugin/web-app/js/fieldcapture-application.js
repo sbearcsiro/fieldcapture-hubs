@@ -314,7 +314,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         }
     );
 
-    viewModel.saveWithErrorDetection = function(successCallback, errorCallback, saveFunction) {
+    viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
         if (config.blockUIOnSave) {
             blockUIWithMessage(config.blockUISaveMessage);
         }
@@ -326,11 +326,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
         amplify.store(config.storageKey, json);
 
         return $.ajax({
-            url: saveUrl,
-            type: 'POST',
-            data: json,
-            contentType: 'application/json',
-            success: function (data) {
+                url: saveUrl,
+                type: 'POST',
+                data: json,
+                contentType: 'application/json'
+            }).done(function (data) {
                 if (data.error) {
                     showAlert(config.errorMessage + data.detail + ' \n' + data.error,
                         "alert-error",config.resultsMessageId);
@@ -352,8 +352,8 @@ function autoSaveModel(viewModel, saveUrl, options) {
                         config.successCallback(data);
                     }
                 }
-            },
-            error: function (data) {
+            })
+            .fail(function (data) {
                 bootbox.alert($(config.timeoutMessageSelector).html());
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
@@ -361,13 +361,13 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
                 }
-            },
-            always: function(data) {
+            })
+            .always(function(data) {
                 if (config.blockUIOnSave) {
                     $.unblockUI();
                 }
-            }
-        });
+            });
+
     }
 
 }
