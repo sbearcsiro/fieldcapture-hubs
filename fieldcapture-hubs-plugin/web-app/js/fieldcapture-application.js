@@ -404,11 +404,14 @@ var mobileAppRoles = [
 var socialMediaRoles = [
     { role: "facebook", name: "Facebook" },
     { role: "googlePlus", name: "Google+" },
+    { role: "instagram", name: "Instagram" },
     { role: "linkedIn", name: "LinkedIn" },
     { role: "pinterest", name: "Pinterest" },
     { role: "rssFeed", name: "Rss Feed" },
     { role: "tumblr", name: "Tumblr" },
-    { role: "twitter", name: "Twitter" }
+    { role: "twitter", name: "Twitter" },
+    { role: "vimeo", name: "Vimeo" },
+    { role: "youtube", name: "You Tube" }
 ];
 function Documents() {
     var self = this;

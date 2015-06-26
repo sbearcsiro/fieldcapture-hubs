@@ -9,6 +9,7 @@
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
         projectUpdateUrl: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+        projectEditUrl:"${createLink(action:'edit', id:project.projectId)}",
         spatialBaseUrl: "${grailsApplication.config.spatial.baseUrl}",
         spatialWmsCacheUrl: "${grailsApplication.config.spatial.wms.cache.url}",
         spatialWmsUrl: "${grailsApplication.config.spatial.wms.url}",
@@ -84,6 +85,9 @@
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
 </g:else>
+<!-- ko stopBinding:true -->
+<g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
+<!-- /ko -->
 
 <r:script>
     $(function() {
@@ -124,10 +128,12 @@
                 touchSwipe:false // at the moment we only support 1 image
             });
         }
+        initialiseSites(project.sites);
+        $("#sitesList").hide();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>
-    });
+});
 </r:script>
 </body>
 </html>
