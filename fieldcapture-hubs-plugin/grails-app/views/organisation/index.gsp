@@ -21,7 +21,7 @@
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
             organisationMembersUrl: "${loadPermissionsUrl}",
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
-            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport')}",
+            dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport', params:[fq:'organisationFacet:'+organisation.name])}",
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
             activityEditUrl: '${g.createLink(controller: 'activity', action:'enterData')}',
             reportCreateUrl: '${g.createLink( action:'createAdHocReport')}',
@@ -146,7 +146,7 @@
 
             var reportType = $('#dashboardType').val();
 
-            $.get(fcConfig.dashboardUrl, {fq:'organisationFacet:'+organisation.name, report:reportType}).done(function(data) {
+            $.get(fcConfig.dashboardUrl, {report:reportType}).done(function(data) {
                 $content.html(data);
                 $loading.hide();
                 $content.show();

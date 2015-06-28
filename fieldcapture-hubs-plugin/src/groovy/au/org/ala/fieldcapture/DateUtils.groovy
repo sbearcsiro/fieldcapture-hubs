@@ -72,6 +72,14 @@ class DateUtils {
         return 1 + Days.daysBetween(start.toLocalDate(), end.toLocalDate()).getDays()
     }
 
+    /**
+     * @return the first year in the current financial year (July-June).  e.g. if we are in 2014/2015 this method will
+     * return 2014
+     */
+    static int currentFinancialYear() {
+        return now().minusMonths(6).year
+    }
+
     static String format(Date date) {
         return DATE_FORMATTER.print(new DateTime(date))
     }
