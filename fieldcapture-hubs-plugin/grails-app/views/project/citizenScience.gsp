@@ -60,7 +60,7 @@
                     <button id="pt-search-all" type="button" class="btn" disabled>All</button>
                     <button id="pt-search-active" type="button" class="btn">Active</button>
                 </div>
-                <label class="span2" for="pt-sort">Sort</label>
+                <label class="span1" for="pt-sort">Sort</label>
                 <div class="span2">
                     <g:select name="pt-sort" from="['Name','Aim','Organisation Name','Status']"  keys="['name','aim','organisationName','status']"/>
                 </div>
