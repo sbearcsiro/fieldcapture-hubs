@@ -16,13 +16,12 @@
                 <!-- /ko -->
 
                 </br></br>
-                <button class="btn btn-default" data-bind="click: addProjectActivity"> <i class="icon-plus"></i> Add Survey</button>
-
-                <!-- ko if: projectActivities().length > 0 -->
-                    </br></br>
-                    <button class="btn btn-default" data-bind="click: deleteProjectActivity"> <i class="icon-minus-sign"></i> Delete Survey</button>
-                <!-- /ko -->
-
+                <div class="btn-group btn-group-vertical">
+                    <a class="btn btn-xs btn-default" data-bind="click: addProjectActivity"> <i class="icon-plus"></i> Add Survey</a>
+                    <!-- ko if: projectActivities().length > 0 -->
+                        <a class="btn btn-xs btn-default" data-bind="click: deleteProjectActivity"> <i class="icon-minus-sign"></i> Delete Survey</a>
+                    <!-- /ko -->
+                </div>
             </div>
 
             <div class="span10">
@@ -33,7 +32,6 @@
                     <li><a href="#survey-species" data-toggle="pill">Species</a></li>
                     <li><a href="#survey-form" data-toggle="pill">Surveys Form</a></li>
                     <li><a href="#survey-locations" data-toggle="pill">locations</a></li>
-                    <li><a href="#survey-access" data-toggle="pill">Access & Visibility</a></li>
                     <li><a href="#survey-alerts" data-toggle="pill">Alerts & Actions</a></li>
                 </ul>
 
@@ -58,16 +56,12 @@
                     </div>
                     <div class="pill-pane" id="survey-locations">
                         <span class="validationEngineContainer" id="project-activities-locations-validation">
-                            <div id="project-activities-locations-result-placeholder"></div>
-                            survey-locations
+                            <div id="project-activities-sites-result-placeholder"></div>
+                            <!-- Allow user to seelct the existing sites and preview those sites.-->
+                            <g:render template="/projectActivity/sites"/>
                         </span>
                     </div>
-                    <div class="pill-pane" id="survey-access">
-                        <span class="validationEngineContainer" id="project-activities-access-validation">
-                            <div id="project-activities-access-result-placeholder"></div>
-                            <g:render template="/projectActivity/access"/>
-                        </span>
-                    </div>
+
                     <div class="pill-pane" id="survey-alerts">
                         survey-alerts
                     </div>
@@ -83,8 +77,8 @@
 </div>
 
 <r:script>
-    function initialiseProjectActivities(pActivities, pActivityForms, projectId) {
-        var pActivitiesVM = new ProjectActivitiesViewModel(pActivities, pActivityForms, projectId);
+    function initialiseProjectActivities(pActivities, pActivityForms, projectId, sites) {
+        var pActivitiesVM = new ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, sites);
         ko.applyBindings(pActivitiesVM, document.getElementById('pActivities'));
     };
 </r:script>

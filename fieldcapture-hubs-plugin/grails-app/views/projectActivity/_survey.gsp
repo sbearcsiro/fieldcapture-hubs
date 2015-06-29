@@ -1,9 +1,13 @@
+
+
 <div id="pActivitySurvey" class="well">
-        <h5>Select a form template  OR build new form for your survey</h5>
-        </br>
 
         <!-- ko foreach: projectActivities -->
             <!-- ko if: current -->
+            <g:render template="/projectActivity/warning"/>
+            <h5>Select a form template  OR build new form for your survey</h5>
+            </br>
+
             <div class="row-fluid">
                 <div class="span2 text-right">
                     <label class="control-label"> Select a form template : </label>

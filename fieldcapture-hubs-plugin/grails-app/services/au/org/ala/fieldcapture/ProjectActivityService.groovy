@@ -11,6 +11,10 @@ class ProjectActivityService {
         webService.getJson(grailsApplication.config.ecodata.baseUrl + 'projectActivity/getAllByProject/'+ projectId).list
     }
 
+    def get(projectActivityId){
+        webService.getJson(grailsApplication.config.ecodata.baseUrl + 'projectActivity/get/'+ projectActivityId)
+    }
+
     def create(pActivity) {
         update('', pActivity)
     }

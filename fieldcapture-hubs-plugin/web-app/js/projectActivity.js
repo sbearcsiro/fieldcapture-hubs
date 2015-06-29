@@ -1,23 +1,21 @@
-function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId) {
+function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, sites) {
     var self = this;
-    self.projectId = ko.observable(projectId);
-    self.coordinateSystems = [{id:'"WGS84"', name:'WGS84'}, {id:'"GDA94"', name:'GDA94'},{id:'EPSG:4326', name:'EPSG:4326'}];
-    self.visibility = [{id: 'OWNER_ONLY_ACCESS', name:'Owner Only'},{id:'LIMITED_PUBLIC_ACCESS', name:'Limited public viewing'}, {id:'PUBLIC_ACCESS',name:'Full public access'}];
     self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
 
+    self.projectId = ko.observable(projectId);
     self.pActivityForms = pActivityForms;
-
     self.formNames = ko.observableArray($.map(pActivityForms ? pActivityForms : [], function (obj, i) {
         return obj.name;
     }));
+    self.sites = sites;
 
     self.projectActivities = ko.observableArray($.map(pActivities, function (obj, i) {
-        return new ProjectActivity(obj, pActivityForms, self.projectId(), i == 0 ? true : false);
+        return new ProjectActivity(obj, pActivityForms, self.projectId(), i == 0 ? true : false, self.sites);
     }));
 
     self.addProjectActivity = function() {
         self.reset();
-        self.projectActivities.push(new ProjectActivity([], self.pActivityForms, self.projectId(), true));
+        self.projectActivities.push(new ProjectActivity([], self.pActivityForms, self.projectId(), true, self.sites));
         initialiseValidator();
     };
 
@@ -49,6 +47,11 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId) {
 
     self.saveSpecies = function(){
         var caller = "species";
+        return self.genericUpdate(self.current().asJSON(caller), caller);
+    };
+
+    self.saveSites = function(){
+        var caller = "sites";
         return self.genericUpdate(self.current().asJSON(caller), caller);
     };
 
@@ -104,7 +107,7 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId) {
         var divId = 'project-activities-'+ caller +'-result-placeholder';
 
         if(caller != "info" && pActivity.projectActivityId() === undefined){
-            showAlert("You need to save 'Survey Info' details before updating other constraints.", "alert-error",  divId);
+            showAlert("Please save 'Survey Info' details before applying other constraints.", "alert-error",  divId);
             return;
         }
 
@@ -148,7 +151,7 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId) {
 
 
 
-var ProjectActivity = function (o, pActivityForms, projectId, selected){
+var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     var self = this;
     self.projectActivityId = ko.observable(o.projectActivityId);
     self.projectId = ko.observable(o.projectId ? o.projectId  : projectId);
@@ -161,8 +164,16 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected){
     self.published = ko.observable(o.published ? o.published : false);
     self.current = ko.observable(selected);
     self.pActivityFormName = ko.observable(o.pActivityFormName);
-    self.access = new AccessVisibilityViewModel(o.access);
     self.species = new SpeciesConstraintViewModel(o.species);
+    self.transients = {};
+    self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl +"&pActivityId="+self.projectActivityId());
+    self.transients.siteCreateUrl = ko.observable(fcConfig.siteCreateUrl);
+    self.transients.warning = ko.computed(function(){
+        return self.projectActivityId() === undefined ? true : false;
+    });
+    self.sites = ko.observableArray($.map(sites ? sites : [], function (obj, i) {
+        return new SiteList(obj, o.sites);
+    }));
 
     var images = [];
     $.each(pActivityForms, function(index, form){
@@ -199,14 +210,53 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected){
             jsData.pActivityFormName = self.pActivityFormName();
         }
         else if(by == "info"){
-            jsData = ko.mapping.toJS(self, {ignore:['current','pActivityForms','pActivityFormImages', 'access', 'species']});
+            jsData = ko.mapping.toJS(self, {ignore:['current','pActivityForms','pActivityFormImages', 'access', 'species','sites','transients']});
         }
         else if(by == "species"){
             jsData = {};
             jsData.species = self.species.asJson();
         }
+        else if(by == "sites"){
+            jsData = {};
+            var sites = [];
+            $.each(self.sites(), function(index, site){
+                if(site.added()){
+                    sites.push(site.siteId());
+                }
+            });
+            jsData.sites = sites;
+        }
+
         return JSON.stringify(jsData, function (key, value) { return value === undefined ? "" : value; });
     }
+};
+
+var SiteList = function(o, surveySites){
+    var self = this;
+    if(!o) o = {};
+    if(!surveySites) surveySites = {};
+
+    self.siteId = ko.observable(o.siteId);
+    self.name = ko.observable(o.name);
+    self.added = ko.observable(false);
+    self.siteUrl = ko.observable(fcConfig.siteViewUrl + "/" + self.siteId())
+
+    self.addSite = function(){
+        self.added(true);
+    };
+    self.removeSite = function(){
+        self.added(false);
+    };
+
+    self.load = function(surveySites){
+        $.each(surveySites, function( index, siteId ) {
+            if(siteId == self.siteId()){
+                self.added(true);
+            }
+        });
+    };
+    self.load(surveySites);
+
 };
 
 var SpeciesConstraintViewModel = function (o){
@@ -219,7 +269,7 @@ var SpeciesConstraintViewModel = function (o){
     self.speciesLists = ko.observableArray($.map(o.speciesLists ? o.speciesLists : [], function (obj, i) {
         return new SpeciesList(obj);
     }));
-    self.newSpeciesLists = new SpeciesList([]);
+    self.newSpeciesLists = new SpeciesList();
 
     self.transients = {};
     self.transients.bioProfileUrl =  ko.computed(function (){
@@ -301,9 +351,16 @@ var SpeciesConstraintViewModel = function (o){
                 jsData.listItems =  jsData.listItems + "," + species.name;
             }
         });
+        // Add bulk species names.
+        if(jsData.listItems == "") {
+            jsData.listItems = self.newSpeciesLists.transients.bulkSpeciesNames();
+        }else{
+            jsData.listItems = "," + self.newSpeciesLists.transients.bulkSpeciesNames();
+        }
 
         var model = JSON.stringify(jsData, function (key, value) { return value === undefined ? "" : value; });
         var divId = 'project-activities-species-result-placeholder';
+        $("#addNewSpecies-status").show();
         $.ajax({
             url: fcConfig.addNewSpeciesListsUrl,
             type: 'POST',
@@ -314,15 +371,17 @@ var SpeciesConstraintViewModel = function (o){
                     showAlert("Error :" + data.error, "alert-error", divId);
                 }
                 else {
+                    showAlert("Successfully added the new species list - "+self.newSpeciesLists.listName() +" ("+ data.id+")", "alert-success", divId);
                     self.newSpeciesLists.dataResourceUid(data.id);
                     self.speciesLists.push(new SpeciesList(ko.mapping.toJS(self.newSpeciesLists)));
-                    self.newSpeciesLists(new SpeciesList([]));
+                    self.newSpeciesLists = new SpeciesList();
                     self.transients.toggleShowAddSpeciesLists();
-                    showAlert("Successfully added the new species lists ("+data.id+")", "alert-success", divId);
                 }
+                $("#addNewSpecies-status").hide();
             },
             error: function (data) {
                 showAlert("Error : An unhandled error occurred" + data.status, "alert-error", divId);
+                $("#addNewSpecies-status").hide();
             }
         });
     };
@@ -397,7 +456,6 @@ var SpeciesListsViewModel = function(o){
 
 };
 
-
 var SpeciesList = function(o){
     var self = this;
     if(!o) o = {};
@@ -419,21 +477,12 @@ var SpeciesList = function(o){
     self.removeNewSpeciesName = function(species){
         self.allSpecies.remove(species);
     };
-    self.addNewSpeciesName();
 
     self.transients = {};
+    self.transients.bulkSpeciesNames = ko.observable(o.bulkSpeciesNames);
     self.transients.url  = ko.observable(fcConfig.speciesListsServerUrl + "/speciesListItem/list/" + o.dataResourceUid);
     self.transients.check = ko.observable(false);
 
-};
-
-var AccessVisibilityViewModel = function (o){
-    var self = this;
-    if(!o) o = {};
-
-    self.recordVisibility = ko.observable(o.recordVisibility);
-    self.userCanChangeVisibility  = ko.observable(o.userCanChangeVisibility);
-    self.coordinateSystem = ko.observable(o.coordinateSystem);
 };
 
 var ImagesViewModel = function(image){

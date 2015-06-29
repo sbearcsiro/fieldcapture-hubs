@@ -1,11 +1,14 @@
 <div id="pActivitySurvey">
-        <h5>You can constrain the species available for selection in this survey to:</h5>
-        </br>
 
         <!-- ko foreach: projectActivities -->
 
             <!-- ko if: current -->
+
             <div class="well">
+                <g:render template="/projectActivity/warning"/>
+
+                <h5>You can constrain the species available for selection in this survey to:</h5>
+
                 <div class="row-fluid">
                     <div class="span4 text-left">
                         <div class="controls">
@@ -13,10 +16,19 @@
                         </div>
                     </div>
 
+                    <div class="span4 text-left">
+
+                        <div class="btn-group btn-group-vertical" data-bind="visible: species.groupInfoVisible, if: species.groupInfoVisible" >
+                            <a class="btn btn-xs btn-default" data-bind="click: species.transients.toggleShowExistingSpeciesLists">Choose from existing species lists</a>
+                            (OR)
+                            <a class="btn btn-xs btn-default" target="blank" data-bind="click: species.transients.toggleShowAddSpeciesLists">Add new species lists</a>
+                        </div>
+
+                    </div>
                 </div>
 
 
-                <div data-bind="visible: species.singleInfoVisible" class="row-fluid">
+                <div class="row-fluid" data-bind="visible: species.singleInfoVisible" >
                     <div class="span4 text-left">
                         <div class="controls">
                             <span data-bind="if: species.singleSpecies.guid">
@@ -38,6 +50,8 @@
 
                     </div>
                 </div>
+
+
 
                 <span data-bind="visible: species.groupInfoVisible, if: species.speciesLists().length > 0">
                     <div class="row-fluid">
@@ -63,27 +77,9 @@
             <span data-bind="visible: species.groupInfoVisible">
 
                 <span data-bind="if: species.groupInfoVisible">
-                    <div class="well">
-                        <div class="span12 text-left">
-                             <div class="controls">
-                                <!-- <a data-bind="click: species.allSpeciesLists.loadAllSpeciesLists" target="blank" href="${grailsApplication.config.lists.baseURL}"><b>Choose from existing species lists</b></a> -->
-                                <a data-bind="click: species.transients.toggleShowExistingSpeciesLists" href="#"><b>Choose from existing species lists</b></a>
-                                (OR)
-                                <!-- <a target="blank" href="${grailsApplication.config.lists.baseURL}"><b>Add new species lists</b></a> -->
-                                <a target="blank" data-bind="click: species.transients.toggleShowAddSpeciesLists" href="#"><b>Add new species lists</b></a>
-                            </div>
-                        </div>
+                    <g:render template="/projectActivity/addSpecies" />
 
-                        </br>
-
-                        <g:render template="/projectActivity/addSpecies" />
-
-                        </br>
-
-                        <g:render template="/projectActivity/chooseSpecies" />
-
-                    </div>
-
+                    <g:render template="/projectActivity/chooseSpecies" />
                 </span>
 
             </span>
