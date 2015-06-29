@@ -85,61 +85,29 @@
     <div class="row-fluid">
         <!-- content  -->
         <ul class="nav nav-pills">
-            <li class="active">
-                <a href="#about" data-toggle="pill">About</a>
-            </li>
-            <li><a href="#news" data-toggle="pill">News</a></li>
-            <li><a href="#surveys" data-toggle="pill">Surveys</a></li>
-            <li><a href="#locations" data-toggle="pill">Locations</a></li>
-            <li><a href="#documents" data-toggle="pill">Documents</a></li>
-            <li><a href="#admin" data-toggle="pill">Admin</a></li>
-        </ul>
+        <fc:tabList tabs="${projectContent}"/>
     </div>
     <div class="pill-content">
         <div class="pill-pane active" id="about">
             <g:render template="aboutCitizenScienceProject"/>
         </div>
         <div class="pill-pane" id="news">
-            <div class="row-fluid">
-                <span class="span6">
-                    <div class="well">
-                        <div class="well-title">News and events</div>
-                        <div data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"></div>
-
-                    </div>
-                </span>
-                <span class="span6">
-                    <div class="well">
-                        <div class="well-title">Project stories</div>
-                        <div data-bind="html:projectStories()?projectStories.markdownToHtml():'Nothing at this time'"></div>
-                    </div>
-                </span>
-            </div>
+            <g:render template="news"/>
         </div>
-        <div class="pill-pane" id="surveys">
+        <div class="pill-pane" id="activities">
             <g:render template="/shared/activitiesList"
                       model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>
         </div>
-        <div class="pill-pane" id="locations">
+        <div class="pill-pane" id="site">
             <!-- ko stopBinding:true -->
-            <g:render template="/site/sitesList" model="[wordForSite:'location']"/>
+            <g:render template="/site/sitesList" model="[wordForSite:'location', editable:true]"/>
             <!-- /ko -->
         </div>
         <div class="pill-pane" id="documents">
             <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
         </div>
         <div class="pill-pane" id="admin">
-            <h4>Administrator actions</h4>
-            <div class="row-fluid">
-                <p><button class="btn btn-small admin-action" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button> Edit the project details and content</p>
-                <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteProject"><i class="icon-remove icon-white"></i> Delete</button> Delete this project. <strong>This cannot be undone</strong></p></g:if>
-            </div>
-
-            <h3>Project Access</h3>
-            <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToProject'), entityId:project.projectId]"/>
-            <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:g.createLink(controller:'project', action:'getMembersForProjectId', id:project.projectId), removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromProject'), entityId:project.projectId, user:user]"/>
-
-
+            <g:render template="admin"/>
         </div>
 
 

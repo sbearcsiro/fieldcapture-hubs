@@ -239,6 +239,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         successCallback:undefined,
         blockUIOnSave:false,
         blockUISaveMessage:"Saving...",
+        blockUISaveSuccessMessage:"Save successful",
         serializeModel:serializeModel,
         pageExitMessage: 'You have unsaved data.  If you leave the page this data will be lost.',
         preventNavigationIfDirty: false,
@@ -332,6 +333,9 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 contentType: 'application/json'
             }).done(function (data) {
                 if (data.error) {
+                    if (config.blockUIOnSave) {
+                        $.unblockUI();
+                    }
                     showAlert(config.errorMessage + data.detail + ' \n' + data.error,
                         "alert-error",config.resultsMessageId);
                     if (typeof errorCallback === 'function') {
@@ -342,7 +346,12 @@ function autoSaveModel(viewModel, saveUrl, options) {
                     }
 
                 } else {
-                    showAlert(config.successMessage,"alert-success",config.resultsMessageId);
+                    if (config.blockUIOnSave) {
+                        blockUIWithMessage(config.blockUISaveSuccessMessage);
+                    }
+                    else {
+                        showAlert(config.successMessage, "alert-success", config.resultsMessageId);
+                    }
                     viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
                     if (typeof successCallback === 'function') {
@@ -354,17 +363,15 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 }
             })
             .fail(function (data) {
+                if (config.blockUIOnSave) {
+                    $.unblockUI();
+                }
                 bootbox.alert($(config.timeoutMessageSelector).html());
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
                 }
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
-                }
-            })
-            .always(function(data) {
-                if (config.blockUIOnSave) {
-                    $.unblockUI();
                 }
             });
 

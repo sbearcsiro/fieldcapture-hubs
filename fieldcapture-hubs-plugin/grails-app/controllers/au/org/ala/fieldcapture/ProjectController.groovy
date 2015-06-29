@@ -34,6 +34,7 @@ class ProjectController {
                 user.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
             def programs = projectService.programsModel()
+            def content = projectContent(project, user, programs)
             def model = [project: project,
                 activities: activityService.activitiesForProject(id),
                 mapFeatures: commonService.getMapFeatures(project),
@@ -48,29 +49,44 @@ class ProjectController {
                 programs: programs,
                 today:DateUtils.format(new DateTime()),
                 themes:metadataService.getThemesForProject(project),
-                projectContent:projectContent(project, user, programs)
+                projectContent:content.model
             ]
 
-            render view:projectView(project), model:model
+            render view:content.view, model:model
         }
     }
 
     protected Map projectContent(project, user, programs) {
-        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
-         documents:[label:'Documents', visible: true, type:'tab'],
-         activities:[label:'Activities', visible:true, disabled:!user?.hasViewAccess, type:'tab'],
-         site:[label:'Sites', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
-         dashboard:[label:'Dashboard', visible: true, disabled:!user?.hasViewAccess, type:'tab'],
+
+        boolean isSurveyProject = (project.projectType == 'survey')
+        def model = isSurveyProject?surveyProjectContent(project, user):worksProjectContent(project, user)
+        [view:projectView(project), model:model]
+    }
+
+    protected String projectView(project) {
+        if (project.isExternal) {
+            return 'externalCitizenScienceProjectTemplate'
+        }
+        return project.projectType == 'survey'?'citizenscienceProjectTemplate':'index'
+    }
+
+    protected Map surveyProjectContent(project, user) {
+        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab'],
+         news:[label:'News', visible: true, type:'tab'],
+         documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
+         activities:[label:'Surveys', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:'Survey',type:'tab'],
+         site:[label:'Locations', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Location', editable:user?.isEditor == true, type:'tab'],
          admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
     }
 
-    private String projectView(project) {
-        if (project.isExternal) {
-            if (project.isCitizenScience) {
-                return 'externalCitizenScienceProjectTemplate'
-            }
-        }
-        return project.projectType == 'survey'?'citizenscienceProjectTemplate':'index'
+    protected Map worksProjectContent(project, user) {
+        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
+         documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
+         activities:[label:'Activities', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:"Activity",type:'tab'],
+         site:[label:'Sites', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Site', editable:user?.isEditor == true, type:'tab'],
+         dashboard:[label:'Dashboard', visible: !project.isExternal, disabled:!user?.hasViewAccess, type:'tab'],
+         admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
+
     }
 
     @PreAuthorise
