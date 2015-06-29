@@ -69,7 +69,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivities"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivity, species"/>
 </head>
 <body>
 
@@ -93,50 +93,27 @@
     <div class="row-fluid">
         <!-- content  -->
         <ul class="nav nav-pills">
-            <li class="active">
-                <a href="#about" data-toggle="pill">About</a>
-            </li>
-            <li><a href="#news" data-toggle="pill">News</a></li>
-            <li><a href="#surveys" data-toggle="pill">Surveys</a></li>
-            <li><a href="#locations" data-toggle="pill">Locations</a></li>
-            <li><a href="#documents" data-toggle="pill">Documents</a></li>
-            <li><a href="#admin" data-toggle="pill">Admin</a></li>
-        </ul>
+        <fc:tabList tabs="${projectContent}"/>
     </div>
     <div class="pill-content">
         <div class="pill-pane active" id="about">
             <g:render template="aboutCitizenScienceProject"/>
         </div>
         <div class="pill-pane" id="news">
-            <div class="row-fluid">
-                <span class="span6">
-                    <div class="well">
-                        <div class="well-title">News and events</div>
-                        <div data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"></div>
-
-                    </div>
-                </span>
-                <span class="span6">
-                    <div class="well">
-                        <div class="well-title">Project stories</div>
-                        <div data-bind="html:projectStories()?projectStories.markdownToHtml():'Nothing at this time'"></div>
-                    </div>
-                </span>
-            </div>
+            <g:render template="news"/>
         </div>
-        <div class="pill-pane" id="surveys">
+        <div class="pill-pane" id="activities">
             <g:render template="/shared/activitiesList"
                       model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>
         </div>
-        <div class="pill-pane" id="locations">
+        <div class="pill-pane" id="site">
             <!-- ko stopBinding:true -->
-            <g:render template="/site/sitesList" model="[wordForSite:'location']"/>
+            <g:render template="/site/sitesList" model="[wordForSite:'location', editable:true]"/>
             <!-- /ko -->
         </div>
         <div class="pill-pane" id="documents">
             <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
         </div>
-
         <div class="pill-pane" id="admin">
             <g:render template="adminTabs"/>
         </div>

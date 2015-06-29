@@ -168,6 +168,8 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     self.transients = {};
     self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl +"&pActivityId="+self.projectActivityId());
     self.transients.siteCreateUrl = ko.observable(fcConfig.siteCreateUrl);
+    self.transients.siteUploadUrl = ko.observable(fcConfig.siteUploadUrl);
+
     self.transients.warning = ko.computed(function(){
         return self.projectActivityId() === undefined ? true : false;
     });
@@ -333,7 +335,7 @@ var SpeciesConstraintViewModel = function (o){
     };
 
     self.saveNewSpeciesName = function(){
-        if (!$('#project-activities-species-addNewSpecies-validation').validationEngine('validate')){
+        if (!$('#project-activities-species-validation').validationEngine('validate')){
             return;
         }
 
@@ -500,6 +502,5 @@ function initialiseValidator() {
     $('#project-activities-species-validation').validationEngine();
     $('#project-activities-form-validation').validationEngine();
     $('#project-activities-access-validation').validationEngine();
-    $('#project-activities-species-addNewSpecies-validation').validationEngine();
 
 }

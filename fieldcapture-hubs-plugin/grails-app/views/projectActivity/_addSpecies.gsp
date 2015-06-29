@@ -1,4 +1,4 @@
-<span class="validationEngineContainer" id="project-activities-species-addNewSpecies-validation" data-bind="if: species.transients.showAddSpeciesLists">
+<span data-bind="if: species.transients.showAddSpeciesLists">
 
 <div class="well">
 
