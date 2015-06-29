@@ -32,8 +32,6 @@
             <div class="well">
                 <div class="well-title">About the project</div>
                 <hr/>
-                <span data-bind="text:aim"></span>
-                <hr/>
                 <span data-bind="html:description.markdownToHtml()"></span>
             </div>
         </span>
@@ -50,13 +48,13 @@
                 <g:render template="/shared/listDocumentLinks"
                           model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>
             </div>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'noCost'])}" data-bind="visible:!hasParticipantCost()"><span class="projecttag"><g:message code="project.tag.noCost"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'teach'])}" data-bind="visible:hasTeachingMaterials()"><span class="projecttag"><g:message code="project.tag.teach"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'diy'])}" data-bind="visible:isDIY()"><span class="projecttag"><g:message code="project.tag.diy"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'children'])}" data-bind="visible:isSuitableForChildren()"><span class="projecttag"><g:message code="project.tag.children"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyEasy'])}" data-bind="visible:difficulty() == 'Easy'"><span class="projecttag"><g:message code="project.tag.difficultyEasy"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyMedium'])}" data-bind="visible:difficulty() == 'Medium'"><span class="projecttag"><g:message code="project.tag.difficultyMedium"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyHard'])}" data-bind="visible:difficulty() == 'Hard'"><span class="projecttag"><g:message code="project.tag.difficultyHard"/></span></a>
+            <span class="projecttag" data-bind="visible:!hasParticipantCost()"><g:message code="project.tag.noCost"/></span>
+            <span class="projecttag" data-bind="visible:hasTeachingMaterials()"><g:message code="project.tag.teach"/></span>
+            <span class="projecttag" data-bind="visible:isDIY()"><g:message code="project.tag.diy"/></span>
+            <span class="projecttag" data-bind="visible:isSuitableForChildren()"><g:message code="project.tag.children"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Easy'"><g:message code="project.tag.difficultyEasy"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Medium'"><g:message code="project.tag.difficultyMedium"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Hard'"><g:message code="project.tag.difficultyHard"/></span>
         </span>
     </div>
 </div>

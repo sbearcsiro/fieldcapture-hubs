@@ -627,7 +627,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 function CreateCitizenScienceFinderProjectViewModel(props) {
     ProjectViewModel.apply(this, [{
         coverage: props[2],
-        aim: props[1],
+        description: props[1],
         difficulty: props[6],
         hasParticipantCost: !props[11],
         hasTeachingMaterials: props[7],
@@ -644,7 +644,6 @@ function CreateCitizenScienceFinderProjectViewModel(props) {
 
     var self = this;
     self.projectId = props[0];
-    self.indexUrl = "${createLink()}/" + props[0];
     self.transients.daysRemaining = ko.observable(props[3]);
     self.transients.daysTotal = ko.observable(props[5]);
     self.since = ko.pureComputed(function(){
@@ -659,7 +658,6 @@ function CreateCitizenScienceFinderProjectViewModel(props) {
         return (daysSince / 365).toFixed(1) + " years ago";
     });
     self.isEditable = props[9];
-    self.orgUrl = props[15] && ("${createLink(controller:'organisation',action:'index')}/" + props[15]);
     self.urlImage = props[18];
 }
 

@@ -33,7 +33,7 @@ describe("Citizen Science Project Finder Spec", function () {
         ];
         var project = new CreateCitizenScienceFinderProjectViewModel(projectData);
 
-        expect(project.aim()).toEqual(projectData[1]);
+        expect(project.description()).toEqual(projectData[1]);
         expect(project.transients.daysRemaining()).toEqual(projectData[3]);
         expect(project.since()).toEqual(projectData[4] + " days ago");
         expect(project.transients.daysTotal()).toEqual(projectData[5]);

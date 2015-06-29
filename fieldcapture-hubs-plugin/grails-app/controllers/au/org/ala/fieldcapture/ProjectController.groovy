@@ -165,7 +165,7 @@ class ProjectController {
             def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
                 projectId  : it.projectId,
-                aim        : it.aim,
+                description: it.description,
                 coverage   : it.coverage ?: '',
                 daysRemaining: endDate? DateUtils.daysRemaining(today, endDate): -1,
                 daysSince: startDate? DateUtils.daysRemaining(startDate, today): -1,
@@ -200,7 +200,7 @@ class ProjectController {
                 projects: projects.collect {
                     [ // pass array instead of object to reduce JSON size
                       it.projectId,
-                      it.aim,
+                      it.description,
                       it.coverage,
                       it.daysRemaining,
                       it.daysSince,
