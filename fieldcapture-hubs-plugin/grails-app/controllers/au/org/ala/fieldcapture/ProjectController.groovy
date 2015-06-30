@@ -56,7 +56,7 @@ class ProjectController {
                 def pActivityForms = []
                 def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
                 activityModel.collect{ pActivityForms.add([name: it.name, images: it.images]) }
-                model.projectActivities = projectActivityService.getAllByProject(project.projectId)
+                model.projectActivities = projectActivityService?.getAllByProject(project.projectId)
                 model.pActivityForms =  pActivityForms
             }
 
