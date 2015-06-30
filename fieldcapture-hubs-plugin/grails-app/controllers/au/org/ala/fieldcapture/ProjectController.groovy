@@ -177,26 +177,22 @@ class ProjectController {
                     url: it.url
                 ]
             }
-            def startDate = it.plannedStartDate? DateUtils.parse(it.plannedStartDate): null
-            def endDate = it.plannedEndDate? DateUtils.parse(it.plannedEndDate): null
             [
                 projectId  : it.projectId,
-                description: it.description,
                 coverage   : it.coverage ?: '',
-                daysRemaining: endDate? DateUtils.daysRemaining(today, endDate): -1,
-                daysSince: startDate? DateUtils.daysRemaining(startDate, today): -1,
-                daysTotal  : startDate && endDate? DateUtils.daysRemaining(startDate, endDate): -1,
+                description: it.description,
                 difficulty : it.difficulty,
-                hasTeachingMaterials: it.hasTeachingMaterials,
+                endDate    : it.plannedEndDate,
+                hasParticipantCost: it.hasParticipantCost && true, // force it to boolean
+                hasTeachingMaterials: it.hasTeachingMaterials && true, // force it to boolean
                 isDIY      : it.isDIY && true, // force it to boolean
-                isEditable : userId && projectService.canUserEditProject(userId, it.projectId),
                 isExternal : it.isExternal && true, // force it to boolean
-                isNoCost   : !it.hasParticipantCost,
-                isSuitableForChildren: it.isSuitableForChildren,
+                isSuitableForChildren: it.isSuitableForChildren && true, // force it to boolean
                 links      : trimmedLinks,
                 name       : it.name,
                 organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
+                startDate  : it.plannedStartDate,
                 status     : it.status,
                 urlImage   : urlImage,
                 urlWeb     : it.urlWeb
@@ -216,22 +212,20 @@ class ProjectController {
                 projects: projects.collect {
                     [ // pass array instead of object to reduce JSON size
                       it.projectId,
-                      it.description,
                       it.coverage,
-                      it.daysRemaining,
-                      it.daysSince,
-                      it.daysTotal,
+                      it.description,
                       it.difficulty,
+                      it.endDate,
+                      it.hasParticipantCost,
                       it.hasTeachingMaterials,
                       it.isDIY,
-                      it.isEditable,
                       it.isExternal,
-                      it.isNoCost,
                       it.isSuitableForChildren,
                       it.links,
                       it.name,
                       it.organisationId,
                       it.organisationName,
+                      it.startDate,
                       it.status,
                       it.urlImage,
                       it.urlWeb

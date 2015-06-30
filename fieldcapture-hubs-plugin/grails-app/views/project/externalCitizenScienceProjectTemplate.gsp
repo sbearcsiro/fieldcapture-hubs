@@ -68,6 +68,7 @@
 
                 <g:render template="aboutCitizenScienceProject"/>
             </div>
+            <div id="map"></div>
             <div class="pill-pane" id="admin">
                 <g:render template="admin"/>
             </div>

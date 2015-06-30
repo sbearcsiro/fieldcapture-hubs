@@ -153,7 +153,6 @@
         }
 
         initialiseSites(project.sites);
-        $("#sitesList").hide();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>

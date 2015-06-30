@@ -383,7 +383,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     self.transients.daysRemaining = ko.pureComputed(function() {
-        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()): -1;
+        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()) + 1: -1;
+    });
+    self.transients.daysSince = ko.pureComputed(function() {
+        return self.plannedStartDate()? calculateDurationInDays(self.plannedStartDate()): -1;
     });
     self.transients.daysTotal = ko.pureComputed(function() {
         return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
@@ -626,28 +629,28 @@ function ProjectViewModel(project, isUserEditor, organisations) {
  */
 function CreateCitizenScienceFinderProjectViewModel(props) {
     ProjectViewModel.apply(this, [{
+        aim: props[1],
         coverage: props[2],
-        description: props[1],
-        difficulty: props[6],
-        hasParticipantCost: !props[11],
-        hasTeachingMaterials: props[7],
-        isDIY: props[8],
-        isExternal: props[10],
-        isSuitableForChildren: props[12],
-        links: props[13],
-        name: props[14],
-        organisationId: props[15],
-        organisationName: props[16],
-        status: props[17],
-        urlWeb: props[19]
+        difficulty: props[3],
+        plannedEndDate: new Date(props[4]),
+        hasParticipantCost: props[5],
+        hasTeachingMaterials: props[6],
+        isDIY: props[7],
+        isExternal: props[8],
+        isSuitableForChildren: props[9],
+        links: props[10],
+        name: props[11],
+        organisationId: props[12],
+        organisationName: props[13],
+        plannedStartDate: new Date(props[14]),
+        status: props[15],
+        urlWeb: props[17]
     }, false, []]);
 
     var self = this;
     self.projectId = props[0];
-    self.transients.daysRemaining = ko.observable(props[3]);
-    self.transients.daysTotal = ko.observable(props[5]);
     self.since = ko.pureComputed(function(){
-        var daysSince = props[4];
+        var daysSince = self.transients.daysSince();
         if (daysSince < 0) return "";
         if (daysSince === 0) return "today";
         if (daysSince === 1) return "yesterday";
@@ -657,8 +660,7 @@ function CreateCitizenScienceFinderProjectViewModel(props) {
         if (daysSince === 365) return "one year ago";
         return (daysSince / 365).toFixed(1) + " years ago";
     });
-    self.isEditable = props[9];
-    self.urlImage = props[18];
+    self.urlImage = props[16];
 }
 
 /**

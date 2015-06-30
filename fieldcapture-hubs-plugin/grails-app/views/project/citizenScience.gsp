@@ -71,7 +71,7 @@
                     </div>
                     <div class="span3">
                         <label for="pt-sort"><g:message code="g.sortBy" /></label>
-                        <g:select name="pt-sort" from="['Name','Description','Organisation Name','Status']"  keys="['name','description','organisationName','status']"/>
+                        <g:select name="pt-sort" from="['Name','Aim and Description','Organisation Name','Status']"  keys="['name','aim','organisationName','status']"/>
                     </div>
                     <div class="span3">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
@@ -126,11 +126,7 @@
                         <a data-bind="attr:{href:orgUrl}">
                             <span data-bind="text:organisationName"></span></a>
                     </div>
-                    <div class="descLine" style="position:relative">
-                        <div data-bind="html:description" style="height:5em;overflow:hidden"></div>
-                        <div data-bind="html:description" style="display:none;overflow:visible"></div>
-                        <a style="display:none;position:absolute;bottom:0;right:0;background:white">&nbsp;...more</a>
-                    </div>
+                    <div data-bind="text:aim"></div>
                     <div>
                         <i class="icon-info-sign"></i><span data-bind="html:links"/>
                     </div>
@@ -178,7 +174,7 @@ $(document).ready(function () {
           x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Social Media&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.description() + ' ' + vm.organisationName()).toLowerCase();
+        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.organisationName()).toLowerCase();
         vm.indexUrl = "${createLink()}/" + vm.projectId;
         vm.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
         return vm;
@@ -247,18 +243,7 @@ $(document).ready(function () {
     function populateTable() {
         pageWindow.pageProjects(projects.slice(offset, offset + perPage));
         pageWindow.pageProjects.valueHasMutated();
-        showOverflowLinks();
         showPaginator();
-    }
-
-    function showOverflowLinks() {
-        $('#projectTable tbody .descLine').each(function() {
-          var divs = $(this).find("div");
-          if (divs.length === 2 && $(divs[1]).height() > $(divs[0]).height())
-            $(this).find("a").show();
-          else
-            $(this).find("a").hide();
-        });
     }
 
     /** display the current size of the filtered list **/
@@ -387,15 +372,6 @@ $(document).ready(function () {
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
     });
-
-    // throttle the resize events so it doesn't go crazy
-    (function() {
-         var timer;
-         $(window).resize(function () {
-             if (timer) clearTimeout(timer);
-             timer = setTimeout(showOverflowLinks, 100);
-         });
-    }());
 });
 </r:script>
 </body>

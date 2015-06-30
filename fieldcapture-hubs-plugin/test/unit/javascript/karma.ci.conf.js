@@ -27,6 +27,7 @@ module.exports = function (config) {
             'web-app/js/fuse.min.js',
             'web-app/js/fieldcapture-application.js',
             'web-app/js/projects.js',
+            'web-app/js/moment.min.js',
             'web-app/js/organisation.js',
             'web-app/js/sites.js',
             'test/unit/javascript/spec/**/*.js'
