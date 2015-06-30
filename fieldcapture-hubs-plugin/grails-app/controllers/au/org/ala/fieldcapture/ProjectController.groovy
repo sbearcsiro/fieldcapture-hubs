@@ -86,7 +86,7 @@ class ProjectController {
          documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
          activities:[label:'Surveys', visible:!project.isExternal, template:'/shared/activitiesList', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
          site:[label:'Locations', visible: !project.isExternal, stopBinding:true, wordForSite:'Location', template:'/site/sitesList', editable:user?.isEditor == true, type:'tab'],
-         admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
+         admin:[label:'Admin', template:'adminTabs', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
     }
 
     protected Map worksProjectContent(project, user) {
