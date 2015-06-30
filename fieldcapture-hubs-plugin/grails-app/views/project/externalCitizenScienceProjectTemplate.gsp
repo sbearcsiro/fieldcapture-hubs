@@ -9,6 +9,7 @@
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
         projectUpdateUrl: "${createLink(action: 'ajaxUpdate', id: project.projectId)}",
+        projectEditUrl:"${createLink(action:'edit', id:project.projectId)}",
         spatialBaseUrl: "${grailsApplication.config.spatial.baseUrl}",
         spatialWmsCacheUrl: "${grailsApplication.config.spatial.wms.cache.url}",
         spatialWmsUrl: "${grailsApplication.config.spatial.wms.url}",
@@ -61,29 +62,24 @@
                 <li><a href="#admin" data-toggle="pill">Admin</a></li>
             </ul>
         </div>
-    </div>
-    <div class="pill-content">
-        <div class="pill-pane active" id="about">
 
-            <g:render template="aboutCitizenScienceProject"/>
-        </div>
-        <div class="pill-pane" id="admin">
-            <h4>Administrator actions</h4>
-            <div class="row-fluid">
-                <p><button class="btn btn-small admin-action" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button> Edit the project details and content</p>
-                <g:if test="${fc.userIsAlaOrFcAdmin()}"><p><button class="admin-action btn btn-small btn-danger" data-bind="click:deleteProject"><i class="icon-remove icon-white"></i> Delete</button> Delete this project. <strong>This cannot be undone</strong></p></g:if>
+        <div class="pill-content">
+            <div class="pill-pane active" id="about">
+
+                <g:render template="aboutCitizenScienceProject"/>
             </div>
-
-            <h3>Project Access</h3>
-            <g:render template="/admin/addPermissions" model="[addUserUrl:g.createLink(controller:'user', action:'addUserAsRoleToProject'), entityId:project.projectId]"/>
-            <g:render template="/admin/permissionTable" model="[loadPermissionsUrl:g.createLink(controller:'project', action:'getMembersForProjectId', id:project.projectId), removeUserUrl:g.createLink(controller:'user', action:'removeUserWithRoleFromProject'), entityId:project.projectId, user:user]"/>
-
+            <div class="pill-pane" id="admin">
+                <g:render template="admin"/>
+            </div>
         </div>
     </div>
 </g:if>
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
 </g:else>
+<!-- ko stopBinding:true -->
+<g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
+<!-- /ko -->
 
 <r:script>
     $(function() {
@@ -124,10 +120,12 @@
                 touchSwipe:false // at the moment we only support 1 image
             });
         }
+        initialiseSites(project.sites);
+        $("#sitesList").hide();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>
-    });
+});
 </r:script>
 </body>
 </html>

@@ -94,6 +94,7 @@ modules = {
     }
 
     amplify {
+        defaultBundle 'application'
         resource url: 'js/amplify.min.js', plugin: 'fieldcapture-plugin'
     }
 
@@ -110,7 +111,7 @@ modules = {
         resource url:'js/jquery-ui-1.9.2.custom.min.js', plugin: 'fieldcapture-plugin'
         resource url:'css/smoothness/jquery-ui-1.9.2.custom.min.css', plugin: 'fieldcapture-plugin'
         resource url:'css/jquery-autocomplete.css', plugin: 'fieldcapture-plugin'
-
+        resource url:'js/jquery.appear.js', plugin: 'fieldcapture-plugin'
     }
 
     jquery_bootstrap_datatable {
@@ -164,11 +165,13 @@ modules = {
     }
 
     attachDocuments {
+        defaultBundle 'application'
         dependsOn 'jQueryFileUpload'
         resource url: 'js/document.js', plugin: 'fieldcapture-plugin'
     }
 
     activity {
+        defaultBundle 'application'
         dependsOn 'knockout'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
         resource url:'js/parser.js', plugin: 'fieldcapture-plugin'
@@ -185,7 +188,7 @@ modules = {
     }
 
     projects {
-        defaultBundle false
+        defaultBundle 'application'
         dependsOn 'knockout','attachDocuments','wmd'
         resource url:'js/projects.js', plugin: 'fieldcapture-plugin'
         resource url:'js/sites.js', plugin: 'fieldcapture-plugin'
@@ -193,11 +196,13 @@ modules = {
     }
 
     jquery_cookie {
+        defaultBundle 'application'
         dependsOn 'jquery'
         resource url:'js/jquery.cookie.js', plugin: 'fieldcapture-plugin'
     }
 
     species {
+        defaultBundle 'application'
         dependsOn 'knockout'
         resource url:'js/speciesModel.js', plugin: 'fieldcapture-plugin'
     }
@@ -234,6 +239,7 @@ modules = {
     }
 
     organisation {
+        defaultBundle 'application'
         dependsOn 'jquery', 'knockout','wmd'
         resource 'js/organisation.js'
     }

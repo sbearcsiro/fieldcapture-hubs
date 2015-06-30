@@ -221,7 +221,7 @@
             <div class="tab-pane" id="site">
                 <!-- SITES -->
                 <!-- ko stopBinding:true -->
-                <g:render template="/site/sitesList"/>
+                <g:render template="/site/sitesList" model="${[editable:user?.isEditor]}"/>
                 <!-- /ko -->
             </div>
 

@@ -239,6 +239,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         successCallback:undefined,
         blockUIOnSave:false,
         blockUISaveMessage:"Saving...",
+        blockUISaveSuccessMessage:"Save successful",
         serializeModel:serializeModel,
         pageExitMessage: 'You have unsaved data.  If you leave the page this data will be lost.',
         preventNavigationIfDirty: false,
@@ -291,7 +292,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         autosaving = false;
         deleteAutoSaveData();
         if (config.preventNavigationIfDirty) {
-            window.removeEventListener('beforeunload', onunloadHandler);
+            window.onbeforeunload = null;
         }
     };
 
@@ -304,7 +305,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 autosaving = true;
 
                 if (config.preventNavigationIfDirty) {
-                    window.addEventListener('beforeunload', onunloadHandler);
+                    window.onbeforeunload = onunloadHandler;
                 }
                 window.setTimeout(autoSaveModel, config.autoSaveIntervalInSeconds*1000);
             }
@@ -314,7 +315,7 @@ function autoSaveModel(viewModel, saveUrl, options) {
         }
     );
 
-    viewModel.saveWithErrorDetection = function(successCallback, errorCallback, saveFunction) {
+    viewModel.saveWithErrorDetection = function(successCallback, errorCallback) {
         if (config.blockUIOnSave) {
             blockUIWithMessage(config.blockUISaveMessage);
         }
@@ -326,12 +327,15 @@ function autoSaveModel(viewModel, saveUrl, options) {
         amplify.store(config.storageKey, json);
 
         return $.ajax({
-            url: saveUrl,
-            type: 'POST',
-            data: json,
-            contentType: 'application/json',
-            success: function (data) {
+                url: saveUrl,
+                type: 'POST',
+                data: json,
+                contentType: 'application/json'
+            }).done(function (data) {
                 if (data.error) {
+                    if (config.blockUIOnSave) {
+                        $.unblockUI();
+                    }
                     showAlert(config.errorMessage + data.detail + ' \n' + data.error,
                         "alert-error",config.resultsMessageId);
                     if (typeof errorCallback === 'function') {
@@ -342,7 +346,12 @@ function autoSaveModel(viewModel, saveUrl, options) {
                     }
 
                 } else {
-                    showAlert(config.successMessage,"alert-success",config.resultsMessageId);
+                    if (config.blockUIOnSave) {
+                        blockUIWithMessage(config.blockUISaveSuccessMessage);
+                    }
+                    else {
+                        showAlert(config.successMessage, "alert-success", config.resultsMessageId);
+                    }
                     viewModel.cancelAutosave();
                     viewModel.dirtyFlag.reset();
                     if (typeof successCallback === 'function') {
@@ -352,8 +361,11 @@ function autoSaveModel(viewModel, saveUrl, options) {
                         config.successCallback(data);
                     }
                 }
-            },
-            error: function (data) {
+            })
+            .fail(function (data) {
+                if (config.blockUIOnSave) {
+                    $.unblockUI();
+                }
                 bootbox.alert($(config.timeoutMessageSelector).html());
                 if (typeof errorCallback === 'function') {
                     errorCallback(data);
@@ -361,13 +373,8 @@ function autoSaveModel(viewModel, saveUrl, options) {
                 if (typeof config.errorCallback === 'function') {
                     config.errorCallback(data);
                 }
-            },
-            always: function(data) {
-                if (config.blockUIOnSave) {
-                    $.unblockUI();
-                }
-            }
-        });
+            });
+
     }
 
 }
@@ -404,11 +411,14 @@ var mobileAppRoles = [
 var socialMediaRoles = [
     { role: "facebook", name: "Facebook" },
     { role: "googlePlus", name: "Google+" },
+    { role: "instagram", name: "Instagram" },
     { role: "linkedIn", name: "LinkedIn" },
     { role: "pinterest", name: "Pinterest" },
     { role: "rssFeed", name: "Rss Feed" },
     { role: "tumblr", name: "Tumblr" },
-    { role: "twitter", name: "Twitter" }
+    { role: "twitter", name: "Twitter" },
+    { role: "vimeo", name: "Vimeo" },
+    { role: "youtube", name: "You Tube" }
 ];
 function Documents() {
     var self = this;

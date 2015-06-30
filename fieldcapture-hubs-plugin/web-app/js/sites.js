@@ -743,8 +743,10 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     if (mapFeatures.features) {
         features = mapFeatures.features;
     }
-    self.sites = $.map(sites, function (obj, i) {
-        return new SiteViewModel(obj, features[i])
+    self.sites = $.map(sites, function (site, i) {
+        var feature = features[i] || site.extent ? site.extent.geometry : null;
+        site.feature = feature;
+        return site;
     });
     self.sitesFilter = ko.observable("");
     self.throttledFilter = ko.computed(self.sitesFilter).extend({throttle: 400});
@@ -809,7 +811,7 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
 
             self.filteredSites([]);
             $.each(self.sites, function (i, site) {
-                if (regex.test(site.name())) {
+                if (regex.test(ko.utils.unwrapObservable(site.name))) {
                     self.filteredSites.push(site);
                 }
             });
@@ -826,10 +828,10 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
     };
 
     this.highlight = function () {
-        map.highlightFeatureById(this.name());
+        map.highlightFeatureById(ko.utils.unwrapObservable(this.name));
     };
     this.unhighlight = function () {
-        map.unHighlightFeatureById(this.name());
+        map.unHighlightFeatureById(ko.utils.unwrapObservable(this.name));
     };
     this.removeAllSites = function () {
         bootbox.confirm("Are you sure you want to remove these sites? This will remove the links to this project but will NOT remove the sites from the site.", function (result) {
@@ -885,8 +887,6 @@ var SitesViewModel =  function(sites, map, mapFeatures, isUserEditor) {
         });
     };
 
-    // set trigger for site reverse geocoding
-    self.triggerGeocoding();
     self.displaySites();
 };
 

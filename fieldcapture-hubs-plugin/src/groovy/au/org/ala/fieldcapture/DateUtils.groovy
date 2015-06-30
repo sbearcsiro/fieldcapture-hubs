@@ -3,6 +3,7 @@ package au.org.ala.fieldcapture
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeZone
+import org.joda.time.Days
 import org.joda.time.Interval
 import org.joda.time.Period
 import org.joda.time.format.DateTimeFormat
@@ -64,6 +65,19 @@ class DateUtils {
 
     static DateTime now() {
         return new DateTime()
+    }
+
+    static int daysRemaining(DateTime start, DateTime end) {
+        if (end < start) return 0
+        return 1 + Days.daysBetween(start.toLocalDate(), end.toLocalDate()).getDays()
+    }
+
+    /**
+     * @return the first year in the current financial year (July-June).  e.g. if we are in 2014/2015 this method will
+     * return 2014
+     */
+    static int currentFinancialYear() {
+        return now().minusMonths(6).year
     }
 
     static String format(Date date) {
