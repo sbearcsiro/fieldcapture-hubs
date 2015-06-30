@@ -34,9 +34,11 @@ class ProjectController {
                 user.hasViewAccess = projectService.canUserViewProject(user.userId, id)?:false
             }
             def programs = projectService.programsModel()
+            def activities = activityService.activitiesForProject(id)
             def content = projectContent(project, user, programs)
+
             def model = [project: project,
-                activities: activityService.activitiesForProject(id),
+                activities: activities,
                 mapFeatures: commonService.getMapFeatures(project),
                 isProjectStarredByUser: userService.isProjectStarredByUser(user?.userId?:"0", project.projectId)?.isProjectStarredByUser,
                 user: user,
@@ -73,9 +75,9 @@ class ProjectController {
     protected Map surveyProjectContent(project, user) {
         [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab'],
          news:[label:'News', visible: true, type:'tab'],
-         documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
-         activities:[label:'Surveys', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:'Survey',type:'tab'],
-         site:[label:'Locations', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Location', editable:user?.isEditor == true, type:'tab'],
+         documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
+         activities:[label:'Surveys', visible:!project.isExternal, template:'/shared/activitiesList', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
+         site:[label:'Locations', visible: !project.isExternal, stopBinding:true, wordForSite:'Location', template:'/site/sitesList', editable:user?.isEditor == true, type:'tab'],
          admin:[label:'Admin', visible:(user?.isAdmin || user?.isCaseManager), type:'tab']]
     }
 
