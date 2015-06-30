@@ -69,7 +69,7 @@ class OrganisationController {
         [projects : [label: 'Projects', visible: true, default:true, stopBinding:true, type: 'tab'],
          sites    : [label: 'Sites', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/sites', projectCount:organisation.projects?.size()?:0],
          dashboard: [label: 'Dashboard', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/dashboard', reports:dashboardReports],
-         admin    : [label: 'Admin', stopBinding:true, visible: hasAdminAccess, type: 'tab']]
+         admin    : [label: 'Admin', visible: hasAdminAccess, type: 'tab']]
     }
 
     def create() {

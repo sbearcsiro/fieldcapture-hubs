@@ -152,7 +152,7 @@
 
     <div class="form-actions" style="text-align:right">
         <button type="button" id="save" data-bind="click:save" class="btn btn-primary">Save</button>
-        <button type="button" id="cancel" class="btn">Cancel</button>
+        <button type="button" id="cancel" data-bind="click:cancel" class="btn">Cancel</button>
     </div>
 
 
