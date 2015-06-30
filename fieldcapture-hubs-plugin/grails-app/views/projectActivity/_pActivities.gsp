@@ -31,7 +31,7 @@
                     <li class="active"><a href="#survey-info" data-toggle="pill">Survey Info</a></li>
                     <li><a href="#survey-species" data-toggle="pill">Species</a></li>
                     <li><a href="#survey-form" data-toggle="pill">Surveys Form</a></li>
-                    <li><a href="#survey-locations" data-toggle="pill">locations</a></li>
+                    <li><a href="#survey-locations" data-toggle="pill">Locations</a></li>
                     <li><a href="#survey-alerts" data-toggle="pill">Alerts & Actions</a></li>
                 </ul>
 

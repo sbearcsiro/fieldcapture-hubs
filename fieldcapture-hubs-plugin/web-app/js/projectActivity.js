@@ -1,13 +1,13 @@
 function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, sites) {
     var self = this;
-    self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
 
+    self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
     self.projectId = ko.observable(projectId);
     self.pActivityForms = pActivityForms;
+    self.sites = sites;
     self.formNames = ko.observableArray($.map(pActivityForms ? pActivityForms : [], function (obj, i) {
         return obj.name;
     }));
-    self.sites = sites;
 
     self.projectActivities = ko.observableArray($.map(pActivities, function (obj, i) {
         return new ProjectActivity(obj, pActivityForms, self.projectId(), i == 0 ? true : false, self.sites);
@@ -148,8 +148,6 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
         });
     };
 }
-
-
 
 var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     var self = this;
@@ -495,12 +493,9 @@ var ImagesViewModel = function(image){
     self.url = ko.observable(image.url);
 };
 
-
-
 function initialiseValidator() {
     $('#project-activities-info-validation').validationEngine();
     $('#project-activities-species-validation').validationEngine();
     $('#project-activities-form-validation').validationEngine();
     $('#project-activities-access-validation').validationEngine();
-
 }

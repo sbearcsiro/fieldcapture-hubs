@@ -53,13 +53,10 @@ class ProjectController {
             ]
 
             if(project.projectType == 'survey'){
-                def projectActivities = projectActivityService.getAllByProject(project.projectId)
-                def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
-                model.projectActivities = projectActivities
                 def pActivityForms = []
-                activityModel.collect{
-                    pActivityForms.add([name: it.name, images: it.images])
-                }
+                def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
+                activityModel.collect{ pActivityForms.add([name: it.name, images: it.images]) }
+                model.projectActivities = projectActivityService.getAllByProject(project.projectId)
                 model.pActivityForms =  pActivityForms
             }
 
