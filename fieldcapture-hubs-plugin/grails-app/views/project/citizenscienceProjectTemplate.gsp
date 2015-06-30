@@ -165,10 +165,11 @@
         }
 
         initialiseSites(project.sites);
-        initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
-    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-        populatePermissionsTable();
-    </g:if>
+        <g:if test="${projectContent.admin.visible}">
+            initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
+            populatePermissionsTable();
+        </g:if>
+
         $('.validationEngineContainer').validationEngine();
         $('.helphover').popover({animation: true, trigger:'hover'});
     });
