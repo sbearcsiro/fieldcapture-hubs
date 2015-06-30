@@ -175,13 +175,16 @@
 
         var projectUrlRenderer = function(data, type, row, meta) {
             var projectId = projects[meta.row].projectId;
+            if (!projectId) {
+                return '';
+            }
             return '<a href="'+fcConfig.viewProjectUrl+'/'+projectId+'">'+data+'</a>';
         };
         var dateRenderer = function(data, type, row) {
             if (type == 'display' || type == 'filter') {
                 return convertToSimpleDate(data, false);
             }
-            return data;
+            return data || '';
         };
         var agreementDateRenderer = function(data, type, row, meta) {
             var program = projects[meta.row].associatedProgram;
@@ -220,8 +223,8 @@
             {title:'Actual duration', width:'4%', data:'plannedDurationInWeeks', defaultContent:''},
 
             {title:'Status', width:'4%', render:statusRenderer, data:'status'},
-            {title:'Funding', width:'8%', data:'funding'},
-            {title:'Programme', width:'13%', data:'associatedProgram'}];
+            {title:'Funding', width:'8%', data:'funding', defaultContent:''},
+            {title:'Programme', width:'13%', data:'associatedProgram', defaultContent:''}];
 
         /** changes the cell contents to display a date picker and autosaves the agreement date once the date changes */
         var editAgreementDate = function(e) {
