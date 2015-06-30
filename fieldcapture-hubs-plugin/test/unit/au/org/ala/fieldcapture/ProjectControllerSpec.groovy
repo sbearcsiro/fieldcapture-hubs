@@ -26,6 +26,7 @@ class ProjectControllerSpec extends Specification {
         controller.activityService = activityServiceStub
         controller.commonService = commonServiceStub
         metadataServiceStub.organisationList() >> [list:[buildOrganisation(), buildOrganisation(), buildOrganisation()]]
+        metadataServiceStub.activitiesModel() >> [activities: []]
         userServiceStub.getOrganisationIdsForUserId(_) >> ['1']
         projectServiceStub.getMembersForProjectId(_) >> []
         metadataServiceStub.organisationList() >> [list:[]]
