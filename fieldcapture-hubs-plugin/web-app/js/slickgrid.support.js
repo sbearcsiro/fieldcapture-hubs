@@ -796,7 +796,6 @@ function BodyAttachedEditor(args) {
     this.hide = function () {
         self.$element.hide();
     };
-
     this.show = function () {
         self.$element.show();
     };
@@ -906,7 +905,83 @@ function SelectEditor(args) {
     this.init();
 }
 
+function DateEditor2(args) {
+    BaseEditor.apply(this, [args]);
+    var self = this;
+    var calendarOpen = false;
 
+    var focus = self.focus;
+    var extractValue = self.extractValue;
+
+    this.init = function () {
+        var $input = $("<INPUT type=text class='editor-text' />");
+        $input.appendTo(args.container);
+        $input.focus().select();
+        $input.datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true
+        });
+        $input.on('changeDate', args.commitChanges);
+
+        $input.width(args.container.width);
+        self.setElement($input);
+        self.focus();
+    };
+
+    this.destroy = function () {
+        $.datepicker.dpDiv.stop(true, true);
+        self.$element.datepicker("hide");
+        self.$element.datepicker("destroy");
+        self.$element.remove();
+    };
+
+    this.extractValue = function(item) {
+        var original = extractValue(item);
+        if (!original) {
+            return '';
+        }
+        return convertToSimpleDate(original, false);
+    };
+
+    this.focus = function() {
+        self.$element.datepicker('show');
+        focus();
+    };
+    this.show = function () {
+        if (calendarOpen) {
+            $.datepicker.dpDiv.stop(true, true).show();
+        }
+    };
+
+    this.hide = function () {
+        if (calendarOpen) {
+            $.datepicker.dpDiv.stop(true, true).hide();
+        }
+    };
+
+    this.position = function (position) {
+        if (!calendarOpen) {
+            return;
+        }
+        $.datepicker.dpDiv
+            .css("top", position.top + 30)
+            .css("left", position.left);
+    };
+
+    this.serializeValue = function () {
+        var simpleDate = self.$element.val();
+        return convertToIsoDate(simpleDate);
+    };
+
+    this.init();
+}
+
+dateFormatter = function(row, cell, value, columnDef, dataContext) {
+    if (!value) {
+        return '';
+    }
+    return convertToSimpleDate(value, false);
+}
 
 progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 

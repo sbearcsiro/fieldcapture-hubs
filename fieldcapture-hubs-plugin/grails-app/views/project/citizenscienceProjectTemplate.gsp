@@ -35,6 +35,14 @@
         sldPolgonDefaultUrl: "${grailsApplication.config.sld.polgon.default.url}",
         sldPolgonHighlightUrl: "${grailsApplication.config.sld.polgon.highlight.url}",
         organisationLinkBaseUrl: "${createLink(controller: 'organisation', action: 'index')}",
+        projectActivityCreateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxCreate')}",
+        projectActivityUpdateUrl: "${createLink(controller: 'projectActivity', action: 'ajaxUpdate')}",
+        addNewSpeciesListsUrl: "${createLink(controller: 'projectActivity', action: 'ajaxAddNewSpeciesLists')}",
+        speciesProfileUrl: "${createLink(controller: 'proxy', action: 'speciesProfile')}",
+        speciesListUrl: "${createLink(controller: 'search', action: 'searchSpeciesList')}",
+        speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
+
+        bieUrl: "${grailsApplication.config.bie.baseURL}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
         },
         here = window.location.href;
@@ -61,7 +69,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivity, species"/>
 </head>
 <body>
 
@@ -88,36 +96,39 @@
         <fc:tabList tabs="${projectContent}"/>
     </div>
     <div class="pill-content">
-        <div class="pill-pane active" id="about">
-            <g:render template="aboutCitizenScienceProject"/>
-        </div>
-        <div class="pill-pane" id="news">
-            <g:render template="news"/>
-        </div>
-        <div class="pill-pane" id="activities">
-            <g:render template="/shared/activitiesList"
-                      model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>
-        </div>
-        <div class="pill-pane" id="site">
-            <!-- ko stopBinding:true -->
-            <g:render template="/site/sitesList" model="[wordForSite:'location', editable:true]"/>
-            <!-- /ko -->
-        </div>
-        <div class="pill-pane" id="documents">
-            <g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>
-        </div>
-        <div class="pill-pane" id="admin">
-            <g:render template="admin"/>
-        </div>
-
+        %{--<div class="pill-pane active" id="about">--}%
+            %{--<g:render template="aboutCitizenScienceProject"/>--}%
+        %{--</div>--}%
+        %{--<div class="pill-pane" id="news">--}%
+            %{--<g:render template="news"/>--}%
+        %{--</div>--}%
+        %{--<div class="pill-pane" id="activities">--}%
+            %{--<g:render template="/shared/activitiesList"--}%
+                      %{--model="[activities:activities ?: [], sites:project.sites ?: [], showSites:true, wordForActivity:'survey']"/>--}%
+        %{--</div>--}%
+        %{--<div class="pill-pane" id="site">--}%
+            %{--<!-- ko stopBinding:true -->--}%
+            %{--<g:render template="/site/sitesList" model="[wordForSite:'location', editable:true]"/>--}%
+            %{--<!-- /ko -->--}%
+        %{--</div>--}%
+        %{--<div class="pill-pane" id="documents">--}%
+            %{--<g:render template="/shared/listDocuments" model="[useExistingModel: true,editable:false, imageUrl:resource(dir:'/images/filetypes'),containerId:'overviewDocumentList']"/>--}%
+        %{--</div>--}%
+        %{--<div class="pill-pane" id="admin">--}%
+            %{--<g:render template="admin"/>--}%
+        %{--</div>--}%
+        <fc:tabContent tabs="${projectContent}" tabClass="pill-pane"/>
 
     </div>
 
 </div>
 <r:script>
     $(function() {
+
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
+        var projectActivities = <fc:modelAsJavascript model="${projectActivities}"/>;
+        var pActivityForms = <fc:modelAsJavascript model="${pActivityForms}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
         var ViewModel = function() {
@@ -138,6 +149,7 @@
 
         };
         ko.applyBindings(new ViewModel());
+
         if (projectViewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
@@ -153,10 +165,13 @@
         }
 
         initialiseSites(project.sites);
-    <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
-        populatePermissionsTable();
-    </g:if>
-    });
+        <g:if test="${projectContent.admin.visible}">
+            initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
+            populatePermissionsTable();
+        </g:if>
+
+        $('.validationEngineContainer').validationEngine();
+        $('.helphover').popover({animation: true, trigger:'hover'})    });
 </r:script>
 </body>
 </html>

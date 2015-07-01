@@ -354,6 +354,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients = self.transients || {};
 
+    var isBeforeToday = function(date) {
+        // not stricty correct but will work since we only deal with day granularity
+        return moment(date) < moment();
+    }
     var calculateDurationInDays = function(startDate, endDate) {
         var start = moment(startDate);
         var end = moment(endDate);
@@ -383,7 +387,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     self.transients.daysRemaining = ko.pureComputed(function() {
-        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()) + 1: -1;
+        var end = self.plannedEndDate();
+        return end? isBeforeToday(end)? 0: calculateDurationInDays(undefined, end) + 1: -1;
     });
     self.transients.daysSince = ko.pureComputed(function() {
         return self.plannedStartDate()? calculateDurationInDays(self.plannedStartDate()): -1;
