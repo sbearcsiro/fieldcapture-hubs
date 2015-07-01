@@ -47,13 +47,11 @@
                 <div class="well-title">Get Involved!</div>
                 <div data-bind="visible:getInvolved(), text:getInvolved"></div>
                 <hr/>
-                <div class="row-fluid" data-bind="visible:transients.daysRemaining() > 0">
-                    <a class="pull-right" data-bind="visible:isExternal() && urlWeb(),attr:{href:urlWeb}">
-                        <button type="button" class="btn">Get Started</button>
-                    </a>
-                    <a class="pull-right" data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">
-                        <button type="button" class="btn">Get Started</button>
-                    </a>
+                <div class="row-fluid nav nav-pills" data-bind="visible:transients.daysRemaining() > 0">
+                    <li class="active pull-right">
+                        <a data-bind="visible:isExternal() && urlWeb(),attr:{href:urlWeb}">Get Started</a>
+                        <a data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">Get Started</a>
+                    </li>
                 </div>
                 <g:render template="/shared/listDocumentLinks"
                           model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>

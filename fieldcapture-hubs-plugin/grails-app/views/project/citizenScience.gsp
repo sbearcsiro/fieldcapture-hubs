@@ -31,6 +31,9 @@
         padding: 6px;
         text-align: center;
     }
+    #pt-downloadLink {
+        margin-bottom: 10px;
+    }
     </style>
 </head>
 <body>
@@ -48,6 +51,13 @@
     <div class="row-fluid"><g:message code="project.citizenScience.preamble"/></div>
     <div id="pt-root" class="row-fluid">
         <div class="well">
+            <g:if test="${fc.userIsAlaOrFcAdmin()}">
+                <div class="row-fluid">
+                    <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn btn-warning span2 pull-right"
+                   title="Download metadata for projects in JSON format">
+                    <i class="icon-download"></i><g:message code="g.download" /></a>
+                </div>
+            </g:if>
             <div class="row-fluid">
                 <span class="span2" id="pt-resultsReturned"></span>
                 <div class="span8 input-append">
@@ -57,11 +67,6 @@
                     <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
                     <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
                 </div>
-                <g:if test="${fc.userIsAlaOrFcAdmin()}">
-                    <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn span2 pull-right"
-                       title="Download metadata for projects in JSON format">
-                        <i class="icon-download"></i><g:message code="g.download" /></a>
-                </g:if>
             </div>
             <div id="pt-searchControls" class="row-fluid">
                 <div id="pt-sortWidgets">
