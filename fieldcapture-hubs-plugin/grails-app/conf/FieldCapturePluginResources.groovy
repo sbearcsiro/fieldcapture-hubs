@@ -203,7 +203,7 @@ modules = {
 
     projectActivity {
         defaultBundle 'application'
-        dependsOn 'knockout'
+        dependsOn 'knockout, species'
         resource url:'js/projectActivity.js', plugin: 'fieldcapture-plugin'
     }
 

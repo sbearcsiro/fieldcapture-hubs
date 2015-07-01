@@ -36,18 +36,20 @@
                 <a data-bind="attr:{href: transients.bioProfileUrl}" target="_blank"><small data-bind="text: transients.textFieldValue"></small></a>
             </span>
             </br>
+
+            <!--
             <input style="width:80%;" type="text" placeholder="Species name"
                    data-bind="value: transients.textFieldValue,
                                             event:{focusout: focusLost},
                                             autocomplete:{
-                                                url:'http://devt.ala.org.au:8088/fieldcapture-hub/search/species',
+                                                url:'',
                                                 render: renderItem,
                                                 listId: list,
                                                 result: speciesSelected,
                                                 valueChangeCallback: textFieldChanged
                                             }" data-validation-engine="validate[required]">
             <button class="btn btn-small" data-bind="click: $parent.species.newSpeciesLists.removeNewSpeciesName"> X</button>
-
+            -->
 
         </div>
 
@@ -55,11 +57,13 @@
     </div>
     <!-- /ko -->
     </br>
+    <!--
     <div class="row-fluid">
         <div class="span8 text-left">
             <button class="btn btn-small" data-bind="click: species.newSpeciesLists.addNewSpeciesName"> <i class="icon icon-search"></i> Search and add species name</button>
         </div>
     </div>
+    -->
     </br>
     <div class="row-fluid">
         <div class="span8 text-left">
