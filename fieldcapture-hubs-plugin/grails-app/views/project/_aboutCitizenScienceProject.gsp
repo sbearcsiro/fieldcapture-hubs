@@ -12,7 +12,7 @@
             <img class="sp-image" data-bind="attr:{'data-src':mainImageUrl}"/>
 
             <p class="sp-layer sp-white sp-padding"
-               data-position="topLeft" data-width="100%"
+               data-position="topLeft" data-width="100%" data-bind="visible:urlWeb"
                data-show-transition="down" data-show-delay="0" data-hide-transition="up">
                 <strong>Get involved!</strong> Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a>
             </p>
@@ -31,10 +31,15 @@
         <span class="span6">
             <div class="well">
                 <div class="well-title">About the project</div>
-                <hr/>
-                <span data-bind="text:aim"></span>
-                <hr/>
-                <span data-bind="html:description.markdownToHtml()"></span>
+                <div data-bind="visible:aim">
+                    <b style="text-decoration: underline;">Aim</b><br/>
+                    <span data-bind="text:aim"></span>
+                    <p/>
+                </div>
+                <div data-bind="visible:aim">
+                    <b style="text-decoration: underline;">Description</b><br/>
+                    <span data-bind="html:description.markdownToHtml()"></span>
+                </div>
             </div>
         </span>
         <span class="span6">
@@ -42,22 +47,23 @@
                 <div class="well-title">Get Involved!</div>
                 <div data-bind="visible:getInvolved(), text:getInvolved"></div>
                 <hr/>
-                <div class="row-fluid" data-bind="visible:urlWeb">
-                    <a class="pull-right" data-bind="attr:{href:urlWeb}">
-                        <button type="button" class="btn">Get Started</button>
-                    </a>
+                <div class="row-fluid nav nav-pills" data-bind="visible:transients.daysRemaining() > 0">
+                    <li class="active pull-right">
+                        <a data-bind="visible:isExternal() && urlWeb(),attr:{href:urlWeb}">Get Started</a>
+                        <a data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">Get Started</a>
+                    </li>
                 </div>
                 <g:render template="/shared/listDocumentLinks"
                           model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>
             </div>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'noCost'])}" data-bind="visible:!hasParticipantCost()"><span class="projecttag"><g:message code="project.tag.noCost"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'teach'])}" data-bind="visible:hasTeachingMaterials()"><span class="projecttag"><g:message code="project.tag.teach"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'diy'])}" data-bind="visible:isDIY()"><span class="projecttag"><g:message code="project.tag.diy"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'children'])}" data-bind="visible:isSuitableForChildren()"><span class="projecttag"><g:message code="project.tag.children"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyEasy'])}" data-bind="visible:difficulty() == 'Easy'"><span class="projecttag"><g:message code="project.tag.difficultyEasy"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyMedium'])}" data-bind="visible:difficulty() == 'Medium'"><span class="projecttag"><g:message code="project.tag.difficultyMedium"/></span></a>
-            <a href="${createLink(controller: 'project', action: 'citizenScience', params: [tag:'difficultyHard'])}" data-bind="visible:difficulty() == 'Hard'"><span class="projecttag"><g:message code="project.tag.difficultyHard"/></span></a>
+            <span class="projecttag" data-bind="visible:!hasParticipantCost()"><g:message code="project.tag.noCost"/></span>
+            <span class="projecttag" data-bind="visible:hasTeachingMaterials()"><g:message code="project.tag.teach"/></span>
+            <span class="projecttag" data-bind="visible:isDIY()"><g:message code="project.tag.diy"/></span>
+            <span class="projecttag" data-bind="visible:isSuitableForChildren()"><g:message code="project.tag.children"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Easy'"><g:message code="project.tag.difficultyEasy"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Medium'"><g:message code="project.tag.difficultyMedium"/></span>
+            <span class="projecttag" data-bind="visible:difficulty() == 'Hard'"><g:message code="project.tag.difficultyHard"/></span>
+            <span class="projecttag" data-bind="visible:scienceType(),text:scienceType()"></span>
         </span>
     </div>
 </div>
-<div id="map"></div>

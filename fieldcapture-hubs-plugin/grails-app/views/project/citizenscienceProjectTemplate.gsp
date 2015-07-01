@@ -171,8 +171,7 @@
         </g:if>
 
         $('.validationEngineContainer').validationEngine();
-        $('.helphover').popover({animation: true, trigger:'hover'});
-    });
+        $('.helphover').popover({animation: true, trigger:'hover'})    });
 </r:script>
 </body>
 </html>

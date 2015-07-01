@@ -354,6 +354,10 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients = self.transients || {};
 
+    var isBeforeToday = function(date) {
+        // not stricty correct but will work since we only deal with day granularity
+        return moment(date) < moment();
+    }
     var calculateDurationInDays = function(startDate, endDate) {
         var start = moment(startDate);
         var end = moment(endDate);
@@ -383,7 +387,11 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     };
 
     self.transients.daysRemaining = ko.pureComputed(function() {
-        return self.plannedEndDate()? calculateDurationInDays(undefined, self.plannedEndDate()): -1;
+        var end = self.plannedEndDate();
+        return end? isBeforeToday(end)? 0: calculateDurationInDays(undefined, end) + 1: -1;
+    });
+    self.transients.daysSince = ko.pureComputed(function() {
+        return self.plannedStartDate()? calculateDurationInDays(self.plannedStartDate()): -1;
     });
     self.transients.daysTotal = ko.pureComputed(function() {
         return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
@@ -618,6 +626,47 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         });
     }
 };
+
+/**
+ * View model for use by the citizen science project finder page.
+ * @param props array of project attributes
+ * @constructor
+ */
+function CreateCitizenScienceFinderProjectViewModel(props) {
+    ProjectViewModel.apply(this, [{
+        aim: props[1],
+        coverage: props[2],
+        difficulty: props[3],
+        plannedEndDate: new Date(props[4]),
+        hasParticipantCost: props[5],
+        hasTeachingMaterials: props[6],
+        isDIY: props[7],
+        isExternal: props[8],
+        isSuitableForChildren: props[9],
+        links: props[10],
+        name: props[11],
+        organisationId: props[12],
+        organisationName: props[13],
+        plannedStartDate: new Date(props[14]),
+        status: props[15],
+        urlWeb: props[17]
+    }, false, []]);
+
+    var self = this;
+    self.projectId = props[0];
+    self.since = ko.pureComputed(function(){
+        var daysSince = self.transients.daysSince();
+        if (daysSince < 0) return "";
+        if (daysSince === 0) return "today";
+        if (daysSince === 1) return "yesterday";
+        if (daysSince < 30) return daysSince + " days ago";
+        if (daysSince < 32) return "one month ago";
+        if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
+        if (daysSince === 365) return "one year ago";
+        return (daysSince / 365).toFixed(1) + " years ago";
+    });
+    self.urlImage = props[16];
+}
 
 /**
  * View model for use by the project create and edit pages.  Extends the ProjectViewModel to provide support

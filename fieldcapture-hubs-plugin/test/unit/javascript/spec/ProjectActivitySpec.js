@@ -1,4 +1,12 @@
 describe("ProjectActivityViewModel Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
 
     it("should be able to be initialised from an object literal", function () {
 
@@ -26,6 +34,14 @@ describe("ProjectActivityViewModel Spec", function () {
 });
 
 describe("SpeciesConstraintViewModel Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
 
     it("should be able to be initialised from an object literal", function () {
         var speciesVM = new SpeciesConstraintViewModel();
@@ -60,6 +76,14 @@ describe("SpeciesConstraintViewModel Spec", function () {
 });
 
 describe("SpeciesListsViewModel Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
 
     it("default offset value should be 0", function () {
         var listsVM = new SpeciesListsViewModel();
