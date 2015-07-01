@@ -31,7 +31,11 @@
             </span>
             <!-- ko foreach: sites -->
                 <div class="row-fluid">
-                    <div class="span2 text-left">
+                    <div class="span10 text-left">
+                        <a target="_blank" data-bind="attr:{href: siteUrl}"><span data-bind="text: name"> </span></a>
+                    </div>
+
+                    <div class="span2 text-right">
                         <span data-bind="if: added()">
                             <small>
                                 <a href="#" data-bind="click: removeSite" class="btn btn-small btn-danger">Remove</a>
@@ -43,19 +47,17 @@
                             </small>
                         </span>
                     </div>
-                    <div class="span5 text-left">
-                         <a target="_blank" data-bind="attr:{href: siteUrl}"><span data-bind="text: name"> </span></a>
-                    </div>
+
                 </div>
             <!-- /ko -->
         </div>
 
         <div class="span6 text-left">
-            <h5> Sites associated with this survey:</h5>
+            <h5 class="text-right"> Sites associated with this survey:</h5>
             <!-- ko foreach: sites -->
             <span data-bind="if: added()">
                 <div class="row-fluid">
-                    <div class="span12 text-left">
+                    <div class="span12 text-right">
                         <i class="icon-check"> </i>
                         <a target="_blank" data-bind="attr:{href: siteUrl}"><span data-bind="text: name"> </span></a>
                     </div>
