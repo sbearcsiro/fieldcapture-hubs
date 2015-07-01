@@ -813,8 +813,10 @@ function ComboBoxEditor(args) {
     this.init = function () {
 
         $select = $("<SELECT tabIndex='0' class='editor'></SELECT>");
+        var labelProperty = args.column.optionLabel || 'label';
+        var valueProperty = args.column.optionValue || 'value';
         for (var i=0; i<args.column.options.length; i++) {
-            $select.append($("<OPTION name=\""+args.column.options[i]+"\" value=\""+args.column.options[i]+"\">"+args.column.options[i]+"</OPTION>"));
+            $select.append($("<OPTION name=\""+args.column.options[i][labelProperty]+"\" value=\""+args.column.options[i][valueProperty]+"\">"+args.column.options[i][labelProperty]+"</OPTION>"));
         }
         $select.combobox({bsVersion:'2'});
         combobox = $select.data('combobox');
@@ -882,12 +884,15 @@ function SelectEditor(args) {
     this.init = function () {
 
         var $select = $("<SELECT tabIndex='0' class='editor' style='width:100%;'></SELECT>");
+        var labelProperty = args.column.optionLabel || 'label';
+        var valueProperty = args.column.optionValue || 'value';
+
         for (var i=0; i<args.column.options.length; i++) {
             var option = args.column.options[i];
             var value, label;
-            if (option.hasOwnProperty('value') && option.hasOwnProperty('label')) {
-                value = option.value;
-                label = option.label;
+            if (option.hasOwnProperty(labelProperty) && option.hasOwnProperty(valueProperty)) {
+                value = option[valueProperty];
+                label = option[labelProperty];
             }
             else {
                 value = option;
