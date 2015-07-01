@@ -57,11 +57,13 @@
     </div>
     <!-- /ko -->
     </br>
+    <!--
     <div class="row-fluid">
         <div class="span8 text-left">
             <button class="btn btn-small" data-bind="click: species.newSpeciesLists.addNewSpeciesName"> <i class="icon icon-search"></i> Search and add species name</button>
         </div>
     </div>
+    -->
     </br>
     <div class="row-fluid">
         <div class="span8 text-left">
