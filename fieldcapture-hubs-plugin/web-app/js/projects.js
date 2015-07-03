@@ -730,9 +730,3 @@ function CreateEditProjectViewModel(project, isUserEditor, userOrganisations, or
 
     autoSaveModel(self, config.projectSaveUrl, {blockUIOnSave:config.blockUIOnSave, blockUISaveMessage:"Saving project...", storageKey:config.storageKey});
 };
-
-function getHostName(href) {
-    var l = document.createElement("a");
-    l.href = href;
-    return l.hostname;
-}
