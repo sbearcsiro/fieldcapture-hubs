@@ -734,6 +734,9 @@ function BaseEditor(args) {
 
     self.setElement = function(element) {
         self.$element = element;
+        if (args.column.validationRules) {
+            element.addClass(args.column.validationRules)// Using class because of way jqueryValidationEngine determines the pattern used.
+        }
         validationSupport.addValidationSupport(element, args.item, args.column.field);
     };
 
