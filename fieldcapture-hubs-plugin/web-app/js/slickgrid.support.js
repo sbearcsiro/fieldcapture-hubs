@@ -986,7 +986,19 @@ dateFormatter = function(row, cell, value, columnDef, dataContext) {
         return '';
     }
     return convertToSimpleDate(value, false);
-}
+};
+
+optionsFormatter = function(row, cell, value, columnDef, dataContext) {
+    var labelProperty = columnDef.optionLabel || 'label';
+    var valueProperty = columnDef.optionValue || 'value';
+
+    for (var i=0; i<columnDef.options.length; i++) {
+        if (value == columnDef.options[i][valueProperty]) {
+            return columnDef.options[i][labelProperty];
+        }
+    }
+    return '';
+};
 
 progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 
