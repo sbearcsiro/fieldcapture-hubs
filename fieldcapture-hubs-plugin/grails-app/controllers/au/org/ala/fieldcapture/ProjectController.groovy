@@ -189,6 +189,7 @@ class ProjectController {
             }
             [
                 projectId  : it.projectId,
+                aim        : it.aim,
                 coverage   : it.coverage ?: '',
                 description: it.description,
                 difficulty : it.difficulty,
@@ -198,12 +199,15 @@ class ProjectController {
                 isDIY      : it.isDIY && true, // force it to boolean
                 isExternal : it.isExternal && true, // force it to boolean
                 isSuitableForChildren: it.isSuitableForChildren && true, // force it to boolean
+                keywords   : it.keywords,
                 links      : trimmedLinks,
+                locality   : null, // TODO
                 name       : it.name,
                 organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
+                scienceType: it.scienceType,
                 startDate  : it.plannedStartDate,
-                status     : it.status,
+                state      : null, // TODO
                 urlImage   : urlImage,
                 urlWeb     : it.urlWeb
             ]
@@ -222,6 +226,7 @@ class ProjectController {
                 projects: projects.collect {
                     [ // pass array instead of object to reduce JSON size
                       it.projectId,
+                      it.aim,
                       it.coverage,
                       it.description,
                       it.difficulty,
@@ -231,12 +236,15 @@ class ProjectController {
                       it.isDIY,
                       it.isExternal,
                       it.isSuitableForChildren,
+                      it.keywords,
                       it.links,
+                      it.locality,
                       it.name,
                       it.organisationId,
                       it.organisationName,
+                      it.scienceType,
                       it.startDate,
-                      it.status,
+                      it.state,
                       it.urlImage,
                       it.urlWeb
                     ]

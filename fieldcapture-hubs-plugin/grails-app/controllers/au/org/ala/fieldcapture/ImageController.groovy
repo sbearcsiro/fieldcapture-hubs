@@ -206,6 +206,7 @@ class ImageController {
     def get() {
 
         File f = new File(fullPath(params.id))
+        println("image get " + fullPath(params.id) + " -> " + f.exists())
         if (!f.exists()) {
             response.status = 404
             return

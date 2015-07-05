@@ -1,23 +1,110 @@
-<div class="row-fluid">
-    <div class="span6">
+<style type="text/css">
+.block-header {
+    position: relative;
+    top:-19px;
+    left:-5px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid lightgrey;
+}
+</style>
 
-        <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
-            <h4>
-                Organisation:
-                <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}"></a>
-                <span data-bind="visible:!organisationId(),text:organisationName"></span>
-            </h4>
+<div class="well">
+    <h4 class="block-header">Project metadata</h4>
+    <div class="row-fluid">
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
+
+            <div class="controls span9">
+                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
+            </div>
         </div>
-        <h4 class="header"><g:message code="project.details.tell"/></h4>
+    </div>
+    <div class="row-fluid">
 
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
 
+            <div class="controls span9">
+                <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="organisationSearch" data-bind="with:organisationSearch">
+        <div class="row-fluid">
+
+            <div class="clearfix control-group">
+
+                <label class="control-label span3" for="organisationName"><g:message code="project.organisationNameSearch"/><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp></label>
+                <div class="span6 controls">
+                    <div class="input-append" style="width:100%;">
+                        <input id="organisationName" style="width:90%" type="text" placeholder="Start typing a name here" data-bind="value:term, valueUpdate:'afterkeydown', disable:selection"><button class="btn" type="button" data-bind="click:clearSelection"><i class='icon-search' data-bind="css:{'icon-search':!term(), 'icon-remove':term()}"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-fluid" data-bind="slideVisible:!selection()">
+            <div class="span9">
+                <div class="control-label span12" style="display:none;" data-bind="visible:!selection() && allViewed()">
+                    <label for="organisationNotPresent">My organisation is not on the list &nbsp;<input type="checkbox" id="organisationNotPresent" value="organisationNotOnList" data-bind="checked:organisationNotPresent"></label>
+                </div>
+                <div style="display:none;" data-bind="visible:!selection() && allViewed() && organisationNotPresent()">
+                    <button class="btn btn-success" id="registerOrganisation" style="float:right" data-bind="click:function() {createOrganisation();}">Register my organisation</button>
+                </div>
+            </div>
+
+            <div class="span9">
+
+                <div style="padding-left:5px;"><b>Organisation Search Results</b> (Click an organisation to select it)</div>
+                <div style="background:white; border: 1px solid lightgrey; border-radius: 4px; height:8em; overflow-y:scroll" data-bind="event:{scroll:scrolled}">
+                    <ul id="organisation-list" class="nav nav-list">
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length">Your organisations</li>
+                        <!-- ko foreach:userOrganisationResults -->
+                        <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
+                        <!-- /ko -->
+                        <li class="nav-header" style="display:none;" data-bind="visible:userOrganisationResults().length && otherResults().length">Other organisations</li>
+                        <!-- ko foreach:otherResults -->
+                        <li data-bind="css:{active:$parent.isSelected($data)}"><a data-bind="click:$parent.select, text:name"></a></li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <p/>
+        <div class="control-group">
+            <label class="control-label span3" for="isMetadataSharing"><g:message code="project.isMetadataSharing"/><fc:iconHelp><g:message code="project.isMetadataSharing.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isMetadataSharing()" type="checkbox" id="isMetadataSharing"/>
+                <g:message code="project.isMetadataSharing.extra"/>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.tell"/></h4>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
 
             <div class="controls span9">
-                <g:textField class="span12" name="name" data-bind="value:name"
+                <g:textField style="width:90%;" name="name" data-bind="value:name"
                              data-validation-engine="validate[required]"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="aim"><g:message code="g.project.aim"/>:</label>
+
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="aim" data-bind="value:aim"
+                            data-validation-engine="validate[required]" maxlength="300" rows="3"/>
             </div>
         </div>
 
@@ -25,7 +112,7 @@
             <label class="control-label span3" for="description"><g:message code="g.project.description"/>:</label>
 
             <div class="controls span9">
-                <g:textArea class="span12" name="description" data-bind="value:description"
+                <g:textArea style="width:90%;" name="description" data-bind="value:description"
                             data-validation-engine="validate[required]" rows="3"/>
             </div>
         </div>
@@ -34,15 +121,40 @@
             <label class="control-label span3" for="manager"><g:message code="project.details.manager"/>:</label>
 
             <div class="controls span9">
-                <g:textField class="span12" type="email" data-bind="value:manager" name="manager"/>
+                <g:textField style="width:90%;" type="email" data-bind="value:manager" name="manager"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="plannedStartDate"><g:message code="project.plannedStartDate"/>:
+            <fc:iconHelp><g:message code="project.plannedStartDate.help"/></fc:iconHelp>
+            </label>
+
+            <div class="controls span9">
+                <fc:datePicker class="input-small" targetField="plannedStartDate.date" name="plannedStartDate"
+                               id="plannedStartDate" data-validation-engine="validate[required]"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="plannedEndDate"><g:message code="project.plannedEndDate"/>:
+            <fc:iconHelp><g:message code="project.plannedEndDate.help"/></fc:iconHelp>
+            </label>
+
+            <div class="controls span9">
+                <fc:datePicker class="input-small" targetField="plannedEndDate.date" name="plannedEndDate"
+                               id="plannedEndDate" data-validation-engine="validate[future[plannedStartDate]]"/>
+                <g:message code="project.plannedEndDate.extra"/>
             </div>
         </div>
     </div>
+</div>
 
-    <div data-bind="visible:!isCitizenScience()" class="span6">
-        <h4 class="header">&nbsp;</h4>
+<div data-bind="visible:!isCitizenScience()" class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.associations"/></h4>
 
-        <div class="control-group">
+        <div class="clearfix control-group">
             <label class="control-label span3" for="externalId"><g:message code="g.project.externalId"/>:</label>
 
             <div class="controls span9">
@@ -116,15 +228,17 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div data-bind="visible:isCitizenScience()" class="span6">
-        <h4 class="header span12"><g:message code="project.details.involved"/></h4>
+<div data-bind="visible:isCitizenScience()" class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.involved"/></h4>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="getInvolved"><g:message code="project.details.involved"/></label>
 
             <div class="controls span9">
-                <g:textArea class="span12" name="getInvolved" data-bind="value:getInvolved"
+                <g:textArea style="width:90%;" name="getInvolved" data-bind="value:getInvolved"
                             rows="2"/>
             </div>
         </div>
@@ -137,89 +251,90 @@
                 <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
             </div>
         </div>
-    </div>
-    <div class="row-fluid">
-        <div class="span6">
-            <h4 class="header"><g:message code="project.details.find"/>:</h4>
 
-            <div class="control-group">
-                <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp></label>
 
-                <div class="controls span9">
-                    <g:textField class="span12" tye="url" name="urlWeb" data-bind="value:urlWeb"/>
-                </div>
+            <div class="controls span9">
+                <select data-bind="value:difficulty, options:transients.difficultyLevels, optionsCaption:'Select...'" data-validation-engine="validate[required]"></select>
             </div>
-
-            <g:render template="/shared/editDocumentLinks"
-                      model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
         </div>
 
-        <div class="span6">
-            <h4 class="header">&nbsp;</h4>
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
+            </div>
+        </div>
 
-            <div class="control-group">
-                <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
+            </div>
+        </div>
 
-                <div class="controls span9">
-                    <g:textArea class="span12" name="keywords" data-bind="value:keywords" rows="2"/>
-                </div>
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="gear" data-bind="value:gear" rows="2"/>
+            </div>
+        </div>
+
+        <div class="clearfix control-group">
+            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp></label>
+            <div class="controls span9">
+                <g:textArea style="width:90%;" name="task" data-bind="value:task" rows="2" data-validation-engine="validate[required]"/>
             </div>
         </div>
     </div>
 </div>
 
-
 <div class="row-fluid">
-    <div class="span6">
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="plannedStartDate"><g:message code="g.project.plannedStartDate"/>:
-            <fc:iconHelp><g:message code="g.project.plannedStartDate.help"/></fc:iconHelp>
-            </label>
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.find"/></h4>
+
+        <div class="control-group">
+            <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
 
             <div class="controls span9">
-                <fc:datePicker targetField="plannedStartDate.date" name="plannedStartDate"
-                               id="plannedStartDate" data-validation-engine="validate[required]"/>
+                <g:textField style="width:90%;" type="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
             </div>
         </div>
 
-        <div class="clearfix control-group">
-            <label class="control-label span3" for="plannedEndDate"><g:message code="g.project.plannedEndDate"/>:
-            <fc:iconHelp><g:message code="g.project.plannedEndDate.help"/></fc:iconHelp>
-            </label>
+        <g:render template="/shared/editDocumentLinks"
+                  model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
+
+        <div class="control-group">
+            <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
 
             <div class="controls span9">
-                <fc:datePicker targetField="plannedEndDate.date" name="plannedEndDate"
-                               id="plannedEndDate" data-validation-engine="validate[future[plannedStartDate]]"/>
+                <g:textArea style="width:90%;" name="keywords" data-bind="value:keywords" rows="2"/>
             </div>
         </div>
+
     </div>
-
 </div>
 
-<hr class="clearfix"/>
+<div data-bind="visible:!isExternal()" class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.access"/></h4>
 
-<div class="row-fluid">
-    <div class="span6 control-group"">
-        <h4 class="header"><g:message code="project.details.image"/></h4>
-
-        <div class="clearfix control-group">
-            <img data-bind="visible:mainImageUrl(),attr:{src:mainImageUrl}">
-            <span class="btn fileinput-button pull-right"
-                  data-url="${createLink(controller: 'image', action: 'upload')}"
-                  data-role="mainImage"
-                  data-owner-type="projectId"
-                  data-owner-id="${project?.projectId}"
-                  data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input
-                    id="mainImage" type="file" name="files"><span>Attach Image</span></span>
-
-            <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-minus"></i> Remove Image</button>
-        </div>
-    </div>
-
-    <div class="span6">
-        <h4 class="header"><g:message code="project.details.access"/></h4>
-
-        <div class="clearfix control-group">
+        <div class="control-group">
             <label class="control-label span3" for="projectPrivacy"><g:message
                     code="project.details.projectPrivacy"/>:</label>
 
@@ -253,70 +368,73 @@
     </div>
 </div>
 
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.image"/></h4>
 
-<hr class="clearfix"/>
-<h4 class="header"><g:message code="project.details.site"/></h4>
-<g:render template="/site/map" model="${pageScope.variables}"/>
-<hr class="clearfix"/>
+        <div class="control-group">
+            <label class="control-label span3" for="logo">Project Logo:</label>
+            <div class="span6" style="text-align:center">
+                <g:message code="project.logo.extra"/><br/>
+                <div style="width:200px;height:150px;display:inline-block">
+                    <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{src:logoUrl}">
+                </div>
+                <div data-bind="visible:logoUrl()"><g:message code="project.logo.visible"/></div>
+            </div>
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="logo"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!logoUrl()"><i class="icon-plus"></i> <input
+                        id="logo" type="file" name="files"><span>Attach</span></span>
 
+                <button class="btn main-image-button" data-bind="click:removeLogoImage, visible:logoUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
 
-<r:script>
-function initViewModel() {
+        <div class="control-group">
+            <label class="control-label span3" for="mainImage">Feature Graphic:</label>
+            <div class="span6" style="text-align:center">
+                <img alt="No image provided" data-bind="attr:{src:mainImageUrl}">
+            </div>
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="mainImage"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!mainImageUrl()"><i class="icon-plus"></i> <input
+                        id="mainImage" type="file" name="files"><span>Attach</span></span>
 
-    function ViewModel (data, activityTypes, organisations) {
-        var self = this;
-        $.extend(self, new ProjectViewModel(data, true, organisations));
-        self.actualEndDate = ko.observable(data.actualEndDate).extend({simpleDate: false});
-        self.actualStartDate = ko.observable(data.actualStartDate).extend({simpleDate: false});
-        self.orgIdGrantee = ko.observable(data.orgIdGrantee);
-        self.orgIdSponsor = ko.observable(data.orgIdSponsor);
-        self.orgIdSvcProvider = ko.observable(data.orgIdSvcProvider);
-        self.selectedActivities = ko.observableArray();
-        self.transients.activitySource = ko.observable('program');
-        self.transients.activityTypes = activityTypes;
-        self.transients.subprogramsToDisplay = ko.computed(function () {
-            return self.transients.subprograms[self.associatedProgram()];
-        });
+                <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
 
-        self.save = function () {
-            if ($('#validation-container').validationEngine('validate')) {
-                if (self.transients.activitySource() === 'program') {
-                    self.selectedActivities([]);
-                }
+        <div class="control-group">
+            <label class="control-label span3" for="bannerImage">Banner:</label>
+            <img class="span6" data-bind="visible:bannerUrl(),attr:{src:bannerUrl}">
+            <span class="span3">
+                <span class="btn fileinput-button pull-right"
+                      data-url="${createLink(controller: 'image', action: 'upload')}"
+                      data-role="banner"
+                      data-owner-type="projectId"
+                      data-owner-id="${project?.projectId}"
+                      data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input
+                        id="bannerImage" type="file" name="files"><span>Attach</span></span>
 
-                var jsData = ko.mapping.toJS(self, {ignore:['mainImageUrl', 'transients', 'dataSharing']});
-                jsData.urlWeb = fixUrl(jsData.urlWeb);
-                jsData.isDataSharing = self.dataSharing() === 'Enabled';
-                if (!jsData.dataSharingLicense) jsData.dataSharingLicense = 'other';
-                var json = JSON.stringify(jsData);
-                var id = "${project?.projectId ? '/' + project.projectId : ''}";
-                $.ajax({
-                    url: "${createLink(action: 'ajaxUpdate')}" + id,
-                    type: 'POST',
-                    data: json,
-                    contentType: 'application/json',
-                    success: function (data) {
-                        if (data.error) {
-                            alert(data.detail + ' \n' + data.error);
-                        } else {
-                            var projectId = "${project?.projectId}" || data.projectId;
-                            document.location.href = "${createLink(action: 'index')}/" + projectId;
+                <button class="btn main-image-button" data-bind="click:removeBannerImage,  visible:bannerUrl()"><i class="icon-minus"></i> Remove</button>
+            </span>
+        </div>
 
-                        }
-                    },
-                    error: function (data) {
-                        alert('An unhandled error occurred: ' + data.status);
-                    }
-                });
-            }
-        }
-    }
+    </div>
+</div>
 
-    var programsModel = <fc:modelAsJavascript model="${programs}"/>;
-    var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
-    var activityTypes = JSON.parse('${(activityTypes as grails.converters.JSON).toString().encodeAsJavaScript()}');
-    var viewModel =  new ViewModel(${project ?: [:]}, activityTypes, organisations);
-    viewModel.loadPrograms(programsModel);
-    return viewModel;
-}
-</r:script>
+<div class="row-fluid">
+    <div class="well">
+        <h4 class="block-header"><g:message code="project.details.site"/></h4>
+        <g:set var="mapHeight" value="400px"/>
+        <g:render template="/site/simpleSite" model="${pageScope.variables}"/>
+    </div>
+</div>

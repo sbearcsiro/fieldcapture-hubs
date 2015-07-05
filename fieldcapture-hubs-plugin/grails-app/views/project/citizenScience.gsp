@@ -27,9 +27,11 @@
         height: 150px;
         line-height: 146px;
         overflow: hidden;
-        background: grey;
-        padding: 6px;
+        padding: 1px;
         text-align: center;
+    }
+    input[type=checkbox] {
+        margin-right: 5px;
     }
     #pt-downloadLink {
         margin-bottom: 10px;
@@ -37,7 +39,7 @@
     </style>
 </head>
 <body>
-<div id="wrapper" class="container-fluid">
+<div id="wrapper" class="content container-fluid">
     <div class="row-fluid">
         <div class="span6" id="heading">
             <h1 class="pull-left"><g:message code="project.citizenScience.heading"/></h1>
@@ -48,20 +50,19 @@
         </g:if>
     </div>
 
-    <div class="row-fluid"><g:message code="project.citizenScience.preamble"/></div>
     <div id="pt-root" class="row-fluid">
         <div class="well">
             <g:if test="${fc.userIsAlaOrFcAdmin()}">
                 <div class="row-fluid">
                     <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn btn-warning span2 pull-right"
                    title="Download metadata for projects in JSON format">
-                    <i class="icon-download"></i><g:message code="g.download" /></a>
+                    <i class="icon-download"></i>&nbsp;<g:message code="g.download" /></a>
                 </div>
             </g:if>
             <div class="row-fluid">
                 <span class="span2" id="pt-resultsReturned"></span>
                 <div class="span8 input-append">
-                    <input class="span12" type="text" name="pt-search" id="pt-search"/>
+                    <input class="span12" type="text" name="pt-search" id="pt-search" placeholder="Enter a search term"/>
                 </div>
                 <div class="span2">
                     <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
@@ -76,7 +77,7 @@
                     </div>
                     <div class="span3">
                         <label for="pt-sort"><g:message code="g.sortBy" /></label>
-                        <g:select name="pt-sort" from="['Name','Aim and Description','Organisation Name','Status']"  keys="['name','aim','organisationName','status']"/>
+                        <g:select name="pt-sort" from="['Name','Aim','Organisation Name','Status']"  keys="['name','aim','organisationName','daysStatus']"/>
                     </div>
                     <div class="span3">
                         <label for="pt-dir"><g:message code="g.sortOrder" /></label>
@@ -90,36 +91,34 @@
             </div><!--drop downs-->
             <div class="row-fluid">
                 <div class="span4">
-                    <label for="pt-search-active"><g:message code="project.search.active" /></label>
-                    <input id="pt-search-active" type="checkbox" />
+                    <label><input id="pt-search-active" type="checkbox" checked /><g:message code="project.search.active" /></label>
                 </div>
                 <div class="span4">
-                    <label for="pt-search-diy"><g:message code="project.search.diy" /></label>
-                    <input id="pt-search-diy" type="checkbox" />
+                    <label><input id="pt-search-diy" type="checkbox" /><g:message code="project.tag.diy" /></label>
                 </div>
                 <div class="span4">
-                    <label for="pt-search-noCost"><g:message code="project.search.noCost" /></label>
-                    <input id="pt-search-noCost" type="checkbox" />
+                    <label><input id="pt-search-noCost" type="checkbox" /><g:message code="project.tag.noCost" /></label>
                 </div>
             </div>
             <div class="row-fluid">
                 <div class="span4">
-                    <label for="pt-search-teach"><g:message code="project.search.teach" /></label>
-                    <input id="pt-search-teach" type="checkbox" />
+                    <label><input id="pt-search-teach" type="checkbox" /><g:message code="project.tag.teach" /></label>
                 </div>
                 <div class="span4">
-                    <label for="pt-search-children"><g:message code="project.search.children" /></label>
-                    <input id="pt-search-children" type="checkbox" />
+                    <label><input id="pt-search-children" type="checkbox" /><g:message code="project.tag.children" /></label>
+                </div>
+                <div class="span4">
+                    <label><input id="pt-search-mobile" type="checkbox" /><g:message code="project.search.mobile" /></label>
                 </div>
             </div>
         </div>
 
-        <table class="table table-bordered table-hover" id="projectTable">
+        <table class="table table-hover" id="projectTable">
             <tbody data-bind="foreach:pageProjects">
-            <tr>
+            <tr style="border-bottom: 2px solid grey">
                 <td style="width:200px">
-                    <div class="projectLogo">
-                        <img style="max-width:100%;max-height:100%" data-bind="attr:{alt:'No image provided',title:name,src:urlImage}"/>
+                    <div class="projectLogo well">
+                        <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{title:name,src:urlImage}"/>
                     </div>
                 </td>
                 <td>
@@ -128,24 +127,26 @@
                     </a>
                     <div data-bind="visible:orgUrl">
                         <span style="font-size:80%;color:grey">Added <!--ko text:since--><!--/ko--> to&nbsp;</span>
-                        <a data-bind="attr:{href:orgUrl}">
-                            <span data-bind="text:organisationName"></span></a>
+                        <a data-bind="text:organisationName,attr:{href:orgUrl}"></a>
                     </div>
                     <div data-bind="text:aim"></div>
-                    <div>
-                        <i class="icon-info-sign"></i><span data-bind="html:links"/>
+                    <div style="padding: 2px">
+                        <i class="icon-info-sign"></i>&nbsp;<span data-bind="html:links"/>
+                    </div>
+                    <div style="padding: 2px">
+                        TAGS:&nbsp;<g:render template="tags"/>
                     </div>
                     <br/>
                     <div data-bind="visible:transients.daysRemaining() > 0">
                         <b>Project status</b>
                         <g:render template="daysline"/>
-                        To find out more and back this project, <a data-bind="attr:{href:indexUrl}">
+                        To find out more about this project, <a data-bind="attr:{href:indexUrl}">
                         <span style="font-weight:bold">view the project page</span></a>
                     </div>
                     <div data-bind="visible:transients.daysRemaining() == 0">
                         <b>Project status</b>
                         <g:render template="daysline"/>
-                        Project successfully concluded. <a data-bind="attr:{href:indexUrl}">
+                        Project concluded. <a data-bind="attr:{href:indexUrl}">
                         <span style="font-weight:bold">View the project page</span></a>
                     </div>
                     <div data-bind="visible:transients.daysRemaining() < 0">
@@ -179,7 +180,7 @@ $(document).ready(function () {
           x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Social Media&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.organisationName()).toLowerCase();
+        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.locality + ' ' + vm.scienceType() + ' ' + vm.state + ' ' + vm.organisationName()).toLowerCase();
         vm.indexUrl = "${createLink()}/" + vm.projectId;
         vm.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
         return vm;
@@ -207,19 +208,11 @@ $(document).ready(function () {
     var pageWindow = new pageVM();
     ko.applyBindings(pageWindow);
 
-    /* the base url of the home server */
-    var baseUrl = fcConfig.baseUrl;
-
-    /** load projects and show first page **/
-    allProjects.sort(comparator); // full list is sorted by name
-    projects = allProjects;
-    updateTotal();
-    populateTable();
-
     /*************************************************\
      *  Filter projects by search term
      \*************************************************/
-    var showActiveOnly, showSuitableForChildrenOnly, showDifficultyOnly, showDIYOnly, showNoCostOnly, showTeachOnly;
+    var showActiveOnly = true, showSuitableForChildrenOnly, showDifficultyOnly, showDIYOnly,
+      showNoCostOnly, showTeachOnly, showWithMobileAppsOnly;
     function doSearch(force) {
         var val = $('#pt-search').val().toLowerCase();
         if (!force && val == searchTerm) return;
@@ -228,12 +221,13 @@ $(document).ready(function () {
         for (var i = 0; i < allProjects.length; i++) {
             var item = allProjects[i];
             if (!item) continue;
-            if (showActiveOnly && item.status() != 'active') continue;
+            if (showActiveOnly && item.daysStatus() != 'active') continue;
             if (showSuitableForChildrenOnly && !item.isSuitableForChildren()) continue;
             if (showDifficultyOnly && item.difficulty() != showDifficultyOnly) continue;
             if (showDIYOnly && !item.isDIY()) continue;
             if (showTeachOnly && !item.hasTeachingMaterials()) continue;
             if (showNoCostOnly && item.hasParticipantCost()) continue;
+            if (showWithMobileAppsOnly && !item.transients.mobileApps().length) continue;
             if (item.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }
@@ -269,22 +263,24 @@ $(document).ready(function () {
         }
         var currentPage = Math.floor(offset / perPage) + 1;
         var maxPage = Math.ceil(total / perPage);
-        var $pago = $("<div class='pagination'></div>");
+        var $ul = $("<ul></ul>");
         // add prev
         if (offset > 0)
-            $pago.append('<a href="javascript:pago.prevPage();">&lt;</a></li>');
+            $ul.append('<li><a href="javascript:pago.prevPage();">&lt;</a></li>');
         for (var i = currentPage - 3, n = 0; i <= maxPage && n < 7; i++) {
             if (i < 1) continue;
             n++;
             if (i == currentPage)
-                $pago.append('<a href="#" class="currentStep">' + i + '</a>');
+                $ul.append('<li><a href="#" class="currentStep">' + i + '</a></li>');
             else
-                $pago.append('<a href="javascript:pago.gotoPage(' + i + ');">' + i + '</a>');
+                $ul.append('<li><a href="javascript:pago.gotoPage(' + i + ');">' + i + '</a></li>');
         }
         // add next
         if ((offset + perPage) < total)
-            $pago.append('<a href="javascript:pago.nextPage();">&gt;</a>');
+            $ul.append('<li><a href="javascript:pago.nextPage();">&gt;</a></li>');
 
+        var $pago = $("<div class='pagination'></div>");
+        $pago.append($ul);
         $('div#pt-navLinks').html($pago);
     }
 
@@ -340,13 +336,8 @@ $(document).ready(function () {
         }
     });
     $('#pt-reset').click(function () {
-        projects = allProjects;
-        $('#pt-per-page').val(perPage = 20);
-        $('#pt-sort').val(sortBy = 'name');
-        $('#pt-dir').val(sortOrder = 1);
-        offset = 0;
-        updateTotal();
-        populateTable();
+        $('#pt-search').val('');
+        doSearch(true);
     });
     $('#pt-search-active').on('change', function() {
         showActiveOnly = $(this).prop('checked');
@@ -373,10 +364,18 @@ $(document).ready(function () {
         showTeachOnly = $(this).prop('checked');
         doSearch(true);
     });
+    $('#pt-search-mobile').on('change', function() {
+        showWithMobileAppsOnly = $(this).prop('checked');
+        doSearch(true);
+    });
 
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
     });
+
+    /** load projects and show first page **/
+    allProjects.sort(comparator); // full list is sorted by name
+    doSearch(true);
 });
 </r:script>
 </body>
