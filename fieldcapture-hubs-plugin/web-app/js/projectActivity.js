@@ -2,6 +2,7 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
     var self = this;
 
     self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
+    self.datesOptions = [60, 90, 120];
     self.projectId = ko.observable(projectId);
     self.pActivityForms = pActivityForms;
     self.sites = sites;
@@ -54,7 +55,10 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
         var caller = "sites";
         return self.genericUpdate(self.current().asJSON(caller), caller);
     };
-
+    self.saveVisibility = function(){
+        var caller = "visibility";
+        return self.genericUpdate(self.current().asJSON(caller), caller);
+    };
 
     self.deleteProjectActivity = function() {
         bootbox.confirm("Are you sure you want to delete the survey?", function (result) {
@@ -161,8 +165,10 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     self.commentsAllowed = ko.observable(o.commentsAllowed ? o.commentsAllowed : false);
     self.published = ko.observable(o.published ? o.published : false);
     self.current = ko.observable(selected);
+    self.restrictRecordToSites = ko.observable(o.restrictRecordToSites);
     self.pActivityFormName = ko.observable(o.pActivityFormName);
     self.species = new SpeciesConstraintViewModel(o.species);
+    self.visibility = new SurveyVisibilityViewModel(o.visibility);
     self.transients = {};
     self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl +"&pActivityId="+self.projectActivityId());
     self.transients.siteCreateUrl = ko.observable(fcConfig.siteCreateUrl);
@@ -225,6 +231,11 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
                 }
             });
             jsData.sites = sites;
+            jsData.restrictRecordToSites = self.restrictRecordToSites();
+        }
+        else if(by == "visibility"){
+            jsData = {};
+            jsData.visibility = ko.mapping.toJS(self.visibility, {ignore:['transients']});
         }
 
         return JSON.stringify(jsData, function (key, value) { return value === undefined ? "" : value; });
@@ -493,9 +504,18 @@ var ImagesViewModel = function(image){
     self.url = ko.observable(image.url);
 };
 
+var SurveyVisibilityViewModel = function(o){
+    var self = this;
+    if(!o) o = {};
+    self.constraint = ko.observable(o.constraint ? o.constraint : 'PUBLIC');   // 'PUBLIC', 'PUBLIC_WITH_SET_DATE', 'EMBARGO'
+    self.setDate = ko.observable(o.setDate ? o.setDate : 60);     // 60, 90, 120 days
+    self.embargoDate = ko.observable(o.embargoDate).extend({simpleDate:false});
+};
+
 function initialiseValidator() {
     $('#project-activities-info-validation').validationEngine();
     $('#project-activities-species-validation').validationEngine();
     $('#project-activities-form-validation').validationEngine();
     $('#project-activities-access-validation').validationEngine();
-}
+    $('#project-activities-visibility-validation').validationEngine();
+};

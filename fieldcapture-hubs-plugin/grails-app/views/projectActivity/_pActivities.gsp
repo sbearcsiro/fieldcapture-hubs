@@ -32,6 +32,7 @@
                     <li><a href="#survey-species" data-toggle="pill">Species</a></li>
                     <li><a href="#survey-form" data-toggle="pill">Surveys Form</a></li>
                     <li><a href="#survey-locations" data-toggle="pill">Locations</a></li>
+                    <li><a href="#survey-visibility" data-toggle="pill">Visibility</a></li>
                     <li><a href="#survey-alerts" data-toggle="pill">Alerts & Actions</a></li>
                 </ul>
 
@@ -59,6 +60,13 @@
                             <div id="project-activities-sites-result-placeholder"></div>
                             <!-- Allow user to seelct the existing sites and preview those sites.-->
                             <g:render template="/projectActivity/sites"/>
+                        </span>
+                    </div>
+
+                    <div class="pill-pane" id="survey-visibility">
+                        <span class="validationEngineContainer" id="project-activities-visibility-validation">
+                            <div id="project-activities-visibility-result-placeholder"></div>
+                            <g:render template="/projectActivity/visibility"/>
                         </span>
                     </div>
 
