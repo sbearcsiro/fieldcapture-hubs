@@ -6,6 +6,13 @@
     padding-bottom: 7px;
     border-bottom: 1px solid lightgrey;
 }
+.req-field:after {
+    content: "*";
+    color: red;
+    font-weight:bold;
+    font-size:1.5em;
+    white-space: nowrap;
+}
 </style>
 
 <div class="well">
@@ -13,7 +20,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
@@ -23,7 +30,7 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
@@ -37,7 +44,7 @@
 
             <div class="clearfix control-group">
 
-                <label class="control-label span3" for="organisationName"><g:message code="project.organisationNameSearch"/><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp></label>
+                <label class="control-label span3" for="organisationName"><g:message code="project.organisationNameSearch"/><fc:iconHelp><g:message code="project.organisationName.help"/></fc:iconHelp><i class="req-field"></i>:</label>
                 <div class="span6 controls">
                     <div class="input-append" style="width:100%;">
                         <input id="organisationName" style="width:90%" type="text" placeholder="Start typing a name here" data-bind="value:term, valueUpdate:'afterkeydown', disable:selection"><button class="btn" type="button" data-bind="click:clearSelection"><i class='icon-search' data-bind="css:{'icon-search':!term(), 'icon-remove':term()}"></i></button>
@@ -76,7 +83,7 @@
     <div class="row-fluid">
         <p/>
         <div class="control-group">
-            <label class="control-label span3" for="isMetadataSharing"><g:message code="project.isMetadataSharing"/><fc:iconHelp><g:message code="project.isMetadataSharing.help"/></fc:iconHelp></label>
+            <label class="control-label span3" for="isMetadataSharing"><g:message code="project.isMetadataSharing"/><fc:iconHelp><g:message code="project.isMetadataSharing.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <input data-bind="checked:isMetadataSharing()" type="checkbox" id="isMetadataSharing"/>
                 <g:message code="project.isMetadataSharing.extra"/>
@@ -91,7 +98,7 @@
         <h4 class="block-header"><g:message code="project.details.tell"/></h4>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="name"><g:message code="g.project.name"/>:</label>
+            <label class="control-label span3" for="name"><g:message code="g.project.name"/><fc:iconHelp><g:message code="project.name.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <g:textField style="width:90%;" name="name" data-bind="value:name"
@@ -100,7 +107,7 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="aim"><g:message code="g.project.aim"/>:</label>
+            <label class="control-label span3" for="aim"><g:message code="g.project.aim"/><fc:iconHelp><g:message code="project.aim.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="aim" data-bind="value:aim"
@@ -109,7 +116,7 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="description"><g:message code="g.project.description"/>:</label>
+            <label class="control-label span3" for="description"><g:message code="g.project.description"/><fc:iconHelp><g:message code="project.description.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="description" data-bind="value:description"
@@ -118,7 +125,7 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="manager"><g:message code="project.details.manager"/>:</label>
+            <label class="control-label span3" for="manager"><g:message code="project.details.manager"/><fc:iconHelp><g:message code="project.manager.help"/></fc:iconHelp>:</label>
 
             <div class="controls span9">
                 <g:textField style="width:90%;" type="email" data-bind="value:manager" name="manager"/>
@@ -127,8 +134,7 @@
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="plannedStartDate"><g:message code="project.plannedStartDate"/>:
-            <fc:iconHelp><g:message code="project.plannedStartDate.help"/></fc:iconHelp>
-            </label>
+            <fc:iconHelp><g:message code="project.plannedStartDate.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <fc:datePicker class="input-small" targetField="plannedStartDate.date" name="plannedStartDate"
@@ -180,7 +186,7 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="program"><g:message code="g.program.name"/>:</label>
+            <label class="control-label span3" for="program"><g:message code="g.program.name"/><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select class="span12" id="program"
@@ -235,7 +241,7 @@
         <h4 class="block-header"><g:message code="project.details.involved"/></h4>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="getInvolved"><g:message code="project.details.involved"/></label>
+            <label class="control-label span3" for="getInvolved"><g:message code="project.details.involved"/><fc:iconHelp><g:message code="project.involved.help"/></fc:iconHelp>:</label>
 
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="getInvolved" data-bind="value:getInvolved"
@@ -245,7 +251,7 @@
 
         <div class="clearfix control-group">
             <label class="control-label span3"
-                   for="scienceType"><g:message code="project.details.scienceType"/>:</label>
+                   for="scienceType"><g:message code="project.details.scienceType"/><fc:iconHelp><g:message code="project.scienceType.help"/></fc:iconHelp>:</label>
 
             <div class="controls span9">
                 <select data-bind="value:scienceType, options:transients.availableScienceTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"></select>
@@ -253,7 +259,7 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.difficulty"/><fc:iconHelp><g:message code="project.difficulty.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select data-bind="value:difficulty, options:transients.difficultyLevels, optionsCaption:'Select...'" data-validation-engine="validate[required]"></select>
@@ -261,42 +267,42 @@
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp></label>
+            <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
             </div>
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp></label>
+            <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
             </div>
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp></label>
+            <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
             </div>
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp></label>
+            <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
             </div>
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.gear"/><fc:iconHelp><g:message code="project.gear.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="gear" data-bind="value:gear" rows="2"/>
             </div>
         </div>
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp></label>
+            <label class="control-label span3"><g:message code="project.task"/><fc:iconHelp><g:message code="project.task.help"/></fc:iconHelp><i class="req-field"></i>:</label>
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="task" data-bind="value:task" rows="2" data-validation-engine="validate[required]"/>
             </div>
@@ -309,7 +315,7 @@
         <h4 class="block-header"><g:message code="project.details.find"/></h4>
 
         <div class="control-group">
-            <label class="control-label span3" for="urlWeb"><g:message code="g.website"/>:</label>
+            <label class="control-label span3" for="urlWeb"><g:message code="g.website"/><fc:iconHelp><g:message code="project.website.help"/></fc:iconHelp>:</label>
 
             <div class="controls span9">
                 <g:textField style="width:90%;" type="url" name="urlWeb" data-bind="value:urlWeb" data-validation-engine="validate[custom[url]]"/>
@@ -317,10 +323,10 @@
         </div>
 
         <g:render template="/shared/editDocumentLinks"
-                  model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
+                  model="${[entity:'project',imageUrl:resource(dir:'/images/filetypes')]}"/>
 
         <div class="control-group">
-            <label class="control-label span3" for="keywords"><g:message code="g.keywords"/>:</label>
+            <label class="control-label span3" for="keywords"><g:message code="g.keywords"/><fc:iconHelp><g:message code="project.keywords.help"/></fc:iconHelp>:</label>
 
             <div class="controls span9">
                 <g:textArea style="width:90%;" name="keywords" data-bind="value:keywords" rows="2"/>
@@ -336,7 +342,7 @@
 
         <div class="control-group">
             <label class="control-label span3" for="projectPrivacy"><g:message
-                    code="project.details.projectPrivacy"/>:</label>
+                    code="project.details.projectPrivacy"/><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select class="span12" id="projectPrivacy"
@@ -347,7 +353,7 @@
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="dataSharing"><g:message
-                    code="project.details.dataSharing"/>:</label>
+                    code="project.details.dataSharing"/><i class="req-field"></i>:</label>
 
             <div class="controls span9">
                 <select class="span12" id="dataSharing"
@@ -373,10 +379,10 @@
         <h4 class="block-header"><g:message code="project.details.image"/></h4>
 
         <div class="control-group">
-            <label class="control-label span3" for="logo">Project Logo:</label>
-            <div class="span6" style="text-align:center">
+            <label class="control-label span3" for="logo">Project Logo<fc:iconHelp><g:message code="project.logo.help"/></fc:iconHelp>:</label>
+            <div class="span6" style="text-align:center;background:white">
                 <g:message code="project.logo.extra"/><br/>
-                <div style="width:200px;height:150px;display:inline-block">
+                <div class="well" style="padding:0;width:200px;height:150px;line-height:146px;display:inline-block">
                     <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{src:logoUrl}">
                 </div>
                 <div data-bind="visible:logoUrl()"><g:message code="project.logo.visible"/></div>
@@ -395,8 +401,8 @@
         </div>
 
         <div class="control-group">
-            <label class="control-label span3" for="mainImage">Feature Graphic:</label>
-            <div class="span6" style="text-align:center">
+            <label class="control-label span3" for="mainImage">Feature Graphic<fc:iconHelp><g:message code="project.mainImage.help"/></fc:iconHelp>:</label>
+            <div class="span6" style="text-align:center;background:white">
                 <img alt="No image provided" data-bind="attr:{src:mainImageUrl}">
             </div>
             <span class="span3">
@@ -411,23 +417,6 @@
                 <button class="btn main-image-button" data-bind="click:removeMainImage,  visible:mainImageUrl()"><i class="icon-minus"></i> Remove</button>
             </span>
         </div>
-
-        <div class="control-group">
-            <label class="control-label span3" for="bannerImage">Banner:</label>
-            <img class="span6" data-bind="visible:bannerUrl(),attr:{src:bannerUrl}">
-            <span class="span3">
-                <span class="btn fileinput-button pull-right"
-                      data-url="${createLink(controller: 'image', action: 'upload')}"
-                      data-role="banner"
-                      data-owner-type="projectId"
-                      data-owner-id="${project?.projectId}"
-                      data-bind="stagedImageUpload:documents, visible:!bannerUrl()"><i class="icon-plus"></i> <input
-                        id="bannerImage" type="file" name="files"><span>Attach</span></span>
-
-                <button class="btn main-image-button" data-bind="click:removeBannerImage,  visible:bannerUrl()"><i class="icon-minus"></i> Remove</button>
-            </span>
-        </div>
-
     </div>
 </div>
 
