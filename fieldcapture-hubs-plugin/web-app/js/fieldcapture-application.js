@@ -647,14 +647,17 @@ function getHostName(href) {
 
 function buildiFrame(embeddedVideo){
     var html = $.parseHTML(embeddedVideo);
-    for(var i = 0; i < html.length; i++){
-        var element = html[i];
-        var attr = $(element).attr('src');
-        var iframe = "";
-        if(typeof attr !== typeof undefined && attr !== false){
-            var height =  element.getAttribute("height") ?  element.getAttribute("height") : "315";
-            iframe = isUrlAndHostValid(attr)  ? '<iframe width="100%" src ="' +  attr + '" height = "' + height + '"/></iframe>' : "";
+    var iframe = "";
+    if(html){
+        for(var i = 0; i < html.length; i++){
+            var element = html[i];
+            var attr = $(element).attr('src');
+            if(typeof attr !== typeof undefined && attr !== false){
+                var height =  element.getAttribute("height") ?  element.getAttribute("height") : "315";
+                iframe = isUrlAndHostValid(attr)  ? '<iframe width="100%" src ="' +  attr + '" height = "' + height + '"/></iframe>' : "";
+            }
+            return iframe;
         }
-        return iframe;
     }
+    return iframe;
 };

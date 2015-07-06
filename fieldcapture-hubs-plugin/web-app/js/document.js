@@ -72,6 +72,9 @@ function DocumentViewModel (doc, owner, settings) {
     this.embeddedVideoVisible = ko.computed(function() {
         return (self.role() == 'embeddedVideo');
     });
+    this.embeddedVideo.subscribe(function(newValue) {
+        setTimeout(function() {$("#embeddedVideo").validationEngine('validate');}, 100);
+    });
 
     this.thirdPartyConsentDeclarationMade.subscribe(function(declarationMade) {
         // Record the text that the user agreed to (as it is an editable setting).
@@ -95,17 +98,19 @@ function DocumentViewModel (doc, owner, settings) {
         return self.filename() && self.progress() === 0 && !self.error();
     });
     this.saveEnabled = ko.computed(function() {
-
-        if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
-            return false;
+        if(self.role() == 'embeddedVideo' ){
+            return buildiFrame(self.embeddedVideo()) != "" ;
         }
-        if(self.role() == 'embeddedVideo'){
-            return true;
+        else if (self.thirdPartyConsentDeclarationRequired() && !self.thirdPartyConsentDeclarationMade()) {
+            return false;
         }
         return self.fileReady();
     });
     this.saveHelp = ko.computed(function() {
-        if (!self.fileReady()) {
+        if(self.role() == 'embeddedVideo' && !buildiFrame(self.embeddedVideo())){
+            return 'Invalid embed video code';
+        }
+        else if (!self.fileReady()) {
             return 'Attach a file using the "+ Attach file" button';
         }
         else if (!self.saveEnabled()) {
@@ -212,6 +217,13 @@ function DocumentViewModel (doc, owner, settings) {
     this.modelForSaving = function() {
         return ko.mapping.toJS(self, {'ignore':['embeddedVideoVisible','iframe','helper', 'progress', 'hasPreview', 'error', 'fileLabel', 'file', 'complete', 'fileButtonText', 'roles', 'stages','maxStages', 'settings', 'thirdPartyConsentDeclarationRequired', 'saveEnabled', 'saveHelp', 'fileReady']});
     }
+
+    window.validateEmbedCode = function() {
+        if(!buildiFrame(self.embeddedVideo())){
+            return "Invalid embed video code."
+        }
+    };
+
 }
 
 
@@ -347,7 +359,6 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
         $modal.modal('hide');
         $fileUpload.find(previewSelector).empty();
         ko.cleanNode($fileUpload[0]);
-        //$fileUpload.fileupload('destroy');
     };
 
     ko.applyBindings(documentViewModel, $fileUpload[0]);
@@ -356,7 +367,9 @@ function showDocumentAttachInModal(uploadUrl, documentViewModel, modalSelector, 
     $modal.modal({backdrop:'static'});
     $modal.on('shown', function() {
         $modal.find('form').validationEngine({'custom_error_messages': {
-            'required': {'message':'The privacy declaration is required for images viewable by everyone'}
+            '#thirdPartyConsentCheckbox': {
+                'required': {'message':'The privacy declaration is required for images viewable by everyone'}
+            }
         }, 'autoPositionUpdate':true, promptPosition:'inline'});
     });
 
