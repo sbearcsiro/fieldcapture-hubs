@@ -734,6 +734,9 @@ function BaseEditor(args) {
 
     self.setElement = function(element) {
         self.$element = element;
+        if (args.column.validationRules) {
+            element.addClass(args.column.validationRules)// Using class because of way jqueryValidationEngine determines the pattern used.
+        }
         validationSupport.addValidationSupport(element, args.item, args.column.field);
     };
 
@@ -986,7 +989,19 @@ dateFormatter = function(row, cell, value, columnDef, dataContext) {
         return '';
     }
     return convertToSimpleDate(value, false);
-}
+};
+
+optionsFormatter = function(row, cell, value, columnDef, dataContext) {
+    var labelProperty = columnDef.optionLabel || 'label';
+    var valueProperty = columnDef.optionValue || 'value';
+
+    for (var i=0; i<columnDef.options.length; i++) {
+        if (value == columnDef.options[i][valueProperty]) {
+            return columnDef.options[i][labelProperty];
+        }
+    }
+    return '';
+};
 
 progressFormatter = function( row, cell, value, columnDef, dataContext ) {
 

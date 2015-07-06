@@ -35,16 +35,18 @@
                                 <a data-bind="attr:{href: species.transients.bioProfileUrl}" target="_blank"><small data-bind="text: species.singleSpecies.name"></small></a>
                            </span>
                            </br>
+                            <!--
                             <input style="width:80%;" type="text" placeholder="Search species"
                                 data-bind="value:species.singleSpecies.transients.textFieldValue,
                                             event:{focusout: species.singleSpecies.focusLost},
                                             autocomplete:{
-                                                url:'http://devt.ala.org.au:8088/fieldcapture-hub/search/species',
+                                                url: '', //http://devt.ala.org.au:8088/fieldcapture-hub/search/species
                                                 render: species.singleSpecies.renderItem,
                                                 listId: species.singleSpecies.list,
                                                 result: species.singleSpecies.speciesSelected,
                                                 valueChangeCallback: species.singleSpecies.textFieldChanged
                                             }" data-validation-engine="validate[required]">
+                            -->
 
                         </div>
 

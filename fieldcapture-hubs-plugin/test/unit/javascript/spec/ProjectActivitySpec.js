@@ -104,3 +104,31 @@ describe("SpeciesListsViewModel Spec", function () {
         expect(listsVM.isNext ()).toEqual(false);
     });
 });
+
+
+describe("SurveyVisibilityViewModel Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
+
+    it("should be able to be initialised from an object literal", function () {
+        var visibility = new SurveyVisibilityViewModel();
+        expect(visibility.setDate()).not.toEqual(0);
+        expect(visibility.constraint()).not.toEqual("");
+    });
+
+    it("default visibility should be public", function () {
+        var visibility = new SurveyVisibilityViewModel();
+        expect(visibility.constraint()).toEqual("PUBLIC");
+    });
+    it("default set date should be 60", function () {
+        var visibility = new SurveyVisibilityViewModel();
+        expect(visibility.setDate()).toEqual(60);
+    });
+
+});

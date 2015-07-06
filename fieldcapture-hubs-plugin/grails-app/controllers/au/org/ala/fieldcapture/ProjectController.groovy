@@ -55,11 +55,9 @@ class ProjectController {
             ]
 
             if(project.projectType == 'survey'){
-                def pActivityForms = []
                 def activityModel = metadataService.activitiesModel().activities.findAll { it.category == "Assessment & monitoring" }
-                activityModel.collect{ pActivityForms.add([name: it.name, images: it.images]) }
                 model.projectActivities = projectActivityService?.getAllByProject(project.projectId)
-                model.pActivityForms =  pActivityForms
+                model.pActivityForms = activityModel.collect{[name: it.name, images: it.images]}
             }
 
             render view:content.view, model:model
