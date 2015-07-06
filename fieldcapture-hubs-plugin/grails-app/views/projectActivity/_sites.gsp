@@ -68,6 +68,19 @@
         </div>
 
     </div>
+
+    </br>
+
+    <div class="row-fluid">
+
+        <div class="span12">
+            <p>
+                <input type="checkbox" data-bind="checked: restrictRecordToSites"/> Restrict record locations to the selected survey sites
+            </p>
+        </div>
+
+    </div>
+
     <!-- /ko -->
     <!-- /ko -->
 
