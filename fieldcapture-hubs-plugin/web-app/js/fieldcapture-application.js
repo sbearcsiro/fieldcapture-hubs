@@ -661,3 +661,32 @@ function buildiFrame(embeddedVideo){
     }
     return iframe;
 };
+
+function showFloatingMessage(message, alertType) {
+    if (!alertType) {
+        alertType = 'alert-success';
+    }
+
+    var messageContainer = $('<div id="alertdiv" style="display:none; margin:0;" class="alert ' +  alertType + '"><a class="close" data-dismiss="alert">×</a><span>'+message+'</span></div>');
+
+    setTimeout(function() { // this will automatically close the alert and remove this if the users doesnt close it in 5 secs
+        messageContainer.slideUp(400, function() {messageContainer.remove();});
+    }, 5000);
+
+    if ($('.navbar').is(':appeared')) {
+        // attach below navbar
+        $('#content').prepend(messageContainer);
+
+    }
+    else {
+        // attach to top
+        messageContainer.css("position", "fixed");
+        messageContainer.width('100%');
+        messageContainer.css("top", 0);
+        messageContainer.css("left", 0);
+
+        $('body').append(messageContainer);
+
+    }
+    messageContainer.slideDown(400);
+}

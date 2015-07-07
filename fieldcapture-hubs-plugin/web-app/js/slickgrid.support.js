@@ -1123,6 +1123,37 @@ function validateOutput(output, outputModel) {
     return results;
 };
 
+function parseValidationString(validationString) {
+    var validationFunctions = [];
+    if (!validationString) {
+        return [];
+    }
+    var validatePrefix = 'validate['
+    var index = validationString.indexOf(validatePrefix);
+    if (index >= 0) {
+        validationString = validationString.substring(validatePrefix.length, validationString.length-1);
+    }
+    var validations = validationString.split(',');
+    for (var i=0; i<validations.length; i++) {
+        var validation = validations[i];
+        var args = undefined;
+        var validatorName = validation;
+        var argsIndex = validation.indexOf('[');
+        if (argsIndex > 0) {
+            validatorName = validation.substring(0, argsIndex);
+            args = validation.substring(argsIndex+1, validation.length-1);
+        }
+        var validatorFn = validators[validatorName];
+        if (validatorFn) {
+            validationFunctions.push(
+                function(field, value) {
+                    return validatorFn(field, value, args);
+                });
+        }
+    }
+    return validationFunctions;
+}
+
 validators = {
     required: function(field, value) {
         if (value === null || value === undefined || !String(value)) {
