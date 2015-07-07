@@ -1,5 +1,5 @@
 <div class="control-group">
-    <label class="control-label span3">Mobile Apps:</label>
+    <label class="control-label span3">Mobile Apps<fc:iconHelp><g:message code="g.mobileApps.help" args="[entity]"/></fc:iconHelp>:</label>
     <table class="controls span9">
         <tbody data-bind="foreach:transients.mobileApps">
         <tr>
@@ -19,7 +19,7 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label span3">Social Media:</label>
+    <label class="control-label span3">Social Media<fc:iconHelp><g:message code="g.socialMedia.help" args="[entity]"/></fc:iconHelp>:</label>
     <table class="controls span9">
         <tbody data-bind="foreach:transients.socialMedia">
         <tr>

@@ -113,8 +113,8 @@
                 <div class="clearfix" data-bind="visible:organisationId()||organisationName()">
                     <h4>
                         Recipient:
-                        <a data-bind="visible:organisationName()&&organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}"></a>
-                        <span data-bind="visible:organisationName()&&!organisationId(),text:organisationName"></span>
+                        <a data-bind="visible:organisationId(),text:organisationName,attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}"></a>
+                        <span data-bind="visible:!organisationId(),text:organisationName"></span>
                     </h4>
                 </div>
                 <div class="clearfix" data-bind="visible:serviceProviderName()">
