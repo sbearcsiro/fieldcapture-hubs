@@ -45,7 +45,7 @@
         <div class="header-text">
             <h2 data-bind="text:name"></h2>
             <h4 class="organisation" data-bind="visible:!organisationId(),text:organisationName"></h4>
-            <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + organisationId()}">
+            <a data-bind="visible:organisationId(),attr:{href:fcConfig.organisationLinkBaseUrl + '/' + organisationId()}">
               <h4 class="organisation" data-bind="text:organisationName"></h4>
             </a>
         </div>

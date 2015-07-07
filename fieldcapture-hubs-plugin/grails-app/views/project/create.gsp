@@ -36,8 +36,7 @@
     Please tell us about your project by completing the form below.  Questions marked with a * are mandatory.
     </p>
     <form id="projectDetails" class="form-horizontal">
-        <g:set var="template" value="${params.citizenScience?'externalCitizenScienceProjectDetails':'details'}"/>
-        <g:render template="${template}" model="${pageScope.variables}"/>
+        <g:render template="details" model="${pageScope.variables}"/>
     </form>
     <div class="form-actions">
         <button type="button" id="save" class="btn btn-primary"><g:message code="g.save"/></button>
@@ -62,6 +61,7 @@ $(function(){
 
     var viewModel =  new CreateEditProjectViewModel(project, true, userOrganisations, organisations, {storageKey:PROJECT_DATA_KEY});
     viewModel.loadPrograms(programsModel);
+    viewModel.isMetadataSharing(true);
 
     $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});

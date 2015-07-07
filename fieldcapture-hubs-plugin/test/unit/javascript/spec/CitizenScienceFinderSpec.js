@@ -19,6 +19,7 @@ describe("Citizen Science Project Finder Spec", function () {
           'pid',
           'aim',
           'coverage',
+          'description',
           'Easy', // difficulty
           fourDaysHence.toISOString(), // plannedEndDate
           false, // hasParticipantCost
@@ -26,32 +27,40 @@ describe("Citizen Science Project Finder Spec", function () {
           true, // isDIY
           false, // isExternal
           true, // isSuitableForChildren
+          'keywords',
           [], // links
+          'locality',
           'name',
           'orgid',
           'orgname',
+          'scienceType',
           threeDaysAgo.toISOString(), // plannedStartDate
-          'active',
+          'state',
           null, // urlImage
           null // urlWeb
         ];
         var project = new CreateCitizenScienceFinderProjectViewModel(projectData);
 
         expect(project.aim()).toEqual(projectData[1]);
-        expect(project.difficulty()).toEqual(projectData[3]);
+        expect(project.description()).toEqual(projectData[3]);
+        expect(project.difficulty()).toEqual(projectData[4]);
         expect(new Date(project.plannedEndDate())).toEqual(fourDaysHence);
-        expect(project.hasParticipantCost()).toEqual(projectData[5]);
-        expect(project.hasTeachingMaterials()).toEqual(projectData[6]);
-        expect(project.isDIY()).toEqual(projectData[7]);
-        expect(project.isExternal()).toEqual(projectData[8]);
-        expect(project.isSuitableForChildren()).toEqual(projectData[9]);
-        expect(project.name()).toEqual(projectData[11]);
-        expect(project.organisationId()).toEqual(projectData[12]);
-        expect(project.organisationName()).toEqual(projectData[13]);
+        expect(project.hasParticipantCost()).toEqual(projectData[6]);
+        expect(project.hasTeachingMaterials()).toEqual(projectData[7]);
+        expect(project.isDIY()).toEqual(projectData[8]);
+        expect(project.isExternal()).toEqual(projectData[9]);
+        expect(project.isSuitableForChildren()).toEqual(projectData[10]);
+        expect(project.keywords()).toEqual(projectData[11]);
+        expect(project.locality).toEqual(projectData[13]);
+        expect(project.name()).toEqual(projectData[14]);
+        expect(project.organisationId()).toEqual(projectData[15]);
+        expect(project.organisationName()).toEqual(projectData[16]);
+        expect(project.scienceType()).toEqual(projectData[17]);
         expect(new Date(project.plannedStartDate())).toEqual(threeDaysAgo);
-        expect(project.status()).toEqual(projectData[15]);
+        expect(project.state).toEqual(projectData[19]);
         expect(project.transients.daysRemaining()).toEqual(4);
         expect(project.transients.daysSince()).toEqual(3);
         expect(project.transients.daysTotal()).toEqual(7);
+        expect(project.daysStatus()).toEqual("active");
     });
 });

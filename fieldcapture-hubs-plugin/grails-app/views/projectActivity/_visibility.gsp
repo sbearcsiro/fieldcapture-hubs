@@ -16,7 +16,7 @@
                         <label><input type="radio" value="PUBLIC" data-bind="checked: visibility.constraint" /> Records publicly visible on submission</label>
                         <label>
                             <input type="radio" value="PUBLIC_WITH_SET_DATE" data-bind="checked: visibility.constraint" /> Records publicly visible after
-                            <select style="width:10%;" data-validation-engine="validate[required]" data-bind="options: $root.datesOptions, value: visibility.setDate, optionsCaption: 'Please select'" ></select>
+                            <select style="width:10%;" data-validation-engine="validate[required]" data-bind="options: $root.datesOptions, value: visibility.setDate, optionsCaption: 'Please select'" ></select> days
                         </label>
                         <label>
                             <input type="radio" value="EMBARGO" data-bind="checked: visibility.constraint" /> Embargo publishing all records until
