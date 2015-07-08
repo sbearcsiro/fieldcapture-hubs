@@ -30,10 +30,10 @@
     <div class="row-fluid">
 
         <div class="clearfix control-group">
-            <label class="control-label span3"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp><i class="req-field"></i>:</label>
+            <label class="control-label span3" for="isExternal"><g:message code="project.useALA"/><fc:iconHelp><g:message code="project.useALA.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
-                <select data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                <select id="isExternal" data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
 
                 </select>
             </div>
@@ -85,7 +85,7 @@
         <div class="control-group">
             <label class="control-label span3" for="isMetadataSharing"><g:message code="project.isMetadataSharing"/><fc:iconHelp><g:message code="project.isMetadataSharing.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <input data-bind="checked:isMetadataSharing()" type="checkbox" id="isMetadataSharing"/>
+                <input data-bind="checked:isMetadataSharing" type="checkbox" id="isMetadataSharing"/>
                 <g:message code="project.isMetadataSharing.extra"/>
             </div>
         </div>
@@ -269,7 +269,7 @@
         <div class="clearfix control-group">
             <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <input data-bind="checked:hasParticipantCost" type="checkbox" id="hasParticipantCost"/>
+                <select id="hasParticipantCost" data-bind="booleanValue:hasParticipantCost, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
             </div>
         </div>
 
@@ -403,7 +403,9 @@
         <div class="control-group">
             <label class="control-label span3" for="mainImage">Feature Graphic<fc:iconHelp><g:message code="project.mainImage.help"/></fc:iconHelp>:</label>
             <div class="span6" style="text-align:center;background:white">
-                <img alt="No image provided" data-bind="attr:{src:mainImageUrl}">
+                <div class="well" style="padding:0;max-height:512px;display:inline-block;overflow:hidden">
+                    <img style="max-width:100%" alt="No image provided" data-bind="attr:{src:mainImageUrl}">
+                </div>
             </div>
             <span class="span3">
                 <span class="btn fileinput-button pull-right"

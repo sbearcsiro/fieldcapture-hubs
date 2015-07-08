@@ -65,10 +65,9 @@
 
         <div class="pill-content">
             <div class="pill-pane active" id="about">
-
                 <g:render template="aboutCitizenScienceProject"/>
+                <div id="map"></div>
             </div>
-            <div id="map"></div>
             <div class="pill-pane" id="admin">
                 <g:render template="admin"/>
             </div>
@@ -77,6 +76,7 @@
 </g:if>
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
+    <div id="map"></div>
 </g:else>
 <!-- ko stopBinding:true -->
 <g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>

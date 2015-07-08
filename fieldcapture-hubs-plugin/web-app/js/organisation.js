@@ -49,10 +49,6 @@ OrganisationViewModel = function (props) {
         return self.name()?self.name():'New Organisation';
     });
 
-    self.detailsTemplate = ko.computed(function() {
-        return self.mainImageUrl() ? 'hasMainImageTemplate' : 'noMainImageTemplate';
-    });
-
     self.projects = props.projects;
 
     self.deleteOrganisation = function() {
@@ -76,7 +72,7 @@ OrganisationViewModel = function (props) {
     }
 
     self.toJS = function(includeDocuments) {
-        var ignore = self.ignore.concat(['detailsTemplate', 'breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
+        var ignore = self.ignore.concat(['breadcrumbName', 'orgTypeDisplayOnly', 'collectoryInstitutionId']);
         var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
         if (includeDocuments) {
             js.documents = ko.toJS(self.documents);
