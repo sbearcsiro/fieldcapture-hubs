@@ -91,24 +91,24 @@
             </div><!--drop downs-->
             <div class="row-fluid">
                 <div class="span4">
-                    <label><input id="pt-search-active" type="checkbox" checked /><g:message code="project.search.active" /></label>
+                    <label class="checkbox"><input id="pt-search-active" type="checkbox" checked /><g:message code="project.search.active" /></label>
                 </div>
                 <div class="span4">
-                    <label><input id="pt-search-diy" type="checkbox" /><g:message code="project.tag.diy" /></label>
+                    <label class="checkbox"><input id="pt-search-diy" type="checkbox" /><g:message code="project.tag.diy" /></label>
                 </div>
                 <div class="span4">
-                    <label><input id="pt-search-noCost" type="checkbox" /><g:message code="project.tag.noCost" /></label>
+                    <label class="checkbox"><input id="pt-search-noCost" type="checkbox" /><g:message code="project.tag.noCost" /></label>
                 </div>
             </div>
             <div class="row-fluid">
                 <div class="span4">
-                    <label><input id="pt-search-teach" type="checkbox" /><g:message code="project.tag.teach" /></label>
+                    <label class="checkbox"><input id="pt-search-teach" type="checkbox" /><g:message code="project.tag.teach" /></label>
                 </div>
                 <div class="span4">
-                    <label><input id="pt-search-children" type="checkbox" /><g:message code="project.tag.children" /></label>
+                    <label class="checkbox"><input id="pt-search-children" type="checkbox" /><g:message code="project.tag.children" /></label>
                 </div>
                 <div class="span4">
-                    <label><input id="pt-search-mobile" type="checkbox" /><g:message code="project.search.mobile" /></label>
+                    <label class="checkbox"><input id="pt-search-mobile" type="checkbox" /><g:message code="project.search.mobile" /></label>
                 </div>
             </div>
         </div>
