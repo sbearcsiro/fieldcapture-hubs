@@ -38,6 +38,9 @@
         .admin-action {
             width:7em;
         }
+        .smallFont {
+            margin: 5px 0;
+        }
     </style>
     <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine,slickgrid"/>
 </head>
@@ -53,14 +56,36 @@
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
                 <li class="active" data-bind="text:name"/>
             </ul>
-
-            <h2 data-bind="text:name"></h2>
+        </div>
+        <div class="row-fluid ">
+            <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
+            <div class="header-text">
+                <h2 data-bind="text:name"></h2>
+            </div>
         </div>
     </div>
     <div class="container-fluid">
 
         <g:render template="/shared/flashScopeMessage"/>
-        <div class="row-fluid space-after" data-bind="template:detailsTemplate"></div>
+        <div class="row-fluid space-after">
+        <span data-bind="visible:mainImageUrl()" class="span3">
+            <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
+        </span>
+
+        <span data-bind="attr:{class:mainImageUrl()&&newsAndEvents()?'span6':mainImageUrl()&&newsAndEvents()?'span9':'span12'}">
+            <h4>Description</h4>
+            <div class="well" data-bind="html:description.markdownToHtml()"></div>
+            <div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>
+            <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+
+        </span>
+        <span data-bind="visible:newsAndEvents()" class="span3">
+            <h4>News and events</h4>
+            <div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>
+
+        </span>
+
+    </div>
 
             <div class="row-fluid">
                 <ul class="nav nav-tabs" data-tabs="tabs">
@@ -78,40 +103,6 @@
             </div>
     </div>
 
-
-<script id="hasMainImageTemplate" type="text/html">
-    <span class="span3">
-        <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-    </span>
-
-    <span class="span6">
-        <h4>Description</h4>
-        <div class="well" data-bind="html:description.markdownToHtml()"></div>
-        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></span>
-        <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-
-    </span>
-    <span class="span3">
-        <h4>News and events</h4>
-        <div class="well" data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'"></div>
-
-    </span>
-</script>
-<script id="noMainImageTemplate" type="text/html">
-    <span class="span9">
-        <h4>Description</h4>
-        <div class="well" data-bind="html:description.markdownToHtml()"></div>
-        <span data-bind="visible:orgType()"><h4 style="display:inline">Type&nbsp;</h4><span data-bind="text:orgTypeDisplayOnly"></span></span>
-        <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
-    </span>
-    <span class="span3">
-        <h4>News and events</h4>
-        <div class="well" data-bind="html:newsAndEvents()?newsAndEvents.markdownToHtml():'Nothing at this time'">
-
-        </div>
-
-    </span>
-</script>
 <g:render template="/shared/declaration"/>
 
 <r:script>

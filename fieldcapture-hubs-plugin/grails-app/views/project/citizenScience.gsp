@@ -130,27 +130,21 @@
                         <a data-bind="text:organisationName,attr:{href:orgUrl}"></a>
                     </div>
                     <div data-bind="text:aim"></div>
-                    <div style="padding: 2px">
+                    <div style="padding: 4px">
                         <i class="icon-info-sign"></i>&nbsp;<span data-bind="html:links"/>
                     </div>
-                    <div style="padding: 2px">
+                    <div style="padding: 4px">
                         TAGS:&nbsp;<g:render template="tags"/>
                     </div>
                     <br/>
                     <div data-bind="visible:transients.daysRemaining() > 0">
                         <b>Project status</b>
                         <g:render template="daysline"/>
-                        To find out more about this project, <a data-bind="attr:{href:indexUrl}">
-                        <span style="font-weight:bold">view the project page</span></a>
                     </div>
                     <div data-bind="visible:transients.daysRemaining() == 0">
                         <b>Project status</b>
                         <g:render template="daysline"/>
                         Project concluded. <a data-bind="attr:{href:indexUrl}">
-                        <span style="font-weight:bold">View the project page</span></a>
-                    </div>
-                    <div data-bind="visible:transients.daysRemaining() < 0">
-                        <b>Project status: </b>Project ongoing. <a data-bind="attr:{href:indexUrl}">
                         <span style="font-weight:bold">View the project page</span></a>
                     </div>
                 </td>
@@ -180,7 +174,7 @@ $(document).ready(function () {
           x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
         if (x) urls.push("Social Media&nbsp;" + x);
         vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.locality + ' ' + vm.scienceType() + ' ' + vm.state + ' ' + vm.organisationName()).toLowerCase();
+        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.locality + ' ' + vm.state + ' ' + vm.organisationName()).toLowerCase();
         vm.indexUrl = "${createLink()}/" + vm.projectId;
         vm.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
         return vm;

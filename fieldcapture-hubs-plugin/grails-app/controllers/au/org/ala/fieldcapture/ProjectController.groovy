@@ -185,6 +185,7 @@ class ProjectController {
                     url: it.url
                 ]
             }
+            def siteGeom = siteService.getRaw(it.projectSiteId)?.site?.extent?.geometry
             [
                 projectId  : it.projectId,
                 aim        : it.aim,
@@ -199,13 +200,13 @@ class ProjectController {
                 isSuitableForChildren: it.isSuitableForChildren && true, // force it to boolean
                 keywords   : it.keywords,
                 links      : trimmedLinks,
-                locality   : null, // TODO
+                locality   : siteGeom?.locality,
                 name       : it.name,
                 organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
                 scienceType: it.scienceType,
                 startDate  : it.plannedStartDate,
-                state      : null, // TODO
+                state      : siteGeom?.state,
                 urlImage   : urlImage,
                 urlWeb     : it.urlWeb
             ]

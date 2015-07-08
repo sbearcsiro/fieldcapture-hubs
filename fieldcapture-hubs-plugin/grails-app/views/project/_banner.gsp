@@ -29,10 +29,6 @@
 <div class="project-header project-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
     <div class="row-fluid" style="margin-left:10px;">
         <ul class="breadcrumb">
-        <g:if test="${user?.isEditor}">
-            <button class="btn btn-small pull-right" style="margin-right:20px;" data-bind="click:editProject"><i class="icon-edit"></i> Edit</button>
-        </g:if>
-
             <li>
                 <g:link controller="home">Home</g:link> <span class="divider">/</span>
             </li>
