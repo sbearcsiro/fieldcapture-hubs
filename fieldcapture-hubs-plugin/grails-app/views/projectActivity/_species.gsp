@@ -27,26 +27,21 @@
                     </div>
                 </div>
 
-
                 <div class="row-fluid" data-bind="visible: species.singleInfoVisible" >
                     <div class="span4 text-left">
                         <div class="controls">
-                            <span data-bind="if: species.singleSpecies.guid">
-                                <a data-bind="attr:{href: species.transients.bioProfileUrl}" target="_blank"><small data-bind="text: species.singleSpecies.name"></small></a>
+                            <span data-bind="if: species.singleSpecies.transients.guid">
+                                <a data-bind="attr:{href: species.transients.bioProfileUrl}" target="_blank"><small data-bind="text:  species.singleSpecies.transients.name"></small></a>
                            </span>
                            </br>
-                            <!--
                             <input style="width:80%;" type="text" placeholder="Search species"
-                                data-bind="value:species.singleSpecies.transients.textFieldValue,
+                                data-bind="value:species.singleSpecies.name,
                                             event:{focusout: species.singleSpecies.focusLost},
-                                            autocomplete:{
-                                                url: '', //http://devt.ala.org.au:8088/fieldcapture-hub/search/species
-                                                render: species.singleSpecies.renderItem,
-                                                listId: species.singleSpecies.list,
-                                                result: species.singleSpecies.speciesSelected,
-                                                valueChangeCallback: species.singleSpecies.textFieldChanged
+                                            deprecatedAutocomplete:{
+                                                source: species.transients.bioSearch,
+                                                name: species.singleSpecies.transients.name,
+                                                guid: species.singleSpecies.transients.guid
                                             }" data-validation-engine="validate[required]">
-                            -->
 
                         </div>
 

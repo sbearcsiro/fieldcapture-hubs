@@ -42,6 +42,7 @@
         speciesProfileUrl: "${createLink(controller: 'proxy', action: 'speciesProfile')}",
         speciesListUrl: "${createLink(controller: 'search', action: 'searchSpeciesList')}",
         speciesListsServerUrl: "${grailsApplication.config.lists.baseURL}",
+        speciesSearchUrl: "${createLink(controller: 'search', action: 'species')}",
 
         bieUrl: "${grailsApplication.config.bie.baseURL}",
         returnTo: "${createLink(controller: 'project', action: 'index', id: project.projectId)}"
@@ -70,7 +71,7 @@
             }
         </style>
     <![endif]-->
-    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify,jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivity"/>
+    <r:require modules="gmap3,mapWithFeatures,knockout,datepicker,amplify, jqueryValidationEngine, projects, attachDocuments, wmd, sliderpro, projectActivity"/>
 </head>
 <body>
 
