@@ -34,7 +34,6 @@
 
             <div class="controls span9">
                 <select id="isExternal" data-bind="booleanValue:isExternal, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
-
                 </select>
             </div>
         </div>
@@ -270,27 +269,31 @@
             <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
                 <select id="hasParticipantCost" data-bind="booleanValue:hasParticipantCost, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                </select>
             </div>
         </div>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <input data-bind="checked:hasTeachingMaterials" type="checkbox" id="hasTeachingMaterials"/>
+                <select id="hasTeachingMaterials" data-bind="booleanValue:hasTeachingMaterials, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                </select>
             </div>
         </div>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <input data-bind="checked:isDIY" type="checkbox" id="isDIY"/>
+                <select id="isDIY" data-bind="booleanValue:isDIY, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                </select>
             </div>
         </div>
 
         <div class="clearfix control-group">
             <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <input data-bind="checked:isSuitableForChildren" type="checkbox" id="isSuitableForChildren"/>
+                <select id="isSuitableForChildren" data-bind="booleanValue:isSuitableForChildren, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                </select>
             </div>
         </div>
 
@@ -404,7 +407,7 @@
             <label class="control-label span3" for="mainImage">Feature Graphic<fc:iconHelp><g:message code="project.mainImage.help"/></fc:iconHelp>:</label>
             <div class="span6" style="text-align:center;background:white">
                 <div class="well" style="padding:0;max-height:512px;display:inline-block;overflow:hidden">
-                    <img style="max-width:100%" alt="No image provided" data-bind="attr:{src:mainImageUrl}">
+                    <img style="width:100%" alt="No image provided" data-bind="attr:{src:mainImageUrl}">
                 </div>
             </div>
             <span class="span3">

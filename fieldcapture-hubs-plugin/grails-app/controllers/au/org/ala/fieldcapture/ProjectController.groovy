@@ -189,7 +189,7 @@ class ProjectController {
             [
                 projectId  : it.projectId,
                 aim        : it.aim,
-                coverage   : it.coverage ?: '',
+                coverage   : siteGeom,
                 description: it.description,
                 difficulty : it.difficulty,
                 endDate    : it.plannedEndDate,

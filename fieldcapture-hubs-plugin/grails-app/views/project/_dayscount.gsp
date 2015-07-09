@@ -1,14 +1,15 @@
 <style type="text/css">
+.dayscount {
+    text-align: center;
+}
 .dayscount > h2 {
     font-size: 300%;
-    text-align: center;
 }
 .dayscount > h4 {
     color: grey;
-    text-align: center;
 }
-.dayscount-infinite {
-    color: green;
+.dayscount > img {
+    width: 70px;
 }
 </style>
 <div class="dayscount" data-bind="visible:transients.daysSince() >= 0 && transients.daysRemaining() > 0">
@@ -20,7 +21,7 @@
     <h4>ENDED</h4>
 </div>
 <div class="dayscount" data-bind="visible:transients.daysSince() >= 0 && transients.daysRemaining() < 0">
-    <h2 class="dayscount-infinite">&infin;</h2>
+    <img data-bind="attr:{src:fcConfig.imageLocation + '/infinity.png'}"/>
     <h4>PROJECT</h4>
     <h4>ONGOING</h4>
 </div>
