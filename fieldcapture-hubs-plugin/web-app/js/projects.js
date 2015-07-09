@@ -534,11 +534,17 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.transients.difficultyLevels = [ "Easy", "Medium", "Hard" ];
 
-    self.transients.availableScienceTypes = [
+    var scienceTypesList = [
         {name:'Biodiversity', value:'biodiversity'},
         {name:'Ecology', value:'ecology'},
         {name:'Natural resource management', value:'nrm'}
     ];
+    self.transients.availableScienceTypes = scienceTypesList;
+    self.transients.scienceTypeDisplay = ko.pureComputed(function () {
+        for (var st = self.scienceType(), i = 0; i < scienceTypesList.length; i++)
+            if (st === scienceTypesList[i].value)
+                return scienceTypesList[i].name;
+    });
 
     self.transients.availableProjectTypes = [
         {name:'Citizen Science Project', value:'citizenScience'},
