@@ -639,7 +639,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
  * @param props array of project attributes
  * @constructor
  */
-function CreateCitizenScienceFinderProjectViewModel(props) {
+function CitizenScienceFinderProjectViewModel(props) {
     ProjectViewModel.apply(this, [{
         aim: props[1],
         coverage: props[2],
@@ -664,7 +664,6 @@ function CreateCitizenScienceFinderProjectViewModel(props) {
     var self = this;
     self.projectId = props[0];
     self.daysStatus = ko.pureComputed(function(){
-        if (self.transients.daysSince() < 0) return "pending";
         return self.transients.daysRemaining()? "active": "ended";
     });
     self.locality = props[13];

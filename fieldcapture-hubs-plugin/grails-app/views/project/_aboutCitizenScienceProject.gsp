@@ -1,3 +1,10 @@
+<style type="text/css">
+#surveyLink a {
+    color:white;
+    background:green;
+    padding:10px
+}
+</style>
 <div id="carousel" class="row-fluid slider-pro" data-bind="visible:mainImageUrl()">
     <div class="sp-slides">
 
@@ -7,7 +14,7 @@
             <p class="sp-layer sp-white sp-padding"
                data-position="topLeft" data-width="100%" data-bind="visible:urlWeb"
                data-show-transition="down" data-show-delay="0" data-hide-transition="up">
-                <strong>Get involved!</strong> Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a>
+                <strong>Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong>
             </p>
 
         </div>
@@ -15,7 +22,7 @@
 </div>
 
 <div id="weburl" data-bind="visible:!mainImageUrl()">
-    <div data-bind="visible:urlWeb()"><strong>Get involved!</strong> Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></div>
+    <div data-bind="visible:urlWeb()"><strong>Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong></div>
 </div>
 
 <div class="container-fluid">
@@ -40,11 +47,10 @@
                 <div class="well-title">Get Involved!</div>
                 <div data-bind="visible:getInvolved(), text:getInvolved"></div>
                 <hr/>
-                <div class="row-fluid nav nav-pills" data-bind="visible:transients.daysRemaining() > 0">
-                    <li class="active pull-right">
-                        <a data-bind="visible:isExternal() && urlWeb(),attr:{href:urlWeb}">Get Started</a>
-                        <a data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">Get Started</a>
-                    </li>
+                <div id="surveyLink" class="row-fluid" data-bind="visible:transients.daysRemaining() != 0 && (!isExternal() || urlWeb())">
+                    <a class="btn pull-right" data-bind="visible:isExternal(),attr:{href:urlWeb}">Get Started</a>
+                    <a class="btn pull-right" data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">Get Started</a>
+                    <br class="clearfix"></br>
                 </div>
                 <g:render template="/shared/listDocumentLinks"
                           model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>

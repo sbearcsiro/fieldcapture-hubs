@@ -39,7 +39,7 @@ describe("Citizen Science Project Finder Spec", function () {
           null, // urlImage
           null // urlWeb
         ];
-        var project = new CreateCitizenScienceFinderProjectViewModel(projectData);
+        var project = new CitizenScienceFinderProjectViewModel(projectData);
 
         expect(project.aim()).toEqual(projectData[1]);
         expect(project.description()).toEqual(projectData[3]);

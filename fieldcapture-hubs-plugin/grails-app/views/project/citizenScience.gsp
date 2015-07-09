@@ -164,7 +164,7 @@
 $(document).ready(function () {
     var markdown = new Showdown.converter();
     function createVM(props) {
-        var vm = new CreateCitizenScienceFinderProjectViewModel(props);
+        var vm = new CitizenScienceFinderProjectViewModel(props);
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
         for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
@@ -205,10 +205,16 @@ $(document).ready(function () {
     /*************************************************\
      *  Filter projects by search term
      \*************************************************/
-    var showActiveOnly = true, showSuitableForChildrenOnly, showDifficultyOnly, showDIYOnly,
-      showNoCostOnly, showTeachOnly, showWithMobileAppsOnly;
     function doSearch(force) {
-        var val = $('#pt-search').val().toLowerCase();
+      var showActiveOnly = $('#pt-search-active').prop('checked'),
+          showSuitableForChildrenOnly = $('#pt-search-children').prop('checked'),
+          showDifficultyOnly = $('#pt-search-difficulty').val(),
+          showDIYOnly = $('#pt-search-diy').prop('checked'),
+          showNoCostOnly = $('#pt-search-noCost').prop('checked'),
+          showTeachOnly = $('#pt-search-teach').prop('checked'),
+          showWithMobileAppsOnly = $('#pt-search-mobile').prop('checked'),
+          val = $('#pt-search').val().toLowerCase();
+        if (showDifficultyOnly === "Any") showDifficultyOnly = null;
         if (!force && val == searchTerm) return;
         searchTerm = val;
         projects = [];
@@ -228,6 +234,9 @@ $(document).ready(function () {
         offset = 0;
         updateTotal();
         populateTable();
+    }
+    function doSearchForce() {
+        doSearch(true);
     }
 
     /*************************************************\
@@ -331,37 +340,15 @@ $(document).ready(function () {
     });
     $('#pt-reset').click(function () {
         $('#pt-search').val('');
-        doSearch(true);
+        doSearchForce();
     });
-    $('#pt-search-active').on('change', function() {
-        showActiveOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-children').on('change', function() {
-        showSuitableForChildrenOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-difficulty').change(function () {
-        showDifficultyOnly = $(this).val();
-        if (showDifficultyOnly === "Any") showDifficultyOnly = null;
-        doSearch(true);
-    });
-    $('#pt-search-diy').on('change', function() {
-        showDIYOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-noCost').on('change', function() {
-        showNoCostOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-teach').on('change', function() {
-        showTeachOnly = $(this).prop('checked');
-        doSearch(true);
-    });
-    $('#pt-search-mobile').on('change', function() {
-        showWithMobileAppsOnly = $(this).prop('checked');
-        doSearch(true);
-    });
+    $('#pt-search-active').on('change', doSearchForce);
+    $('#pt-search-children').on('change', doSearchForce);
+    $('#pt-search-difficulty').change(doSearchForce);
+    $('#pt-search-diy').on('change', doSearchForce);
+    $('#pt-search-noCost').on('change', doSearchForce);
+    $('#pt-search-teach').on('change', doSearchForce);
+    $('#pt-search-mobile').on('change', doSearchForce);
 
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
@@ -369,7 +356,7 @@ $(document).ready(function () {
 
     /** load projects and show first page **/
     allProjects.sort(comparator); // full list is sorted by name
-    doSearch(true);
+    doSearchForce();
 });
 </r:script>
 </body>
