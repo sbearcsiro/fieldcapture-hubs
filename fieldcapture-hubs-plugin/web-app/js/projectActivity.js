@@ -170,7 +170,7 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     self.species = new SpeciesConstraintViewModel(o.species);
     self.visibility = new SurveyVisibilityViewModel(o.visibility);
     self.transients = {};
-    self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl +"&pActivityId="+self.projectActivityId());
+    self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl);
     self.transients.siteCreateUrl = ko.observable(fcConfig.siteCreateUrl);
     self.transients.siteUploadUrl = ko.observable(fcConfig.siteUploadUrl);
 
@@ -276,7 +276,7 @@ var SpeciesConstraintViewModel = function (o){
 
     self.type = ko.observable(o.type);
     self.allSpeciesLists  = new SpeciesListsViewModel();
-    self.singleSpecies = new SpeciesViewModel(o.singleSpecies ? o.singleSpecies : [],[]);
+    self.singleSpecies = new Species(o.singleSpecies);
     self.speciesLists = ko.observableArray($.map(o.speciesLists ? o.speciesLists : [], function (obj, i) {
         return new SpeciesList(obj);
     }));
@@ -286,15 +286,17 @@ var SpeciesConstraintViewModel = function (o){
     self.transients.bioProfileUrl =  ko.computed(function (){
         return  fcConfig.bieUrl + '/species/' + self.singleSpecies.guid();
     });
+
+    self.transients.bioSearch = ko.observable(fcConfig.speciesSearch);
     self.transients.allowedListTypes = [
-        {id:'SPECIES_CHARACTERS', name:'SPECIES_CHARACTERS'},
-        {id:'CONSERVATION_LIST', name:'CONSERVATION_LIST'},
-        {id:'SENSITIVE_LIST', name:'SENSITIVE_LIST'},
-        {id:'LOCAL_LIST', name:'LOCAL_LIST'},
-        {id:'COMMON_TRAIT', name:'COMMON_TRAIT'},
-        {id:'COMMON_HABITAT', name:'COMMON_HABITAT'},
-        {id:'TEST', name:'TEST'},
-        {id:'OTHER', name:'OTHER'}];
+    {id:'SPECIES_CHARACTERS', name:'SPECIES_CHARACTERS'},
+    {id:'CONSERVATION_LIST', name:'CONSERVATION_LIST'},
+    {id:'SENSITIVE_LIST', name:'SENSITIVE_LIST'},
+    {id:'LOCAL_LIST', name:'LOCAL_LIST'},
+    {id:'COMMON_TRAIT', name:'COMMON_TRAIT'},
+    {id:'COMMON_HABITAT', name:'COMMON_HABITAT'},
+    {id:'TEST', name:'TEST'},
+    {id:'OTHER', name:'OTHER'}];
 
     self.transients.showAddSpeciesLists = ko.observable(false);
     self.transients.showExistingSpeciesLists = ko.observable(false);
@@ -366,7 +368,7 @@ var SpeciesConstraintViewModel = function (o){
         if(jsData.listItems == "") {
             jsData.listItems = self.newSpeciesLists.transients.bulkSpeciesNames();
         }else{
-            jsData.listItems = "," + self.newSpeciesLists.transients.bulkSpeciesNames();
+            jsData.listItems = jsData.listItems + "," + self.newSpeciesLists.transients.bulkSpeciesNames();
         }
 
         var model = JSON.stringify(jsData, function (key, value) { return value === undefined ? "" : value; });
@@ -483,7 +485,7 @@ var SpeciesList = function(o){
     self.listType = ko.observable(o.listType);
     self.allSpecies = ko.observableArray();
     self.addNewSpeciesName = function(){
-        self.allSpecies.push(new SpeciesViewModel([],[]));
+        self.allSpecies.push(new Species());
     };
     self.removeNewSpeciesName = function(species){
         self.allSpecies.remove(species);
@@ -493,7 +495,27 @@ var SpeciesList = function(o){
     self.transients.bulkSpeciesNames = ko.observable(o.bulkSpeciesNames);
     self.transients.url  = ko.observable(fcConfig.speciesListsServerUrl + "/speciesListItem/list/" + o.dataResourceUid);
     self.transients.check = ko.observable(false);
+};
 
+var Species = function(o){
+    var self = this;
+    if(!o) o = {};
+    self.name = ko.observable(o.name);
+    self.guid = ko.observable(o.guid);
+
+    self.transients = {};
+    self.transients.name = ko.observable(o.name);
+    self.transients.guid = ko.observable(o.guid);
+
+    self.focusLost = function(event) {
+        self.name(self.transients.name());
+        self.guid(self.transients.guid());
+    };
+
+    self.transients.guid.subscribe(function(newValue) {
+        self.name(self.transients.name());
+        self.guid(self.transients.guid());
+    });
 };
 
 var ImagesViewModel = function(image){

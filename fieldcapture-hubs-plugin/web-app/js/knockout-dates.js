@@ -553,6 +553,46 @@ ko.bindingHandlers.sortIcon = {
     }
 };
 
+/*
+ * Uses original autocomplete implementation by Jorn Zaefferer
+ * Expects three parameters source, name and guid
+ * Ajax response lists needs name attribute.
+ * Doco url: http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
+ * Note: Autocomplete implementation by Jorn Zaefferer is now been deprecated and its been migrated to jquery_ui.
+ *
+*/
+
+ko.bindingHandlers.deprecatedAutocomplete = {
+    update: function (element, params) {
+        var params = params();
+        var options = {};
+        options.source = ko.utils.unwrapObservable(params.source);
+        options.matchSubset = false;
+        options.formatItem = function(row, i, n) {
+            return row.name;
+        };
+        options.highlight = false;
+        options.parse = function(data) {
+            var rows = new Array();
+            data = data.autoCompleteList;
+            for(var i=0; i < data.length; i++) {
+                rows[i] = {
+                    data: data[i],
+                    value: data[i],
+                    result: data[i].name
+                };
+            }
+            return rows;
+        };
+
+        $(element).autocomplete(options.source, options).result(function(event, data, formatted) {
+            if (data) {
+                params.name(data.name);
+                params.guid(data.guid);
+            }
+        });
+    }
+};
 
 ko.bindingHandlers.autocomplete = {
     init: function (element, params) {
@@ -602,7 +642,7 @@ ko.bindingHandlers.autocomplete = {
         };
 
         var render = ko.utils.unwrapObservable(param.render);
-        if (render) {
+        if (render && $(element).autocomplete(options).data("ui-autocomplete")) {
 
             $(element).autocomplete(options).data("ui-autocomplete")._renderItem = function(ul, item) {
                 var result = $('<li></li>').html(render(item.source));
