@@ -287,7 +287,7 @@ var SpeciesConstraintViewModel = function (o){
         return  fcConfig.bieUrl + '/species/' + self.singleSpecies.guid();
     });
 
-    self.transients.bioSearch = ko.observable(fcConfig.speciesSearch);
+    self.transients.bioSearch = ko.observable(fcConfig.speciesSearchUrl);
     self.transients.allowedListTypes = [
     {id:'SPECIES_CHARACTERS', name:'SPECIES_CHARACTERS'},
     {id:'CONSERVATION_LIST', name:'CONSERVATION_LIST'},
