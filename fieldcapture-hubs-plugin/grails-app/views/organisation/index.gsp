@@ -46,7 +46,6 @@
 </head>
 <body>
 
-
     <div class="container-fluid organisation-header organisation-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
         <div class="row-fluid">
             <ul class="breadcrumb">
@@ -54,53 +53,56 @@
                     <g:link controller="home">Home</g:link> <span class="divider">/</span>
                 </li>
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
-                <li class="active" data-bind="text:name"/>
+                <li class="active">${organisation.name}</li>
             </ul>
         </div>
         <div class="row-fluid ">
             <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
             <div class="header-text">
-                <h2 data-bind="text:name"></h2>
+                <h2>${organisation.name}</h2>
             </div>
         </div>
     </div>
-    <div class="container-fluid">
+    <div id="organisationDetails" class="container-fluid" style="display:none;">
 
         <g:render template="/shared/flashScopeMessage"/>
         <div class="row-fluid space-after">
-        <span data-bind="visible:mainImageUrl()" class="span3">
-            <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-        </span>
+            <span data-bind="visible:mainImageUrl()" class="span3">
+                <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
+            </span>
 
-        <span data-bind="attr:{class:mainImageUrl()&&newsAndEvents()?'span6':mainImageUrl()&&newsAndEvents()?'span9':'span12'}">
-            <h4>Description</h4>
-            <div class="well" data-bind="html:description.markdownToHtml()"></div>
-            <div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>
-            <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+            <span data-bind="attr:{class:mainImageUrl() && newsAndEvents()?'span6':mainImageUrl() || newsAndEvents()?'span9':'span12'}">
+                <h4>Description</h4>
+                <div class="well" data-bind="html:description.markdownToHtml()"></div>
+                <div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>
+                <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
 
-        </span>
-        <span data-bind="visible:newsAndEvents()" class="span3">
-            <h4>News and events</h4>
-            <div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>
+            </span>
+            <span data-bind="visible:newsAndEvents()" class="span3">
+                <h4>News and events</h4>
+                <div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>
 
-        </span>
+            </span>
 
-    </div>
+        </div>
 
-            <div class="row-fluid">
-                <ul class="nav nav-tabs" data-tabs="tabs">
+        <div class="row-fluid">
+            <ul class="nav nav-tabs" data-tabs="tabs">
 
-                    <ul id="organisationTabs" class="nav nav-tabs big-tabs">
-                        <fc:tabList tabs="${content}"/>
-                    </ul>
+                <ul id="organisationTabs" class="nav nav-tabs big-tabs">
+                    <fc:tabList tabs="${content}"/>
                 </ul>
-            </div>
-            <div class="row-fluid" id="save-agreement-result-placeholder"></div>
-            <div class="tab-content row-fluid">
+            </ul>
+        </div>
+        <div class="row-fluid" id="save-agreement-result-placeholder"></div>
+        <div class="tab-content row-fluid">
 
-                <fc:tabContent tabs="${content}"/>
+            <fc:tabContent tabs="${content}"/>
 
-            </div>
+        </div>
+    </div>
+    <div id="loading" class="text-center">
+        <r:img width="50px" dir="images" file="loading.gif" alt="loading icon"/>
     </div>
 
 <g:render template="/shared/declaration"/>
@@ -113,6 +115,8 @@
         var organisationViewModel = new OrganisationViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);
+        $('#loading').hide();
+        $('#organisationDetails').show();
 
 
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
