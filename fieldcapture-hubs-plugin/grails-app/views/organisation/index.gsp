@@ -51,13 +51,13 @@
                     <g:link controller="home">Home</g:link> <span class="divider">/</span>
                 </li>
                 <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
-                <li class="active" data-bind="text:name"/>
+                <li class="active">${organisation.name}</li>
             </ul>
 
-            <h2 data-bind="text:name"></h2>
+            <h2>${organisation.name}</h2>
         </div>
     </div>
-    <div class="container-fluid">
+    <div id="organisationDetails" class="container-fluid" style="display:none;">
 
         <g:render template="/shared/flashScopeMessage"/>
         <div class="row-fluid space-after" data-bind="template:detailsTemplate"></div>
@@ -76,6 +76,9 @@
                 <fc:tabContent tabs="${content}"/>
 
             </div>
+    </div>
+    <div id="loading" class="text-center">
+        <r:img width="100px" dir="images" file="loading.gif" alt="loading icon"/>
     </div>
 
 
@@ -122,6 +125,8 @@
         var organisationViewModel = new OrganisationViewModel(organisation);
 
         ko.applyBindings(organisationViewModel);
+        $('#loading').hide();
+        $('#organisationDetails').show();
 
 
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
