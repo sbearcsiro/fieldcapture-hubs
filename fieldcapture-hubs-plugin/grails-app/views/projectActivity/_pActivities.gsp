@@ -1,3 +1,5 @@
+<!-- ko stopBinding: true -->
+
 <h4>Project surveys</h4>
 <p>Each of your surveys can be configured differently depending on your needs. Project level settings are inherited as the default.</p>
 <p>Click on tabs to edit settings required. And new surveys to the project as required.</p>
@@ -71,7 +73,7 @@
                     </div>
 
                     <div class="pill-pane" id="survey-alerts">
-                        survey-alerts
+
                     </div>
                 </div>
                 <!-- /ko -->
@@ -83,6 +85,7 @@
     </span>
 
 </div>
+<!-- /ko -->
 
 <r:script>
     function initialiseProjectActivities(pActivities, pActivityForms, projectId, sites) {

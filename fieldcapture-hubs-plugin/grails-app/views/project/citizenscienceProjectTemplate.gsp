@@ -8,7 +8,7 @@
     <r:script disposition="head">
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
-        projectAjaxUpdateUrl:"${createLink(action:'ajaxUpdate', id:project.projectId)}",
+        projectUpdateUrl:"${createLink(action:'ajaxUpdate', id:project.projectId)}",
         projectEditUrl:"${createLink(action:'edit', id:project.projectId)}",
         sitesDeleteUrl: "${createLink(controller: 'site', action: 'ajaxDeleteSitesFromProject', id:project.projectId)}",
         siteDeleteUrl: "${createLink(controller: 'site', action: 'ajaxDeleteSiteFromProject', id:project.projectId)}",
@@ -167,8 +167,18 @@
         }
 
         initialiseSites(project.sites);
+
         <g:if test="${projectContent.admin.visible}">
             initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
+
+            var projectStoriesMarkdown = '${(project.projectStories?:"").markdownToHtml().encodeAsJavaScript()}';
+            var projectStoriesViewModel = new window.projectStoriesViewModel(projectViewModel, projectStoriesMarkdown);
+            ko.applyBindings(projectStoriesViewModel, $('#editprojectStoriesContent')[0]);
+
+            var newsAndEventsMarkdown = '${(project.newsAndEvents?:"").markdownToHtml().encodeAsJavaScript()}';
+            var newsAndEventsViewModel = new window.newsAndEventsViewModel(projectViewModel, newsAndEventsMarkdown);
+            ko.applyBindings(newsAndEventsViewModel, $('#editnewsAndEventsContent')[0]);
+
             populatePermissionsTable();
         </g:if>
 
