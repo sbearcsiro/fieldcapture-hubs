@@ -113,6 +113,13 @@ OrganisationViewModel = function (props) {
         });
     }
 
+    // links
+    if (props.links) {
+        $.each(props.links, function(i, link) {
+            self.addLink(link.role, link.url);
+        });
+    }
+
     return self;
 
 };

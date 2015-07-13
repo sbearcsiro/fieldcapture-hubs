@@ -268,7 +268,7 @@
         <div class="clearfix control-group">
             <label class="control-label span3" for="hasParticipantCost"><g:message code="project.hasParticipantCost"/><fc:iconHelp><g:message code="project.hasParticipantCost.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <select id="hasParticipantCost" data-bind="booleanValue:hasParticipantCost, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                <select id="hasParticipantCost" data-bind="booleanValue:hasParticipantCost, options:[{label:'Yes', value:'true'}, {label:'No', value:'false'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'">
                 </select>
             </div>
         </div>
@@ -276,7 +276,7 @@
         <div class="clearfix control-group">
             <label class="control-label span3" for="hasTeachingMaterials"><g:message code="project.hasTeachingMaterials"/><fc:iconHelp><g:message code="project.hasTeachingMaterials.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <select id="hasTeachingMaterials" data-bind="booleanValue:hasTeachingMaterials, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                <select id="hasTeachingMaterials" data-bind="booleanValue:hasTeachingMaterials, options:[{label:'Yes', value:'true'}, {label:'No', value:'false'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'">
                 </select>
             </div>
         </div>
@@ -284,7 +284,7 @@
         <div class="clearfix control-group">
             <label class="control-label span3" for="isDIY"><g:message code="project.isDIY"/><fc:iconHelp><g:message code="project.isDIY.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <select id="isDIY" data-bind="booleanValue:isDIY, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                <select id="isDIY" data-bind="booleanValue:isDIY, options:[{label:'Yes', value:'true'}, {label:'No', value:'false'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'">
                 </select>
             </div>
         </div>
@@ -292,7 +292,7 @@
         <div class="clearfix control-group">
             <label class="control-label span3" for="isSuitableForChildren"><g:message code="project.isSuitableForChildren"/><fc:iconHelp><g:message code="project.isSuitableForChildren.help"/></fc:iconHelp>:</label>
             <div class="controls span9">
-                <select id="isSuitableForChildren" data-bind="booleanValue:isSuitableForChildren, options:[{label:'Yes', value:'false'}, {label:'No', value:'true'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'" data-validation-engine="validate[required]">
+                <select id="isSuitableForChildren" data-bind="booleanValue:isSuitableForChildren, options:[{label:'Yes', value:'true'}, {label:'No', value:'false'}], optionsText:'label', optionsValue:'value', optionsCaption:'Select...'">
                 </select>
             </div>
         </div>

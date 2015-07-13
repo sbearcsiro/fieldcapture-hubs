@@ -3,6 +3,7 @@
     background: orange;
     color: white;
     padding: 4px;
+    margin: 3px 0;
 }
 </style>
 <span class="projecttag" data-bind="visible:isDIY()"><g:message code="project.tag.diy"/></span>

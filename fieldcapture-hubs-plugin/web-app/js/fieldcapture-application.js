@@ -410,6 +410,7 @@ var mobileAppRoles = [
 ];
 var socialMediaRoles = [
     { role: "facebook", name: "Facebook" },
+    { role: "flickr", name: "Flickr" },
     { role: "googlePlus", name: "Google+" },
     { role: "instagram", name: "Instagram" },
     { role: "linkedIn", name: "LinkedIn" },

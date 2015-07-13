@@ -58,6 +58,11 @@
         </div>
         <div class="row-fluid ">
             <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
+            <div class="pull-right">
+                <span data-bind="foreach:transients.socialMedia">
+                    <a data-bind="attr:{href:link.url}"><img class="logo-small" data-bind="attr:{src:logo('${imageUrl}')}"/></a>
+                </span>
+            </div>
             <div class="header-text">
                 <h2>${organisation.name}</h2>
             </div>

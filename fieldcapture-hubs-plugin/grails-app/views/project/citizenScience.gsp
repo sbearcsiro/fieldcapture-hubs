@@ -4,7 +4,6 @@
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
     <title><g:message code="g.citizenScience"/> | <g:message code="g.fieldCapture"/></title>
-    <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
     var fcConfig = {
         baseUrl: "${grailsApplication.config.grails.serverURL}",
@@ -126,14 +125,15 @@
                         <span data-bind="text:name" style="font-size:150%;font-weight:bold"></span>
                     </a>
                     <div data-bind="visible:orgUrl">
-                        <span style="font-size:80%;color:grey">Added <!--ko text:since--><!--/ko--> to&nbsp;</span>
+                        <span data-bind="visible:transients.daysSince() < 0" style="font-size:80%;color:grey">Starts <!--ko text:since--><!--/ko--> for&nbsp;</span>
+                        <span data-bind="visible:transients.daysSince() >= 0" style="font-size:80%;color:grey">Added <!--ko text:since--><!--/ko--> to&nbsp;</span>
                         <a data-bind="text:organisationName,attr:{href:orgUrl}"></a>
                     </div>
                     <div data-bind="text:aim"></div>
                     <div style="padding: 4px">
                         <i class="icon-info-sign"></i>&nbsp;<span data-bind="html:links"/>
                     </div>
-                    <div style="padding: 4px">
+                    <div>
                         TAGS:&nbsp;<g:render template="tags"/>
                     </div>
                     <br/>
@@ -291,14 +291,17 @@ $(document).ready(function () {
         gotoPage: function(pageNum) {
             offset = (pageNum - 1) * perPage;
             populateTable();
+            $('html,body').scrollTop(0);
         },
         prevPage: function() {
             offset -= perPage;
             populateTable();
+            $('html,body').scrollTop(0);
         },
         nextPage: function() {
             offset += perPage;
             populateTable();
+            $('html,body').scrollTop(0);
         }
     }
 
