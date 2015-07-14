@@ -1,9 +1,14 @@
 <g:if test="${!disableProjectCreation}">
     <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
-       class="btn btn-small">
+       class="btn btn-small pull-right">
         <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
 </g:if>
 <g:if test="${organisation.projects}">
+    <!-- ko stopBinding: true -->
+    <div id="projectsList">
+        
+    </div>
+    <!-- /ko -->
     <table id="projectList" class="table
 
                     table-striped" style="width:100%;">

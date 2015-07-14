@@ -125,9 +125,11 @@
 
 
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
+        var hasMERITprojects = false;
         $.each(projects, function(i, project) {
             project.startDate = project.contractStartDate || project.plannedStartDate;
             project.duration = project.contractDurationInWeeks || project.plannedDurationInWeeks;
+            if (project.grantId) hasMERITprojects = true;
         });
 
     <g:if test="${content.reporting?.visible}">
@@ -308,65 +310,72 @@
             ko.utils.registerEventHandler(input, "hide", changeHandler);
         };
 
-        $('#projectList').dataTable( {
-            "data": projects,
-            "autoWidth":false,
-            "columns": projectListHeader,
-            "initComplete":function(settings) {
-                $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);
-            },
-            "footerCallback": function ( tfoot, data, start, end, display ) {
-                var api = this.api();
+        if (true || hasMERITprojects) {
+            $('#projectsList').hide();
+            $('#projectList').dataTable( {
+                "data": projects,
+                "autoWidth":false,
+                "columns": projectListHeader,
+                "initComplete":function(settings) {
+                    $('#projectList tbody').on('click', 'a.agreementDate', editAgreementDate);
+                },
+                "footerCallback": function ( tfoot, data, start, end, display ) {
+                    var api = this.api();
 
-                // Remove the formatting to get integer data for summation
-                var intVal = function ( i ) {
-                    return typeof i === 'string' ?
-                        i.replace(/[\$,]/g, '')*1 :
-                        typeof i === 'number' ?
-                            i : 0;
-                };
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
 
-                var fundingColumn = -1;
-                $.each(projectListHeader, function(i, column) {
-                    if (column.data == 'funding') {
-                        fundingColumn = i;
-                        return false;
+                    var fundingColumn = -1;
+                    $.each(projectListHeader, function(i, column) {
+                        if (column.data == 'funding') {
+                            fundingColumn = i;
+                            return false;
+                        }
+                    });
+
+                    if (fundingColumn < 0) {
+                        return;
                     }
-                });
+                    // Total over all pages
+                    var total = api
+                        .column( fundingColumn )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        } );
 
-                if (fundingColumn < 0) {
-                    return;
+                    // Total over this page
+                    var pageTotal = api
+                        .column( fundingColumn, { page: 'current'} )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+                    // Update footer
+                    var footerRow = $(api.table().footer()).find('tr');
+                    var col = footerRow.find('td.fundingTotal');
+                    if (!col.length) {
+                        footerRow.append('<td colspan="'+fundingColumn+'"></td>');
+                        footerRow.append('<td class="fundingTotal">$'+pageTotal + ' ($'+total + ' total)'+'</td>');
+
+                    }
+                    else {
+                        col.text('$'+pageTotal + ' ($'+total + ' total)');
+                    }
+
                 }
-                // Total over all pages
-                var total = api
-                    .column( fundingColumn )
-                    .data()
-                    .reduce( function (a, b) {
-                        return intVal(a) + intVal(b);
-                    } );
-
-                // Total over this page
-                var pageTotal = api
-                    .column( fundingColumn, { page: 'current'} )
-                    .data()
-                    .reduce( function (a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0 );
-
-                // Update footer
-                var footerRow = $(api.table().footer()).find('tr');
-                var col = footerRow.find('td.fundingTotal');
-                if (!col.length) {
-                    footerRow.append('<td colspan="'+fundingColumn+'"></td>');
-                    footerRow.append('<td class="fundingTotal">$'+pageTotal + ' ($'+total + ' total)'+'</td>');
-
-                }
-                else {
-                    col.text('$'+pageTotal + ' ($'+total + ' total)');
-                }
-
-            }
-        });
+            });
+        } else {
+            // no MERIT projects
+            $('#projectList').hide();
+            window.pago.init(projects);
+        }
 
 
         <g:if test="${content.admin.visible}">
