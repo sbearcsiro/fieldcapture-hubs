@@ -335,7 +335,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.dataSharingLicense = ko.observable(project.dataSharingLicense);
     self.difficulty = ko.observable(project.difficulty);
     self.gear = ko.observable(project.gear);
-    self.getInvolved = ko.observable(project.getInvolved);
+    self.getInvolved = ko.observable(project.getInvolved).extend({markdown:true});
     self.hasParticipantCost = ko.observable(project.hasParticipantCost);
     self.hasTeachingMaterials = ko.observable(project.hasTeachingMaterials);
     self.isCitizenScience = ko.observable(project.isCitizenScience);
@@ -356,8 +356,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.transients = self.transients || {};
 
     var isBeforeToday = function(date) {
-        // not stricty correct but will work since we only deal with day granularity
-        return moment(date) < moment();
+        return moment(date) < moment().startOf('day');
     }
     var calculateDurationInDays = function(startDate, endDate) {
         var start = moment(startDate);
@@ -392,10 +391,36 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return end? isBeforeToday(end)? 0: calculateDurationInDays(undefined, end) + 1: -1;
     });
     self.transients.daysSince = ko.pureComputed(function() {
-        return self.plannedStartDate()? calculateDurationInDays(self.plannedStartDate()): -1;
+        var startDate = self.plannedStartDate();
+        if (!startDate) return -1;
+        var start = moment(startDate);
+        var today = moment();
+        return today.diff(start, 'days');
     });
     self.transients.daysTotal = ko.pureComputed(function() {
         return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
+    });
+    self.daysStatus = ko.pureComputed(function(){
+        return self.transients.daysSince() < 0? "pending": self.transients.daysRemaining()? "active": "ended";
+    });
+    self.transients.since = ko.pureComputed(function(){
+        var daysSince = self.transients.daysSince();
+        if (daysSince < 0) {
+            daysSince = -daysSince;
+            if (daysSince === 1) return "tomorrow";
+            if (daysSince < 30) return "in " + daysSince + " days";
+            if (daysSince < 32) return "in about a month";
+            if (daysSince < 365) return "in " + (daysSince / 30).toFixed(1) + " months";
+            if (daysSince === 365) return "in one year";
+            return "in " + (daysSince / 365).toFixed(1) + " years";
+        }
+        if (daysSince === 0) return "today";
+        if (daysSince === 1) return "yesterday";
+        if (daysSince < 30) return daysSince + " days ago";
+        if (daysSince < 32) return "about a month ago";
+        if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
+        if (daysSince === 365) return "one year ago";
+        return (daysSince / 365).toFixed(1) + " years ago";
     });
     var updatingDurations = false; // Flag to prevent endless loops during change of end date / duration.
     self.transients.plannedDuration = ko.observable(calculateDuration(self.plannedStartDate(), self.plannedEndDate()));
@@ -584,7 +609,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     self.toJS = function() {
         var toIgnore = self.ignore; // document properties to ignore.
-        toIgnore.concat(['transients', 'projectDatesChanged', 'collectoryInstitutionId', 'ignore', 'projectStatus']);
+        toIgnore.concat(['transients', 'daysStatus', 'projectDatesChanged', 'collectoryInstitutionId', 'ignore', 'projectStatus']);
         return ko.mapping.toJS(self, {ignore:toIgnore});
     }
 
@@ -663,21 +688,7 @@ function CitizenScienceFinderProjectViewModel(props) {
 
     var self = this;
     self.projectId = props[0];
-    self.daysStatus = ko.pureComputed(function(){
-        return self.transients.daysRemaining()? "active": "ended";
-    });
     self.locality = props[13];
-    self.since = ko.pureComputed(function(){
-        var daysSince = self.transients.daysSince();
-        if (daysSince < 0) return "";
-        if (daysSince === 0) return "today";
-        if (daysSince === 1) return "yesterday";
-        if (daysSince < 30) return daysSince + " days ago";
-        if (daysSince < 32) return "one month ago";
-        if (daysSince < 365) return (daysSince / 30).toFixed(1) + " months ago";
-        if (daysSince === 365) return "one year ago";
-        return (daysSince / 365).toFixed(1) + " years ago";
-    });
     self.state = props[19];
     self.urlImage = props[20];
 }

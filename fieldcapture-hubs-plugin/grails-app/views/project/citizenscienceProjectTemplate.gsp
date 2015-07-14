@@ -4,7 +4,6 @@
 <head>
     <meta name="layout" content="${hubConfig.skin}"/>
     <title>${project?.name.encodeAsHTML()} | Project | Field Capture</title>
-    <script type="text/javascript" src="${grailsApplication.config.google.maps.url}"></script>
     <r:script disposition="head">
     var fcConfig = {
         serverUrl: "${grailsApplication.config.grails.serverURL}",
@@ -155,7 +154,8 @@
         if (projectViewModel.mainImageUrl()) {
             $( '#carousel' ).sliderPro({
                 width: '100%',
-                height: 400,
+                height: 'auto',
+                autoHeight: true,
                 arrows: false, // at the moment we only support 1 image
                 buttons: false,
                 waitForLayers: true,
