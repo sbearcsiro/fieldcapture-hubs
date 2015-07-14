@@ -105,7 +105,7 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
 
         message = typeof message !== 'undefined' ? message : 'Successfully updated';
         var pActivity = self.current();
-        var url = pActivity.projectActivityId() ? fcConfig.projectActivityUpdateUrl + "/" +
+        var url = pActivity.projectActivityId() ? fcConfig.projectActivityUpdateUrl + "&id=" +
         pActivity.projectActivityId() : fcConfig.projectActivityCreateUrl;
 
         var divId = 'project-activities-'+ caller +'-result-placeholder';

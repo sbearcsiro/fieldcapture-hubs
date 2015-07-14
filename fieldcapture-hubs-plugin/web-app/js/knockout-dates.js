@@ -554,43 +554,81 @@ ko.bindingHandlers.sortIcon = {
 };
 
 /*
- * Uses original autocomplete implementation by Jorn Zaefferer
- * Expects three parameters source, name and guid
+ * Fused Autocomplete supports two versions of autocomplete (original autocomplete implementation by Jorn Zaefferer and jquery_ui)
+ * Expects three parameters source, name and guid.
  * Ajax response lists needs name attribute.
  * Doco url: http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
  * Note: Autocomplete implementation by Jorn Zaefferer is now been deprecated and its been migrated to jquery_ui.
  *
 */
 
-ko.bindingHandlers.deprecatedAutocomplete = {
-    update: function (element, params) {
+ko.bindingHandlers.fusedAutocomplete = {
+
+    init: function (element, params) {
         var params = params();
         var options = {};
-        options.source = ko.utils.unwrapObservable(params.source);
-        options.matchSubset = false;
-        options.formatItem = function(row, i, n) {
-            return row.name;
+        var url = ko.utils.unwrapObservable(params.source);
+        options.source = function(request, response) {
+            $(element).addClass("ac_loading");
+            $.ajax({
+                url: url,
+                dataType:'json',
+                data: {q:request.term},
+                success: function(data) {
+                    var items = $.map(data.autoCompleteList, function(item) {
+                        return {
+                            label:item.name,
+                            value: item.name,
+                            source: item
+                        }
+                    });
+                    response(items);
+
+                },
+                error: function() {
+                    items = [{label:"Error during species lookup", value:request.term, source: {listId:'error-unmatched', name: request.term}}];
+                    response(items);
+                },
+                complete: function() {
+                    $(element).removeClass("ac_loading");
+                }
+            });
         };
-        options.highlight = false;
-        options.parse = function(data) {
-            var rows = new Array();
-            data = data.autoCompleteList;
-            for(var i=0; i < data.length; i++) {
-                rows[i] = {
-                    data: data[i],
-                    value: data[i],
-                    result: data[i].name
-                };
-            }
-            return rows;
+        options.select = function(event, ui) {
+            var selectedItem = ui.item;
+            params.name(selectedItem.source.name);
+            params.guid(selectedItem.source.guid);
         };
 
-        $(element).autocomplete(options.source, options).result(function(event, data, formatted) {
-            if (data) {
-                params.name(data.name);
-                params.guid(data.guid);
-            }
-        });
+        if(!$(element).autocomplete(options).data("ui-autocomplete")){
+            // Fall back mechanism to handle deprecated version of autocomplete.
+            var options = {};
+            options.source = url;
+            options.matchSubset = false;
+            options.formatItem = function(row, i, n) {
+                return row.name;
+            };
+            options.highlight = false;
+            options.parse = function(data) {
+                var rows = new Array();
+                data = data.autoCompleteList;
+                for(var i=0; i < data.length; i++) {
+                    rows[i] = {
+                        data: data[i],
+                        value: data[i],
+                        result: data[i].name
+                    };
+                }
+                return rows;
+            };
+
+            $(element).autocomplete(options.source, options).result(function(event, data, formatted) {
+                if (data) {
+                    params.name(data.name);
+                    params.guid(data.guid);
+                }
+            });
+        }
     }
 };
 
