@@ -39,7 +39,7 @@
             <input style="width:80%;" type="text" placeholder="Search species"
                                      data-bind="value: name,
                                             event:{focusout: focusLost},
-                                            deprecatedAutocomplete:{
+                                            fusedAutocomplete:{
                                                 source: $parent.species.transients.bioSearch,
                                                 name: transients.name,
                                                 guid: transients.guid

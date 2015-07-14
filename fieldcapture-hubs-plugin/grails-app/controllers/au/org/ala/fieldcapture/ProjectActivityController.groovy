@@ -6,7 +6,7 @@ class ProjectActivityController {
     def projectActivityService,  speciesService
     static ignore = ['action','controller','id']
 
-    @PreAuthorise(accessLevel = 'siteAdmin')
+    @PreAuthorise(accessLevel = 'admin', projectIdParam = "projectId")
     def ajaxCreate() {
 
         def postBody = request.JSON
@@ -29,7 +29,7 @@ class ProjectActivityController {
         }
     }
 
-    @PreAuthorise(accessLevel = 'siteAdmin')
+    @PreAuthorise(accessLevel='admin', projectIdParam = "projectId")
     def ajaxUpdate(String id) {
         def postBody = request.JSON
         log.debug "Body: " + postBody
@@ -51,7 +51,7 @@ class ProjectActivityController {
         }
     }
 
-    @PreAuthorise(accessLevel = 'siteAdmin')
+    @PreAuthorise(accessLevel = 'admin', projectIdParam = "projectId")
     def ajaxAddNewSpeciesLists(){
 
         def postBody = request.JSON
