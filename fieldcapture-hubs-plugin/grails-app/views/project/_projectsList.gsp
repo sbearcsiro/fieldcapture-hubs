@@ -1,5 +1,4 @@
-<head>
-    <style type="text/css">
+<style type="text/css">
     .projectLogo {
         width: 200px;
         height: 150px;
@@ -8,16 +7,29 @@
         padding: 1px;
         text-align: center;
     }
+    .projectType {j
+        padding-right: 10px;
+        padding-left: 10px;
+        background: grey;
+        color: white;
+        white-space: pre-line;
+        display: inline-block;
+        text-align: center;
+    }
     input[type=checkbox] {
         margin-right: 5px;
     }
     #pt-downloadLink {
         margin-bottom: 10px;
     }
-    </style>
-</head>
-<body>
-<div class="well">
+</style>
+<div id="pt-table">
+    <ul class="nav nav-tabs">
+    <li>
+    <a data-bind="click:hideshow"><g:message code="project.search.hideshow"/></a>
+    </li>
+    </ul>
+<div id="pt-selectors" class="well" style="display:none">
     <g:if test="${fc.userIsAlaOrFcAdmin()}">
         <div class="row-fluid">
             <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn btn-warning span2 pull-right"
@@ -49,12 +61,21 @@
                 <label for="pt-dir"><g:message code="g.sortOrder" /></label>
                 <g:select name="pt-dir" from="['Ascending','Descending']" keys="[1,-1]"/>
             </div>
+<g:if test="${controllerName == 'organisation'}">
+            <div class="span3">
+                <label for="pt-search-projecttype"><g:message code="project.search.projecttype" /></label>
+                <select id="pt-search-projecttype" multiple data-bind="options:availableProjectTypes, optionsText:'name', optionsValue:'value'" style="width:100%"></select>
+            </div>
+</g:if>
+<g:else>
             <div class="span3">
                 <label for="pt-search-difficulty"><g:message code="project.search.difficulty" /></label>
                 <g:select name="pt-search-difficulty" from="['Any','Easy','Medium','Hard']"/>
             </div>
+</g:else>
         </div>
     </div><!--drop downs-->
+<g:if test="${controllerName != 'organisation'}">
     <div class="row-fluid">
         <div class="span4">
             <label class="checkbox"><input id="pt-search-active" type="checkbox" checked /><g:message code="project.search.active" /></label>
@@ -77,46 +98,49 @@
             <label class="checkbox"><input id="pt-search-mobile" type="checkbox" /><g:message code="project.search.mobile" /></label>
         </div>
     </div>
+</g:if>
 </div>
-
-<table class="table table-hover" id="pt-table">
+<p/>
+<table class="table table-hover">
     <tbody data-bind="foreach:pageProjects">
     <tr style="border-bottom: 2px solid grey">
         <td style="width:200px">
             <div class="projectLogo well">
-                <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{title:name,src:urlImage}"/>
+                <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{title:name,src:transients.imageUrl}"/>
             </div>
         </td>
         <td>
-            <a data-bind="attr:{href:indexUrl}">
+            <a data-bind="attr:{href:transients.indexUrl}">
                 <span data-bind="text:name" style="font-size:150%;font-weight:bold"></span>
             </a>
-            <div data-bind="visible:orgUrl">
-                <span data-bind="visible:transients.daysSince() < 0" style="font-size:80%;color:grey">Starts <!--ko text:transients.since--><!--/ko--> for&nbsp;</span>
-                <span data-bind="visible:transients.daysSince() >= 0" style="font-size:80%;color:grey">Added <!--ko text:transients.since--><!--/ko--> to&nbsp;</span>
-                <a data-bind="text:organisationName,attr:{href:orgUrl}"></a>
+            <div data-bind="visible:transients.orgUrl">
+                <span data-bind="visible:transients.daysSince() >= 0" style="font-size:80%;color:grey">Started <!--ko text:transients.since--><!--/ko-->&nbsp;</span>
+                <g:if test="${controllerName != 'organisation'}">
+                    <a data-bind="text:organisationName,attr:{href:transients.orgUrl}"></a>
+                </g:if>
             </div>
             <div data-bind="text:aim"></div>
             <div style="padding: 4px">
-                <i class="icon-info-sign"></i>&nbsp;<span data-bind="html:links"/>
+                <i class="icon-info-sign"></i>&nbsp;<span data-bind="html:transients.links"/>
             </div>
-            <div>
+            <div style="line-height:2.2em">
                 TAGS:&nbsp;<g:render template="/project/tags"/>
             </div>
             <br/>
-            <div data-bind="visible:transients.daysRemaining() > 0">
+            <div data-bind="visible:transients.daysSince() >= 0">
                 <b>Project status</b>
                 <g:render template="/project/daysline"/>
             </div>
-            <div data-bind="visible:transients.daysRemaining() == 0">
-                <b>Project status</b>
-                <g:render template="/project/daysline"/>
-                Project concluded. <a data-bind="attr:{href:indexUrl}">
+            <div data-bind="visible:transients.daysSince() >= 0 && transients.daysRemaining() == 0">
+                Project concluded. <a data-bind="attr:{href:transients.indexUrl}">
                 <span style="font-weight:bold">View the project page</span></a>
             </div>
         </td>
-        <td style="width:10em">
+        <td style="width:10em;text-align:center">
             <g:render template="/project/dayscount"/>
+<g:if test="${controllerName == 'organisation'}">
+            <span class="projectType" data-bind="text:transients.kindOfProjectDisplay"></span>
+</g:if>
         </td>
     </tr>
     </tbody>
@@ -125,26 +149,10 @@
 <div id="pt-searchNavBar" class="clearfix">
     <div id="pt-navLinks"></div>
 </div>
+
+</div>
 <r:script>
 $(document).ready(function () {
-    var markdown = new Showdown.converter();
-    function createVM(props) {
-        var vm = new CitizenScienceFinderProjectViewModel(props);
-        var x, urls = [];
-        if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
-        for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Mobile Apps&nbsp;" + x);
-        for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Social Media&nbsp;" + x);
-        vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.locality + ' ' + vm.state + ' ' + vm.organisationName()).toLowerCase();
-        vm.indexUrl = "${createLink()}/" + vm.projectId;
-        vm.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
-        return vm;
-    }
-
     /* holds all projects */
     var allProjects = [];
 
@@ -162,6 +170,10 @@ $(document).ready(function () {
     /* window into current page */
     function pageVM() {
         this.pageProjects = ko.observableArray();
+        this.availableProjectTypes = ko.observableArray();
+        this.hideshow = function() {
+          $("#pt-selectors").toggle();
+        }
     }
     var pageWindow = new pageVM();
     ko.applyBindings(pageWindow, document.getElementById('pt-table'));
@@ -173,6 +185,7 @@ $(document).ready(function () {
       var showActiveOnly = $('#pt-search-active').prop('checked'),
           showSuitableForChildrenOnly = $('#pt-search-children').prop('checked'),
           showDifficultyOnly = $('#pt-search-difficulty').val(),
+          showProjectTypeOnly = $('#pt-search-projecttype').val(),
           showDIYOnly = $('#pt-search-diy').prop('checked'),
           showNoCostOnly = $('#pt-search-noCost').prop('checked'),
           showTeachOnly = $('#pt-search-teach').prop('checked'),
@@ -188,11 +201,12 @@ $(document).ready(function () {
             if (showActiveOnly && item.daysStatus() != 'active') continue;
             if (showSuitableForChildrenOnly && !item.isSuitableForChildren()) continue;
             if (showDifficultyOnly && item.difficulty() != showDifficultyOnly) continue;
+            if (showProjectTypeOnly && showProjectTypeOnly.indexOf(item.transients.kindOfProject()) < 0) continue;
             if (showDIYOnly && !item.isDIY()) continue;
             if (showTeachOnly && !item.hasTeachingMaterials()) continue;
             if (showNoCostOnly && item.hasParticipantCost()) continue;
             if (showWithMobileAppsOnly && !item.transients.mobileApps().length) continue;
-            if (item.searchText.indexOf(searchTerm) >= 0)
+            if (item.transients.searchText.indexOf(searchTerm) >= 0)
                 projects.push(item);
         }
         offset = 0;
@@ -251,9 +265,38 @@ $(document).ready(function () {
         $('div#pt-navLinks').html($pago);
     }
 
+    function augmentVM(vm) {
+        var x, urls = [];
+        if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
+        for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
+          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Mobile Apps&nbsp;" + x);
+        for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
+          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
+        if (x) urls.push("Social Media&nbsp;" + x);
+        vm.transients.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
+        vm.transients.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.transients.locality + ' ' + vm.transients.state + ' ' + vm.organisationName()).toLowerCase();
+        vm.transients.indexUrl = "${createLink(controller:'project',action:'index')}/" + vm.transients.projectId;
+        vm.transients.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
+        vm.transients.imageUrl = vm.logoUrl();
+        if (!vm.transients.imageUrl) {
+          x = vm.primaryImages();
+          if (x && x.length > 0) vm.transients.imageUrl = x[0].url;
+        }
+        return vm;
+    }
+
     window.pago = {
         init: function(projects) {
-            allProjects = projects;
+            allProjects = [];
+            $.each(projects, function(i, project) {
+                allProjects.push(augmentVM(project));
+            });
+            if (projects.length > 0) {
+                pageWindow.availableProjectTypes(projects[0].transients.availableProjectTypes);
+                pageWindow.availableProjectTypes.valueHasMutated();
+                $('#pt-search-projecttype option').prop('selected', true);
+            }
             allProjects.sort(comparator); // full list is sorted by name
             doSearchForce();
         },
@@ -317,11 +360,10 @@ $(document).ready(function () {
     $('#pt-search-active').on('change', doSearchForce);
     $('#pt-search-children').on('change', doSearchForce);
     $('#pt-search-difficulty').change(doSearchForce);
+    $('#pt-search-projecttype').change(doSearchForce);
     $('#pt-search-diy').on('change', doSearchForce);
     $('#pt-search-noCost').on('change', doSearchForce);
     $('#pt-search-teach').on('change', doSearchForce);
     $('#pt-search-mobile').on('change', doSearchForce);
 });
 </r:script>
-</body>
-</html>

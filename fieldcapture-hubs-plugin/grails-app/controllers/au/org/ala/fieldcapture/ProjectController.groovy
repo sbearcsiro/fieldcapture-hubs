@@ -200,13 +200,11 @@ class ProjectController {
                 isSuitableForChildren: it.isSuitableForChildren && true, // force it to boolean
                 keywords   : it.keywords,
                 links      : trimmedLinks,
-                locality   : siteGeom?.locality,
                 name       : it.name,
                 organisationId  : it.organisationId,
                 organisationName: it.organisationName ?: organisationService.getNameFromId(it.organisationId),
                 scienceType: it.scienceType,
                 startDate  : it.plannedStartDate,
-                state      : siteGeom?.state,
                 urlImage   : urlImage,
                 urlWeb     : it.urlWeb
             ]
@@ -237,13 +235,11 @@ class ProjectController {
                       it.isSuitableForChildren,
                       it.keywords,
                       it.links,
-                      it.locality,
                       it.name,
                       it.organisationId,
                       it.organisationName,
                       it.scienceType,
                       it.startDate,
-                      it.state,
                       it.urlImage,
                       it.urlWeb
                     ]

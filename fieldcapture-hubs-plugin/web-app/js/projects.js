@@ -401,7 +401,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         return self.plannedEndDate()? calculateDurationInDays(self.plannedStartDate(), self.plannedEndDate()): -1;
     });
     self.daysStatus = ko.pureComputed(function(){
-        return self.transients.daysSince() < 0? "pending": self.transients.daysRemaining()? "active": "ended";
+        return self.transients.daysRemaining()? "active": "ended";
     });
     self.transients.since = ko.pureComputed(function(){
         var daysSince = self.transients.daysSince();
@@ -544,6 +544,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
         }
     });
 
+    self.transients.projectId = project.projectId;
     self.transients.programs = [];
     self.transients.subprograms = {};
     self.transients.subprogramsToDisplay = ko.computed(function () {
@@ -571,11 +572,17 @@ function ProjectViewModel(project, isUserEditor, organisations) {
                 return scienceTypesList[i].name;
     });
 
-    self.transients.availableProjectTypes = [
-        {name:'Citizen Science Project', value:'citizenScience'},
-        {name:'Ecological or biological survey / assessment (not citizen science)', value:'survey'},
-        {name:'Natural resource management works project', value:'works'}
+    var availableProjectTypes = [
+        {name:'Citizen Science Project', display:'Citizen\nScience', value:'citizenScience'},
+        {name:'Ecological or biological survey / assessment (not citizen science)', display:'Biological\nScience', value:'survey'},
+        {name:'Natural resource management works project', display:'Works\nProject', value:'works'}
     ];
+    self.transients.availableProjectTypes = availableProjectTypes;
+    self.transients.kindOfProjectDisplay = ko.pureComputed(function () {
+        for (var pt = self.transients.kindOfProject(), i = 0; i < availableProjectTypes.length; i++)
+            if (pt === availableProjectTypes[i].value)
+                return availableProjectTypes[i].display;
+    });
     /** Map between the available selection of project types and how the data is stored */
     self.transients.kindOfProject = ko.pureComputed({
         read: function() {
@@ -666,8 +673,8 @@ function ProjectViewModel(project, isUserEditor, organisations) {
  */
 function CitizenScienceFinderProjectViewModel(props) {
     ProjectViewModel.apply(this, [{
+        projectId: props[0],
         aim: props[1],
-        coverage: props[2],
         description: props[3],
         difficulty: props[4],
         plannedEndDate: props[5] && new Date(props[5]),
@@ -678,19 +685,24 @@ function CitizenScienceFinderProjectViewModel(props) {
         isSuitableForChildren: props[10],
         keywords: props[11],
         links: props[12],
-        name: props[14],
-        organisationId: props[15],
-        organisationName: props[16],
-        scienceType: props[17],
-        plannedStartDate: props[18] && new Date(props[18]),
-        urlWeb: props[21]
+        name: props[13],
+        organisationId: props[14],
+        organisationName: props[15],
+        scienceType: props[16],
+        plannedStartDate: props[17] && new Date(props[17]),
+        documents: [
+            {
+                public: true,
+                role: 'logo',
+                url: props[18]
+            }
+        ],
+        urlWeb: props[19]
     }, false, []]);
 
     var self = this;
-    self.projectId = props[0];
-    self.locality = props[13];
-    self.state = props[19];
-    self.urlImage = props[20];
+    self.transients.locality = props[2] && props[2].locality;
+    self.transients.state = props[2] && props[2].state;
 }
 
 /**

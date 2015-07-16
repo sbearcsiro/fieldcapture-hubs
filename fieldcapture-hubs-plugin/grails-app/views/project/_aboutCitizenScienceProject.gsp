@@ -49,7 +49,7 @@
             </div>
             <div data-bind="visible:manager">
                 <b style="text-decoration: underline;">Contact email</b><br/>
-                <span data-bind="text:manager"></span>
+                <a data-bind="attr:{href:'mailto:' + manager()}"><span data-bind="text:manager"></span></a>
                 <p/>
             </div>
             <div data-bind="visible:gear">
@@ -71,7 +71,7 @@
             <g:render template="/shared/listDocumentLinks"
                       model="${[transients:transients,imageUrl:resource(dir:'/images/filetypes')]}"/>
             <p/>
-            <div>
+            <div style="line-height:2.2em">
                 <g:render template="tags"/>
             </div>
         </div>

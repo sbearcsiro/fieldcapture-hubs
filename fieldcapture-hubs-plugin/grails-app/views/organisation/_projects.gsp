@@ -1,12 +1,14 @@
 <g:if test="${!disableProjectCreation}">
+    <div class="row-fluid">
     <a href="${createLink(controller:'project', action: 'create', params: [organisationId: organisation.organisationId])}"
        class="btn btn-small pull-right">
         <i class="icon-file"></i>&nbsp;<g:message code="project.create.crumb"/></a>
+    </div>
 </g:if>
 <g:if test="${organisation.projects}">
     <!-- ko stopBinding: true -->
-    <div id="projectsList">
-        
+    <div id="pt-root" class="row-fluid">
+        <g:render template="/project/projectsList"/>
     </div>
     <!-- /ko -->
     <table id="projectList" class="table
