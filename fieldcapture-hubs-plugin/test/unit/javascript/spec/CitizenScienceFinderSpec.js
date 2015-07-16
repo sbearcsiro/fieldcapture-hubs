@@ -18,7 +18,10 @@ describe("Citizen Science Project Finder Spec", function () {
         var projectData = [
           'pid',
           'aim',
-          'coverage',
+          {
+            locality: "locality",
+            state: "state"
+          },
           'description',
           'Easy', // difficulty
           fourDaysHence.toISOString(), // plannedEndDate
@@ -29,13 +32,11 @@ describe("Citizen Science Project Finder Spec", function () {
           true, // isSuitableForChildren
           'keywords',
           [], // links
-          'locality',
           'name',
           'orgid',
           'orgname',
           'scienceType',
           threeDaysAgo.toISOString(), // plannedStartDate
-          'state',
           null, // urlImage
           null // urlWeb
         ];
@@ -51,16 +52,16 @@ describe("Citizen Science Project Finder Spec", function () {
         expect(project.isExternal()).toEqual(projectData[9]);
         expect(project.isSuitableForChildren()).toEqual(projectData[10]);
         expect(project.keywords()).toEqual(projectData[11]);
-        expect(project.locality).toEqual(projectData[13]);
-        expect(project.name()).toEqual(projectData[14]);
-        expect(project.organisationId()).toEqual(projectData[15]);
-        expect(project.organisationName()).toEqual(projectData[16]);
-        expect(project.scienceType()).toEqual(projectData[17]);
+        expect(project.name()).toEqual(projectData[13]);
+        expect(project.organisationId()).toEqual(projectData[14]);
+        expect(project.organisationName()).toEqual(projectData[15]);
+        expect(project.scienceType()).toEqual(projectData[16]);
         expect(new Date(project.plannedStartDate())).toEqual(threeDaysAgo);
-        expect(project.state).toEqual(projectData[19]);
         expect(project.transients.daysRemaining()).toEqual(4);
         expect(project.transients.daysSince()).toEqual(3);
         expect(project.transients.daysTotal()).toEqual(7);
+        expect(project.transients.locality).toEqual(projectData[2].locality);
+        expect(project.transients.state).toEqual(projectData[2].state);
         expect(project.daysStatus()).toEqual("active");
     });
 });

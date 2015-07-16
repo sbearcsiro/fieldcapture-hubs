@@ -20,6 +20,8 @@
             organisationListUrl: '${g.createLink(action:"list")}',
             organisationViewUrl: '${g.createLink(action:"index", id:"${organisation.organisationId}")}',
             organisationMembersUrl: "${loadPermissionsUrl}",
+            imageLocation:"${resource(dir:'/images')}",
+            logoLocation:"${resource(dir:'/images/filetypes')}",
             adHocReportsUrl: '${g.createLink(action:"getAdHocReportTypes")}',
             dashboardUrl: "${g.createLink(controller: 'report', action: 'loadReport', params:[fq:'organisationFacet:'+organisation.name])}",
             activityViewUrl: '${g.createLink(controller: 'activity', action:'index')}',
@@ -310,8 +312,8 @@
             ko.utils.registerEventHandler(input, "hide", changeHandler);
         };
 
-        if (true || hasMERITprojects) {
-            $('#projectsList').hide();
+        if (hasMERITprojects) {
+            $('#pt-root').hide();
             $('#projectList').dataTable( {
                 "data": projects,
                 "autoWidth":false,
@@ -374,9 +376,12 @@
         } else {
             // no MERIT projects
             $('#projectList').hide();
-            window.pago.init(projects);
+            var projectVMs = [];
+            $.each(projects, function(i, project) {
+                projectVMs.push(new ProjectViewModel(project, false, organisation));
+            });
+            window.pago.init(projectVMs);
         }
-
 
         <g:if test="${content.admin.visible}">
         populatePermissionsTable(fcConfig.organisationMembersUrl);

@@ -26,7 +26,7 @@
     <h4>ONGOING</h4>
 </div>
 <div class="dayscount" data-bind="visible:transients.daysSince() < 0">
-    <h4>PROJECT</h4>
-    <h4>NOT YET</h4>
-    <h4>STARTED</h4>
+    <h4>STARTS IN</h4>
+    <h2 data-bind="text:-transients.daysSince()"></h2>
+    <h4>DAYS</h4>
 </div>

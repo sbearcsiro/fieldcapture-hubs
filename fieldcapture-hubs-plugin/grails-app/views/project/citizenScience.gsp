@@ -39,29 +39,12 @@
 </div>
 <r:script>
 $(document).ready(function () {
-    function createVM(props) {
-        var vm = new CitizenScienceFinderProjectViewModel(props);
-        var x, urls = [];
-        if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
-        for (x = "", docs = vm.transients.mobileApps(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Mobile Apps&nbsp;" + x);
-        for (x = "", docs = vm.transients.socialMedia(), i = 0; i < docs.length; i++)
-          x += '&nbsp;<a href="' + docs[i].link.url + '"><img class="logo-small" src="' + docs[i].logo(fcConfig.logoLocation) + '"/></a>';
-        if (x) urls.push("Social Media&nbsp;" + x);
-        vm.links = urls.join('&nbsp;&nbsp;|&nbsp;&nbsp;') || '';
-        vm.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.locality + ' ' + vm.state + ' ' + vm.organisationName()).toLowerCase();
-        vm.indexUrl = "${createLink()}/" + vm.projectId;
-        vm.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
-        return vm;
-    }
-
     $("#newPortal").on("click", function() {
         document.location.href = "${createLink(controller:'project',action:'create',params:[citizenScience:true])}";
     });
 
     window.pago.init([
-    <g:each var="p" in="${projects}">createVM(${p as JSON}),</g:each>
+    <g:each var="p" in="${projects}">new CitizenScienceFinderProjectViewModel(${p as JSON}),</g:each>
     ]);
 });
 </r:script>
