@@ -367,6 +367,11 @@ var ValidationSupport = function() {
 
 };
 
+function helpHover(helpText) {
+    return '<a href="#" class="helphover" data-original-title="" data-placement="top" data-container="body" data-content="'+helpText+'">'+
+        '<i class="icon-question-sign">&nbsp;</i>'+
+        '</a>';
+};
 
 var validationSupport = new ValidationSupport();
 /**
@@ -517,8 +522,11 @@ function LongTextEditor(args) {
         $wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
             .appendTo($container);
 
-        $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
-            .appendTo($wrapper);
+        $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>");
+        if (args.column.maxlength) {
+            $input.attr('maxlength', args.column.maxlength);
+        }
+        $input.appendTo($wrapper);
 
         $("<DIV style='text-align:right'><BUTTON>Save</BUTTON><BUTTON>Cancel</BUTTON></DIV>")
             .appendTo($wrapper);
@@ -908,6 +916,30 @@ function SelectEditor(args) {
         $select.focus();
 
         self.setElement($select);
+    };
+
+    this.init();
+}
+
+function CurrencyEditor(args) {
+    BaseEditor.apply(this, [args]);
+    var self = this;
+
+    this.init = function () {
+        var height = $(args.container).height();
+        var width = $(args.container).width();
+        var $container = $('<div class="input-append input-prepend" style="width:100%;"></div>');
+        $container.append('<span class="add-on">$</span>');
+        var $input = $('<input style="width:100%;" type="text">');
+        $container.append($input);
+        $container.append('<span class="add-on">.00</span>');
+        $container.appendTo(args.container);
+        $input.focus();
+        $container.height(height);
+        $input.height(height).width(width-68).css('padding-top', 0).css('padding-bottom', 0);
+        $container.find('span').height(height).css('padding-top', 0).css('padding-bottom', 0);
+
+        self.setElement($input);
     };
 
     this.init();
