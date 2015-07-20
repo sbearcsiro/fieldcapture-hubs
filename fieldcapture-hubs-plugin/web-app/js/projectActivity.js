@@ -18,7 +18,8 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
         self.reset();
         self.projectActivities.push(new ProjectActivity([], self.pActivityForms, self.projectId(), true, self.sites));
         initialiseValidator();
-    };
+        showAlert("Successfully added.", "alert-success",  'project-activities-result-placeholder');
+   };
 
     self.reset = function(){
         $.each(self.projectActivities(), function(i, obj){
@@ -78,7 +79,7 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
                     if(self.projectActivities().length > 0){
                         self.projectActivities()[0].current(true);
                     }
-                    showAlert("Successfully deleted.", "alert-success",  'project-activities-info-result-placeholder');
+                    showAlert("Successfully deleted.", "alert-success",  'project-activities-result-placeholder');
                 }
                 else{
                     self.genericUpdate(self.current().asJSON("info"), "info");

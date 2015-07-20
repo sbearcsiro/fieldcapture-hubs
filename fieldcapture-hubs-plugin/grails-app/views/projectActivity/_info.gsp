@@ -45,7 +45,7 @@
                 </div>
                 <div class="span7">
                     <div class="controls">
-                        <input data-bind="datepicker:endDate.date" type="text" data-validation-engine="validate[required]" />
+                        <input data-bind="datepicker:endDate.date" type="text" />
                     </div>
                 </div>
             </div>

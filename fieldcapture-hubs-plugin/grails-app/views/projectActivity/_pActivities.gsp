@@ -1,34 +1,62 @@
 <!-- ko stopBinding: true -->
 
-<h4>Project surveys</h4>
+<h4>Survey settings</h4>
 <p>Each of your surveys can be configured differently depending on your needs. Project level settings are inherited as the default.</p>
 <p>Click on tabs to edit settings required. And new surveys to the project as required.</p>
 
 <div id="pActivities" >
 
     <div class="tab-pane" id="admin-project-activity">
-        <div class="row-fluid">
-            <div class="span2 large-space-before">
 
-                <!-- ko  foreach: projectActivities -->
-                <button  data-bind="click: $root.setCurrent, css:{'btn btn-link' : true} ">
-                   <b><span data-bind="text: name"></span> </b> <span data-bind="if: current"> <i class="icon-chevron-right"></i></span>
-                </button>
-                </br>
+        <div class="row-fluid">
+
+            <div class="span12 text-left">
+                <div id="project-activities-result-placeholder"></div>
+                <!-- ko if: projectActivities().length > 0 -->
+                 <span> <b> Select survey: </b></span>
+                 <div class="btn-group">
+
+                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <!-- ko  foreach: projectActivities -->
+                        <span data-bind="if: current">
+                           <span data-bind="text: name"></span> <span class="caret"></span>
+                        </span>
+                    <!-- /ko -->
+                  </button>
+
+                  <ul class="dropdown-menu" role="menu" style="height: auto;max-height: 200px;overflow-x: hidden;">
+                    <!-- ko  foreach: projectActivities -->
+                        <li>
+                            <a href="#" data-bind="click: $root.setCurrent" >
+                                <span data-bind="text: $index()+1"></span>. <span data-bind="text: name"></span> <span data-bind="if: current"> <span class="badge badge-important">selected</span></span>
+                            </a>
+                        </li>
+                        </br>
+                    <!-- /ko -->
+                  </ul>
+                </div>
                 <!-- /ko -->
 
-                </br></br>
-                <div class="btn-group btn-group-vertical">
-                    <a class="btn btn-xs btn-default" data-bind="click: addProjectActivity"> <i class="icon-plus"></i> Add Survey</a>
-                    <!-- ko if: projectActivities().length > 0 -->
-                        <a class="btn btn-xs btn-default" data-bind="click: deleteProjectActivity"> <i class="icon-minus-sign"></i> Delete Survey</a>
-                    <!-- /ko -->
+                <div class="btn-group btn-group-horizontal">
+                        <a class="btn btn-xs btn-default" data-bind="click: addProjectActivity"> <i class="icon-plus"></i> Add Survey</a>
                 </div>
+
+             </div>
+
+        </div>
+
+
+        <!-- ko if: projectActivities().length > 0 -->
+        <div class="row-fluid">
+            <div class="span12 text-right">
+                <a class="btn btn-sm btn-default" data-bind="click: deleteProjectActivity"> <i class="icon-minus-sign"></i> Delete</a>
             </div>
+        </div>
 
-            <div class="span10">
+        <div class="row-fluid">
 
-                <!-- ko if: projectActivities().length > 0 -->
+            <div class="span12">
+
                 <ul class="nav nav-pills">
                     <li class="active"><a href="#survey-info" data-toggle="pill">Survey Info</a></li>
                     <li><a href="#survey-species" data-toggle="pill">Species</a></li>
@@ -76,10 +104,12 @@
 
                     </div>
                 </div>
-                <!-- /ko -->
+
 
             </div>
         </div>
+
+        <!-- /ko -->
     </div>
 
     </span>
