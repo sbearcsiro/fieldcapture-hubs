@@ -303,7 +303,7 @@ class ProjectController {
             documents.each { doc ->
                 doc.projectId = id
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
-                if (doc.isPrimaryProjectImage) doc.public = true
+                if (doc.isPrimaryProjectImage || doc.role == documentService.ROLE_LOGO) doc.public = true
                 documentService.saveStagedImageDocument(doc)
             }
         }
