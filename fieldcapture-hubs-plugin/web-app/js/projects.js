@@ -346,7 +346,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.keywords = ko.observable(project.keywords);
     self.projectPrivacy = ko.observable(project.projectPrivacy);
     self.projectSiteId = project.projectSiteId;
-    self.projectType = ko.observable(project.projectType || "works");
+    self.projectType = ko.observable(project.projectType);
     self.scienceType = ko.observable(project.scienceType);
     self.task = ko.observable(project.task);
     self.urlWeb = ko.observable(project.urlWeb).extend({url:true});
@@ -589,7 +589,9 @@ function ProjectViewModel(project, isUserEditor, organisations) {
             if (self.isCitizenScience()) {
                 return 'citizenScience';
             }
-            return self.projectType() == 'survey' ? 'survey' : 'works';
+            if (self.projectType()) {
+                return self.projectType() == 'survey' ? 'survey' : 'works';
+            }
         },
         write: function(value) {
             if (value === 'citizenScience') {
@@ -654,6 +656,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
 
     if (project.documents) {
         $.each(project.documents, function(i, doc) {
+            if (doc.role === "logo") doc.public = true; // for backward compatibility
             self.addDocument(doc);
         });
     }

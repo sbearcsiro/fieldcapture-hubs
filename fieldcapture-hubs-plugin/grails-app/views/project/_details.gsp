@@ -23,7 +23,7 @@
             <label class="control-label span3"><g:message code="project.type"/><fc:iconHelp><g:message code="project.type.help"/></fc:iconHelp><i class="req-field"></i>:</label>
 
             <div class="controls span9">
-                <select data-bind="value:transients.projectKind, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
+                <select data-bind="value:transients.kindOfProject, options:transients.availableProjectTypes, optionsText:'name', optionsValue:'value', optionsCaption:'Select...'"  <g:if test="${params.citizenScience}">disabled</g:if> data-validation-engine="validate[required]"></select>
             </div>
         </div>
     </div>
@@ -79,7 +79,7 @@
             </div>
         </div>
     </div>
-    <div class="row-fluid">
+    <div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
         <p/>
         <div class="control-group">
             <label class="control-label span3" for="isMetadataSharing"><g:message code="project.isMetadataSharing"/><fc:iconHelp><g:message code="project.isMetadataSharing.help"/></fc:iconHelp>:</label>
@@ -92,7 +92,7 @@
 
 </div>
 
-<div class="row-fluid">
+<div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.tell"/></h4>
 
@@ -155,7 +155,7 @@
     </div>
 </div>
 
-<div data-bind="visible:!isCitizenScience()" class="row-fluid">
+<div data-bind="visible:!isCitizenScience() && !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.associations"/></h4>
 
@@ -235,7 +235,7 @@
     </div>
 </div>
 
-<div data-bind="visible:isCitizenScience()" class="row-fluid">
+<div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.involved"/></h4>
 
@@ -313,7 +313,7 @@
     </div>
 </div>
 
-<div class="row-fluid">
+<div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.find"/></h4>
 
@@ -377,7 +377,7 @@
     </div>
 </div>
 
-<div class="row-fluid">
+<div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.image"/></h4>
 
@@ -425,7 +425,7 @@
     </div>
 </div>
 
-<div class="row-fluid">
+<div data-bind="visible:isCitizenScience() || !isExternal()" class="row-fluid">
     <div class="well">
         <h4 class="block-header"><g:message code="project.details.site"/></h4>
         <g:set var="mapHeight" value="400px"/>
