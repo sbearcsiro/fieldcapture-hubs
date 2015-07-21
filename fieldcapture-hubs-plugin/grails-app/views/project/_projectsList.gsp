@@ -267,6 +267,11 @@ $(document).ready(function () {
         $('div#pt-navLinks').html($pago);
     }
 
+    var meritProjectLogo;
+<g:if test="${grailsApplication.config.merit.projectLogo}">
+    meritProjectLogo = fcConfig.imageLocation + "/" + "${grailsApplication.config.merit.projectLogo}";
+</g:if>
+
     function augmentVM(vm) {
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
@@ -280,7 +285,7 @@ $(document).ready(function () {
         vm.transients.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.transients.locality + ' ' + vm.transients.state + ' ' + vm.organisationName()).toLowerCase();
         vm.transients.indexUrl = "${createLink(controller:'project',action:'index')}/" + vm.transients.projectId;
         vm.transients.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
-        vm.transients.imageUrl = vm.logoUrl();
+        vm.transients.imageUrl = meritProjectLogo && vm.isMERIT()? meritProjectLogo: vm.logoUrl();
         if (!vm.transients.imageUrl) {
           x = vm.primaryImages();
           if (x && x.length > 0) vm.transients.imageUrl = x[0].url;
