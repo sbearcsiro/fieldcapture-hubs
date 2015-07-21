@@ -879,3 +879,12 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     background-color: #f0f0e8;
 }
 
+.links-table {
+    margin-bottom: 0;
+}
+.links-table td {
+    border: none;
+    padding: 4px;
+    vertical-align: middle;
+}
+

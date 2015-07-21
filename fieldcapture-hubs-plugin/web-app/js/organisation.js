@@ -64,7 +64,7 @@ OrganisationViewModel = function (props) {
        window.location = fcConfig.organisationEditUrl;
     };
 
-    self.transients = {};
+    self.transients = self.transients || {};
     self.transients.orgTypes = [];
     for (var ot in orgTypesMap) {
         if (orgTypesMap.hasOwnProperty(ot))

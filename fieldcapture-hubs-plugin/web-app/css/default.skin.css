@@ -46,3 +46,28 @@ footer img {
 .map-box {
     height:540px;
 }
+
+.links-table {
+    margin-bottom: 0;
+}
+.links-table td {
+    border: none;
+    padding: 4px;
+    vertical-align: middle;
+}
+
+.output-block .required label,  .validationEngineContainer .required label {
+    position:relative;
+}
+.output-block .required label:after, .output-block th.required:after, .validationEngineContainer .required label:after {
+    content: "*";
+    font-weight:bold;
+    font-size:1.5em;
+    color: red;
+    position:absolute;
+    white-space: nowrap;
+}
+
+.ie .output-block .required label:after, .ie .output-block th.required:after, .ie .validationEngineContainer .required label:after {
+    font-size:1em;
+}
