@@ -14,7 +14,11 @@
 <div id="weburl" data-bind="visible:!mainImageUrl()">
     <div data-bind="visible:url()"><strong>Visit us at <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></strong></div>
 </div>
+
 <div data-bind="visible:description">
-    <b style="text-decoration: underline;">Description</b><br/>
-    <span data-bind="html:description.markdownToHtml()"></span>
+    <div class="span12 well">
+        <div class="well-title">About ${organisation.name}</div>
+
+        <span data-bind="html:description.markdownToHtml()"></span>
+    </div>
 </div>

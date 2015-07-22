@@ -49,44 +49,18 @@
 <body>
 
     <g:render template="banner" model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
-    <div class="container-fluid">
-        <div id="organisationDetails" class="container-fluid" style="display:none;">
 
-            <g:render template="/shared/flashScopeMessage"/>
-            %{--<div class="row-fluid space-after">--}%
-                %{--<span data-bind="visible:mainImageUrl()" class="span3">--}%
-                    %{--<img data-bind="attr:{src:mainImageUrl}" style="width:100%;">--}%
-                %{--</span>--}%
+    <div id="organisationDetails" class="container-fluid" style="display:none;">
 
-                %{--<span data-bind="attr:{class:mainImageUrl() && newsAndEvents()?'span6':mainImageUrl() || newsAndEvents()?'span9':'span12'}">--}%
-                    %{--<h4>Description</h4>--}%
-                    %{--<div class="well" data-bind="html:description.markdownToHtml()"></div>--}%
-                    %{--<div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>--}%
-                    %{--<div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>--}%
+        <g:render template="/shared/flashScopeMessage"/>
 
-                %{--</span>--}%
-                %{--<span data-bind="visible:newsAndEvents()" class="span3">--}%
-                    %{--<h4>News and events</h4>--}%
-                    %{--<div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>--}%
+        <div class="row-fluid">
+            <ul class="nav nav-tabs" data-tabs="tabs">
+                <fc:tabList tabs="${content}"/>
+            </ul>
 
-                %{--</span>--}%
-
-            %{--</div>--}%
-            <g:render template="about"/>
-
-            <div class="row-fluid">
-                <ul class="nav nav-tabs" data-tabs="tabs">
-
-                    <ul id="organisationTabs" class="nav nav-tabs big-tabs">
-                        <fc:tabList tabs="${content}"/>
-                    </ul>
-                </ul>
-            </div>
-            <div class="row-fluid" id="save-agreement-result-placeholder"></div>
-            <div class="tab-content row-fluid">
-
+            <div class="tab-content">
                 <fc:tabContent tabs="${content}"/>
-
             </div>
         </div>
         <div id="loading" class="text-center">

@@ -66,7 +66,8 @@ class OrganisationController {
         def hasViewAccess = hasAdminAccess || userService.userHasReadOnlyAccess() || orgRole.role == RoleService.PROJECT_EDITOR_ROLE
         def dashboardReports = [[name:'dashboard', label:'Activity Outputs']]
 
-        [projects : [label: 'Projects', visible: true, default:true, stopBinding:true, type: 'tab'],
+        [about    : [label: 'About', visible: true, stopBinding: false, type:'tab'],
+         projects : [label: 'Projects', visible: true, default:true, stopBinding:true, type: 'tab'],
          sites    : [label: 'Sites', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/sites', projectCount:organisation.projects?.size()?:0],
          dashboard: [label: 'Dashboard', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/dashboard', reports:dashboardReports],
          admin    : [label: 'Admin', visible: hasAdminAccess, type: 'tab']]

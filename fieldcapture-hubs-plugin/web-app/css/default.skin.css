@@ -74,7 +74,6 @@ footer img {
 
 .banner .logo {
     height:110px;
-    margin-left:10px;
     margin-bottom:10px;
     float:left;
 }
@@ -92,3 +91,12 @@ footer img {
     max-height: 512px;
     overflow: hidden;
 }
+
+.well-title {
+    border-bottom: 1px solid lightgrey;
+    font-weight: bold;
+    padding-bottom:5px;
+    margin-bottom:10px;
+    font-size:larger;
+}
+

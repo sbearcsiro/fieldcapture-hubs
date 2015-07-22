@@ -23,5 +23,7 @@
     </table>
 </g:if>
 <g:else>
-    <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+    <div class="row-fluid">
+        <span class="span12"><h4>${organisation.name} is not currently involved in any projects.</h4></span>
+    </div>
 </g:else>
