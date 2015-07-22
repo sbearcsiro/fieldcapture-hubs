@@ -65,10 +65,7 @@
 
         <div class="pill-content">
             <div class="pill-pane active" id="about">
-                <g:render template="aboutCitizenScienceProject"/>
-                <!-- ko stopBinding:true -->
-                <g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
-                <!-- /ko -->
+                <g:render template="aboutCitizenScienceProject" model="${projectContent.about}"/>
             </div>
             <div class="pill-pane" id="admin">
                 <g:render template="admin"/>
@@ -78,9 +75,6 @@
 </g:if>
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
-    <!-- ko stopBinding:true -->
-    <g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
-    <!-- /ko -->
 </g:else>
 
 <r:script>
@@ -123,7 +117,7 @@
                 touchSwipe:false // at the moment we only support 1 image
             });
         }
-        initialiseSites(project.sites);
+        initialiseProjectArea();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>

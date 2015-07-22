@@ -79,7 +79,8 @@ class ProjectController {
     }
 
     protected Map surveyProjectContent(project, user) {
-        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab'],
+        def projectSite = project.sites?.find{it.siteId == project.projectSiteId}
+        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab', projectSite:projectSite],
          news:[label:'News', visible: true, type:'tab'],
          documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
          activities:[label:'Surveys', visible:!project.isExternal, template:'/shared/activitiesList', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
