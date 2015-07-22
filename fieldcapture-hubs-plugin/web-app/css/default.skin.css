@@ -71,3 +71,24 @@ footer img {
 .ie .output-block .required label:after, .ie .output-block th.required:after, .ie .validationEngineContainer .required label:after {
     font-size:1em;
 }
+
+.banner .logo {
+    height:110px;
+    margin-left:10px;
+    margin-bottom:10px;
+    float:left;
+}
+
+.banner .header-text {
+    float:left;
+    margin-left:10px;
+}
+.banner .header-text h2,.header-text h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#carousel {
+    max-height: 512px;
+    overflow: hidden;
+}

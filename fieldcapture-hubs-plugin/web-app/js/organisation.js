@@ -76,6 +76,7 @@ OrganisationViewModel = function (props) {
         var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
         if (includeDocuments) {
             js.documents = ko.toJS(self.documents);
+            js.links = ko.mapping.toJS(self.links());
         }
         return js;
     };

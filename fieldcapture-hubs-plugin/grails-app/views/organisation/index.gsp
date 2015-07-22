@@ -48,68 +48,50 @@
 </head>
 <body>
 
-    <div class="container-fluid organisation-header organisation-banner" data-bind="style:{'backgroundImage':asBackgroundImage(bannerUrl())}">
-        <div class="row-fluid">
-            <ul class="breadcrumb">
-                <li>
-                    <g:link controller="home">Home</g:link> <span class="divider">/</span>
-                </li>
-                <li class="active"><g:link controller="organisation" action="list">Organisations</g:link> <span class="divider">/</span></li>
-                <li class="active">${organisation.name}</li>
-            </ul>
-        </div>
-        <div class="row-fluid ">
-            <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
-            <div class="pull-right">
-                <span data-bind="foreach:transients.socialMedia">
-                    <a data-bind="attr:{href:link.url}"><img class="logo-small" data-bind="attr:{src:logo('${imageUrl}')}"/></a>
-                </span>
-            </div>
-            <div class="header-text">
-                <h2>${organisation.name}</h2>
-            </div>
-        </div>
-    </div>
-    <div id="organisationDetails" class="container-fluid" style="display:none;">
+    <g:render template="banner" model="${[imageUrl:resource(dir:'/images/filetypes')]}"/>
+    <div class="container-fluid">
+        <div id="organisationDetails" class="container-fluid" style="display:none;">
 
-        <g:render template="/shared/flashScopeMessage"/>
-        <div class="row-fluid space-after">
-            <span data-bind="visible:mainImageUrl()" class="span3">
-                <img data-bind="attr:{src:mainImageUrl}" style="width:100%;">
-            </span>
+            <g:render template="/shared/flashScopeMessage"/>
+            %{--<div class="row-fluid space-after">--}%
+                %{--<span data-bind="visible:mainImageUrl()" class="span3">--}%
+                    %{--<img data-bind="attr:{src:mainImageUrl}" style="width:100%;">--}%
+                %{--</span>--}%
 
-            <span data-bind="attr:{class:mainImageUrl() && newsAndEvents()?'span6':mainImageUrl() || newsAndEvents()?'span9':'span12'}">
-                <h4>Description</h4>
-                <div class="well" data-bind="html:description.markdownToHtml()"></div>
-                <div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>
-                <div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>
+                %{--<span data-bind="attr:{class:mainImageUrl() && newsAndEvents()?'span6':mainImageUrl() || newsAndEvents()?'span9':'span12'}">--}%
+                    %{--<h4>Description</h4>--}%
+                    %{--<div class="well" data-bind="html:description.markdownToHtml()"></div>--}%
+                    %{--<div data-bind="visible:orgType()"><h4 style="display:inline">Type of organisation&nbsp;</h4> <span data-bind="text:orgTypeDisplayOnly"></span></div>--}%
+                    %{--<div class="smallFont" data-bind="visible:url()">Learn more at: <a data-bind="attr:{href:url}"><span data-bind="text:url"></span></a></div>--}%
 
-            </span>
-            <span data-bind="visible:newsAndEvents()" class="span3">
-                <h4>News and events</h4>
-                <div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>
+                %{--</span>--}%
+                %{--<span data-bind="visible:newsAndEvents()" class="span3">--}%
+                    %{--<h4>News and events</h4>--}%
+                    %{--<div class="well" data-bind="html:newsAndEvents.markdownToHtml()"></div>--}%
 
-            </span>
+                %{--</span>--}%
 
-        </div>
+            %{--</div>--}%
+            <g:render template="about"/>
 
-        <div class="row-fluid">
-            <ul class="nav nav-tabs" data-tabs="tabs">
+            <div class="row-fluid">
+                <ul class="nav nav-tabs" data-tabs="tabs">
 
-                <ul id="organisationTabs" class="nav nav-tabs big-tabs">
-                    <fc:tabList tabs="${content}"/>
+                    <ul id="organisationTabs" class="nav nav-tabs big-tabs">
+                        <fc:tabList tabs="${content}"/>
+                    </ul>
                 </ul>
-            </ul>
-        </div>
-        <div class="row-fluid" id="save-agreement-result-placeholder"></div>
-        <div class="tab-content row-fluid">
+            </div>
+            <div class="row-fluid" id="save-agreement-result-placeholder"></div>
+            <div class="tab-content row-fluid">
 
-            <fc:tabContent tabs="${content}"/>
+                <fc:tabContent tabs="${content}"/>
 
+            </div>
         </div>
-    </div>
-    <div id="loading" class="text-center">
-        <r:img width="50px" dir="images" file="loading.gif" alt="loading icon"/>
+        <div id="loading" class="text-center">
+            <r:img width="50px" dir="images" file="loading.gif" alt="loading icon"/>
+        </div>
     </div>
 
 <g:render template="/shared/declaration"/>

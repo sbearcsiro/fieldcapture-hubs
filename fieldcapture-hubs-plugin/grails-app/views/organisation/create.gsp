@@ -38,7 +38,12 @@
     $(function () {
         var organisation = <fc:modelAsJavascript model="${organisation}"/>;
         var organisationViewModel = new OrganisationViewModel(organisation);
-        autoSaveModel(organisationViewModel, fcConfig.organisationSaveUrl, {blockUIOnSave:true, blockUISaveMessage:'Creating organisation....'});
+        autoSaveModel(organisationViewModel, fcConfig.organisationSaveUrl,
+            {
+                blockUIOnSave:true,
+                blockUISaveMessage:'Creating organisation....',
+                 serializeModel:function() {return organisationViewModel.modelAsJSON(true);}
+            });
         organisationViewModel.save = function() {
             if ($('.validationEngineContainer').validationEngine('validate')) {
                 organisationViewModel.saveWithErrorDetection(
@@ -58,10 +63,6 @@
                             url = fcConfig.organisationViewUrl+'/'+orgId;
                         }
                         window.location.href = url;
-                    },
-                    undefined,
-                    {
-                        serializeModel:function() {return organisationViewModel.modelToJSON(true);}
                     }
                 );
 

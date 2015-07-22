@@ -103,13 +103,23 @@ class OrganisationController {
         def organisationDetails = request.JSON
 
         def documents = organisationDetails.remove('documents')
+        def links = organisationDetails.remove('links')
         def result = organisationService.update(organisationDetails.organisationId?:'', organisationDetails)
 
-        documents.each { doc ->
-            doc.organisationId = organisationDetails.organisationId?:result.resp?.organisationId
-            documentService.saveStagedImageDocument(doc)
-
+        def organisationId = organisationDetails.organisationId?:result.resp?.organisationId
+        if (documents && !result.error) {
+            documents.each { doc ->
+                doc.organisationId = organisationId
+                documentService.saveStagedImageDocument(doc)
+            }
         }
+        if (links && !result.error) {
+            links.each { link ->
+                link.organisationId = organisationId
+                documentService.saveLink(link)
+            }
+        }
+
         if (result.error) {
             render result as JSON
         } else {

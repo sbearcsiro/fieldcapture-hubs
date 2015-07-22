@@ -4,10 +4,7 @@
     background:green;
     padding:10px
 }
-#carousel {
-    max-height: 512px;
-    overflow: hidden;
-}
+
 </style>
 <div id="carousel" class="row-fluid slider-pro" data-bind="visible:mainImageUrl()">
     <div class="sp-slides">

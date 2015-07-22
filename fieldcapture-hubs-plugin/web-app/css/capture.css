@@ -873,10 +873,17 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     border-bottom: 1px solid #ddd;
 }
 
-.organisation-banner,.project-banner {
+.banner {
     background-repeat: no-repeat;
     background-position: right;
     background-color: #f0f0e8;
+}
+
+.banner .logo {
+    height:110px;
+    margin-left:10px;
+    margin-bottom:10px;
+    float:left;
 }
 
 .links-table {
@@ -888,3 +895,7 @@ input[type="checkbox"] { -webkit-appearance: checkbox; !important }
     vertical-align: middle;
 }
 
+#carousel {
+    max-height: 512px;
+    overflow: hidden;
+}
