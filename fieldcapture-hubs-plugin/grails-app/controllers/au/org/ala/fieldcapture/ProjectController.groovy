@@ -22,10 +22,8 @@ class ProjectController {
             redirect(controller: 'home', model: [error: flash.message])
         } else {
             project.sites?.sort {it.name}
-            def projectSite = project.sites?.find{it.siteId == project.projectSiteId}
-            if (projectSite) {
-                project.projectSite = projectSite
-            }
+            project.projectSite = project.sites?.find{it.siteId == project.projectSiteId}
+
             def user = userService.getUser()
             def members = projectService.getMembersForProjectId(id)
             def admins = members.findAll{ it.role == "admin" }.collect{ it.userName }.join(",") // comma separated list of user email addresses
