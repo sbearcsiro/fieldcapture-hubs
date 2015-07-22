@@ -84,8 +84,10 @@
     </div>
     </g:if>
 </div>
+<g:if test="${projectSite?.extent?.geometry}">
 <r:script>
-function initialiseProjectArea(sites) {
+
+    function initialiseProjectArea(sites) {
 
         var projectArea = <fc:modelAsJavascript model="${projectSite.extent.geometry}"/>;
         var mapOptions = {
@@ -108,3 +110,4 @@ function initialiseProjectArea(sites) {
 
     }
 </r:script>
+</g:if>
