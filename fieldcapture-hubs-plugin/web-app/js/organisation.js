@@ -60,6 +60,10 @@ OrganisationViewModel = function (props) {
         };
     };
 
+    self.editDescription = function() {
+        editWithMarkdown('Edit organisation description', self.description);
+    };
+
     self.editOrganisation = function() {
        window.location = fcConfig.organisationEditUrl;
     };

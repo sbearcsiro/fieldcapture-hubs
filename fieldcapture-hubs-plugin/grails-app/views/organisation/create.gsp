@@ -15,9 +15,7 @@
             };
     </r:script>
     <r:require modules="knockout,jqueryValidationEngine,amplify,organisation"/>
-    <style type="text/css">
-        td {padding:4px;}
-    </style>
+
 </head>
 <body>
 <div class="container-fluid">
@@ -31,6 +29,10 @@
 
     <g:render template="organisationDetails"/>
 
+    <div class="form-actions">
+        <button type="button" id="save" data-bind="click:save" class="btn btn-primary">Create</button>
+        <button type="button" id="cancel" class="btn">Cancel</button>
+    </div>
 </div>
 
 <r:script>
@@ -74,7 +76,7 @@
 
         $("#cancel").on("click", function() {
             document.location.href = "${createLink(action:'list')}";
-        })
+        });
 
     });
 

@@ -23,6 +23,7 @@
                 <label class="control-label span3" for="description">Description: <fc:iconHelp><g:message code="organisation.description.help"/></fc:iconHelp></label>
                 <div class="controls span9">
                     <textarea rows="3" class="input-xxlarge" data-bind="value:description" data-validation-engine="validate[required]" id="description" placeholder="A description of the organisation"></textarea>
+                    <br/><button class="btn popup-edit" data-bind="click:editDescription"><i class="icon-edit"></i> Edit with Markdown Editor</button>
                 </div>
             </div>
             <div class="control-group">
@@ -84,10 +85,6 @@
         </div>
     </div>
 
-
-    <div class="form-actions">
-        <button type="button" id="save" data-bind="click:save" class="btn btn-primary">Create</button>
-        <button type="button" id="cancel" class="btn">Cancel</button>
-    </div>
 </form>
 <g:render template="/shared/attachDocument"/>
+<g:render template="/shared/markdownEditorModal"/>
