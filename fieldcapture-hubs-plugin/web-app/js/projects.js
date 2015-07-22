@@ -341,6 +341,7 @@ function ProjectViewModel(project, isUserEditor, organisations) {
     self.isCitizenScience = ko.observable(project.isCitizenScience);
     self.isDIY = ko.observable(project.isDIY);
     self.isExternal = ko.observable(project.isExternal);
+    self.isMERIT = ko.observable(project.isMERIT);
     self.isMetadataSharing = ko.observable(project.isMetadataSharing);
     self.isSuitableForChildren = ko.observable(project.isSuitableForChildren);
     self.keywords = ko.observable(project.keywords);

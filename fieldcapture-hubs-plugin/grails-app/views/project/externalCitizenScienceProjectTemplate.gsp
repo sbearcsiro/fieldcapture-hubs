@@ -66,7 +66,9 @@
         <div class="pill-content">
             <div class="pill-pane active" id="about">
                 <g:render template="aboutCitizenScienceProject"/>
-                <div id="map"></div>
+                <!-- ko stopBinding:true -->
+                <g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
+                <!-- /ko -->
             </div>
             <div class="pill-pane" id="admin">
                 <g:render template="admin"/>
@@ -76,11 +78,10 @@
 </g:if>
 <g:else>
     <g:render template="aboutCitizenScienceProject"/>
-    <div id="map"></div>
+    <!-- ko stopBinding:true -->
+    <g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
+    <!-- /ko -->
 </g:else>
-<!-- ko stopBinding:true -->
-<g:render template="/site/sitesList" model="${[config:[editable:user?.isEditor]]}"/>
-<!-- /ko -->
 
 <r:script>
     $(function() {
@@ -123,7 +124,6 @@
             });
         }
         initialiseSites(project.sites);
-        $("#sitesList").hide();
     <g:if test="${isAdmin || fc.userIsAlaOrFcAdmin()}">
         populatePermissionsTable();
     </g:if>

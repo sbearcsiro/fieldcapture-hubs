@@ -113,7 +113,7 @@
         $.each(projects, function(i, project) {
             project.startDate = project.contractStartDate || project.plannedStartDate;
             project.duration = project.contractDurationInWeeks || project.plannedDurationInWeeks;
-            if (project.grantId) hasMERITprojects = true;
+// No special display for MERIT projects            if (project.grantId) hasMERITprojects = true;
         });
 
     <g:if test="${content.reporting?.visible}">
@@ -356,7 +356,6 @@
                 }
             });
         } else {
-            // no MERIT projects
             $('#projectList').hide();
             var projectVMs = [];
             $.each(projects, function(i, project) {
