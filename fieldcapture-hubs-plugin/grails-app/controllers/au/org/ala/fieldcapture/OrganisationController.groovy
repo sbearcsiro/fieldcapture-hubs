@@ -67,7 +67,7 @@ class OrganisationController {
         def dashboardReports = [[name:'dashboard', label:'Activity Outputs']]
         def includeProjectList = organisation.projects?.size() > 0
 
-        [about    : [label: 'About', visible: true, stopBinding: false, type:'tab', includeProjectList:includeProjectList],
+        [about    : [label: 'About', visible: true, stopBinding: false, type:'tab', default:true, includeProjectList:includeProjectList],
          sites    : [label: 'Sites', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/sites', projectCount:organisation.projects?.size()?:0],
          dashboard: [label: 'Dashboard', visible: hasViewAccess, stopBinding:true, type: 'tab', template:'/shared/dashboard', reports:dashboardReports],
          admin    : [label: 'Admin', visible: hasAdminAccess, type: 'tab']]
