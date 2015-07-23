@@ -1,4 +1,4 @@
-<div id="carousel" class="row-fluid slider-pro" data-bind="visible:mainImageUrl()">
+<div id="carousel" class="slider-pro row-fluid" data-bind="visible:mainImageUrl()" style="margin-bottom:20px;">
     <div class="sp-slides">
         <div class="sp-slide">
             <img class="sp-image" data-bind="attr:{'data-src':mainImageUrl}"/>
@@ -22,3 +22,26 @@
         <span data-bind="html:description.markdownToHtml()"></span>
     </div>
 </div>
+
+<g:if test="${includeProjectList}">
+
+    <div class="well-header"><h2>Projects</h2></div>
+
+    <!-- ko stopBinding: true -->
+    <div id="pt-root" class="row-fluid">
+        <g:render template="/project/projectsList"/>
+    </div>
+    <!-- /ko -->
+
+    <r:script>
+        $(function() {
+
+            var organisation =<fc:modelAsJavascript model="${organisation}"/>;
+            var projectVMs = [];
+            $.each(organisation.projects, function(i, project) {
+                projectVMs.push(new ProjectViewModel(project, false, organisation));
+            });
+            window.pago.init(projectVMs);
+        });
+    </r:script>
+</g:if>

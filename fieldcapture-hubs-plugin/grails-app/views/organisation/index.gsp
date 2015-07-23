@@ -44,7 +44,7 @@
             margin: 5px 0;
         }
     </style>
-    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine,slickgrid"/>
+    <r:require modules="wmd,knockout,mapWithFeatures,amplify,organisation,projects,jquery_bootstrap_datatable,datepicker,jqueryValidationEngine,slickgrid,sliderpro"/>
 </head>
 <body>
 
@@ -79,8 +79,22 @@
 
         ko.applyBindings(organisationViewModel);
         $('#loading').hide();
-        $('#organisationDetails').show();
-
+        $('#organisationDetails').show({complete:function() {
+            if (organisationViewModel.mainImageUrl()) {
+            $( '#carousel' ).sliderPro({
+                width: '100%',
+                height: 'auto',
+                autoHeight: true,
+                arrows: false, // at the moment we only support 1 image
+                buttons: false,
+                waitForLayers: true,
+                fade: true,
+                autoplay: false,
+                autoScaleLayers: false,
+                touchSwipe:false // at the moment we only support 1 image
+            });
+        }
+        }});
 
         var projects = <fc:modelAsJavascript model="${organisation.projects}"/>;
         var hasMERITprojects = false;
@@ -331,11 +345,11 @@
             });
         } else {
             $('#projectList').hide();
-            var projectVMs = [];
-            $.each(projects, function(i, project) {
-                projectVMs.push(new ProjectViewModel(project, false, organisation));
-            });
-            window.pago.init(projectVMs);
+            %{--var projectVMs = [];--}%
+            %{--$.each(projects, function(i, project) {--}%
+                %{--projectVMs.push(new ProjectViewModel(project, false, organisation));--}%
+            %{--});--}%
+            %{--window.pago.init(projectVMs);--}%
         }
 
         <g:if test="${content.admin.visible}">
