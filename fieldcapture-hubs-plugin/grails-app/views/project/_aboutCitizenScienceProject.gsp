@@ -84,11 +84,10 @@
     </div>
     </g:if>
 </div>
-<g:if test="${projectSite?.extent?.geometry}">
 <r:script>
 
-    function initialiseProjectArea(sites) {
-
+    function initialiseProjectArea() {
+    <g:if test="${projectSite?.extent?.geometry}">
         var projectArea = <fc:modelAsJavascript model="${projectSite.extent.geometry}"/>;
         var mapOptions = {
             zoomToBounds:true,
@@ -107,7 +106,6 @@
             },
             mapOptions
         );
-
+</g:if>
     }
 </r:script>
-</g:if>
