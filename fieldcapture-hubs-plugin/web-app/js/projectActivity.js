@@ -1,25 +1,29 @@
-function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, sites) {
+var ProjectActivitiesViewModel = function (pActivities, pActivityForms, projectId, sites){
     var self = this;
-
-    self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
-    self.datesOptions = [60, 90, 120];
-    self.projectId = ko.observable(projectId);
     self.pActivityForms = pActivityForms;
     self.sites = sites;
-    self.formNames = ko.observableArray($.map(pActivityForms ? pActivityForms : [], function (obj, i) {
-        return obj.name;
-    }));
 
-    self.projectActivities = ko.observableArray($.map(pActivities, function (obj, i) {
-        return new ProjectActivity(obj, pActivityForms, self.projectId(), i == 0 ? true : false, self.sites);
-    }));
+    self.projectId = ko.observable();
+    self.projectActivities = ko.observableArray();
 
-    self.addProjectActivity = function() {
-        self.reset();
-        self.projectActivities.push(new ProjectActivity([], self.pActivityForms, self.projectId(), true, self.sites));
-        initialiseValidator();
-        showAlert("Successfully added.", "alert-success",  'project-activities-result-placeholder');
-   };
+    self.sortBy = ko.observable();
+    self.sortOrder = ko.observable();
+    self.sortOptions = [{id: 'name', name:'Name'},{id: 'description', name:'Description'},{id:'transients.status', name:'Status'}];
+    self.sortOrderOptions = [{id: 'asc', name:'Ascending'},{id:'desc', name:'Descending'}];
+    self.sortBy.subscribe(function(by) {
+        self.sort();
+    });
+    self.sortOrder.subscribe(function(order) {
+        self.sort();
+    });
+
+    self.sort = function(){
+        var by = self.sortBy();
+        var order = self.sortOrder() == 'asc' ? '<' : '>';
+        if(by && order){
+            eval('self.projectActivities.sort(function(left, right) { return left.'+ by +'() == right.'+ by +'() ? 0 : (left.'+ by +'() '+ order +' right.'+ by +'() ? -1 : 1) });');
+        }
+    };
 
     self.reset = function(){
         $.each(self.projectActivities(), function(i, obj){
@@ -27,9 +31,70 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
         });
     };
 
+    self.current = function (){
+        var pActivity;
+        $.each(self.projectActivities(), function(i, obj){
+            if(obj.current()){
+                pActivity = obj;
+            }
+        });
+        return pActivity;
+    };
+
     self.setCurrent = function(pActivity) {
         self.reset();
         pActivity.current(true);
+    };
+
+    self.loadProjectActivitiesVM = function(pActivities, pActivityForms, projectId, sites){
+        self.projectId(projectId);
+        self.sortBy("name");
+        self.sortOrder("asc");
+        $.map(pActivities, function (pActivity, i) {
+            return self.projectActivities.push(new ProjectActivity(pActivity, pActivityForms, projectId, (i == 0), sites));
+        });
+
+        self.sort();
+    };
+
+    self.loadProjectActivitiesVM(pActivities, pActivityForms, projectId, sites);
+
+};
+
+var ProjectActivitiesListViewModel = function(pActivitiesVM){
+    var self = $.extend(this, pActivitiesVM);
+    self.filter = ko.observable(false);
+
+    self.toggleFilter = function () {
+        self.filter(!self.filter())
+    };
+
+    self.setCurrent = function(pActivity) {
+        self.reset();
+        pActivity.current(true);
+    };
+};
+
+var ProjectActivitiesDataViewModel = function(pActivitiesVM){
+    var self = $.extend(this, pActivitiesVM);
+
+};
+
+var ProjectActivitiesSettingsViewModel =  function(pActivitiesVM) {
+
+    var self = $.extend(this, pActivitiesVM);
+
+    self.speciesOptions =  [{id: 'ALL_SPECIES', name:'All species'},{id:'SINGLE_SPECIES', name:'Single species'}, {id:'GROUP_OF_SPECIES',name:'A selection or group of species'}];
+    self.datesOptions = [60, 90, 120];
+    self.formNames = ko.observableArray($.map(self.pActivityForms ? self.pActivityForms : [], function (obj, i) {
+        return obj.name;
+    }));
+
+    self.addProjectActivity = function() {
+        self.reset();
+        self.projectActivities.push(new ProjectActivity([], self.pActivityForms, self.projectId(), true, self.sites));
+        initialiseValidator();
+        showAlert("Successfully added.", "alert-success",  'project-activities-result-placeholder');
     };
 
     self.saveAccess = function(access){
@@ -89,16 +154,6 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
 
     };
 
-    self.current = function (){
-        var pActivity;
-        $.each(self.projectActivities(), function(i, obj){
-            if(obj.current()){
-                pActivity = obj;
-            }
-        });
-        return pActivity;
-    };
-
     self.genericUpdate = function(model, caller, message){
         if (!$('#project-activities-'+caller+'-validation').validationEngine('validate')){
             return false;
@@ -154,10 +209,11 @@ function ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, site
     };
 }
 
-var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
+var pActivityInfo = function(o, selected){
     var self = this;
+    if(!o) o = {};
+
     self.projectActivityId = ko.observable(o.projectActivityId);
-    self.projectId = ko.observable(o.projectId ? o.projectId  : projectId);
     self.name = ko.observable(o.name ? o.name : "Survey name");
     self.description = ko.observable(o.description);
     self.status = ko.observable(o.status ? o.status : "active");
@@ -165,12 +221,66 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
     self.endDate = ko.observable(o.endDate).extend({simpleDate:false});
     self.commentsAllowed = ko.observable(o.commentsAllowed ? o.commentsAllowed : false);
     self.published = ko.observable(o.published ? o.published : false);
+    self.logoUrl = ko.observable(fcConfig.imageLocation + "/no-image-2.png");
     self.current = ko.observable(selected);
+
+    self.transients = self.transients || {};
+    var isBeforeToday = function(date) {
+        return moment(date) < moment().startOf('day');
+    };
+    var calculateDurationInDays = function(startDate, endDate) {
+        var start = moment(startDate);
+        var end = moment(endDate);
+        var days = end.diff(start, 'days');
+        return days < 0? 0: days;
+    };
+
+    self.transients.daysSince = ko.pureComputed(function() {
+        var startDate = self.startDate();
+        if (!startDate) return -1;
+        var start = moment(startDate);
+        var today = moment();
+        return today.diff(start, 'days');
+    });
+
+    self.transients.daysRemaining = ko.pureComputed(function() {
+        var end = self.endDate();
+        return end? isBeforeToday(end)? 0: calculateDurationInDays(undefined, end) + 1: -1;
+    });
+    self.transients.daysTotal = ko.pureComputed(function() {
+        return self.startDate()? calculateDurationInDays(self.startDate(), self.endDate()): -1;
+    });
+    self.transients.status = ko.pureComputed(function(){
+        var status = "";
+        if(self.transients.daysSince() < 0 || (self.transients.daysSince() >= 0 && self.transients.daysRemaining() > 0)){
+            status = "Active, Not yet started"
+        }
+        else if(self.transients.daysSince() >= 0 && self.transients.daysRemaining() < 0){
+            status = "Active, In progress"
+        }
+        else if(self.transients.daysSince() >= 0 && self.transients.daysRemaining() == 0){
+            status = "Inactive, Completed"
+        }
+        return status;
+    });
+
+};
+
+var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
+    if(!o) o = {};
+    if(!pActivityForms) pActivityForms = [];
+    if(!projectId) projectId = "";
+    if(!selected) selected = false;
+    if(!sites) sites = [];
+
+    var self = $.extend(this, new pActivityInfo(o, selected));
+    self.projectId = ko.observable(o.projectId ? o.projectId  : projectId);
     self.restrictRecordToSites = ko.observable(o.restrictRecordToSites);
     self.pActivityFormName = ko.observable(o.pActivityFormName);
     self.species = new SpeciesConstraintViewModel(o.species);
     self.visibility = new SurveyVisibilityViewModel(o.visibility);
-    self.transients = {};
+
+    self.transients = self.transients || {};
     self.transients.siteSelectUrl = ko.observable(fcConfig.siteSelectUrl);
     self.transients.siteCreateUrl = ko.observable(fcConfig.siteCreateUrl);
     self.transients.siteUploadUrl = ko.observable(fcConfig.siteUploadUrl);
@@ -217,7 +327,8 @@ var ProjectActivity = function (o, pActivityForms, projectId, selected, sites){
             jsData.pActivityFormName = self.pActivityFormName();
         }
         else if(by == "info"){
-            jsData = ko.mapping.toJS(self, {ignore:['current','pActivityForms','pActivityFormImages', 'access', 'species','sites','transients']});
+            jsData = ko.mapping.toJS(self, {ignore:['current','pActivityForms','pActivityFormImages', 'access', 'species','sites','transients','endDate']});
+            jsData.endDate = moment(self.endDate(), 'YYYY-MM-DDThh:mm:ssZ').isValid() ? self.endDate() : "";
         }
         else if(by == "species"){
             jsData = {};
@@ -536,9 +647,8 @@ var SurveyVisibilityViewModel = function(o){
 };
 
 function initialiseValidator() {
-    $('#project-activities-info-validation').validationEngine();
-    $('#project-activities-species-validation').validationEngine();
-    $('#project-activities-form-validation').validationEngine();
-    $('#project-activities-access-validation').validationEngine();
-    $('#project-activities-visibility-validation').validationEngine();
+    var tabs = ['info','species','form', 'access','visibility'];
+    $.each(tabs, function( index, label ) {
+        $('#project-activities-'+ label +'-validation').validationEngine();
+    });
 };

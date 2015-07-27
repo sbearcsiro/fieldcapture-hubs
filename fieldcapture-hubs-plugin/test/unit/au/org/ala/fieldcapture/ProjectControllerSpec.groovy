@@ -263,7 +263,7 @@ class ProjectControllerSpec extends Specification {
 
         model.projectContent.activities.label == 'Surveys'
         model.projectContent.activities.wordForActivity == 'Survey'
-        model.projectContent.site.label == 'Data'
+        model.projectContent.site.label == 'Location'
         model.projectContent.site.wordForSite == 'Location'
     }
 
