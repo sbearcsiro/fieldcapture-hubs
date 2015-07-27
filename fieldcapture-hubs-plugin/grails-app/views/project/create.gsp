@@ -66,16 +66,17 @@ $(function(){
     $('#projectDetails').validationEngine();
     $('.helphover').popover({animation: true, trigger:'hover'});
 
-    ko.applyBindings(viewModel, document.getElementById("projectDetails"));
-
-    $('#cancel').click(function () {
     <g:if test="${citizenScience}">
+    viewModel.transients.kindOfProject("citizenScience");
+    $('#cancel').click(function () {
         document.location.href = "${createLink(action: 'citizenScience')}";
+    });
     </g:if>
     <g:else>
+    $('#cancel').click(function () {
         document.location.href = "${createLink(action: 'index', id: project?.projectId)}";
-    </g:else>
     });
+    </g:else>
     $('#save').click(function () {
         if ($('#projectDetails').validationEngine('validate')) {
 
@@ -85,6 +86,8 @@ $(function(){
             });
         }
     });
+
+    ko.applyBindings(viewModel, document.getElementById("projectDetails"));
  });
 </r:script>
 

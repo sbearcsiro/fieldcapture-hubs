@@ -22,6 +22,8 @@ class ProjectController {
             redirect(controller: 'home', model: [error: flash.message])
         } else {
             project.sites?.sort {it.name}
+            project.projectSite = project.sites?.find{it.siteId == project.projectSiteId}
+
             def user = userService.getUser()
             def members = projectService.getMembersForProjectId(id)
             def admins = members.findAll{ it.role == "admin" }.collect{ it.userName }.join(",") // comma separated list of user email addresses
@@ -79,7 +81,8 @@ class ProjectController {
     }
 
     protected Map surveyProjectContent(project, user) {
-        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab'],
+
+        [about:[label:'About', template:'aboutCitizenScienceProject', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          news:[label:'News', visible: true, type:'tab'],
          documents:[label:'Documents', template:'/shared/listDocuments', useExistingModel: true, editable:user?.isEditor,  visible: !project.isExternal, imageUrl:resource(dir:'/images/filetypes'), containerId:'overviewDocumentList', type:'tab'],
          activities:[label:'Surveys', visible:!project.isExternal, template:'/projectActivity/list', showSites:true, site:project.sites, wordForActivity:'Survey', type:'tab'],
@@ -90,7 +93,7 @@ class ProjectController {
 
 
     protected Map worksProjectContent(project, user) {
-        [overview:[label:'Overview', visible: true, default: true, type:'tab'],
+        [overview:[label:'Overview', visible: true, default: true, type:'tab', projectSite:project.projectSite],
          documents:[label:'Documents', visible: !project.isExternal, type:'tab'],
          activities:[label:'Activities', visible:!project.isExternal, disabled:!user?.hasViewAccess, wordForActivity:"Activity",type:'tab'],
          site:[label:'Sites', visible: !project.isExternal, disabled:!user?.hasViewAccess, wordForSite:'Site', editable:user?.isEditor == true, type:'tab'],
@@ -305,7 +308,7 @@ class ProjectController {
             documents.each { doc ->
                 doc.projectId = id
                 doc.isPrimaryProjectImage = doc.role == 'mainImage'
-                if (doc.isPrimaryProjectImage) doc.public = true
+                if (doc.isPrimaryProjectImage || doc.role == documentService.ROLE_LOGO) doc.public = true
                 documentService.saveStagedImageDocument(doc)
             }
         }

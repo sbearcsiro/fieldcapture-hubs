@@ -51,13 +51,7 @@
     </r:script>
 
     <style type="text/css">
-        .well-title {
-            border-bottom: 1px solid lightgrey;
-            font-weight: bold;
-            padding-bottom:5px;
-            margin-bottom:10px;
-            font-size:larger;
-        }
+
     </style>
 
     <!--[if gte IE 8]>

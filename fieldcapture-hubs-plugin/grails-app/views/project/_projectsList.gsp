@@ -7,7 +7,7 @@
         padding: 1px;
         text-align: center;
     }
-    .projectType {j
+    .projectType {
         padding-right: 10px;
         padding-left: 10px;
         background: grey;
@@ -55,7 +55,7 @@
             </div>
             <div class="span3">
                 <label for="pt-sort"><g:message code="g.sortBy" /></label>
-                <g:select name="pt-sort" from="['Name','Aim','Organisation Name','Status']"  keys="['name','aim','organisationName','daysStatus']"/>
+                <select id="pt-sort" data-bind="options:sortKeys, optionsText:'name', optionsValue:'value'"></select>
             </div>
             <div class="span3">
                 <label for="pt-dir"><g:message code="g.sortOrder" /></label>
@@ -65,6 +65,7 @@
             <div class="span3">
                 <label for="pt-search-projecttype"><g:message code="project.search.projecttype" /></label>
                 <select id="pt-search-projecttype" multiple data-bind="options:availableProjectTypes, optionsText:'name', optionsValue:'value'" style="width:100%"></select>
+                <label><g:message code="g.multiselect.help" /></label>
             </div>
 </g:if>
 <g:else>
@@ -171,6 +172,7 @@ $(document).ready(function () {
     function pageVM() {
         this.pageProjects = ko.observableArray();
         this.availableProjectTypes = ko.observableArray();
+        this.sortKeys = ko.observableArray();
         this.hideshow = function() {
           $("#pt-selectors").toggle();
         }
@@ -265,6 +267,11 @@ $(document).ready(function () {
         $('div#pt-navLinks').html($pago);
     }
 
+    var meritProjectLogo;
+<g:if test="${grailsApplication.config.merit.projectLogo}">
+    meritProjectLogo = fcConfig.imageLocation + "/" + "${grailsApplication.config.merit.projectLogo}";
+</g:if>
+
     function augmentVM(vm) {
         var x, urls = [];
         if (vm.urlWeb()) urls.push('<a href="' + vm.urlWeb() + '">Website</a>');
@@ -278,7 +285,7 @@ $(document).ready(function () {
         vm.transients.searchText = (vm.name() + ' ' + vm.aim() + ' ' + vm.description() + ' ' + vm.keywords() + ' ' + vm.transients.scienceTypeDisplay() + ' ' + vm.transients.locality + ' ' + vm.transients.state + ' ' + vm.organisationName()).toLowerCase();
         vm.transients.indexUrl = "${createLink(controller:'project',action:'index')}/" + vm.transients.projectId;
         vm.transients.orgUrl = vm.organisationId() && ("${createLink(controller:'organisation',action:'index')}/" + vm.organisationId());
-        vm.transients.imageUrl = vm.logoUrl();
+        vm.transients.imageUrl = meritProjectLogo && vm.isMERIT()? meritProjectLogo: vm.logoUrl();
         if (!vm.transients.imageUrl) {
           x = vm.primaryImages();
           if (x && x.length > 0) vm.transients.imageUrl = x[0].url;
@@ -287,15 +294,27 @@ $(document).ready(function () {
     }
 
     window.pago = {
-        init: function(projects) {
-            allProjects = [];
-            $.each(projects, function(i, project) {
+        init: function(projs) {
+            var hasPrograms = false;
+            projects = allProjects = [];
+            $.each(projs, function(i, project) {
                 allProjects.push(augmentVM(project));
+                if (project.associatedProgram()) hasPrograms = true;
             });
             if (projects.length > 0) {
                 pageWindow.availableProjectTypes(projects[0].transients.availableProjectTypes);
                 pageWindow.availableProjectTypes.valueHasMutated();
                 $('#pt-search-projecttype option').prop('selected', true);
+                var sortKeys = [
+                    {name:'Name', value:'name'},
+                    {name:'Aim', value:'aim'},
+                    {name:'Organisation Name', value:'organisationName'},
+                    {name:'Status', value:'daysStatus'}
+                ];
+                if (hasPrograms)
+                    sortKeys.push({name:'Programme', value:'associatedProgram'},{name:'Sub Programme', value:'associatedSubProgram'});
+                pageWindow.sortKeys(sortKeys);
+                pageWindow.sortKeys.valueHasMutated();
             }
             allProjects.sort(comparator); // full list is sorted by name
             doSearchForce();
@@ -365,5 +384,8 @@ $(document).ready(function () {
     $('#pt-search-noCost').on('change', doSearchForce);
     $('#pt-search-teach').on('change', doSearchForce);
     $('#pt-search-mobile').on('change', doSearchForce);
+    <g:if test="${controllerName != 'organisation'}">
+        $('#pt-selectors').show();
+    </g:if>
 });
 </r:script>

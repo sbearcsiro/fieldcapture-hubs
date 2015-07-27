@@ -60,11 +60,15 @@ OrganisationViewModel = function (props) {
         };
     };
 
+    self.editDescription = function() {
+        editWithMarkdown('Edit organisation description', self.description);
+    };
+
     self.editOrganisation = function() {
        window.location = fcConfig.organisationEditUrl;
     };
 
-    self.transients = {};
+    self.transients = self.transients || {};
     self.transients.orgTypes = [];
     for (var ot in orgTypesMap) {
         if (orgTypesMap.hasOwnProperty(ot))
@@ -76,6 +80,7 @@ OrganisationViewModel = function (props) {
         var js = ko.mapping.toJS(self, {include:['documents'], ignore:ignore} );
         if (includeDocuments) {
             js.documents = ko.toJS(self.documents);
+            js.links = ko.mapping.toJS(self.links());
         }
         return js;
     };

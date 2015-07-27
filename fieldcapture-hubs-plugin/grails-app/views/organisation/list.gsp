@@ -23,13 +23,7 @@
         </li>
         <li class="active">Organisations<span class="divider"></span></li>
     </ul>
-
-    <g:if test="${user && citizenScienceOrgId != ''}">
-        <h5>Please select the organisation which will manage your citizen science project
-        If you are not a member of that organisation, you will need to contact that organisation's administrator to induct you as a member.
-        Alternatively, you may register a new organisation if it is not listed below.</h5>
-    </g:if>
-
+<g:if test="${allowOrganisationRegistration}">
     <div>
         <h2 style="display:inline">Registered
 
@@ -39,9 +33,11 @@
             <button class="btn btn-success pull-right" data-bind="click:addOrganisation">Register new organisation</button>
         </g:if>
     </div>
+</g:if>
 
     <div class="row-fluid">
-        <div class="span6">
+        <div class="span6 input-prepend">
+            <span class="add-on"><i class="icon-search"></i> </span>
             <input id="searchText" class="span12" placeholder="Search..." />
         </div>
         <div class="span2">
@@ -62,14 +58,18 @@
             <table class="table table-striped" id="organisations">
 
                 <tbody data-bind="foreach:currentPage">
-                <tr>
+                <tr class="banner">
+
                     <td class="organisation-banner" data-bind="style:{'backgroundImage':bannerUrl}">
-                        <h4>
-                            <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
-                            data-bind="text:name"></span></a>
-                            <span data-bind="visible:!organisationId,text:name"></span>
-                        </h4>
-                        <span data-bind="html:description.markdownToHtml()"></span>
+                        <span data-bind="visible:logoUrl"><img class="logo" data-bind="attr:{'src':logoUrl}"></span>
+                        <div class="header-text">
+                            <h4>
+                                <a data-bind="visible:organisationId,attr:{href:fcConfig.viewOrganisationUrl+'/'+organisationId}"><span
+                                data-bind="text:name"></span></a>
+                                <span data-bind="visible:!organisationId,text:name"></span>
+                            </h4>
+                            <span data-bind="html:description.markdownToHtml()"></span>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -112,10 +112,6 @@
                 model.fuseDescription = model.description.markdownToHtml();
                 if (userOrgIdsMap[org.organisationId])
                     userOrgs.push(model);
-<g:if test="${user && citizenScienceOrgId != ''}">
-                else if (org.organisationId == "${citizenScienceOrgId}")
-                    citizenScienceOrg = model;
-</g:if>
                 else
                     otherOrgs.push(model);
             });
@@ -181,16 +177,19 @@
             var fuseUserOrgs, fuseOtherOrgs, userOrgsBanner = {
                   organisationId: null,
                   bannerUrl: "",
+                  logoUrl:'',
                   description: ko.observable("").extend({markdown:true}),
-                  name: "You are a member of the following organisations"
+                  name: "Your Organisations"
                 }, otherOrgsBanner = {
                   organisationId: null,
                   bannerUrl: "",
+                  logoUrl:'',
                   description: ko.observable("").extend({markdown:true}),
-                  name: "You are NOT a member of the following organisations"
+                  name: "Other Organisations"
                 }, citizenScienceOrgBanner = {
                   organisationId: null,
                   bannerUrl: "",
+                  logoUrl:'',
                   description: ko.observable("").extend({markdown:true}),
                   name: "The following organisation may be used even by non-members to create or register citizen science projects"
                 };
