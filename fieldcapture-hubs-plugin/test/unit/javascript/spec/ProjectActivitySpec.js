@@ -9,16 +9,11 @@ describe("ProjectActivityViewModel Spec", function () {
     });
 
     it("should be able to be initialised from an object literal", function () {
-
-        var pActivities = []
-        var pActivityForms = [];
-        var projectId = "abcd";
-        var projectActivity = new ProjectActivitiesViewModel(pActivities, pActivityForms, projectId);
-
-        expect(projectActivity.projectId()).toEqual(projectId);
-        expect(projectActivity.speciesOptions.length).toBeGreaterThan(0)
-        expect(projectActivity.projectActivities.length).toEqual(0)
-
+        var projectActivity = new ProjectActivity();
+        expect(projectActivity.projectId()).toEqual("");
+        expect(projectActivity.sites()).toEqual([]);
+        expect(projectActivity.species).toEqual(jasmine.any(SpeciesConstraintViewModel));
+        expect(projectActivity.visibility).toEqual(jasmine.any(SurveyVisibilityViewModel));
     });
 
     it("Survey should have a default survey name", function () {
@@ -32,6 +27,52 @@ describe("ProjectActivityViewModel Spec", function () {
     });
 
 });
+
+describe("pActivityInfo Spec", function () {
+    beforeAll(function() {
+        window.fcConfig = {
+            imageLocation:'/'
+        }
+    });
+    afterAll(function() {
+        delete window.fcConfig;
+    });
+
+    it("should be able to be initialised from an object literal", function () {
+        var projectActivity = new pActivityInfo();
+        expect(projectActivity.projectActivityId()).toEqual(undefined);
+        expect(projectActivity.name()).toEqual("Survey name");
+        expect(projectActivity.description()).toEqual(undefined);
+        expect(projectActivity.status()).toEqual("active");
+        expect(projectActivity.startDate()).toEqual("");
+        expect(projectActivity.endDate()).toEqual("");
+        expect(projectActivity.commentsAllowed()).toEqual(false);
+        expect(projectActivity.published()).toEqual(false);
+        expect(projectActivity.logoUrl()).toEqual("//no-image-2.png");
+        expect(projectActivity.current()).toEqual(undefined);
+        expect(projectActivity.transients.status()).toEqual("Active, Not yet started");
+        expect(projectActivity.transients.daysTotal()).toEqual(-1);
+        expect(projectActivity.transients.daysRemaining()).toEqual(-1);
+    });
+
+    it("check daysTotal and daysRemaining for given start and end date", function () {
+        var info = {};
+        var today = new Date();
+        var past = new Date(today);
+        var future = new Date(today);
+        future.setDate(today.getDate()-10);
+        past.setDate(today.getDate()-30);
+        info.startDate = past;
+        info.endDate = future;
+        var projectActivity = new pActivityInfo(info);
+        expect(projectActivity.transients.daysTotal()).toEqual(20);
+        expect(projectActivity.transients.daysRemaining()).toEqual(0);
+        expect(projectActivity.transients.daysSince()).toEqual(30);
+        expect(projectActivity.transients.status()).toEqual("Inactive, Completed");
+    });
+
+});
+
 
 describe("SpeciesConstraintViewModel Spec", function () {
     beforeAll(function() {

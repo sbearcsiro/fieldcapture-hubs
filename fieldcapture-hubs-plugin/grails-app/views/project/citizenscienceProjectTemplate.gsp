@@ -128,7 +128,7 @@
 
         var organisations = <fc:modelAsJavascript model="${organisations?:[]}"/>;
         var project = <fc:modelAsJavascript model="${project}"/>;
-        var projectActivities = <fc:modelAsJavascript model="${projectActivities}"/>;
+        var pActivities = <fc:modelAsJavascript model="${projectActivities}"/>;
         var pActivityForms = <fc:modelAsJavascript model="${pActivityForms}"/>;
         var projectViewModel = new ProjectViewModel(project, ${user?.isEditor?:false}, organisations);
 
@@ -167,9 +167,12 @@
         }
 
         initialiseSites(project.sites);
+        var pActivitiesVM = new ProjectActivitiesViewModel(pActivities, pActivityForms, project.projectId, project.sites);
+        initialiseProjectActivitiesList(pActivitiesVM);
+        initialiseProjectActivitiesData(pActivitiesVM);
 
         <g:if test="${projectContent.admin.visible}">
-            initialiseProjectActivities(projectActivities, pActivityForms, project.projectId, project.sites);
+            initialiseProjectActivitiesSettings(pActivitiesVM);
 
             var projectStoriesMarkdown = '${(project.projectStories?:"").markdownToHtml().encodeAsJavaScript()}';
             var projectStoriesViewModel = new window.projectStoriesViewModel(projectViewModel, projectStoriesMarkdown);

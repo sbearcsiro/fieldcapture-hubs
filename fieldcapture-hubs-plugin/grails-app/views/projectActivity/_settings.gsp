@@ -28,7 +28,7 @@
                     <!-- ko  foreach: projectActivities -->
                         <li>
                             <a href="#" data-bind="click: $root.setCurrent" >
-                                <span data-bind="text: $index()+1"></span>. <span data-bind="text: name"></span> <span data-bind="if: current"> <span class="badge badge-important">selected</span></span>
+                                <span data-bind="text: name"></span> <span data-bind="if: current"> <span class="badge badge-important">selected</span></span>
                             </a>
                         </li>
                         </br>
@@ -118,8 +118,8 @@
 <!-- /ko -->
 
 <r:script>
-    function initialiseProjectActivities(pActivities, pActivityForms, projectId, sites) {
-        var pActivitiesVM = new ProjectActivitiesViewModel(pActivities, pActivityForms, projectId, sites);
+    function initialiseProjectActivitiesSettings(pActivitiesVM) {
+        var pActivitiesVM = new ProjectActivitiesSettingsViewModel(pActivitiesVM);
         ko.applyBindings(pActivitiesVM, document.getElementById('pActivities'));
     };
 </r:script>

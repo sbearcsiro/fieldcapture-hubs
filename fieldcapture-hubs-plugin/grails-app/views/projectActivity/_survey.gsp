@@ -1,5 +1,3 @@
-
-
 <div id="pActivitySurvey" class="well">
 
         <!-- ko foreach: projectActivities -->

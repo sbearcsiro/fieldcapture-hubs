@@ -46,7 +46,7 @@
                 </div>
 
                 <div id="projectActivity" class="pill-pane">
-                    <g:render template="/projectActivity/pActivities" model="[projectActivities : projectActivities]" />
+                    <g:render template="/projectActivity/settings" model="[projectActivities : projectActivities]" />
                 </div>
 
                 <!-- DOCUMENTS -->
