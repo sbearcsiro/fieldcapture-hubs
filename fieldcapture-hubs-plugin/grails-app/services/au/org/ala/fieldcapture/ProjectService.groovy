@@ -7,7 +7,7 @@ class ProjectService {
     def list(brief = false, citizenScienceOnly = false) {
         def params = brief ? '?brief=true' : ''
         if (citizenScienceOnly) params += (brief ? '&' : '?') + 'citizenScienceOnly=true'
-        def resp = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'project/' + params)
+        def resp = webService.getJson(grailsApplication.config.ecodata.baseUrl + 'project/' + params, 30000)
         resp.list
     }
 
