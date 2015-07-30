@@ -22,7 +22,7 @@ before_script:
 script:
   - cd fieldcapture-hubs-plugin;
   - npm install --save-dev
-  - node_modules/karma/bin/karma start karma.conf.js --single-run
+  - node_modules/karma/bin/karma start karma.conf.js --single-run --browsers PhantomJS
   - MAVEN_REPO="ala-repo-snapshot"; grep 'def version =' ./FieldcapturePluginGrailsPlugin.groovy | grep -q "\-SNAPSHOT"; if [ "$?" = "1" ]; then MAVEN_REPO="ala-repo-release"; fi;
   - grails clean; grails refresh-dependencies --non-interactive; grails test-app --non-interactive
   - '[ "$TRAVIS_PULL_REQUEST" != "false" ] || grails prod maven-deploy --repository=$MAVEN_REPO --non-interactive'
