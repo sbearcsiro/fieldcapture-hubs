@@ -1,5 +1,5 @@
 <div class="control-group">
-    <label class="control-label span3">Social Media:<fc:iconHelp><g:message code="g.socialMedia.help" args="[entity]"/></fc:iconHelp></label>
+    <label class="control-label span3"><g:message code="g.socialMedia" />:<fc:iconHelp><g:message code="g.socialMedia.help" args="[entity]"/></fc:iconHelp></label>
     <table class="table links-table controls span9">
         <tbody data-bind="foreach:transients.socialMedia">
         <tr>

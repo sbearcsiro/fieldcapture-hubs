@@ -1,5 +1,5 @@
 <div class="control-group">
-    <label class="control-label span3">Mobile Apps:<fc:iconHelp><g:message code="g.mobileApps.help" args="[entity]"/></fc:iconHelp></label>
+    <label class="control-label span3"><g:message code="g.mobileApps" />:<fc:iconHelp><g:message code="g.mobileApps.help" args="[entity]"/></fc:iconHelp></label>
     <table class="table links-table controls span9">
         <tbody data-bind="foreach:transients.mobileApps">
         <tr>
