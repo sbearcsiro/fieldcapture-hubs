@@ -19,7 +19,7 @@
         define([
             'jquery',
             'angular',
-            './jquery.fileupload-image.js',
+            './jquery.fileupload-image',
             './jquery.fileupload-audio',
             './jquery.fileupload-video',
             './jquery.fileupload-validate'
