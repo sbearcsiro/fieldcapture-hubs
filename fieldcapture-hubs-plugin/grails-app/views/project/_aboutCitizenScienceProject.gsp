@@ -15,56 +15,55 @@
             <p class="sp-layer sp-white sp-padding"
                data-position="topLeft" data-width="100%" data-bind="visible:urlWeb"
                data-show-transition="down" data-show-delay="0" data-hide-transition="up">
-                <strong>Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong>
+                <strong><g:message code="g.visitUsAt" /> <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong>
             </p>
         </div>
     </div>
 </div>
 
 <div id="weburl" data-bind="visible:!mainImageUrl()">
-    <div data-bind="visible:urlWeb()"><strong>Visit us at <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong></div>
+    <div data-bind="visible:urlWeb()"><strong><g:message code="g.visitUsAt" /> <a data-bind="attr:{href:urlWeb}"><span data-bind="text:urlWeb"></span></a></strong></div>
 </div>
 
 <div class="container-fluid">
     <hr/>
     <div class="row-fluid">
         <div class="span6 well">
-            <div class="well-title">About the project</div>
+            <div class="well-title"><g:message code="project.display.about" /></div>
             <div data-bind="visible:aim">
-                <b style="text-decoration: underline;">Aim</b><br/>
+                <b style="text-decoration: underline;"><g:message code="project.display.aim" /></b><br/>
                 <span data-bind="text:aim"></span>
                 <p/>
             </div>
             <div data-bind="visible:description">
-                <b style="text-decoration: underline;">Description</b><br/>
+                <b style="text-decoration: underline;"><g:message code="project.display.description" /></b><br/>
                 <span data-bind="html:description.markdownToHtml()"></span>
             </div>
         </div>
         <div class="span6 well">
-            <div class="well-title">Get Involved!</div>
+            <div class="well-title"><g:message code="project.display.involved" /></div>
             <div data-bind="visible:getInvolved">
                 <div data-bind="html:getInvolved.markdownToHtml()"></div>
                 <p/>
             </div>
             <div data-bind="visible:manager">
-                <b style="text-decoration: underline;">Contact email</b><br/>
+                <b style="text-decoration: underline;"><g:message code="project.display.contact" /></b><br/>
                 <a data-bind="attr:{href:'mailto:' + manager()}"><span data-bind="text:manager"></span></a>
                 <p/>
             </div>
             <div data-bind="visible:gear">
-                <b style="text-decoration: underline;">Equipment</b><br/>
+                <b style="text-decoration: underline;"><g:message code="project.display.gear" /></b><br/>
                 <span data-bind="text:gear"></span>
                 <p/>
             </div>
             <div data-bind="visible:task">
-                <b style="text-decoration: underline;">Tasks</b><br/>
+                <b style="text-decoration: underline;"><g:message code="project.display.task" /></b><br/>
                 <span data-bind="text:task"></span>
                 <p/>
             </div>
             <hr/>
             <div id="surveyLink" class="row-fluid" data-bind="visible:transients.daysRemaining() != 0 && (!isExternal() || urlWeb())">
-                <a class="btn pull-right" data-bind="visible:isExternal(),attr:{href:urlWeb}">Get Started</a>
-                <a class="btn pull-right" data-bind="visible:!isExternal(),attr:{href:'${createLink(action:'survey',id:project.projectId)}'}">Get Started</a>
+                <a class="btn pull-right" data-bind="attr:{href:isExternal()?urlWeb:'${createLink(action:'survey',id:project.projectId)}'}"><g:message code="project.display.join" /></a>
                 <p class="clearfix"/>
             </div>
             <g:render template="/shared/listDocumentLinks"
@@ -78,7 +77,7 @@
     <g:if test="${projectSite?.extent?.geometry}">
     <div class="row-fluid">
         <div class="span12 well">
-            <div class="well-title">Project Area</div>
+            <div class="well-title"><g:message code="project.display.site" /></div>
             <div id="map" style="width:100%; height: 512px;"></div>
         </div>
     </div>
@@ -94,7 +93,7 @@
             zoomLimit:16,
             highlightOnHover:true,
             features:[projectArea],
-            featureService: "${createLink(controller: 'proxy', action: 'feature')}",
+            featureS rvice: "${createLink(controller: 'proxy', action: 'feature')}",
             wmsServer: "${grailsApplication.config.spatial.geoserverUrl}"
         };
 

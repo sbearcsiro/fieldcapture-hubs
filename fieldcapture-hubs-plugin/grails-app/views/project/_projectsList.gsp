@@ -26,25 +26,25 @@
 <div id="pt-table">
     <ul class="nav nav-tabs">
     <li>
-    <a data-bind="click:hideshow"><g:message code="project.search.hideshow"/></a>
+    <a data-bind="click:hideshow"><g:message code="g.search.hideShow"/></a>
     </li>
     </ul>
 <div id="pt-selectors" class="well" style="display:none">
     <g:if test="${fc.userIsAlaOrFcAdmin()}">
         <div class="row-fluid">
             <a href="${createLink(action:'citizenScience',params:[download:true])}" id="pt-downloadLink" class="btn btn-warning span2 pull-right"
-               title="Download metadata for projects in JSON format">
+               title="${message(code:'project.download.tooltip')}">
                 <i class="icon-download"></i>&nbsp;<g:message code="g.download" /></a>
         </div>
     </g:if>
     <div class="row-fluid">
         <span class="span2" id="pt-resultsReturned"></span>
         <div class="span8 input-append">
-            <input class="span12" type="text" name="pt-search" id="pt-search" placeholder="Enter a search term"/>
+            <input class="span12" type="text" name="pt-search" id="pt-search" placeholder="${message(code:'g.search.placeHolder')}"/>
         </div>
         <div class="span2">
-            <a href="javascript:void(0);" title="Only show projects which contain the search term" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
-            <a href="javascript:void(0);" title="Remove all filters and sorting options" id="pt-reset" class="btn"><g:message code="g.reset" /></a>
+            <a href="javascript:void(0);" title="${message(code:'project.search.term.tooltip')}" id="pt-search-link" class="btn"><g:message code="g.search" /></a>
+            <a href="javascript:void(0);" title="${message(code:'g.resetSearch.tooltip')}" id="pt-reset" class="btn"><g:message code="g.resetSearch" /></a>
         </div>
     </div>
     <div id="pt-searchControls" class="row-fluid">
@@ -96,7 +96,7 @@
             <label class="checkbox"><input id="pt-search-children" type="checkbox" /><g:message code="project.tag.children" /></label>
         </div>
         <div class="span4">
-            <label class="checkbox"><input id="pt-search-mobile" type="checkbox" /><g:message code="project.search.mobile" /></label>
+            <label class="checkbox"><input id="pt-search-mobile" type="checkbox" /><g:message code="g.mobileApps" /></label>
         </div>
     </div>
 </g:if>
@@ -107,7 +107,7 @@
     <tr style="border-bottom: 2px solid grey">
         <td style="width:200px">
             <div class="projectLogo well">
-                <img style="max-width:100%;max-height:100%" alt="No image provided" data-bind="attr:{title:name,src:transients.imageUrl}"/>
+                <img style="max-width:100%;max-height:100%" alt="${message(code:'g.noImage')}" data-bind="attr:{title:name,src:transients.imageUrl}"/>
             </div>
         </td>
         <td>
@@ -129,12 +129,12 @@
             </div>
             <br/>
             <div data-bind="visible:transients.daysSince() >= 0">
-                <b>Project status</b>
+                <b><g:message code="project.display.status" /></b>
                 <g:render template="/project/daysline"/>
             </div>
             <div data-bind="visible:transients.daysSince() >= 0 && transients.daysRemaining() == 0">
-                Project concluded. <a data-bind="attr:{href:transients.indexUrl}">
-                <span style="font-weight:bold">View the project page</span></a>
+                <g:message code="project.display.concluded" /> <a data-bind="attr:{href:transients.indexUrl}">
+                <span style="font-weight:bold"><g:message code="project.display.view" /></span></a>
             </div>
         </td>
         <td style="width:10em;text-align:center">
