@@ -238,6 +238,16 @@
         }); // end document ready
     </r:script>
 </g:if>
+<g:if test="${grailsApplication.config.bugherd.integration}">
+    <r:script>
+        (function (d, t) {
+            var bh = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            bh.type = 'text/javascript';
+            bh.src = '//www.bugherd.com/sidebarv2.js?apikey=2wgeczqfyixard6e9xxfnq';
+            s.parentNode.insertBefore(bh, s);
+        })(document, 'script');
+    </r:script>
+</g:if>
 
     <script type="text/javascript">
         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
