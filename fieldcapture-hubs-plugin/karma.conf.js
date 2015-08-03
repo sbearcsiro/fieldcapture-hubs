@@ -28,16 +28,16 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'web-app/js/knockout-3.3.0.min.js',
-            'web-app/js/knockout.mapping-latest.js',
-            'web-app/js/knockout-dates.js',
-            'web-app/wmd/showdown.js',
-            'web-app/wmd/wmd.js',
+            'web-app/vendor/knockout.js/knockout-3.3.0.min.js',
+            'web-app/vendor/knockout.js/knockout.mapping-latest.js',
+            'web-app/vendor/knockout.js/knockout-dates.js',
+            'web-app/vendor/wmd/showdown.js',
+            'web-app/vendor/wmd/wmd.js',
             'web-app/js/document.js',
-            'web-app/js/fuse.min.js',
+            'web-app/vendor/fuse/fuse.min.js',
             'web-app/js/fieldcapture-application.js',
             'web-app/js/projects.js',
-            'web-app/js/moment.min.js',
+            'web-app/vendor/moment/moment.min.js',
             'web-app/js/organisation.js',
             'web-app/js/sites.js',
             'web-app/js/speciesModel.js',
