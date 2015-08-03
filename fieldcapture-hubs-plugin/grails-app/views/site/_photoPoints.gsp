@@ -255,7 +255,7 @@
         self.isDirty = function() {
             var isDirty = false;
             $.each(self.photoPoints(), function(i, photoPoint) {
-                isDirty = isDirty || photoPoint.isDirty;
+                isDirty = isDirty || photoPoint.isDirty();
             });
             return isDirty;
         };
@@ -361,27 +361,36 @@
                 return isNewPhotopoint ? 'editablePhotoPoint' : 'readOnlyPhotoPoint'
             },
             isNew : function() { return isNewPhotopoint },
-            isDirty: isDirty
+            isDirty: function() {
+                if (isDirty) {
+                    return true;
+                };
+                var tmpPhotos = photos();
+                for (var i=0; i<tmpPhotos.length; i++) {
+                    if (tmpPhotos[i].dirtyFlag.isDirty()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
 
         }
     }
 
     var photoPointPhoto = function(data) {
-
         if (!data) {
             data = {};
         }
         data.role = 'photoPoint';
-        data.dateTaken = ko.observable(data.dateTaken).extend({simpleDate:false});
-        data.formattedSize = formatBytes(data.filesize);
-        data.status = ko.observable(data.status);
-        if (data.lat && data.lng) {
-
-        }
-
         var result = new DocumentViewModel(data);
-        $.extend(result, data);
+        result.dateTaken = ko.observable(data.dateTaken).extend({simpleDate:false});
+        result.formattedSize = formatBytes(data.filesize);
 
+        for (var prop in data) {
+            if (!result.hasOwnProperty(prop)) {
+                result[prop]= data[prop];
+            }
+        }
         var docModelForSaving = result.modelForSaving;
         result.modelForSaving = function() {
             var js = docModelForSaving();
@@ -392,6 +401,7 @@
 
             return js;
         };
+        result.dirtyFlag = ko.dirtyFlag(result, false);
 
         return result;
     };
