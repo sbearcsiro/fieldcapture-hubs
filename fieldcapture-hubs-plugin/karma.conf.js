@@ -5,7 +5,17 @@ module.exports = function (config) {
     config.set({
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
-        basePath: '../../../',
+        basePath: '',
+
+        plugins: [
+            'karma-jquery',
+            'karma-chrome-launcher',
+            'karma-jasmine',
+            'karma-jasmine-jquery',
+            'karma-coverage',
+            'karma-firefox-launcher',
+            'karma-phantomjs-launcher'
+        ],
 
 
         // frameworks to use
@@ -32,7 +42,7 @@ module.exports = function (config) {
             'web-app/js/sites.js',
             'web-app/js/speciesModel.js',
             'web-app/js/projectActivity.js',
-            'test/unit/javascript/spec/**/*.js'
+            'test/js/spec/**/*.js'
         ],
 
 
@@ -48,11 +58,7 @@ module.exports = function (config) {
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['remote'],
-        remoteReporter: {
-            host:'localhost',
-            port:'9889'
-        },
+        reporters: ['progress', 'coverage'],
 
         // web server port
         port: 9876,
@@ -73,7 +79,7 @@ module.exports = function (config) {
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: ['PhantomJS'],
+        browsers: ['Chrome','Firefox','PhantomJS'],
 
 
         // Continuous Integration mode
