@@ -24,10 +24,10 @@ modules = {
     }
 
     wmd {
-        resource url:[ dir:'wmd', file:"wmd.css", plugin:'fieldcapture-plugin']
-        resource url:[ dir:'wmd', file:"showdown.js", plugin:'fieldcapture-plugin']
-        resource url:[ dir:'wmd', file:"wmd.js", plugin:'fieldcapture-plugin']
-        resource url:[ dir:'wmd', file:'wmd-buttons.png', plugin:'fieldcapture-plugin']
+        resource url:[ dir:'vendor/wmd', file:"wmd.css", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'vendor/wmd', file:"showdown.js", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'vendor/wmd', file:"wmd.js", plugin:'fieldcapture-plugin']
+        resource url:[ dir:'vendor/wmd', file:'wmd-buttons.png', plugin:'fieldcapture-plugin']
 
     }
 
@@ -149,7 +149,7 @@ modules = {
         resource url: 'vendor/fileupload-9.0.0/jquery.fileupload-audio.js', plugin: 'fieldcapture-plugin'
         resource url: 'vendor/fileupload-9.0.0/jquery.iframe-transport.js', plugin: 'fieldcapture-plugin'
 
-        resource url: 'js/locale.js', plugin: 'fieldcapture-plugin'
+        resource url: 'vendor/fileupload-9.0.0/locale.js', plugin: 'fieldcapture-plugin'
         resource url: 'vendor/cors/jquery.xdr-transport.js', plugin: 'fieldcapture-plugin',
                 wrapper: { s -> "<!--[if gte IE 8]>$s<![endif]-->" }
     }
