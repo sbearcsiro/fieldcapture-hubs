@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 export  ECODATA_DIR=target/ecodata
 export ECODATA_BRANCH=master
 
