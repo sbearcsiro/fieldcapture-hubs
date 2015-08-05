@@ -55,6 +55,7 @@ modules = {
         resource url:'vendor/knockout.js/knockout-3.3.0.debug.js', plugin: 'fieldcapture-plugin'
         resource url:'vendor/knockout.js/knockout.mapping-latest.js', plugin: 'fieldcapture-plugin'
         resource url:'vendor/knockout.js/knockout-custom-bindings.js', plugin: 'fieldcapture-plugin'
+        resource url:'vendor/knockout.js/knockout-custom-extenders.js', plugin: 'fieldcapture-plugin'
         resource url:'vendor/knockout.js/knockout-dates.js', plugin: 'fieldcapture-plugin'
         resource url:'js/outputs.js', plugin: 'fieldcapture-plugin'
     }

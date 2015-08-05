@@ -224,6 +224,9 @@ var pActivityInfo = function(o, selected){
     self.logoUrl = ko.observable(fcConfig.imageLocation + "/no-image-2.png");
     self.current = ko.observable(selected);
 
+    self.addActivity = function(){
+    };
+
     self.transients = self.transients || {};
     var isBeforeToday = function(date) {
         return moment(date) < moment().startOf('day');

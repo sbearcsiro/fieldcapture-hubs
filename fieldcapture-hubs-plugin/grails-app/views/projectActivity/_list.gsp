@@ -72,7 +72,7 @@
             </div>
 
             <div class="span2 text-right">
-                <a href="#" class="btn btn-success btn-sm"> Add a record</a>
+                <a href="#" class="btn btn-success btn-sm" data-bind="click: addActivity"> Add a record</a>
             </div>
         </div>
 
