@@ -39,7 +39,7 @@
             output: "editorOutput",
             button_bar: "editor-button-bar",
             preview: "",
-            helpLink: "${request.contextPath}/static/wmd/markdownhelp.html"
+            helpLink: "${request.contextPath}/static/vendor/wmd/markdownhelp.html"
         });
 
         self.title = ko.observable();
