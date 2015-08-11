@@ -86,7 +86,10 @@ class SearchController {
         def path = "search/downloadShapefile"
 
         def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
-        webService.proxyGetRequest(response, url, true, true,960000)
+        def resp = webService.proxyGetRequest(response, url, true, true,960000)
+        if (resp.status != 200) {
+            render view:'/error', model:[error:resp.error]
+        }
     }
 
 }
