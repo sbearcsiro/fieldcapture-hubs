@@ -80,4 +80,13 @@ class SearchController {
         webService.proxyGetRequest(response, url, true, true,960000)
     }
 
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadShapefile() {
+        params.query = "docType:project"
+        def path = "search/downloadShapefile"
+
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
 }
