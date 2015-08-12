@@ -77,6 +77,23 @@ class SiteController {
         }
     }
 
+    def downloadShapefile(String id) {
+
+        def site = siteService.get(id)
+        if (site) {
+            // permissions check - can't use annotation as we have to know the projectId in order to lookup access right
+            if (!isUserMemberOfSiteProjects(site)) {
+                flash.message = "Access denied: User does not have permission to view site: ${id}"
+                redirect(controller: 'home', action: 'index')
+            }
+        }
+        def url = grailsApplication.config.ecodata.baseUrl + "site/${id}.shp"
+        def resp = webService.proxyGetRequest(response, url, true, true,960000)
+        if (resp.status != 200) {
+            render view:'/error', model:[error:resp.error]
+        }
+    }
+
     def ajaxDeleteSitesFromProject(String id){
         // permissions check - id is the projectId here
         if (!projectService.canUserEditProject(userService.getCurrentUserId(), id)) {

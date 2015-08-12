@@ -109,15 +109,16 @@
                 <span class="label label-important">This site does not have a geoference associated with it.</span>
             </div>
             <div id="smallMap" style="width:100%;height:500px;"></div>
-            <g:if test="${site?.extent?.geometry?.pid}">
-                <div style="margin-top:20px;" class="pull-right">
-                    <a href="${grailsApplication.config.spatial.layersUrl}/shape/shp/${site.extent.geometry.pid}" class="btn">
-                        <i class="icon-download"></i>
-                        Download ShapeFile
-                    </a>
+
+            <div style="margin-top:20px;" class="pull-right">
+                <a href="${g.createLink(action:'downloadShapefile', id:site.siteId)}" class="btn">
+                    <i class="icon-download"></i>
+                    Download ShapeFile
+                </a>
+                <g:if test="${site?.extent?.geometry?.pid}">
                     <a href="${grailsApplication.config.spatial.baseUrl}/?pid=${site.extent.geometry.pid}" class="btn">View in Spatial Portal</a>
-                </div>
-            </g:if>
+                </g:if>
+            </div>
         </div>
     </div>
     <g:if test="${site.poi}">
