@@ -26,6 +26,10 @@ class SearchController {
 
     }
 
+    def searchSpeciesList(String sort, Integer max, Integer offset){
+        render speciesService.searchSpeciesList(sort, max, offset) as JSON
+    }
+
     @PreAuthorise(accessLevel = 'siteReadOnly', redirectController ='home', redirectAction = 'index')
     def downloadSearchResults() {
         def path = 'search/downloadSearchResults'
@@ -74,6 +78,18 @@ class SearchController {
 
         def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
         webService.proxyGetRequest(response, url, true, true,960000)
+    }
+
+    @PreAuthorise(accessLevel = 'siteAdmin', redirectController ='home', redirectAction = 'index')
+    def downloadShapefile() {
+        params.query = "docType:project"
+        def path = "search/downloadShapefile"
+
+        def url = grailsApplication.config.ecodata.baseUrl + path + commonService.buildUrlParamsFromMap(params)
+        def resp = webService.proxyGetRequest(response, url, true, true,960000)
+        if (resp.status != 200) {
+            render view:'/error', model:[error:resp.error]
+        }
     }
 
 }

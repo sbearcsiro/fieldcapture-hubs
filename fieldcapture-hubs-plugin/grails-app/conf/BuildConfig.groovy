@@ -87,7 +87,6 @@ grails.project.dependency.resolution = {
         }
         compile ':cookie:1.4'
 
-        test ":karma-test-runner:0.2.4"
         build ":release:3.0.1"
     }
 }

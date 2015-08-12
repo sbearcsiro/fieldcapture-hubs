@@ -25,7 +25,7 @@ class SpeciesService {
      */
     def searchByScientificName(scientificName, listId = null) {
         def results = searchForSpecies(scientificName, 10, listId)
-        return results.autoCompleteList?.find {it.name.equalsIgnoreCase(scientificName)}
+        return results?.autoCompleteList?.find {it.name.equalsIgnoreCase(scientificName)}
     }
 
     /**
@@ -56,4 +56,13 @@ class SpeciesService {
 
         webService.getJson(url)
     }
+
+    def searchSpeciesList(sort = 'listName', max = 100, offset = 0) {
+        webService.getJson("${grailsApplication.config.lists.baseURL}/ws/speciesList?sort=${sort}&max=${max}&offset=${offset}")
+    }
+
+    def addSpeciesList(postBody) {
+       webService.doPost("${grailsApplication.config.lists.baseURL}/ws/speciesList", postBody)
+    }
+
 }
