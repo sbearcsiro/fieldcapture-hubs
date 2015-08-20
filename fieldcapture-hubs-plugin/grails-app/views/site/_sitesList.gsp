@@ -80,6 +80,7 @@
                             <a data-bind="click: $root.addSite" type="button" class="btn ">Add new ${wordForSite}</a>
                             <a data-bind="click: $root.addExistingSite" type="button" class="btn">Add existing ${wordForSite}</a>
                             <a data-bind="click: $root.uploadShapefile" type="button" class="btn">Upload ${wordForSite}s from shapefile</a>
+                            <a href="${g.createLink(action:'downloadShapefile', id:project.projectId)}" target="_blank" type="button" class="btn">Download ${wordForSite}s as shapefile</a>
                             <a data-bind="click: $root.removeAllSites" type="button" class="btn">Delete all ${wordForSite}s</a>
                         </div>
                     </div>
