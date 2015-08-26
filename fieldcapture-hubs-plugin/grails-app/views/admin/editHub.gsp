@@ -228,7 +228,7 @@
                self.availableMapFacets(self.orEmptyArray(settings.availableMapFacets));
                self.bannerUrl(self.orBlank(settings.bannerUrl));
                self.logoUrl(self.orBlank(settings.logoUrl));
-               self.homePathPath(self.orBlank(settings.homePagePath));
+               self.homePagePath(self.orBlank(settings.homePagePath));
 
                if (settings.defaultFacetQuery && settings.defaultFacetQuery instanceof Array) {
                    $.each(settings.defaultFacetQuery, function(i, obj) {
