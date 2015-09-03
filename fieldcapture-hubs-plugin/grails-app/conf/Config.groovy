@@ -175,6 +175,10 @@ if(!google.geocode.url){
 if(!google.drawmaps.url){
     google.drawmaps.url = "//maps.google.com/maps/api/js?sensor=false&libraries=drawing,geometry"
 }
+if (!pdfgen.baseURL){
+    pdfgen.baseURL="http://devt.ala.org.au:9090/"
+}
+
 // If true, no-cache headers will be added to all responses.
 if(!app.view.nocache){
 	app.view.nocache = false
